@@ -1,0 +1,1 @@
+This is another test file used in Get File and Put File tests.

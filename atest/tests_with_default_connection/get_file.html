@@ -1,0 +1,378 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="RobotIDE" /> 
+<style type="text/css">
+html {
+  font-family: Arial,Helvetica,sans-serif;
+  background-color: white;
+  color: black;
+}
+p {
+  max-width: 60em;
+}
+table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 1em 0em;
+  border: 0.1em solid black;
+}
+th, td {
+  border-style: solid;
+  border-width: 0.05em 0.1em;
+  border-color: black;
+  padding: 0.1em 0.2em;
+  height: 1.5em;
+}
+th {
+  background-color: rgb(192, 192, 192);
+  color: black;
+  border-width: 0.1em;
+  font-weight: bold;
+  text-align: center;
+  text-transform: capitalize;
+  letter-spacing: 0.1em;
+}
+/* Widths of named columns */
+col.name {
+  width: 10em;
+}
+.action, .value, .arg {
+  width: 15em;
+}
+/* Properties for the name column 
+- td:first-child should work in CSS 2.1 avare browsers (tested in Firefox)
+- col.name is against specs but works in IE
+*/
+td:first-child, col.name {
+  background-color: rgb(240, 240, 240);
+  text-transform: capitalize;
+  letter-spacing: 0.1em;
+}
+/* required for IE */
+th {
+  font-style: normal;
+}
+</style>
+<title>Get File</title>
+</head>
+<body>
+<h1>Get File</h1>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="value" span="4"></colgroup>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>This suite contains test for 'Get File' keyword. These tests use test scripts that are already transferred to remote machine in the higher level suite setup.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Test Setup</td>
+<td>Create Directory</td>
+<td>${TMPDIR}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Test Teardown</td>
+<td>Remove Directory</td>
+<td>${TMPDIR}</td>
+<td>yes</td>
+<td></td>
+</tr>
+<tr>
+<td>Resource</td>
+<td>../ssh_library_resources.html</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Library</td>
+<td>OperatingSystem</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="value" span="4"></colgroup>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>${TMPDIR}</td>
+<td>robot-tmpdir${/}</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="action">
+<col class="arg" span="3"></colgroup>
+<tr>
+<th>Test Case</th>
+<th>Action</th>
+<th>Argument</th>
+<th>Argument</th>
+<th>Argument</th>
+</tr>
+<tr>
+<td><a name="test_Get File From Absolute Source">Get File From Absolute Source</a></td>
+<td>Get File And Verify Listing</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}</td>
+<td>${TEST SCRIPT NAME}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File From Relative Source">Get File From Relative Source</a></td>
+<td>Get File And Verify Listing</td>
+<td>${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}</td>
+<td>${TEST SCRIPT NAME}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File With Different Name">Get File With Different Name</a></td>
+<td>Get File And Verify Listing</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}${/}foo.txt</td>
+<td>foo.txt</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File With Pattern">Get File With Pattern</a></td>
+<td>Get File And Verify Listing</td>
+<td>/home/${USERNAME}/*.sh</td>
+<td>${TMPDIR}</td>
+<td>${TEST SCRIPT NAME}</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>${INTERACTIVE TEST SCRIPT NAME}</td>
+<td>${REPEAT TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Getting Mulitple Source Files To Single File Fails">Getting Mulitple Source Files To Single File Fails</a></td>
+<td>Run Keyword And Expect Error</td>
+<td>ValueError: It is not possible to copy multiple source files to one destination file.</td>
+<td>SSHLibrary.Get File</td>
+<td>/home/${USERNAME}/*.sh</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>${TMPDIR}foo.sh</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File To Curdir">Get File To Curdir</a></td>
+<td>SSHLibrary.Get File</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>\</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${listing} =</td>
+<td>List Files In Directory</td>
+<td>.</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${listing}</td>
+<td>${TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File When Destination Directory Does Not Exist">Get File When Destination Directory Does Not Exist</a></td>
+<td>SSHLibrary.Get File</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}missingdir${/}foo.txt</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${listing} =</td>
+<td>List Files In Directory</td>
+<td>${TMPDIR}missingdir</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${listing}</td>
+<td>foo.txt</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="action">
+<col class="arg" span="3"></colgroup>
+<tr>
+<th>Keyword</th>
+<th>Action</th>
+<th>Argument</th>
+<th>Argument</th>
+<th>Argument</th>
+</tr>
+<tr>
+<td><a name="keyword_Get File And Verify Listing">Get File And Verify Listing</a></td>
+<td>[Arguments]</td>
+<td>${source}</td>
+<td>${destination}</td>
+<td>@{expected}</td>
+</tr>
+<tr>
+<td></td>
+<td>[Timeout]</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>SSHLibrary.Get File</td>
+<td>${source}</td>
+<td>${destination}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${listing} =</td>
+<td>List Files In Directory</td>
+<td>${TMPDIR}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>:: FOR</td>
+<td>${filename}</td>
+<td>IN</td>
+<td>@{expected}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>Should Contain</td>
+<td>${listing}</td>
+<td>${filename}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,413 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="RobotIDE" /> 
+<style type="text/css">
+html {
+  font-family: Arial,Helvetica,sans-serif;
+  background-color: white;
+  color: black;
+}
+p {
+  max-width: 60em;
+}
+table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 1em 0em;
+  border: 0.1em solid black;
+}
+th, td {
+  border-style: solid;
+  border-width: 0.05em 0.1em;
+  border-color: black;
+  padding: 0.1em 0.2em;
+  height: 1.5em;
+}
+th {
+  background-color: rgb(192, 192, 192);
+  color: black;
+  border-width: 0.1em;
+  font-weight: bold;
+  text-align: center;
+  text-transform: capitalize;
+  letter-spacing: 0.1em;
+}
+/* Widths of named columns */
+col.name {
+  width: 10em;
+}
+.action, .value, .arg {
+  width: 15em;
+}
+/* Properties for the name column 
+- td:first-child should work in CSS 2.1 avare browsers (tested in Firefox)
+- col.name is against specs but works in IE
+*/
+td:first-child, col.name {
+  background-color: rgb(240, 240, 240);
+  text-transform: capitalize;
+  letter-spacing: 0.1em;
+}
+/* required for IE */
+th {
+  font-style: normal;
+}
+</style>
+<title>Execute Command</title>
+</head>
+<body>
+<h1>Execute Command</h1>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="value" span="4"></colgroup>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>Resource</td>
+<td>../ssh_library_resources.html</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="value" span="4"></colgroup>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+<th>Value</th>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="action">
+<col class="arg" span="3"></colgroup>
+<tr>
+<th>Test Case</th>
+<th>Action</th>
+<th>Argument</th>
+<th>Argument</th>
+<th>Argument</th>
+</tr>
+<tr>
+<td><a name="test_Execute Command With Defaults">Execute Command With Defaults</a></td>
+<td>${stdout} =</td>
+<td>Execute Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Execute Command With Stdout">Execute Command With Stdout</a></td>
+<td>${stdout} =</td>
+<td>Execute Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td>STDout</td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Execute Command With Stderr">Execute Command With Stderr</a></td>
+<td>${stderr} =</td>
+<td>Execute Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td>stderr</td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stderr}</td>
+<td>This is stderr</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Execute Command With Stdout And Stderr">Execute Command With Stdout And Stderr</a></td>
+<td>${stdout}</td>
+<td>${stderr} =</td>
+<td>Execute Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>Both</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stderr}</td>
+<td>This is stderr</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Start Command And Read Process Output With Defaults">Start Command And Read Process Output With Defaults</a></td>
+<td>Start Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${stdout} =</td>
+<td>Read Command Output</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Start Command And Read Process Output With Stdout">Start Command And Read Process Output With Stdout</a></td>
+<td>Start Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${stdout} =</td>
+<td>Read Command Output</td>
+<td>STDOUT</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Start Command And Read Process Output With Stderr">Start Command And Read Process Output With Stderr</a></td>
+<td>Start Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${stderr} =</td>
+<td>Read Command Output</td>
+<td>stderr</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stderr}</td>
+<td>This is stderr</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Start Command And Read Process Output With Stdout And Stderr">Start Command And Read Process Output With Stdout And Stderr</a></td>
+<td>Start Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${stdout}</td>
+<td>${stderr} =</td>
+<td>Read Command Output</td>
+<td>both</td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stderr}</td>
+<td>This is stderr</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Start Command And Execute Command">Start Command And Execute Command</a></td>
+<td>Start Command</td>
+<td>./${TEST SCRIPT NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${stdout} =</td>
+<td>Execute Command</td>
+<td>./${TEST SCRIPT NAME} Hello</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>Hello</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${stdout} =</td>
+<td>Read Command Output</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${stdout}</td>
+<td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<table border="1">
+<colgroup span="99">
+<col class="name">
+<col class="action">
+<col class="arg" span="3"></colgroup>
+<tr>
+<th>Keyword</th>
+<th>Action</th>
+<th>Argument</th>
+<th>Argument</th>
+<th>Argument</th>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+</body>
+</html>
