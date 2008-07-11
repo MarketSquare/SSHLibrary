@@ -56,6 +56,13 @@
 executing commands over SSH connection.<br />
 <br />
 SSHLibrary works with both Python and Jython interpreters.<br />
+To use SSHLibrary with Python, you must first install paramiko[1] SSH<br />
+implementation for Python and it's dependencies.<br />
+To use SSHLibrary with Jython, you must have jar file of trilead[2] SSH<br />
+implementation in the Classpath during test execution<br />
+<br />
+[1] <a href="http://www.lag.net/paramiko/">http://www.lag.net/paramiko/</a><br />
+[2] <a href="http://www.trilead.com/Products/Trilead_SSH_for_Java/">http://www.trilead.com/Products/Trilead_SSH_for_Java/</a><br />
 <br />
 Currently, there are two modes of operation:<br />
 1. When keyword 'Execute Command' or 'Start Command' is used to execute<br />
@@ -80,7 +87,7 @@ Both modes require that a connection is opened with 'Open Connection'.</p>
 <a href="#Read Command Output" title="Reads and returns/logs everything currently available on the output (stdout and/or stderr).">Read&nbsp;Command&nbsp;Output</a>&nbsp;
 <a href="#Read Until" title="Reads from the current output until expected is encountered or timeout expires.">Read&nbsp;Until</a>&nbsp;
 <a href="#Read Until Prompt" title="Reads from the current output until prompt is found.">Read&nbsp;Until&nbsp;Prompt</a>&nbsp;
-<a href="#Read Until Regexp" title="Reads from the current output until a match to a regexp is found or timeout expires.">Read&nbsp;Until&nbsp;Regexp</a>&nbsp;
+<a href="#Read Until Regexp" title="Reads from the current output until a match to 'regexp' is found or timeout expires.">Read&nbsp;Until&nbsp;Regexp</a>&nbsp;
 <a href="#Set Default Log Level" title="Sets the default log level used by all read keywords.">Set&nbsp;Default&nbsp;Log&nbsp;Level</a>&nbsp;
 <a href="#Set Newline" title="Sets the newline used by 'Write' keyword.">Set&nbsp;Newline</a>&nbsp;
 <a href="#Set Prompt" title="Sets the prompt used by 'Read Until Prompt' keyword.">Set&nbsp;Prompt</a>&nbsp;
@@ -129,7 +136,7 @@ Examples:<br />
 <td style="border: 1px solid gray; padding: 2px;">Execute Command</td>
 <td style="border: 1px solid gray; padding: 2px;">some command</td>
 <td style="border: 1px solid gray; padding: 2px;"></td>
-<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;">#stdout is returned</td>
 <td style="border: 1px solid gray; padding: 2px;"></td>
 </tr>
 <tr>
@@ -166,6 +173,9 @@ intermediate directories are also created.<br />
 4) If the destination does not exist and it does not end with path<br />
 separator, it is considered a file. If the path to the file does not<br />
 exist it is created.<br />
+5) By default, destination is empty, and in that case the current working<br />
+directory in the local machine is used as destination. This will most<br />
+probably be the direcotry where test execution was started.<br />
 <br />
 Using wild cards like '*' and '?' are allowed.<br />
 When wild cards are used, destination MUST be a directory and only files<br />
@@ -271,18 +281,19 @@ Examples:<br />
 over it.<br />
 2) If the destination is an existing directory, the source file is<br />
 copied into it. Possible file with same name is overwritten.<br />
-3) If the destination does not exist and it ends with path separator<br />
-('/' in unixes, '\' in Windows), it is considered a directory. That<br />
-directory is created and source file copied into it. Possible missing<br />
-intermediate directories are also created.<br />
+3) If the destination does not exist and it ends with path slash ('/'),<br />
+it is considered a directory. That directory is created and source file<br />
+copied into it. Possible missing intermediate directories are also created.<br />
 4) If the destination does not exist and it does not end with path<br />
 separator, it is considered a file. If the path to the file does not<br />
 exist it is created.<br />
+5) By default, destination is empty and the user's home directory in the<br />
+remote machine is used as destination.<br />
 <br />
 Using wild cards like '*' and '?' are allowed.<br />
 When wild cards are used, destination MUST be a directory and only files<br />
-are copied from the source, subdirectories are discarded. If the contents of<br />
-sub directories are also needed, use the keyword again.<br />
+are copied from the source, sub directories are ignores. If the contents<br />
+of sub directories are also needed, use the keyword again.<br />
 Default file permission is 0744 (-rwxr--r--) and can be changed by<br />
 giving a value to the optional mode-parameter.<br />
 <br />
@@ -370,15 +381,15 @@ See 'Read' for more information on 'loglevel'.</td>
   <td class="arg">loglevel=None</td>
   <td class="doc">Reads from the current output until prompt is found.<br />
 <br />
-Prompt must have been set, either in Library import or at login time,<br />
-or by using 'Set Prompt' -keyword.<br />
+Prompt must have been set, either in Library import or by using<br />
+'Set Prompt' -keyword.<br />
 <br />
 See 'Read' for more information on 'loglevel'.</td>
 </tr>
 <tr>
   <td class="kw"><a name="Read Until Regexp"></a>Read Until Regexp</td>
   <td class="arg">regexp, loglevel=None</td>
-  <td class="doc">Reads from the current output until a match to a regexp is found or timeout expires.<br />
+  <td class="doc">Reads from the current output until a match to 'regexp' is found or timeout expires.<br />
 <br />
 Return text up until and including the regexp.<br />
 <br />
@@ -392,11 +403,6 @@ Examples:<br />
 <td style="border: 1px solid gray; padding: 2px;">Read Until Regexp</td>
 <td style="border: 1px solid gray; padding: 2px;">(#|$)</td>
 <td style="border: 1px solid gray; padding: 2px;"></td>
-</tr>
-<tr>
-<td style="border: 1px solid gray; padding: 2px;">Read Until Regexp</td>
-<td style="border: 1px solid gray; padding: 2px;">first_regexp</td>
-<td style="border: 1px solid gray; padding: 2px;">second_regexp</td>
 </tr>
 <tr>
 <td style="border: 1px solid gray; padding: 2px;">Read Until Regexp</td>
@@ -643,7 +649,7 @@ the keyword will fail if 'myprocess' does not appear on the output in<br />
 </table>
 <p class="footer">
 Altogether 21 keywords.
-Documentation generated 20080711 14:18:48.
+Documentation generated 20080711 14:37:16.
 </p>
 </body>
 </html>
