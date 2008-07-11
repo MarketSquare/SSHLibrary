@@ -1,0 +1,3 @@
+include *.txt
+include lib/.jar
+include doc/*.html

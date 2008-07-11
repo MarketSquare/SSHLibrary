@@ -5,7 +5,7 @@ from distutils.core import setup
 
 def main():
     setup(name         = 'SSHLibrary',
-          version      =  'trunk',
+          version      =  '0.5',
           description  = 'Test Library for Robot Framework enabling SSH',
           author       = 'Robot Framework Developers',
           author_email = 'robotframework-sshlibrary@groups.google.com',
