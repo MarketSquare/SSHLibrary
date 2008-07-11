@@ -1,3 +1,18 @@
+#  Copyright 2008 Nokia Siemens Networks Oyj
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+
 import time
 import os
 import glob
@@ -18,6 +33,13 @@ class SSHLibrary:
     executing commands over SSH connection.
     
     SSHLibrary works with both Python and Jython interpreters.
+    To use SSHLibrary with Python, you must first install paramiko[1] SSH 
+    implementation for Python and it's dependencies.
+    To use SSHLibrary with Jython, you must have jar file of trilead[2] SSH 
+    implementation in the Classpath during test execution
+    
+    [1] http://www.lag.net/paramiko/
+    [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/ 
     
     Currently, there are two modes of operation:
     1. When keyword 'Execute Command' or 'Start Command' is used to execute 
@@ -63,7 +85,7 @@ class SSHLibrary:
         self.client = SSHClient(host, int(port))
         return self.cache.register(self.client, alias)
 
-    def switch_connection(self,index_or_alias):
+    def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.
 
         Index is got from Open keywords and alias can be given to it.
@@ -129,7 +151,7 @@ class SSHLibrary:
         behavior is required, use Start Command instead.
         
         Examples:
-        | ${out}=   | Execute Command | some command    |              |                     |                                 |
+        | ${out}=   | Execute Command | some command    |              | #stdout is returned |                                 |
         | ${err}=   | Execute Command | some command    | stderr       | #stderr is returned |                                 |
         | ${out}    | ${err}=         | Execute Command | some command | both                | #stdout and stderr are returned |
         """
@@ -291,7 +313,7 @@ class SSHLibrary:
         return ret
 
     def read_until_regexp(self, regexp, loglevel=None):
-        """Reads from the current output until a match to a regexp is found or timeout expires.
+        """Reads from the current output until a match to 'regexp' is found or timeout expires.
 
         Return text up until and including the regexp.
 
@@ -301,7 +323,6 @@ class SSHLibrary:
         See 'Read' for more information on 'loglevel'.
         Examples:
         | Read Until Regexp | (#|$) |
-        | Read Until Regexp | first_regexp | second_regexp |
         | Read Until Regexp | some regexp  | DEBUG |
         """
         loglevel = self._default_log_level
@@ -314,8 +335,8 @@ class SSHLibrary:
     def read_until_prompt(self, loglevel=None):
         """Reads from the current output until prompt is found.
         
-        Prompt must have been set, either in Library import or at login time, 
-        or by using 'Set Prompt' -keyword.
+        Prompt must have been set, either in Library import or by using 
+        'Set Prompt' -keyword.
         
         See 'Read' for more information on 'loglevel'.
         """
@@ -385,18 +406,19 @@ class SSHLibrary:
         over it.
         2) If the destination is an existing directory, the source file is
         copied into it. Possible file with same name is overwritten.
-        3) If the destination does not exist and it ends with path separator 
-        ('/' in unixes, '\\' in Windows), it is considered a directory. That 
-        directory is created and source file copied into it. Possible missing
-        intermediate directories are also created.
+        3) If the destination does not exist and it ends with path slash ('/'), 
+        it is considered a directory. That directory is created and source file 
+        copied into it. Possible missing intermediate directories are also created.
         4) If the destination does not exist and it does not end with path
         separator, it is considered a file. If the path to the file does not
         exist it is created.
+        5) By default, destination is empty and the user's home directory in the
+        remote machine is used as destination.
         
         Using wild cards like '*' and '?' are allowed.
         When wild cards are used, destination MUST be a directory and only files
-        are copied from the source, subdirectories are discarded. If the contents of
-        sub directories are also needed, use the keyword again.
+        are copied from the source, sub directories are ignores. If the contents 
+        of sub directories are also needed, use the keyword again.
         Default file permission is 0744 (-rwxr--r--) and can be changed by
         giving a value to the optional mode-parameter.
         
@@ -424,6 +446,9 @@ class SSHLibrary:
         4) If the destination does not exist and it does not end with path
         separator, it is considered a file. If the path to the file does not
         exist it is created.
+        5) By default, destination is empty, and in that case the current working
+        directory in the local machine is used as destination. This will most 
+        probably be the direcotry where test execution was started.
 
         Using wild cards like '*' and '?' are allowed.
         When wild cards are used, destination MUST be a directory and only files
