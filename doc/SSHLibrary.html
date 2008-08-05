@@ -71,6 +71,9 @@ means that no session information is stored.<br />
 <br />
 2. Keywords 'Write' and 'Read XXX' operate in an interactive shell, which<br />
 means that changes to state are visible to next keywords.<br />
+Note that in interactive mode, a prompt must be set before using any of the<br />
+Write-keywords. Prompt can be set either when the library is taken into use<br />
+or when a new connection is opened using 'Open Connection'.<br />
 <br />
 Both modes require that a connection is opened with 'Open Connection'.</p>
 
@@ -215,7 +218,7 @@ Example:<br />
 </tr>
 <tr>
   <td class="kw"><a name="Open Connection"></a>Open Connection</td>
-  <td class="arg">host, alias=None, port=22, timeout=None</td>
+  <td class="arg">host, alias=None, port=22, timeout=None, newline=None, prompt=None</td>
   <td class="doc">Opens a new SSH connection to given host and port.<br />
 <br />
 Possible already opened connections are cached.<br />
@@ -649,7 +652,7 @@ the keyword will fail if 'myprocess' does not appear on the output in<br />
 </table>
 <p class="footer">
 Altogether 21 keywords.
-Documentation generated 20080711 14:37:16.
+Documentation generated 20080805 17:00:38.
 </p>
 </body>
 </html>
