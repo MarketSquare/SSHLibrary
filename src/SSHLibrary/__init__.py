@@ -48,6 +48,9 @@ class SSHLibrary:
     
     2. Keywords 'Write' and 'Read XXX' operate in an interactive shell, which 
     means that changes to state are visible to next keywords.
+    Note that in interactive mode, a prompt must be set before using any of the
+    Write-keywords. Prompt can be set either when the library is taken into use
+    or when a new connection is opened using 'Open Connection'.
     
     Both modes require that a connection is opened with 'Open Connection'.
     """
@@ -61,7 +64,8 @@ class SSHLibrary:
         self._default_log_level = 'INFO'
         self._prompt = prompt
         
-    def open_connection(self, host, alias=None, port=22, timeout=None):
+    def open_connection(self, host, alias=None, port=22, timeout=None, 
+                        newline=None, prompt=None):
         """Opens a new SSH connection to given host and port.
     
         Possible already opened connections are cached.
@@ -82,6 +86,9 @@ class SSHLibrary:
         | Open Connection | myhost.net      | 3rd conn   | 25                  | # alias and port    |                  |
         """
         self._host, self._port = host, port
+        self._timeout = timeout and int(timeout) or self._timeout
+        self._newline = newline and self._parse_newline(newline) or self._newline
+        self._prompt = prompt and prompt or self._prompt
         self.client = SSHClient(host, int(port))
         return self.cache.register(self.client, alias)
 
@@ -267,8 +274,7 @@ class SSHLibrary:
         command. To get the output, one of the 'Read XXX' keywords must be 
         used.
         """
-        text += self._newline
-        self.write_bare(text)
+        self.write_bare(text + self._newline)
         data = self.read_until(self._newline, loglevel)
         return data
 
@@ -280,6 +286,11 @@ class SSHLibrary:
             raise ValueError('Only ascii characters are allowed in SSH.' 
                              'Got: %s' % text)
         self._info("Writing %s" % repr(text))
+        if self._prompt is None:
+            msg = ("Using 'Write' or 'Write Bare' keyword requires setting "
+                   "prompt first. Prompt can be set either when taking library "
+                   "into use or when using 'Open Connection' keyword.")
+            raise RuntimeError(msg)
         self.client.write(text, self._prompt)
 
     def read(self, loglevel=None):
