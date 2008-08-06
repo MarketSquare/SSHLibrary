@@ -77,6 +77,9 @@ class SSHLibrary:
         Optional alias is a name for the connection and it can be used for
         switching between connections similarly as the index. See Switch
         Connection for more details about that.
+        
+        For more information about timeout, newline and prompt, see 'Set Timeout',
+        'Set Newline' and 'Set Prompt', respectively.
 
         Examples:
         | Open Connection | myhost.net      |            |                     |                     |                  |
