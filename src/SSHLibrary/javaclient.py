@@ -120,10 +120,11 @@ class SSHClient(AbstractSSHClient):
         return self.sftp_client.canonicalPath('.') + '/'
             
     def _create_missing_dest_dirs(self, path):
-        if os.path.isabs(path):
+        if path.startswith('/'):
             curdir = '/'
         else:
             curdir = self.sftp_client.canonicalPath('.')
+        print curdir, path
         for dirname in path.split('/'):
             if dirname:
                 curdir = '%s/%s' % (curdir, dirname)
@@ -132,8 +133,6 @@ class SSHClient(AbstractSSHClient):
             except IOException:
                 self._info("Creating missing target directory '%s'" % curdir)
                 self.sftp_client.mkdir(curdir, 0744)
-            for f in self.sftp_client.ls(curdir):
-                print f.longEntry
                 
     def _put_files(self, sourcefiles, destfiles, mode):
         for source, dest in zip(sourcefiles, destfiles):
@@ -157,7 +156,8 @@ class SSHClient(AbstractSSHClient):
             localfile.close()
             
     def _get_source_files(self, source):
-        path, pattern = os.path.split(source)
+        path_components = source.split('/')
+        path, pattern = '/'.join(path_components[:-1]), path_components[-1]
         sourcefiles = []
         for fileinfo in self.sftp_client.ls(path):
             if utils.matches(fileinfo.filename, pattern):
