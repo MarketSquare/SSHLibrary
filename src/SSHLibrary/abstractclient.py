@@ -35,8 +35,8 @@ class AbstractSSHClient:
                 data += char
             if regexp.search(data): 
                 return data
-        raise AssertionError("No match found for %s in %s"
-                             % (regexp, utils.secs_to_timestr(self._timeout)))
+        raise AssertionError("No match found for '%s' in %s"
+                             % (regexp.pattern, utils.secs_to_timestr(timeout)))
 
     def put_file(self, source, destination, mode):
         homedir = self._create_sftp_client() 
@@ -45,15 +45,19 @@ class AbstractSSHClient:
         if len(sourcepaths) > 1 and not self._remote_destination_is_directory(destination):
             raise ValueError('It is not possible to copy multiple source files ' 
                              'to one destination file.')
-        dirpath = destination.endswith('/') and destination or os.path.split(destination)[0]
+        dirpath = ''
+        if destination.endswith('/'):
+            dirpath = destination 
+        elif '/' in destination:
+            dirpath = '/'.join(destination.split('/')[:-1])
         self._create_missing_dest_dirs(dirpath)
         if self._remote_destination_is_directory(destination):
             if not destination:
                 prefix = homedir
             else:
                 prefix = destination
-            destpaths = [ prefix + os.path.split(path)[1] for path in sourcepaths]
-        elif os.path.isabs(destination):
+            destpaths = [ prefix + os.path.split(path)[1] for path in sourcepaths ]
+        elif destination.startswith('/'):
             destpaths = [ destination ]        
         else:
             destpaths = [ homedir + '/' + destination ]
