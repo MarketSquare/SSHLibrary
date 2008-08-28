@@ -129,7 +129,7 @@ th {
 </tr>
 <tr>
 <td>${TMPDIR}</td>
-<td>robot-tmpdir${/}</td>
+<td>robot-tmpdir</td>
 <td></td>
 <td></td>
 <td></td>
@@ -159,7 +159,7 @@ th {
 <td><a name="test_Get File From Absolute Source">Get File From Absolute Source</a></td>
 <td>Get File And Verify Listing</td>
 <td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
-<td>${TMPDIR}</td>
+<td>${TMPDIR}${/}</td>
 <td>${TEST SCRIPT NAME}</td>
 </tr>
 <tr>
@@ -173,7 +173,7 @@ th {
 <td><a name="test_Get File From Relative Source">Get File From Relative Source</a></td>
 <td>Get File And Verify Listing</td>
 <td>${TEST SCRIPT NAME}</td>
-<td>${TMPDIR}</td>
+<td>${TMPDIR}${/}</td>
 <td>${TEST SCRIPT NAME}</td>
 </tr>
 <tr>
@@ -201,7 +201,7 @@ th {
 <td><a name="test_Get File With Pattern">Get File With Pattern</a></td>
 <td>Get File And Verify Listing</td>
 <td>/home/${USERNAME}/*.sh</td>
-<td>${TMPDIR}</td>
+<td>${TMPDIR}${/}</td>
 <td>${TEST SCRIPT NAME}</td>
 </tr>
 <tr>
@@ -228,7 +228,7 @@ th {
 <tr>
 <td></td>
 <td>...</td>
-<td>${TMPDIR}foo.sh</td>
+<td>${TMPDIR}${/}foo</td>
 <td></td>
 <td></td>
 </tr>
@@ -278,14 +278,14 @@ th {
 <td><a name="test_Get File When Destination Directory Does Not Exist">Get File When Destination Directory Does Not Exist</a></td>
 <td>SSHLibrary.Get File</td>
 <td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
-<td>${TMPDIR}missingdir${/}foo.txt</td>
+<td>${TMPDIR}${/}missingdir${/}foo.txt</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
 <td>${listing} =</td>
 <td>List Files In Directory</td>
-<td>${TMPDIR}missingdir</td>
+<td>${TMPDIR}${/}missingdir</td>
 <td></td>
 </tr>
 <tr>
@@ -293,6 +293,34 @@ th {
 <td>Should Contain</td>
 <td>${listing}</td>
 <td>foo.txt</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File From A Path Not Under Home Directory">Get File From A Path Not Under Home Directory</a></td>
+<td>[Setup]</td>
+<td>Create Tmp Dir And Move File</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Get File And Verify Listing</td>
+<td>/tmp/test_file.txt</td>
+<td>${TMPDIR}${/}</td>
+<td>test_file.txt</td>
+</tr>
+<tr>
+<td></td>
+<td>[Teardown]</td>
+<td>Execute Command</td>
+<td>rm -f /tmp/test_file.txt</td>
 <td></td>
 </tr>
 <tr>
@@ -332,13 +360,6 @@ th {
 </tr>
 <tr>
 <td></td>
-<td>[Timeout]</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
 <td>SSHLibrary.Get File</td>
 <td>${source}</td>
 <td>${destination}</td>
@@ -364,6 +385,27 @@ th {
 <td>Should Contain</td>
 <td>${listing}</td>
 <td>${filename}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="keyword_Create Tmp Dir And Move File">Create Tmp Dir And Move File</a></td>
+<td>Put File</td>
+<td>${CURDIR}${/}..${/}scripts${/}test_file.txt</td>
+<td>/tmp/</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Create Directory</td>
+<td>${TMPDIR}</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td></td>

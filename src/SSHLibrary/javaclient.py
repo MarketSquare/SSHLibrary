@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 
-import os 
 import time
 import jarray
 
@@ -124,7 +123,6 @@ class SSHClient(AbstractSSHClient):
             curdir = '/'
         else:
             curdir = self.sftp_client.canonicalPath('.')
-        print curdir, path
         for dirname in path.split('/'):
             if dirname:
                 curdir = '%s/%s' % (curdir, dirname)
@@ -161,7 +159,11 @@ class SSHClient(AbstractSSHClient):
         sourcefiles = []
         for fileinfo in self.sftp_client.ls(path):
             if utils.matches(fileinfo.filename, pattern):
-                sourcefiles.append(fileinfo.filename)
+                if path:
+                    filepath = '%s/%s' % (path, fileinfo.filename)
+                else:
+                    filepath = fileinfo.filename 
+                sourcefiles.append(filepath)
         return sourcefiles
     
     def _get_files(self, sourcepaths, destpaths):

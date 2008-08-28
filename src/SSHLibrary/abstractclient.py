@@ -74,7 +74,7 @@ class AbstractSSHClient:
         sourcefiles = self._get_source_files(source)
         if self._local_destination_is_directory(destination):
             if not destination:
-                prefix = os.path.abspath(os.curdir) + '/'
+                prefix = os.path.abspath(os.curdir) + os.path.sep
             else:
                 prefix = destination
             destfiles = [ prefix + os.path.split(name)[1] for name in sourcefiles ]

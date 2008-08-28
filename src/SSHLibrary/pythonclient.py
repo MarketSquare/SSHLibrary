@@ -114,6 +114,8 @@ class SSHClient(AbstractSSHClient):
         sourcefiles = []
         for filename in self.sftp_client.listdir(path):
             if utils.matches(filename, pattern):
+                if path:
+                    filename = '%s/%s' % (path, filename)
                 sourcefiles.append(filename)
         return sourcefiles
 
