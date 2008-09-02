@@ -135,6 +135,13 @@ th {
 <td></td>
 </tr>
 <tr>
+<td>${TMPDIR2}</td>
+<td>robot-tmpdir2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td></td>
 <td></td>
 <td></td>
@@ -321,6 +328,41 @@ th {
 <td>[Teardown]</td>
 <td>Execute Command</td>
 <td>rm -f /tmp/test_file.txt</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Get File To Absolute Destination">Get File To Absolute Destination</a></td>
+<td>SSHLibrary.Get File</td>
+<td>${TEST SCRIPT NAME}</td>
+<td>${CURDIR}${/}${TMPDIR}${/}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${contents} =</td>
+<td>List Directory</td>
+<td>${CURDIR}${/}${TMPDIR}${/}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Log</td>
+<td>${contents}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>[Teardown]</td>
+<td>Remove Directory</td>
+<td>${CURDIR}${/}${TMPDIR2}2</td>
 <td></td>
 </tr>
 <tr>

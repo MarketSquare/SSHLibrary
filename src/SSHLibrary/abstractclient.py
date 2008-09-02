@@ -92,11 +92,9 @@ class AbstractSSHClient:
         return destination.endswith(os.path.sep) or destination == ''
     
     def _create_missing_local_dirs(self, destination):
-        curdir = os.path.abspath(os.path.curdir)
-        for dirname in os.path.split(destination)[0].split(os.path.sep):
-            curdir = os.path.join(curdir, dirname)
-            if dirname and not os.path.exists(curdir):
-                os.mkdir(curdir)
+        if not os.path.exists(os.path.split(destination)[0]):
+            os.makedirs(destination)
+        return
     
     def _info(self, msg):
         self._log(msg, 'INFO')
