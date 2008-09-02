@@ -20,15 +20,18 @@ import glob
 
 from robot import utils
 
+
 class AbstractSSHClient:
 
     def close(self):
         self.client.close()
 
     def read_until_regexp(self, regexp, timeout):
-        start_time = time.time()
+        """Regexp can be a pattern or a compiled re object."""
         data = ''
-        regexp = re.compile(regexp)
+        if isinstance(regexp, basestring):
+            regexp = re.compile(regexp)
+        start_time = time.time()
         while time.time() < start_time + int(timeout):
             char = self._read()
             if char is not None:
@@ -92,8 +95,14 @@ class AbstractSSHClient:
         return destination.endswith(os.path.sep) or destination == ''
     
     def _create_missing_local_dirs(self, destination):
-        if not os.path.exists(os.path.split(destination)[0]):
-            os.makedirs(destination)
+        if not destination:
+            destination = os.path.abspath(os.curdir)
+        destdir = os.path.split(destination)[0]
+        if not os.path.isabs(destdir):
+            destdir = os.path.join(os.path.abspath(os.curdir), destdir)
+        self._info(destdir)
+        if not os.path.exists(destdir):
+            os.makedirs(destdir)
         return
     
     def _info(self, msg):

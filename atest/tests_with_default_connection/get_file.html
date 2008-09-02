@@ -326,8 +326,8 @@ th {
 <tr>
 <td></td>
 <td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f /tmp/test_file.txt</td>
+<td>Remove Tmp Dir And Remote File</td>
+<td></td>
 <td></td>
 </tr>
 <tr>
@@ -339,31 +339,38 @@ th {
 </tr>
 <tr>
 <td><a name="test_Get File To Absolute Destination">Get File To Absolute Destination</a></td>
+<td>[Setup]</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
 <td>SSHLibrary.Get File</td>
 <td>${TEST SCRIPT NAME}</td>
-<td>${CURDIR}${/}${TMPDIR}${/}</td>
+<td>${CURDIR}${/}${TMPDIR2}${/}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
 <td>${contents} =</td>
 <td>List Directory</td>
-<td>${CURDIR}${/}${TMPDIR}${/}</td>
+<td>${CURDIR}${/}${TMPDIR2}${/}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
-<td>Log</td>
+<td>Should Contain</td>
 <td>${contents}</td>
-<td></td>
+<td>${TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
 <td>[Teardown]</td>
 <td>Remove Directory</td>
-<td>${CURDIR}${/}${TMPDIR2}2</td>
-<td></td>
+<td>${CURDIR}${/}${TMPDIR2}</td>
+<td>yes</td>
 </tr>
 <tr>
 <td></td>
@@ -447,6 +454,27 @@ th {
 <td>Create Directory</td>
 <td>${TMPDIR}</td>
 <td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="keyword_Remove Tmp Dir And Remote File">Remove Tmp Dir And Remote File</a></td>
+<td>Execute Command</td>
+<td>rm -f /tmp/test_file.txt</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Remove Directory</td>
+<td>${TMPDIR}</td>
+<td>yes</td>
 <td></td>
 </tr>
 <tr>
