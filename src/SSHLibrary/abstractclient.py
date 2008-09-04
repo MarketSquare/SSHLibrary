@@ -27,7 +27,7 @@ class AbstractSSHClient:
         self.client.close()
 
     def read_until_regexp(self, regexp, timeout):
-        """Regexp can be a pattern or a compiled re object."""
+        """Regexp can be a pattern or a compiled re-object."""
         data = ''
         if isinstance(regexp, basestring):
             regexp = re.compile(regexp)
@@ -48,11 +48,12 @@ class AbstractSSHClient:
         if len(sourcepaths) > 1 and not self._remote_destination_is_directory(destination):
             raise ValueError('It is not possible to copy multiple source files ' 
                              'to one destination file.')
-        dirpath = ''
         if destination.endswith('/'):
             dirpath = destination 
         elif '/' in destination:
             dirpath = '/'.join(destination.split('/')[:-1])
+        else:
+            dirpath = ''
         self._create_missing_dest_dirs(dirpath)
         if self._remote_destination_is_directory(destination):
             if not destination:
@@ -73,37 +74,30 @@ class AbstractSSHClient:
     
     def get_file(self, source, destination):
         self._create_sftp_client()
-        self._create_missing_local_dirs(destination)
         sourcefiles = self._get_source_files(source)
-        if self._local_destination_is_directory(destination):
-            if not destination:
-                prefix = os.path.abspath(os.curdir) + os.path.sep
-            else:
-                prefix = destination
-            destfiles = [ prefix + os.path.split(name)[1] for name in sourcefiles ]
-        elif len(sourcefiles) > 1:
-            raise ValueError('It is not possible to copy multiple source files ' 
-                             'to one destination file.')
-        elif not os.path.isabs(destination):
-            destfiles = [ os.path.join(os.path.abspath(os.path.curdir), 
-                                       destination) ]
+        destfiles = self._get_dest_files(sourcefiles, destination)
         self._info('Getting %s to %s' % (sourcefiles, destfiles))
         self._get_files(sourcefiles, destfiles)
         self.sftp_client.close()
-    
-    def _local_destination_is_directory(self, destination):
-        return destination.endswith(os.path.sep) or destination == ''
-    
-    def _create_missing_local_dirs(self, destination):
-        if not destination:
-            destination = os.path.abspath(os.curdir)
-        destdir = os.path.split(destination)[0]
-        if not os.path.isabs(destdir):
-            destdir = os.path.join(os.path.abspath(os.curdir), destdir)
-        self._info(destdir)
-        if not os.path.exists(destdir):
-            os.makedirs(destdir)
-        return
+        
+    def _get_dest_files(self, sourcefiles, dest):
+        is_dir = dest.endswith(os.path.sep) or dest == '.'
+        if not is_dir and len(sourcefiles) > 1:
+            raise ValueError('It is not possible to copy multiple source files ' 
+                             'to one destination file.')
+        dest = os.path.abspath(dest.replace('\\', '/').replace('/', os.sep)) 
+        self._create_missing_local_dirs(dest, is_dir)
+        if is_dir:
+            return [ os.path.join(dest, os.path.split(name)[1]) for name in sourcefiles ]
+        else:
+            return [ dest ]
+        
+    def _create_missing_local_dirs(self, dest, is_dir):
+        if not is_dir:
+            dest = os.path.dirname(dest)
+        if not os.path.exists(dest):
+            self._info("Creating missing local directories for path '%s'" % dest)
+            os.makedirs(dest)
     
     def _info(self, msg):
         self._log(msg, 'INFO')

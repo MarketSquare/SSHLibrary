@@ -73,6 +73,13 @@ th {
 <th>Value</th>
 </tr>
 <tr>
+<td>Documentation</td>
+<td>\</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td>Suite Setup</td>
 <td>Connect, Login and Move Test Script To Remote Machine</td>
 <td></td>
@@ -143,13 +150,6 @@ th {
 </tr>
 <tr>
 <td></td>
-<td>[Timeout]</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
 <td>Open Connection</td>
 <td>${HOST}</td>
 <td></td>
@@ -166,21 +166,21 @@ th {
 <td></td>
 <td>Put File</td>
 <td>${TEST SCRIPT}</td>
-<td>/home/testuser/${TEST SCRIPT NAME}</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
 <td>Put File</td>
 <td>${INTERACTIVE TEST SCRIPT}</td>
-<td>/home/testuser/${INTERACTIVE TEST SCRIPT NAME}</td>
+<td>/home/${USERNAME}/${INTERACTIVE TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
 <td>Put File</td>
 <td>${REPEAT TEST SCRIPT}</td>
-<td>/home/testuser/${REPEAT TEST SCRIPT NAME}</td>
+<td>/home/${USERNAME}/${REPEAT TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
@@ -192,13 +192,6 @@ th {
 </tr>
 <tr>
 <td><a name="keyword_Remove Test File And Disconnect">Remove Test File And Disconnect</a></td>
-<td>[Timeout]</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
 <td>Execute Command</td>
 <td>rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${COUNTER NAME}</td>
 <td></td>

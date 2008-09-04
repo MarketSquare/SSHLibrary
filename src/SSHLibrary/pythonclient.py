@@ -111,6 +111,8 @@ class SSHClient(AbstractSSHClient):
 
     def _get_source_files(self, source):
         path, pattern = os.path.split(source)
+        if not path:
+            path = '.'
         sourcefiles = []
         for filename in self.sftp_client.listdir(path):
             if utils.matches(filename, pattern):
