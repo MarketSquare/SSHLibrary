@@ -17,15 +17,11 @@ import jarray
 
 from java.io import BufferedReader, InputStreamReader, IOException, \
                     FileOutputStream, BufferedWriter, OutputStreamWriter
-
 from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
                              SFTPv3FileAttributes, SFTPException
-from robot import utils
-
-from abstractclient import AbstractSSHClient
 
 
-class SSHClient(AbstractSSHClient):
+class SSHClient(object):
 
     def __init__(self, host, port=22):
         self.client = Connection(host, port)
@@ -35,6 +31,9 @@ class SSHClient(AbstractSSHClient):
     def login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
             raise AssertionError("Authentication failed for user: %s" % username)
+        
+    def close(self):
+        self.client.close()
 
     def execute_command(self, command, ret_mode):
         sess = self.client.openSession()
@@ -71,21 +70,17 @@ class SSHClient(AbstractSSHClient):
         self.sess.close()
         return outputs
 
-    def write(self, text, prompt='$'):
-        if self.shell is None:
-            self._start_shell()
-            print '*INFO* Opening new channel'
-            print '*INFO* %s' % self.read_until(prompt, 30)
-        self._writer.write(text)
-        self._writer.flush()
-        
-    def _start_shell(self):
+    def open_shell(self):
         self.shell = self.client.openSession()
         self.shell.requestDumbPTY()
         self.shell.startShell()
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()
 
+    def write(self, text):
+        self._writer.write(text)
+        self._writer.flush()
+        
     def read(self):
         data = ''
         if self._stdout.available():
@@ -94,21 +89,21 @@ class SSHClient(AbstractSSHClient):
             data += ''.join([chr(b) for b in buf])
         return data
     
-    def _read(self):
+    def read_char(self):
         if self._stdout.available():
             buf = jarray.zeros(1, 'b')
             self._stdout.read(buf)
             return chr(buf[0])
         return ''
         
-    def _create_sftp_client(self):                
+    def create_sftp_client(self):                
         self.sftp_client = SFTPv3Client(self.client)
         self.homedir = self.sftp_client.canonicalPath('.') + '/'
         
-    def _close_sftp_client(self):
+    def close_sftp_client(self):
         self.sftp_client.close()
             
-    def _create_missing_dest_dirs(self, path):
+    def create_missing_dest_dirs(self, path):
         if path.startswith('/'):
             curdir = '/'
         else:
@@ -119,10 +114,9 @@ class SSHClient(AbstractSSHClient):
             try:
                 self.sftp_client.stat(curdir)
             except IOException:
-                self._info("Creating missing target directory '%s'" % curdir)
                 self.sftp_client.mkdir(curdir, 0744)
                 
-    def _put_file(self, source, dest, mode):
+    def put_file(self, source, dest, mode):
         size = 0
         localfile = open(source, 'rb')
         remotefile = self.sftp_client.createFile(dest)
@@ -142,10 +136,10 @@ class SSHClient(AbstractSSHClient):
         self.sftp_client.closeFile(remotefile)
         localfile.close()
         
-    def _listdir(self, path):
+    def listdir(self, path):
         return [fileinfo.filename for fileinfo in self.sftp_client.ls(path)]
     
-    def _get_file(self, source, dest):
+    def get_file(self, source, dest):
         localfile = FileOutputStream(dest)
         tempstats = self.sftp_client.stat(source)
         remotefilesize = tempstats.size

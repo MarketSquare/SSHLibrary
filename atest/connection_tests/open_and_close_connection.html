@@ -1,6 +1,9 @@
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-<meta name="generator" content="HTML Tidy for Cygwin (vers 1st September 2004), see www.w3.org">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="RobotIDE" /> 
 <style type="text/css">
 html {
   font-family: Arial,Helvetica,sans-serif;
@@ -53,24 +56,32 @@ th {
   font-style: normal;
 }
 </style>
-<title>Robot Test Cases</title></head>
+<title>Open And Close Connection</title>
+</head>
 <body>
-<h1>Robot Test Cases</h1>
+<h1>Open And Close Connection</h1>
+
 <table border="1">
-<colgroup span="99"><col class="name"><col class="value" span="4"></colgroup>
-<thead>
+<colgroup span="99">
+<col class="name">
+<col class="value" span="4"></colgroup>
 <tr>
 <th>Setting</th>
 <th>Value</th>
 <th>Value</th>
-<th>value</th>
+<th>Value</th>
 <th>Value</th>
 </tr>
-</thead>
-<tbody>
 <tr>
-<td>Resource</td><td>../ssh_library_resources.html</td>
-
+<td>Documentation</td>
+<td>\</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Resource</td>
+<td>../ssh_library_resources.html</td>
 <td></td>
 <td></td>
 <td></td>
@@ -82,11 +93,12 @@ th {
 <td></td>
 <td></td>
 </tr>
-</tbody>
 </table>
+
 <table border="1">
-<colgroup span="99"><col class="name"><col class="value" span="4"></colgroup>
-<thead>
+<colgroup span="99">
+<col class="name">
+<col class="value" span="4"></colgroup>
 <tr>
 <th>Variable</th>
 <th>Value</th>
@@ -94,8 +106,6 @@ th {
 <th>Value</th>
 <th>Value</th>
 </tr>
-</thead>
-<tbody>
 <tr>
 <td></td>
 <td></td>
@@ -103,52 +113,174 @@ th {
 <td></td>
 <td></td>
 </tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
 </table>
+
 <table border="1">
-<colgroup span="99"><col class="name"><col class="action"><col class="arg" span="3"></colgroup>
-<thead>
+<colgroup span="99">
+<col class="name">
+<col class="action">
+<col class="arg" span="3"></colgroup>
 <tr>
 <th>Test Case</th>
 <th>Action</th>
 <th>Argument</th>
 <th>Argument</th>
 <th>Argument</th>
-<th>Argument</th>
-<th>Argument</th>
 </tr>
-</thead>
-<tbody>
 <tr>
-<td>Test Opening and Closing Connection</td>
-<td>Open Connection</td><td>${HOST}</td>
-
-<td></td>
-<td></td>
+<td><a name="test_Test Opening And Closing Connection">Test Opening And Closing Connection</a></td>
+<td>Open Connection</td>
+<td>${HOST}</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
 <td></td>
-<td>Login</td><td>${USERNAME}</td><td>${PASSWORD}</td>
-
-
+<td>Login</td>
+<td>${USERNAME}</td>
+<td>${PASSWORD}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Close Connection</td>
 <td></td>
 <td></td>
 <td></td>
-</tr><tr><td></td><td>Close Connection</td><td></td><td></td><td></td><td></td><td></td></tr>
-</tbody>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Switch Connection">Switch Connection</a></td>
+<td>${id1} =</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Login</td>
+<td>${USERNAME}</td>
+<td>${PASSWORD}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Write</td>
+<td>cd /tmp</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Read Until Prompt</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${id2} =</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td>second</td>
+</tr>
+<tr>
+<td></td>
+<td>Login</td>
+<td>${USERNAME}</td>
+<td>${PASSWORD}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${prev id} =</td>
+<td>Switch Connection</td>
+<td>${id1}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${prev id}</td>
+<td>${id2}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Write</td>
+<td>pwd</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${result} =</td>
+<td>Read Until Prompt</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${result}</td>
+<td>/tmp</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${prev id}=</td>
+<td>Switch Connection</td>
+<td>second</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Write</td>
+<td>pwd</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${result} =</td>
+<td>Read Until Prompt</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${result}</td>
+<td>/home</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
 </table>
+
 <table border="1">
-<colgroup span="99"><col class="name"><col class="action"><col class="arg" span="3"></colgroup>
-<thead>
+<colgroup span="99">
+<col class="name">
+<col class="action">
+<col class="arg" span="3"></colgroup>
 <tr>
 <th>Keyword</th>
 <th>Action</th>
@@ -156,8 +288,6 @@ th {
 <th>Argument</th>
 <th>Argument</th>
 </tr>
-</thead>
-<tbody>
 <tr>
 <td></td>
 <td></td>
@@ -165,13 +295,7 @@ th {
 <td></td>
 <td></td>
 </tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
 </table>
-</body></html>
+
+</body>
+</html>

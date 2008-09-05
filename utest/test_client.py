@@ -1,48 +1,33 @@
 import unittest
 import os
 
-from SSHLibrary.abstractclient import AbstractSSHClient
+from SSHLibrary import SSHLibrary
 
 
-class _MockClient(AbstractSSHClient):
+class _MockClient(object):
     
     def __init__(self):
         self.putfile_record = []
         self.getfile_record = []
         self.homedir = '/home'
 
-    def _create_sftp_client(self):
-        pass
-        
-    def _close_sftp_client(self):
-        pass
-
-    def _create_missing_dest_dirs(self, dest):
-        pass
-    
-    def _create_missing_local_dirs(self, dest, is_dir):
-        pass
-    
-    def _get_put_file_sources(self, src):
-        return src
-    
-    def _get_get_file_sources(self, src):
-        return src
-    
-    def _put_file(self, src, dest, mode):
+    def put_file(self, src, dest, mode):
         self.putfile_record.append(dest)
         
-    def _get_file(self, src, dest):
+    def get_file(self, src, dest):
         self.getfile_record.append(dest)
+
+    create_sftp_client = close_sftp_client = lambda self: None
+    create_missing_dest_dirs = lambda self, x: None
     
-    def _info(self, msg, level=None):
-        pass
+
+class MySSHLibrary(SSHLibrary):
+    _create_missing_local_dirs = lambda self, x, y: None
+    _get_put_file_sources = _info = lambda self, x: x
+    _get_get_file_sources = lambda self, x: x
     
 
 class TestClient(unittest.TestCase):
-    
-    def setUp(self):
-        self._client = _MockClient()
     
     def test_put_file(self):
         data = [ (['foo.txt'], 'foo.txt', ['/home/foo.txt']), 
@@ -52,8 +37,10 @@ class TestClient(unittest.TestCase):
                   ['/opt/Files/foo.txt', '/opt/Files/bar.sh', '/opt/Files/BAZ.my']),
                  (['myfile'], '\\tmp\\', ['/tmp/myfile']) ]
         for src, dest, exp in data:
-            client = _MockClient() 
-            client.put_file(src, dest, 0744)
+            client = _MockClient()
+            lib = MySSHLibrary()
+            lib.client = client
+            lib.put_file(src, dest, '0744')
             self.assertEquals(client.putfile_record, exp)
     
     def test_get_file(self):
@@ -65,7 +52,9 @@ class TestClient(unittest.TestCase):
                  ]
         for src, dest, exp in data:
             client = _MockClient()
-            client.get_file(src, dest)
+            lib = MySSHLibrary()
+            lib.client = client
+            lib.get_file(src, dest)
             self.assertEquals(client.getfile_record, exp)
 
 

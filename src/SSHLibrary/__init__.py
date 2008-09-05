@@ -16,9 +16,8 @@
 import time
 import os
 import glob
-import string
 import re
-from types import TupleType, StringTypes
+import posixpath
 
 from robot import utils
 
@@ -59,8 +58,9 @@ class SSHLibrary:
     ROBOT_LIBRARY_SCOPE="GLOBAL"
 
     def __init__(self, timeout=3, newline='LF', prompt=None):
-        self.cache = utils.ConnectionCache()
-        self.client = None
+        self._cache = utils.ConnectionCache()
+        self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
+        self._client = None
         self._newline = self._parse_newline(newline and newline or 'LF')
         self._timeout = timeout and int(timeout) or 3
         self._default_log_level = 'INFO'
@@ -94,14 +94,17 @@ class SSHLibrary:
         self._timeout = timeout and int(timeout) or self._timeout
         self._newline = newline and self._parse_newline(newline) or self._newline
         self._prompt = prompt and prompt or self._prompt
-        self.client = SSHClient(host, int(port))
-        return self.cache.register(self.client, alias)
+        self._client = SSHClient(host, int(port))
+        return self._cache.register(self._client, alias)
 
     def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.
 
         Index is got from `Open Connection` and alias can be given to it.
 
+        Returns the index of previous connection, which can be used to restore 
+        the connection later. This works with Robot Framework 2.0.2 or newer.
+        
         Example:
 
         | Open Connection       | myhost.net   |          |
@@ -125,10 +128,12 @@ class SSHLibrary:
         | # Do something ... |
         | Switch Connection  | ${id}           |            |
         """
-        self.client=self.cache.switch(index_or_alias)
+        old_index = self._cache.current_index
+        self._client = self._cache.switch(index_or_alias)
+        return old_index
 
     def close_all_connections(self):
-        """Closes all open connections and empties the connection cache.
+        """Closes all open connections and empties the connection _cache.
 
         After this keyword new indexes get from `Open Connection` are reset to 1.
 
@@ -136,15 +141,15 @@ class SSHLibrary:
         all connections are closed.
         """
         try:
-            self.cache.close_all()
+            self._cache.close_all()
         except AttributeError:
             pass
-        self.client = None
+        self._client = None
         
     def close_connection(self):
         """Closes the currently active connection.
         """
-        self.client.close()
+        self._client.close()
 
     def login(self, username, password):
         """Logs in to SSH server with given user information.
@@ -154,7 +159,7 @@ class SSHLibrary:
         """
         self._info("Logging into '%s:%s' with username '%s' and password '%s'" 
                    % (self._host, self._port, username, password))
-        self.client.login(username, password)
+        self._client.login(username, password)
 
     def execute_command(self, command, ret_mode='stdout'):
         """Executes command on remote host over existing SSH connection and returns stdout and/or stderr.
@@ -168,7 +173,7 @@ class SSHLibrary:
         | ${out}    | ${err}=         | Execute Command | some command | both                | #stdout and stderr are returned |
         """
         self._info("Executing command '%s'" % command)
-        return self._process_output(self.client.execute_command(command, ret_mode))
+        return self._process_output(self._client.execute_command(command, ret_mode))
 
     def start_command(self, command):
         """Starts command execution on remote host over existing SSH connection.
@@ -184,7 +189,7 @@ class SSHLibrary:
         """
         self._info("Starting command '%s'" % command)
         self._command = command
-        self.client.start_command(command)
+        self._client.start_command(command)
 
     def read_command_output(self, ret_mode='stdout'):
         """Reads and returns/logs everything currently available on the output (stdout and/or stderr).
@@ -195,10 +200,10 @@ class SSHLibrary:
         | ${out}  | ${err}=             | Read Command Output | both                | #stdout and stderr are returned |
         """
         self._info("Reading output of command '%s'" % self._command)
-        return self._process_output(self.client.read_command_output(ret_mode))
+        return self._process_output(self._client.read_command_output(ret_mode))
             
     def _process_output(self, output):
-        if type(output) == TupleType:
+        if isinstance(output, tuple):
             return [self._strip_possible_newline(out) for out in output]
         return self._strip_possible_newline(output)
         
@@ -290,13 +295,16 @@ class SSHLibrary:
         except UnicodeError:
             raise ValueError('Only ascii characters are allowed in SSH.' 
                              'Got: %s' % text)
-        self._info("Writing %s" % repr(text))
         if self._prompt is None:
             msg = ("Using 'Write' or 'Write Bare' keyword requires setting "
                    "prompt first. Prompt can be set either when taking library "
                    "into use or when using 'Open Connection' keyword.")
             raise RuntimeError(msg)
-        self.client.write(text, self._prompt)
+        if self._client.shell is None:
+            self._client.open_shell()
+            self.read_until_prompt('INFO')
+        self._info("Writing %s" % repr(text))
+        self._client.write(text)
 
     def read(self, loglevel=None):
         """Reads and returns/logs everything currently available on the output.
@@ -306,7 +314,7 @@ class SSHLibrary:
         `loglevel` can be used to override the default log level, and available
         levels are TRACE, DEBUG, INFO and WARN.
         """
-        ret = self.client.read()
+        ret = self._client.read()
         self._log(ret, loglevel)
         return ret
 
@@ -321,12 +329,22 @@ class SSHLibrary:
         
         See `Read` for more information on `loglevel`.
         """
-        ret = self.client.read_until(expected, self._timeout)
+        return self._read_until(expected, loglevel)
+        
+    def _read_until(self, expected, loglevel):
+        ret = ''
+        start_time = time.time()
+        while time.time() < float(self._timeout) + start_time:
+            ret += self._client.read_char()
+            if (isinstance(expected, basestring) and expected in ret) or \
+               (not isinstance(expected, basestring) and expected.search(ret)):
+                self._log(ret, loglevel)
+                return ret
         self._log(ret, loglevel)
-        if not ret.endswith(expected):
-            raise AssertionError("No match found for '%s' in %s" 
+        if not isinstance(expected, basestring):
+            expected = expected.pattern
+        raise AssertionError("No match found for '%s' in %s" 
                                  % (expected, utils.secs_to_timestr(self._timeout)))
-        return ret
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Reads from the current output until a match to `regexp` is found or timeout expires.
@@ -343,9 +361,9 @@ class SSHLibrary:
         | Read Until Regexp | (#|$) |
         | Read Until Regexp | some regexp  | DEBUG |
         """
-        ret = self.client.read_until_regexp(regexp, self._timeout)
-        self._log(ret, loglevel)
-        return ret
+        if isinstance(regexp, basestring):
+            regexp = re.compile(regexp)
+        return self._read_until(regexp, loglevel)
 
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the current output until prompt is found.
@@ -359,7 +377,6 @@ class SSHLibrary:
             raise RuntimeError('Prompt is not set')
         return self.read_until(self._prompt, loglevel)
 
-        
     def write_until_expected_output(self, text, expected, timeout, 
                                     retry_interval, loglevel=None):
         """Writes given text repeatedly until `expected` appears in output.
@@ -384,37 +401,20 @@ class SSHLibrary:
         """
         timeout = utils.timestr_to_secs(timeout)
         retry_interval = utils.timestr_to_secs(retry_interval)
+        old_timeout = self.set_timeout(retry_interval)
         starttime = time.time()
         while time.time() - starttime < timeout:
-            self.write(text)
-            ret = self.client.read_until(expected, retry_interval)
-            self._log(ret, loglevel)
-            if ret.endswith(expected):
+            self.write_bare(text)
+            try:
+                ret = self._read_until(expected, loglevel)
+                self.set_timeout(old_timeout)
                 return ret
+            except AssertionError:
+                pass
+        self.set_timeout(old_timeout)
         raise AssertionError("No match found for '%s' in %s" 
                              % (expected, utils.secs_to_timestr(timeout)))
         
-    def _info(self, msg):
-        self._log(msg, 'INFO')
-        
-    def _log(self, msg, level=None):
-        self._is_valid_log_level(level, raise_if_invalid=True)
-        msg = msg.strip()
-        if level is None:
-            level = self._default_log_level
-        if msg != '':
-            print '*%s* %s' % (level.upper(), msg)
-
-    def _is_valid_log_level(self, level, raise_if_invalid=False):
-        if level is None:
-            return True
-        if type(level) in StringTypes and \
-                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN']:
-            return True
-        if not raise_if_invalid:
-            return False
-        raise AssertionError("Invalid log level '%s'" % level)
-    
     def put_file(self, source, destination='.', mode='0744'):
         """Copies file(s) from local host to remote host using existing SSH connection.
 
@@ -445,7 +445,35 @@ class SSHLibrary:
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |  0777                            | # file permissions |
         
         """
-        self.client.put_file(source, destination, int(mode,8))
+        mode = int(mode,8)
+        self._client.create_sftp_client()
+        sourcefiles = self._get_put_file_sources(source)
+        destfiles, destpath = self._get_put_file_destinations(sourcefiles, destination)
+        self._client.create_missing_dest_dirs(destpath)
+        for source, destination in zip(sourcefiles, destfiles):
+            self._info("Putting '%s' to '%s'" % (source, destination))
+            self._client.put_file(source, destination, mode)
+        self._client.close_sftp_client()
+        
+    def _get_put_file_sources(self, source):
+        return glob.glob(source.replace('/', os.sep))
+    
+    def _get_put_file_destinations(self, sources, dest):
+        dest = dest.replace('\\', '/')
+        if dest == '.':
+            dest = self._client.homedir + '/'
+        if len(sources) > 1 and dest[-1] != '/':
+            raise ValueError('It is not possible to copy multiple source files ' 
+                             'to one destination file.')
+        dirpath, filename = self._parse_path_elements(dest)
+        if filename:
+            return [ posixpath.join(dirpath, filename) ], dirpath
+        return [ posixpath.join(dirpath, os.path.split(path)[1]) for path in sources ], dirpath
+    
+    def _parse_path_elements(self, dest):
+        if not posixpath.isabs(dest):
+            dest = posixpath.join(self._client.homedir, dest)
+        return posixpath.split(dest)
 
     def get_file(self, source, destination='.'):
         """Copies a file from remote host to local host using existing SSH connection.
@@ -476,5 +504,65 @@ class SSHLibrary:
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
         
         """
-        self.client.get_file(source, destination)
+        self._client.create_sftp_client()
+        sourcefiles = self._get_get_file_sources(source)
+        destfiles = self._get_get_file_destinations(sourcefiles, destination)
+        for source, dest in zip(sourcefiles, destfiles):
+            self._info('Getting %s to %s' % (source, dest))
+            self._client.get_file(source, dest)
+        self._client.close_sftp_client()
         
+    def _get_get_file_sources(self, source):
+        path, pattern = posixpath.split(source)
+        if not path:
+            path = '.'
+        sourcefiles = []
+        for filename in self._client.listdir(path):
+            if utils.matches(filename, pattern):
+                if path:
+                    filename = posixpath.join(path, filename)
+                sourcefiles.append(filename)
+        return sourcefiles
+        
+    def _get_get_file_destinations(self, sourcefiles, dest):
+        if dest == '.':
+            dest = os.curdir + os.sep
+        is_dir = dest.endswith(os.sep)
+        if not is_dir and len(sourcefiles) > 1:
+            raise ValueError('It is not possible to copy multiple source files ' 
+                             'to one destination file.')
+        dest = os.path.abspath(dest.replace('/', os.sep)) 
+        self._create_missing_local_dirs(dest, is_dir)
+        if is_dir:
+            return [ os.path.join(dest, os.path.split(name)[1]) for name in sourcefiles ]
+        else:
+            return [ dest ]
+        
+    def _create_missing_local_dirs(self, dest, is_dir):
+        if not is_dir:
+            dest = os.path.dirname(dest)
+        if not os.path.exists(dest):
+            self._info("Creating missing local directories for path '%s'" % dest)
+            os.makedirs(dest)
+
+    def _info(self, msg):
+        self._log(msg, 'INFO')
+        
+    def _log(self, msg, level=None):
+        self._is_valid_log_level(level, raise_if_invalid=True)
+        msg = msg.strip()
+        if level is None:
+            level = self._default_log_level
+        if msg != '':
+            print '*%s* %s' % (level.upper(), msg)
+
+    def _is_valid_log_level(self, level, raise_if_invalid=False):
+        if level is None:
+            return True
+        if isinstance(level, basestring) and \
+                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN']:
+            return True
+        if not raise_if_invalid:
+            return False
+        raise AssertionError("Invalid log level '%s'" % level)
+    

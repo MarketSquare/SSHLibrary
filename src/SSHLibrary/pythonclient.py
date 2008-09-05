@@ -16,9 +16,7 @@
 import os
 
 import paramiko
-from robot import utils
 
-from abstractclient import AbstractSSHClient
 
 # There doesn't seem to be a simpler way to increase banner timeout
 def _monkey_patched_start_client(self, event=None):
@@ -29,17 +27,20 @@ paramiko.transport.Transport._orig_start_client = paramiko.transport.Transport.s
 paramiko.transport.Transport.start_client = _monkey_patched_start_client
 
 
-class SSHClient(AbstractSSHClient):
+class SSHClient(object):
     
     def __init__(self, host, port=22):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.host = host
         self.port = port
-        self.channel = None
+        self.shell = None
         
     def login(self, username, password):
         self.client.connect(self.host, self.port, username, password)
+        
+    def close(self):
+        self.client.close()
 
     def execute_command(self, command, ret_mode):
         _, stdout, stderr = self.client.exec_command(command)
@@ -57,33 +58,32 @@ class SSHClient(AbstractSSHClient):
         if ret_mode.lower() == 'stderr':
             return stderr.read()
         return stdout.read()
-
-    def write(self, text, prompt):
-        if self.channel is None:
-            self.channel = self.client.invoke_shell()
-            print '*INFO* Opening new channel'
-            print '*INFO* %s' % self.read_until(prompt, 30)
-        self.channel.sendall(text)
+    
+    def open_shell(self):
+        self.shell = self.client.invoke_shell()
+        
+    def write(self, text):
+        self.shell.sendall(text)
 
     def read(self):
         data = ''
-        while self.channel.recv_ready():
-            data += self.channel.recv(100000)
+        while self.shell.recv_ready():
+            data += self.shell.recv(100000)
         return data
 
-    def _read(self):
-        if self.channel.recv_ready():
-            return self.channel.recv(1)
+    def read_char(self):
+        if self.shell.recv_ready():
+            return self.shell.recv(1)
         return ''
 
-    def _create_sftp_client(self):
+    def create_sftp_client(self):
         self.sftp_client = self.client.open_sftp()
         self.homedir = self.sftp_client.normalize('.') + '/'
         
-    def _close_sftp_client(self):
+    def close_sftp_client(self):
         self.sftp_client.close()
         
-    def _create_missing_dest_dirs(self, path):
+    def create_missing_dest_dirs(self, path):
         if path == '.':
             return
         if os.path.isabs(path):
@@ -92,17 +92,15 @@ class SSHClient(AbstractSSHClient):
             self.sftp_client.chdir('.')
         for dirname in path.split('/'):
             if dirname and dirname not in self.sftp_client.listdir(self.sftp_client.getcwd()):
-                self._info("Creating missing target directory '%s/%s'" % 
-                           (self.sftp_client.getcwd(), dirname))
                 self.sftp_client.mkdir(dirname)
             self.sftp_client.chdir(dirname)
         
-    def _put_file(self, source, dest, mode):
+    def put_file(self, source, dest, mode):
         self.sftp_client.put(source, dest)
         self.sftp_client.chmod(dest, mode)
         
-    def _listdir(self, path):
+    def listdir(self, path):
         return self.sftp_client.listdir(path)
 
-    def _get_file(self, source, dest):
+    def get_file(self, source, dest):
         self.sftp_client.get(source, dest)
