@@ -42,6 +42,7 @@ class SSHLibrary:
     [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/
     
     Currently, there are two modes of operation:
+    
     1. When keyword `Execute Command` or `Start Command` is used to execute 
     something, a new channel is opened over the SSH connection. In practice it
     means that no session information is stored. 
@@ -342,9 +343,6 @@ class SSHLibrary:
         | Read Until Regexp | (#|$) |
         | Read Until Regexp | some regexp  | DEBUG |
         """
-        loglevel = self._default_log_level
-        if self._is_valid_log_level(loglevel):
-            loglevel = loglevel.upper()
         ret = self.client.read_until_regexp(regexp, self._timeout)
         self._log(ret, loglevel)
         return ret
@@ -395,6 +393,7 @@ class SSHLibrary:
                 return ret
         raise AssertionError("No match found for '%s' in %s" 
                              % (expected, utils.secs_to_timestr(timeout)))
+        
     def _info(self, msg):
         self._log(msg, 'INFO')
         
@@ -448,7 +447,6 @@ class SSHLibrary:
         """
         self.client.put_file(source, destination, int(mode,8))
 
-        
     def get_file(self, source, destination='.'):
         """Copies a file from remote host to local host using existing SSH connection.
 

@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 
-import time
 import jarray
 
 from java.io import BufferedReader, InputStreamReader, IOException, \
@@ -94,29 +93,20 @@ class SSHClient(AbstractSSHClient):
             self._stdout.read(buf)
             data += ''.join([chr(b) for b in buf])
         return data
-
-    def read_until(self, expected, timeout):
-        data = ''
-        start_time = time.time()
-        while time.time() < float(timeout) + start_time:
-            if self._stdout.available():
-                data += self._get_output()
-            if data.count(expected) > 0:
-                return data
-        return data
-    
-    def _get_output(self):
-        buf = jarray.zeros(1, 'b')
-        self._stdout.read(buf)
-        return chr(buf[0])
     
     def _read(self):
         if self._stdout.available():
-            return self._get_output()
+            buf = jarray.zeros(1, 'b')
+            self._stdout.read(buf)
+            return chr(buf[0])
+        return ''
         
     def _create_sftp_client(self):                
         self.sftp_client = SFTPv3Client(self.client)
-        return self.sftp_client.canonicalPath('.') + '/'
+        self.homedir = self.sftp_client.canonicalPath('.') + '/'
+        
+    def _close_sftp_client(self):
+        self.sftp_client.close()
             
     def _create_missing_dest_dirs(self, path):
         if path.startswith('/'):
@@ -132,60 +122,46 @@ class SSHClient(AbstractSSHClient):
                 self._info("Creating missing target directory '%s'" % curdir)
                 self.sftp_client.mkdir(curdir, 0744)
                 
-    def _put_files(self, sourcefiles, destfiles, mode):
-        for source, dest in zip(sourcefiles, destfiles):
-            size = 0
-            localfile = open(source, 'rb')
-            remotefile = self.sftp_client.createFile(dest)
-            try:
-                tempstats = self.sftp_client.fstat(remotefile)
-                tempstats.permissions = mode
-                self.sftp_client.fsetstat(remotefile, tempstats)
-            except SFTPException:
-                pass
-            while True:
-                data = localfile.read(4096)
-                datalen = len(data)
-                if datalen == 0:
-                    break
-                self.sftp_client.write(remotefile, size, data, 0, datalen)
-                size += datalen
-            self.sftp_client.closeFile(remotefile)
-            localfile.close()
-            
-    def _get_source_files(self, source):
-        path_components = source.split('/')
-        path, pattern = '/'.join(path_components[:-1]), path_components[-1]
-        if not path:
-            path = '.'
-        sourcefiles = []
-        for fileinfo in self.sftp_client.ls(path):
-            if utils.matches(fileinfo.filename, pattern):
-                if path:
-                    filepath = '%s/%s' % (path, fileinfo.filename)
-                else:
-                    filepath = fileinfo.filename 
-                sourcefiles.append(filepath)
-        return sourcefiles
+    def _put_file(self, source, dest, mode):
+        size = 0
+        localfile = open(source, 'rb')
+        remotefile = self.sftp_client.createFile(dest)
+        try:
+            tempstats = self.sftp_client.fstat(remotefile)
+            tempstats.permissions = mode
+            self.sftp_client.fsetstat(remotefile, tempstats)
+        except SFTPException:
+            pass
+        while True:
+            data = localfile.read(4096)
+            datalen = len(data)
+            if datalen == 0:
+                break
+            self.sftp_client.write(remotefile, size, data, 0, datalen)
+            size += datalen
+        self.sftp_client.closeFile(remotefile)
+        localfile.close()
+        
+    def _listdir(self, path):
+        return [fileinfo.filename for fileinfo in self.sftp_client.ls(path)]
     
-    def _get_files(self, sourcepaths, destpaths):
-        for source, destination in zip(sourcepaths, destpaths):
-            localfile = FileOutputStream(destination)
-            tempstats = self.sftp_client.stat(source)
-            remotefilesize = tempstats.size
-            remotefile = self.sftp_client.openFileRO(source)
-            size = 0
-            arraysize = 4096
-            data = jarray.zeros(arraysize, 'b')
-            while True:
-                moredata = self.sftp_client.read(remotefile, size, data, 0, arraysize)
-                datalen = len(data)
-                if moredata==-1:
-                    break
-                if remotefilesize-size < arraysize:
-                    datalen = remotefilesize-size
-                localfile.write(data, 0, datalen)
-                size += datalen
-            self.sftp_client.closeFile(remotefile)
-            localfile.flush()
-            localfile.close()
+    def _get_file(self, source, dest):
+        localfile = FileOutputStream(dest)
+        tempstats = self.sftp_client.stat(source)
+        remotefilesize = tempstats.size
+        remotefile = self.sftp_client.openFileRO(source)
+        size = 0
+        arraysize = 4096
+        data = jarray.zeros(arraysize, 'b')
+        while True:
+            moredata = self.sftp_client.read(remotefile, size, data, 0, arraysize)
+            datalen = len(data)
+            if moredata==-1:
+                break
+            if remotefilesize-size < arraysize:
+                datalen = remotefilesize-size
+            localfile.write(data, 0, datalen)
+            size += datalen
+        self.sftp_client.closeFile(remotefile)
+        localfile.flush()
+        localfile.close()

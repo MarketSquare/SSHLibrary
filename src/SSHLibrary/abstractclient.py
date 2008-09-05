@@ -17,6 +17,7 @@ import os
 import re
 import time
 import glob
+import posixpath
 
 from robot import utils
 
@@ -40,52 +41,75 @@ class AbstractSSHClient:
                 return data
         raise AssertionError("No match found for '%s' in %s"
                              % (regexp.pattern, utils.secs_to_timestr(timeout)))
+    
+    def read_until(self, expected, timeout):
+        data = ''
+        start_time = time.time()
+        while time.time() < float(timeout) + start_time :
+            data += self._read()
+            if expected in data:
+                return data
+        return data
 
     def put_file(self, source, destination, mode):
-        homedir = self._create_sftp_client() 
-        mode = int(mode)
-        sourcepaths = glob.glob(source)
-        if len(sourcepaths) > 1 and not self._remote_destination_is_directory(destination):
+        self._create_sftp_client()
+        sourcefiles = self._get_put_file_sources(source)
+        destfiles, destpath = self._get_put_file_destinations(sourcefiles, destination)
+        self._create_missing_dest_dirs(destpath)
+        for source, destination in zip(sourcefiles, destfiles):
+            self._info("Putting '%s' to '%s'" % (source, destination))
+            self._put_file(source, destination, mode)
+        self._close_sftp_client()
+        
+    def _get_put_file_sources(self, source):
+        return glob.glob(source.replace('/', os.sep))
+        
+    def _get_put_file_destinations(self, sources, dest):
+        dest = dest.replace('\\', '/')
+        if dest == '.':
+            dest = self.homedir + '/'
+        if len(sources) > 1 and dest[-1] != '/':
             raise ValueError('It is not possible to copy multiple source files ' 
                              'to one destination file.')
-        if destination.endswith('/'):
-            dirpath = destination 
-        elif '/' in destination:
-            dirpath = '/'.join(destination.split('/')[:-1])
-        else:
-            dirpath = ''
-        self._create_missing_dest_dirs(dirpath)
-        if self._remote_destination_is_directory(destination):
-            if not destination:
-                prefix = homedir
-            else:
-                prefix = destination
-            destpaths = [ prefix + os.path.split(path)[1] for path in sourcepaths ]
-        elif destination.startswith('/'):
-            destpaths = [ destination ]        
-        else:
-            destpaths = [ homedir + '/' + destination ]
-        self._info("Putting %s to %s" % (sourcepaths, destpaths))
-        self._put_files(sourcepaths, destpaths, mode)
-        self.sftp_client.close()
+        dirpath, filename = self._parse_path_elements(dest)
+        if filename:
+            return [ posixpath.join(dirpath, filename) ], dirpath
+        return [ posixpath.join(dirpath, os.path.split(path)[1]) for path in sources ], dirpath
     
-    def _remote_destination_is_directory(self, destination):
-        return destination.endswith('/') or destination == ''
-    
+    def _parse_path_elements(self, dest):
+        if not posixpath.isabs(dest):
+            dest = posixpath.join(self.homedir, dest)
+        return posixpath.split(dest)
+        
     def get_file(self, source, destination):
         self._create_sftp_client()
-        sourcefiles = self._get_source_files(source)
-        destfiles = self._get_dest_files(sourcefiles, destination)
-        self._info('Getting %s to %s' % (sourcefiles, destfiles))
-        self._get_files(sourcefiles, destfiles)
-        self.sftp_client.close()
+        sourcefiles = self._get_get_file_sources(source)
+        destfiles = self._get_get_file_destinations(sourcefiles, destination)
+        for source, dest in zip(sourcefiles, destfiles):
+            self._info('Getting %s to %s' % (source, dest))
+            self._get_file(source, dest)
+        self._close_sftp_client()
         
-    def _get_dest_files(self, sourcefiles, dest):
-        is_dir = dest.endswith(os.path.sep) or dest == '.'
+    def _get_get_file_sources(self, source):
+        path, pattern = posixpath.split(source)
+        if not path:
+            path = '.'
+        sourcefiles = []
+        for filename in self._listdir(path):
+            if utils.matches(filename, pattern):
+                if path:
+                    filename = posixpath.join(path, filename)
+                sourcefiles.append(filename)
+        return sourcefiles
+        
+    def _get_get_file_destinations(self, sourcefiles, dest):
+        if dest == '.':
+            dest = os.curdir + os.sep
+        is_dir = dest.endswith(os.sep)
         if not is_dir and len(sourcefiles) > 1:
             raise ValueError('It is not possible to copy multiple source files ' 
                              'to one destination file.')
-        dest = os.path.abspath(dest.replace('\\', '/').replace('/', os.sep)) 
+        dest = os.path.abspath(dest.replace('/', os.sep)) 
         self._create_missing_local_dirs(dest, is_dir)
         if is_dir:
             return [ os.path.join(dest, os.path.split(name)[1]) for name in sourcefiles ]

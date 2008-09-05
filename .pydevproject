@@ -4,6 +4,7 @@
 <pydev_project>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/robotframework-sshlibrary/src</path>
+<path>/robotframework-sshlibrary/utest</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.4</pydev_property>
 </pydev_project>

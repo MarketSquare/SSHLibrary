@@ -14,7 +14,6 @@
 
 
 import os
-import time
 
 import paramiko
 from robot import utils
@@ -67,32 +66,26 @@ class SSHClient(AbstractSSHClient):
         self.channel.sendall(text)
 
     def read(self):
-        if self.channel is None:
-            return ""
         data = ''
         while self.channel.recv_ready():
             data += self.channel.recv(100000)
-        return data
-    
-    def read_until(self, expected, timeout):
-        data = ''
-        start_time = time.time()
-        while time.time() < float(timeout) + start_time :
-            if self.channel.recv_ready():
-                data += self.channel.recv(1)
-            if data.count(expected) > 0:
-                return data
         return data
 
     def _read(self):
         if self.channel.recv_ready():
             return self.channel.recv(1)
+        return ''
 
     def _create_sftp_client(self):
         self.sftp_client = self.client.open_sftp()
-        return self.sftp_client.normalize('.') + '/'
+        self.homedir = self.sftp_client.normalize('.') + '/'
+        
+    def _close_sftp_client(self):
+        self.sftp_client.close()
         
     def _create_missing_dest_dirs(self, path):
+        if path == '.':
+            return
         if os.path.isabs(path):
             self.sftp_client.chdir('/')
         else:
@@ -104,23 +97,12 @@ class SSHClient(AbstractSSHClient):
                 self.sftp_client.mkdir(dirname)
             self.sftp_client.chdir(dirname)
         
-    def _put_files(self, sourcepaths, destpaths, mode):
-        for source, destination in zip(sourcepaths, destpaths):
-            self.sftp_client.put(source, destination)
-            self.sftp_client.chmod(destination, mode)
+    def _put_file(self, source, dest, mode):
+        self.sftp_client.put(source, dest)
+        self.sftp_client.chmod(dest, mode)
+        
+    def _listdir(self, path):
+        return self.sftp_client.listdir(path)
 
-    def _get_source_files(self, source):
-        path, pattern = os.path.split(source)
-        if not path:
-            path = '.'
-        sourcefiles = []
-        for filename in self.sftp_client.listdir(path):
-            if utils.matches(filename, pattern):
-                if path:
-                    filename = '%s/%s' % (path, filename)
-                sourcefiles.append(filename)
-        return sourcefiles
-
-    def _get_files(self, sourcepaths, destpaths):
-        for source, destination in zip(sourcepaths, destpaths):
-            self.sftp_client.get(source, destination)
+    def _get_file(self, source, dest):
+        self.sftp_client.get(source, dest)
