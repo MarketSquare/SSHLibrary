@@ -103,7 +103,7 @@ class SSHClient(object):
     def close_sftp_client(self):
         self.sftp_client.close()
             
-    def create_missing_dest_dirs(self, path):
+    def create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'
         else:

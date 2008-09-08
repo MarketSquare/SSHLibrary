@@ -18,7 +18,7 @@ class _MockClient(object):
         self.getfile_record.append(dest)
 
     create_sftp_client = close_sftp_client = lambda self: None
-    create_missing_dest_dirs = lambda self, x: None
+    create_missing_remote_path = lambda self, x: None
     
 
 class MySSHLibrary(SSHLibrary):
@@ -39,7 +39,7 @@ class TestClient(unittest.TestCase):
         for src, dest, exp in data:
             client = _MockClient()
             lib = MySSHLibrary()
-            lib.client = client
+            lib._client = client
             lib.put_file(src, dest, '0744')
             self.assertEquals(client.putfile_record, exp)
     
@@ -53,7 +53,7 @@ class TestClient(unittest.TestCase):
         for src, dest, exp in data:
             client = _MockClient()
             lib = MySSHLibrary()
-            lib.client = client
+            lib._client = client
             lib.get_file(src, dest)
             self.assertEquals(client.getfile_record, exp)
 

@@ -418,12 +418,12 @@ class SSHLibrary:
     def put_file(self, source, destination='.', mode='0744'):
         """Copies file(s) from local host to remote host using existing SSH connection.
 
-        1. If the destination is an existing file, the source file is copied
+        1. If the destination is an existing file, the src file is copied
         over it.
-        2. If the destination is an existing directory, the source file is
+        2. If the destination is an existing directory, the src file is
         copied into it. Possible file with same name is overwritten.
         3. If the destination does not exist and it ends with path separator ('/'), 
-        it is considered a directory. That directory is created and source file 
+        it is considered a directory. That directory is created and src file 
         copied into it. Possibly missing intermediate directories are also created.
         4. If the destination does not exist and it does not end with path
         separator, it is considered a file. If the path to the file does not
@@ -433,7 +433,7 @@ class SSHLibrary:
         
         Using wild cards like '*' and '?' are allowed.
         When wild cards are used, destination MUST be a directory and only files
-        are copied from the source, sub directories are ignored. If the contents 
+        are copied from the src, sub directories are ignored. If the contents 
         of sub directories are also needed, use the keyword again.
         Default file permission is 0744 (-rwxr--r--) and can be changed by
         giving a value to the optional `mode` parameter.
@@ -447,12 +447,12 @@ class SSHLibrary:
         """
         mode = int(mode,8)
         self._client.create_sftp_client()
-        sourcefiles = self._get_put_file_sources(source)
-        destfiles, destpath = self._get_put_file_destinations(sourcefiles, destination)
-        self._client.create_missing_dest_dirs(destpath)
-        for source, destination in zip(sourcefiles, destfiles):
-            self._info("Putting '%s' to '%s'" % (source, destination))
-            self._client.put_file(source, destination, mode)
+        localfiles = self._get_put_file_sources(source)
+        remotefiles, remotepath = self._get_put_file_destinations(localfiles, destination)
+        self._client.create_missing_remote_path(remotepath)
+        for src, dst in zip(localfiles, remotefiles):
+            self._info("Putting '%s' to '%s'" % (src, dst))
+            self._client.put_file(src, dst, mode)
         self._client.close_sftp_client()
         
     def _get_put_file_sources(self, source):
@@ -505,11 +505,11 @@ class SSHLibrary:
         
         """
         self._client.create_sftp_client()
-        sourcefiles = self._get_get_file_sources(source)
-        destfiles = self._get_get_file_destinations(sourcefiles, destination)
-        for source, dest in zip(sourcefiles, destfiles):
-            self._info('Getting %s to %s' % (source, dest))
-            self._client.get_file(source, dest)
+        remotefiles = self._get_get_file_sources(source)
+        localfiles = self._get_get_file_destinations(remotefiles, destination)
+        for src, dst in zip(remotefiles, localfiles):
+            self._info('Getting %s to %s' % (src, dst))
+            self._client.get_file(src, dst)
         self._client.close_sftp_client()
         
     def _get_get_file_sources(self, source):
