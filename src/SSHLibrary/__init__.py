@@ -56,7 +56,8 @@ class SSHLibrary:
     Both modes require that a connection is opened with `Open Connection`.
     """
     
-    ROBOT_LIBRARY_SCOPE="GLOBAL"
+    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+    ROBOT_LIBRARY_VERSION = '0.7'
 
     def __init__(self, timeout=3, newline='LF', prompt=None):
         self._cache = utils.ConnectionCache()
