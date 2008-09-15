@@ -33,7 +33,7 @@ class SSHLibrary:
     
     SSHLibrary works with both Python and Jython interpreters.
     To use SSHLibrary with Python, you must first install paramiko SSH 
-    implementation[1] for Python and it's dependencies.
+    implementation[1] for Python and its dependencies.
     To use SSHLibrary with Jython, you must have jar distribution of trilead SSH 
     implementation[2] in the Classpath during test execution
     
@@ -55,6 +55,7 @@ class SSHLibrary:
     
     Both modes require that a connection is opened with `Open Connection`.
     """
+    
     ROBOT_LIBRARY_SCOPE="GLOBAL"
 
     def __init__(self, timeout=3, newline='LF', prompt=None):
@@ -133,9 +134,9 @@ class SSHLibrary:
         return old_index
 
     def close_all_connections(self):
-        """Closes all open connections and empties the connection _cache.
+        """Closes all open connections and empties the connection cache.
 
-        After this keyword new indexes get from `Open Connection` are reset to 1.
+        After this keyword indices returned by `Open Connection` start from 1.
 
         This keyword ought to be used in test or suite teardown to make sure
         all connections are closed.
@@ -448,6 +449,7 @@ class SSHLibrary:
         mode = int(mode,8)
         self._client.create_sftp_client()
         localfiles = self._get_put_file_sources(source)
+        self._debug('Source pattern matched local files: %s' % utils.seq2str(localfiles))
         remotefiles, remotepath = self._get_put_file_destinations(localfiles, destination)
         self._client.create_missing_remote_path(remotepath)
         for src, dst in zip(localfiles, remotefiles):
@@ -456,10 +458,10 @@ class SSHLibrary:
         self._client.close_sftp_client()
         
     def _get_put_file_sources(self, source):
-        return glob.glob(source.replace('/', os.sep))
+        return [f for f in glob.glob(source.replace('/', os.sep)) if os.path.isfile(f)]
     
     def _get_put_file_destinations(self, sources, dest):
-        dest = dest.replace('\\', '/')
+        dest = dest.split(':')[-1].replace('\\', '/')
         if dest == '.':
             dest = self._client.homedir + '/'
         if len(sources) > 1 and dest[-1] != '/':
@@ -506,6 +508,7 @@ class SSHLibrary:
         """
         self._client.create_sftp_client()
         remotefiles = self._get_get_file_sources(source)
+        self._debug('Source pattern matched remote files: %s' % utils.seq2str(remotefiles))
         localfiles = self._get_get_file_destinations(remotefiles, destination)
         for src, dst in zip(remotefiles, localfiles):
             self._info('Getting %s to %s' % (src, dst))
@@ -517,7 +520,7 @@ class SSHLibrary:
         if not path:
             path = '.'
         sourcefiles = []
-        for filename in self._client.listdir(path):
+        for filename in self._client.listfiles(path):
             if utils.matches(filename, pattern):
                 if path:
                     filename = posixpath.join(path, filename)
@@ -547,6 +550,9 @@ class SSHLibrary:
 
     def _info(self, msg):
         self._log(msg, 'INFO')
+        
+    def _debug(self, msg):
+        self._log(msg, 'DEBUG')
         
     def _log(self, msg, level=None):
         self._is_valid_log_level(level, raise_if_invalid=True)
