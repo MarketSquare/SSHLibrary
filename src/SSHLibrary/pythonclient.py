@@ -14,6 +14,7 @@
 
 
 import os
+import stat
 
 import paramiko
 
@@ -92,6 +93,7 @@ class SSHClient(object):
             self.sftp_client.chdir('.')
         for dirname in path.split('/'):
             if dirname and dirname not in self.sftp_client.listdir(self.sftp_client.getcwd()):
+                print "*INFO* Creating missing remote directory '%s'" % dirname
                 self.sftp_client.mkdir(dirname)
             self.sftp_client.chdir(dirname)
         
@@ -99,8 +101,10 @@ class SSHClient(object):
         self.sftp_client.put(source, dest)
         self.sftp_client.chmod(dest, mode)
         
-    def listdir(self, path):
-        return self.sftp_client.listdir(path)
+    def listfiles(self, path):
+        return[ getattr(fileinfo, 'filename', '?') for fileinfo 
+                in self.sftp_client.listdir_attr(path) 
+                if stat.S_ISREG(fileinfo.st_mode) ]
 
     def get_file(self, source, dest):
         self.sftp_client.get(source, dest)

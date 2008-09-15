@@ -114,6 +114,7 @@ class SSHClient(object):
             try:
                 self.sftp_client.stat(curdir)
             except IOException:
+                print "*INFO* Creating missing remote directory '%s'" % curdir
                 self.sftp_client.mkdir(curdir, 0744)
                 
     def put_file(self, source, dest, mode):
@@ -136,8 +137,9 @@ class SSHClient(object):
         self.sftp_client.closeFile(remotefile)
         localfile.close()
         
-    def listdir(self, path):
-        return [fileinfo.filename for fileinfo in self.sftp_client.ls(path)]
+    def listfiles(self, path):
+        return [ fileinfo.filename for fileinfo in self.sftp_client.ls(path) if
+                 fileinfo.attributes.getOctalPermissions().startswith('0100') ]
     
     def get_file(self, source, dest):
         localfile = FileOutputStream(dest)
