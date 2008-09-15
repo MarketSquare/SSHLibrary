@@ -31,7 +31,7 @@ class TestClient(unittest.TestCase):
     
     def test_put_file(self):
         data = [ (['foo.txt'], 'foo.txt', ['/home/foo.txt']), 
-                 (['txt.bar'], '/tmp/foo.txt', ['/tmp/foo.txt']),
+                 (['txt.bar'], 'c:/tmp/foo.txt', ['/tmp/foo.txt']),
                  (['FOO.TXT'], '.', ['/home/FOO.TXT']),
                  (['foo.txt', 'bar.sh', 'BAZ.my'], '/opt/Files/', 
                   ['/opt/Files/foo.txt', '/opt/Files/bar.sh', '/opt/Files/BAZ.my']),

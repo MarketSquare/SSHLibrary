@@ -317,6 +317,34 @@ th {
 <td></td>
 </tr>
 <tr>
+<td><a name="test_Put File With Pattern Matching Directory">Put File With Pattern Matching Directory</a></td>
+<td>Put Files And Verify</td>
+<td>${SCRIPTS}test_fi*</td>
+<td>/home/${USERNAME}/</td>
+<td>${TEST FILE NAME}</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>${TEST FILE 2 NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>[Teardown]</td>
+<td>Execute Command</td>
+<td>rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td></td>
 <td></td>
 <td></td>
