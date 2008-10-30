@@ -26,6 +26,8 @@ if utils.is_jython:
 else:
     from pythonclient import SSHClient
     
+__version__ = 'trunk'
+    
 
 class SSHLibrary:
     """SSHLibrary is a test library for Robot Framework that enables 
@@ -56,7 +58,8 @@ class SSHLibrary:
     Both modes require that a connection is opened with `Open Connection`.
     """
     
-    ROBOT_LIBRARY_SCOPE="GLOBAL"
+    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+    ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=3, newline='LF', prompt=None):
         self._cache = utils.ConnectionCache()
