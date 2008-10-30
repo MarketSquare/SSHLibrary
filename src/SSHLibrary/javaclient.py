@@ -56,7 +56,7 @@ class SSHClient(object):
     def _read_from_stream(self, streamReader):
         result = ''
         line = streamReader.readLine()
-        while line:
+        while line is not None:
             result += line + '\n'
             line = streamReader.readLine()
         return result
