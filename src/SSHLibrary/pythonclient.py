@@ -103,8 +103,8 @@ class SSHClient(object):
         
     def listfiles(self, path):
         return[ getattr(fileinfo, 'filename', '?') for fileinfo 
-                in self.sftp_client.listdir_attr(path) 
-                if stat.S_ISREG(fileinfo.st_mode) ]
+                in self.sftp_client.listdir_attr(path)
+                if stat.S_ISREG(fileinfo.st_mode) or stat.S_IFMT(fileinfo.st_mode) == 0 ]
 
     def get_file(self, source, dest):
         self.sftp_client.get(source, dest)
