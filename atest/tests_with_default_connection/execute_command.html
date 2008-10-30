@@ -73,8 +73,29 @@ th {
 <th>Value</th>
 </tr>
 <tr>
+<td>Documentation</td>
+<td>\</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Test Teardown</td>
+<td>Execute Command</td>
+<td>rm -f ${TEST FILE NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td>Resource</td>
 <td>../ssh_library_resources.html</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Library</td>
+<td>OperatingSystem</td>
 <td></td>
 <td></td>
 <td></td>
@@ -370,6 +391,34 @@ th {
 <td>Should Be Equal</td>
 <td>${stdout}</td>
 <td>This is stdout</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a name="test_Execute Command With Output Containing Newlines">Execute Command With Output Containing Newlines</a></td>
+<td>${res} =</td>
+<td>Execute Command</td>
+<td>cat ${FILE WITH NEWLINES NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${actual} =</td>
+<td>OperatingSystem.Get FIle</td>
+<td>${FILE WITH NEWLINES}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${res}\n</td>
+<td>${actual}</td>
 <td></td>
 </tr>
 <tr>
