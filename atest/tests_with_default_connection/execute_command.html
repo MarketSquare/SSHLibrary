@@ -429,6 +429,27 @@ th {
 <td></td>
 </tr>
 <tr>
+<td><a name="test_Execute Command With Multiple Statements">Execute Command With Multiple Statements</a></td>
+<td>${result} =</td>
+<td>Execute Command</td>
+<td>echo -e "foo\n"; echo RC=$?</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Be Equal</td>
+<td>${result}</td>
+<td>foo\n\nRC=0</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td></td>
 <td></td>
 <td></td>
