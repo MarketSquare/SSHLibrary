@@ -461,7 +461,10 @@ class SSHLibrary:
         self._client.close_sftp_client()
         
     def _get_put_file_sources(self, source):
-        return [f for f in glob.glob(source.replace('/', os.sep)) if os.path.isfile(f)]
+        sources = [f for f in glob.glob(source.replace('/', os.sep)) if os.path.isfile(f)]
+        if not sources:
+            raise AssertionError("There were no source files matching '%s'" % source)  
+        return sources
     
     def _get_put_file_destinations(self, sources, dest):
         dest = dest.split(':')[-1].replace('\\', '/')
@@ -528,6 +531,8 @@ class SSHLibrary:
                 if path:
                     filename = posixpath.join(path, filename)
                 sourcefiles.append(filename)
+        if not sourcefiles:
+            raise AssertionError("There were no source files matching '%s'" % source)
         return sourcefiles
         
     def _get_get_file_destinations(self, sourcefiles, dest):
