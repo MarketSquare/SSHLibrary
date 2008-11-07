@@ -18,7 +18,7 @@ import jarray
 from java.io import BufferedReader, InputStreamReader, IOException, \
                     FileOutputStream, BufferedWriter, OutputStreamWriter
 from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
-                             SFTPv3FileAttributes, SFTPException
+                             SFTPv3FileAttributes, SFTPException, DebugLogger
 
 
 class SSHClient(object):
@@ -31,6 +31,9 @@ class SSHClient(object):
     def login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
             raise AssertionError("Authentication failed for user: %s" % username)
+        
+    def enable_ssh_logging(self, path):
+        self.client.enableDebugging(True, Logger(path))
         
     def close(self):
         self.client.close()
@@ -161,3 +164,12 @@ class SSHClient(object):
         self.sftp_client.closeFile(remotefile)
         localfile.flush()
         localfile.close()
+        
+        
+class Logger(DebugLogger):
+    
+    def __init__(self, fname):
+        self._file = open(fname, 'w')
+        
+    def log(self, level, classname, message):
+        self._file.write('%d\t%s\t%s\n' % (level, classname, message))

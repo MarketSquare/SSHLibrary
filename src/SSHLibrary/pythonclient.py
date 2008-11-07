@@ -37,6 +37,9 @@ class SSHClient(object):
         self.port = port
         self.shell = None
         
+    def enable_ssh_logging(self, path):
+        paramiko.util.log_to_file(path)
+        
     def login(self, username, password):
         self.client.connect(self.host, self.port, username, password)
         

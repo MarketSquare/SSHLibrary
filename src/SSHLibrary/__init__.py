@@ -150,6 +150,15 @@ class SSHLibrary:
             pass
         self._client = None
         
+    def enable_ssh_logging(self, logfile):
+        """Enables the logging of SSH protocol output to given `logfile`
+        
+        `logfile` can be relative or absolute path to a file that is writable by
+        current user. In case that it already exists, it will be overwritten.
+        """
+        self._client.enable_ssh_logging(logfile)
+        self._log('Enabled SSH logging to <a href="%s">file</a>.' % logfile, 'HTML')
+
     def close_connection(self):
         """Closes the currently active connection.
         """
@@ -574,7 +583,7 @@ class SSHLibrary:
         if level is None:
             return True
         if isinstance(level, basestring) and \
-                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN']:
+                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
             return True
         if not raise_if_invalid:
             return False
