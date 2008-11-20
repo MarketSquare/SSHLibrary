@@ -15,6 +15,7 @@
 
 import os
 import stat
+import posixpath
 
 import paramiko
 
@@ -90,7 +91,7 @@ class SSHClient(object):
     def create_missing_remote_path(self, path):
         if path == '.':
             return
-        if os.path.isabs(path):
+        if posixpath.isabs(path):
             self.sftp_client.chdir('/')
         else:
             self.sftp_client.chdir('.')

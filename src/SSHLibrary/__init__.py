@@ -546,7 +546,7 @@ class SSHLibrary:
         
     def _get_get_file_destinations(self, sourcefiles, dest):
         if dest == '.':
-            dest = os.curdir + os.sep
+            dest += os.sep
         is_dir = dest.endswith(os.sep)
         if not is_dir and len(sourcefiles) > 1:
             raise ValueError('It is not possible to copy multiple source files ' 
