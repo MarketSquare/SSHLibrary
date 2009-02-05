@@ -16,9 +16,10 @@
 import os
 import stat
 import posixpath
-
-import paramiko
-
+try:
+    import paramiko
+except ImportError:
+    raise ImportError("Importing paramiko failed. Make sure you have it installed.")
 
 # There doesn't seem to be a simpler way to increase banner timeout
 def _monkey_patched_start_client(self, event=None):
