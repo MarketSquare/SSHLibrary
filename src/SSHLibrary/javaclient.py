@@ -17,8 +17,12 @@ import jarray
 
 from java.io import BufferedReader, InputStreamReader, IOException, \
                     FileOutputStream, BufferedWriter, OutputStreamWriter
-from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
+try:
+    from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
                              SFTPv3FileAttributes, SFTPException, DebugLogger
+except ImportError:
+    raise ImportError('Importing TriLead failed.'
+                      'Make sure you have it installed.')
 
 
 class SSHClient(object):
