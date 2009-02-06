@@ -22,7 +22,7 @@ try:
                              SFTPv3FileAttributes, SFTPException, DebugLogger
 except ImportError:
     raise ImportError('Importing Trilead SSH modules failed.'
-                      'Make sure you have them installed.')
+                      ' Make sure you have them installed.')
 
 
 class SSHClient(object):
