@@ -21,8 +21,8 @@ try:
     from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
                              SFTPv3FileAttributes, SFTPException, DebugLogger
 except ImportError:
-    raise ImportError('Importing TriLead failed.'
-                      'Make sure you have it installed.')
+    raise ImportError('Importing Trilead SSH modules failed.'
+                      'Make sure you have them installed.')
 
 
 class SSHClient(object):
