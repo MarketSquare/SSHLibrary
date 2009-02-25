@@ -73,8 +73,8 @@ th {
 <th>Value</th>
 </tr>
 <tr>
-<td>Documentation</td>
-<td>\</td>
+<td>Test Teardown</td>
+<td>Close All Connections</td>
 <td></td>
 <td></td>
 <td></td>
@@ -128,10 +128,10 @@ th {
 <th>Argument</th>
 </tr>
 <tr>
-<td><a name="test_Test Opening And Closing Connection">Test Opening And Closing Connection</a></td>
+<td>Test Opening And Closing Connection</td>
+<td>[Setup]</td>
 <td>Open Connection</td>
 <td>${HOST}</td>
-<td></td>
 <td></td>
 </tr>
 <tr>
@@ -143,20 +143,13 @@ th {
 </tr>
 <tr>
 <td></td>
-<td>Close Connection</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
 <td></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Switch Connection">Switch Connection</a></td>
+<td>Switch Connection</td>
 <td>${id1} =</td>
 <td>Open Connection</td>
 <td>${HOST}</td>
@@ -234,7 +227,7 @@ th {
 </tr>
 <tr>
 <td></td>
-<td>${prev id}=</td>
+<td>${prev id} =</td>
 <td>Switch Connection</td>
 <td>second</td>
 <td></td>
@@ -258,6 +251,83 @@ th {
 <td>Should Contain</td>
 <td>${result}</td>
 <td>/home</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Login With Public Key</td>
+<td>[Setup]</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Login With Public Key</td>
+<td>${PUBKEY_USERNAME}</td>
+<td>${PUBKEY_FILE}</td>
+<td>${PUBKEY_PASSWORD}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Login With Non Existing Public Key</td>
+<td>[Setup]</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Run Keyword And Expect Error</td>
+<td>Given key file '/invalid/path' does not exist</td>
+<td>Login With Public Key</td>
+<td>${PUBKEY_USERNAME}</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>/invalid/path</td>
+<td>${PUBKEY_PASSWORD}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Login With Invalid Public Key</td>
+<td>[Setup]</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Run Keyword And Expect Error</td>
+<td>Login with public key failed</td>
+<td>Login With Public Key</td>
+<td>${PUBKEY_USERNAME}</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>${INVALID PUBKEY FILE}</td>
+<td>invalid</td>
 <td></td>
 </tr>
 <tr>

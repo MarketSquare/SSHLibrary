@@ -16,6 +16,8 @@
 import os
 import stat
 import posixpath
+
+from robot.errors import DataError
 try:
     import paramiko
 except ImportError:
@@ -45,6 +47,13 @@ class SSHClient(object):
     def login(self, username, password):
         self.client.connect(self.host, self.port, username, password)
         
+    def login_with_public_key(self, username, keyfile, password):
+        try:
+            self.client.connect(self.host, self.port, username, password, 
+                                key_filename=keyfile)
+        except paramiko.AuthenticationException:
+            raise DataError()
+
     def close(self):
         self.client.close()
 

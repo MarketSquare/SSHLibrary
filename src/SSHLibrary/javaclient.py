@@ -15,8 +15,10 @@
 
 import jarray
 
-from java.io import BufferedReader, InputStreamReader, IOException, \
+from java.io import File, BufferedReader, InputStreamReader, IOException, \
                     FileOutputStream, BufferedWriter, OutputStreamWriter
+
+from robot.errors import DataError
 try:
     from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
                              SFTPv3FileAttributes, SFTPException, DebugLogger
@@ -36,6 +38,13 @@ class SSHClient(object):
         if not self.client.authenticateWithPassword(username, password):
             raise AssertionError("Authentication failed for user: %s" % username)
         
+    def login_with_public_key(self, username, key, password):
+        try:
+            if not self.client.authenticateWithPublicKey(username, File(key), password):
+                raise AssertionError("Authentication failed for user: %s" % username)
+        except IOException:
+            raise DataError()
+
     def enable_ssh_logging(self, path):
         self.client.enableDebugging(True, Logger(path))
         

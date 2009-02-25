@@ -20,6 +20,7 @@ import re
 import posixpath
 
 from robot import utils
+from robot.errors import DataError
 
 if utils.is_jython:
     from javaclient import SSHClient
@@ -173,6 +174,21 @@ class SSHLibrary:
         self._info("Logging into '%s:%s' with username '%s' and password '%s'" 
                    % (self._host, self._port, username, password))
         self._client.login(username, password)
+
+    def login_with_public_key(self, username, keyfile, password):
+        """Logs into SSH server with given information
+
+        `username` is the username on the remote system.
+        `keyfile` is a path to a valid OpenSSH *private* key file.
+        `password` is used to unlock `keyfile` if unlocking is required.
+        """
+        if not os.path.exists(keyfile):
+            raise DataError("Given key file '%s' does not exist" % keyfile)
+        self._info("Logging into '%s' as '%s'" % (self._host, username))
+        try:
+            self._client.login_with_public_key(username, keyfile, password)
+        except DataError:
+            raise DataError('Login with public key failed')
 
     def execute_command(self, command, ret_mode='stdout'):
         """Executes command on remote host over existing SSH connection and returns stdout and/or stderr.
