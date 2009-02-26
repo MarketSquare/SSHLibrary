@@ -74,7 +74,7 @@ class SSHLibrary:
         self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
         self._client = None
         self._newline = self._parse_newline(newline and newline or 'LF')
-        self._timeout = timeout and int(timeout) or 3
+        self.set_timeout(timeout or 3)
         self._default_log_level = 'INFO'
         self._prompt = prompt
         
@@ -268,9 +268,9 @@ class SSHLibrary:
         | Do Something |
         | Set Timeout | ${tout} |
         """
-        old = self._timeout
+        old = hasattr(self, '_timeout') and self._timeout or None
         self._timeout = utils.timestr_to_secs(timeout)
-        return utils.secs_to_timestr(old)
+        return old is not None and utils.secs_to_timestr(old) or None
         
     def set_newline(self, newline):
         """Sets the newline used by `Write` keyword.
