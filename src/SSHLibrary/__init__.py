@@ -179,8 +179,8 @@ class SSHLibrary:
         Example:
         | Login | john | secret |
         """
-        self._info("Logging into '%s:%s' with username '%s' and password '%s'" 
-                   % (self._host, self._port, username, password))
+        self._info("Logging into '%s:%s' as '%s'."
+                    % (self._host, self._port, username))
         self._client.login(username, password)
 
     def login_with_public_key(self, username, keyfile, password):
@@ -192,7 +192,8 @@ class SSHLibrary:
         """
         if not os.path.exists(keyfile):
             raise DataError("Given key file '%s' does not exist" % keyfile)
-        self._info("Logging into '%s' as '%s'" % (self._host, username))
+        self._info("Logging into '%s:%s' as '%s'." 
+                    % (self._host, self._port, username))
         try:
             self._client.login_with_public_key(username, keyfile, password)
         except DataError:
