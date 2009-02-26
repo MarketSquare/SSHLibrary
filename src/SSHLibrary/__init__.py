@@ -52,7 +52,7 @@ class SSHLibrary:
     2. Keywords `Write` and `Read XXX` operate in an interactive shell, which
     means that changes to state are visible to next keywords. Note that in
     interactive mode, a prompt must be set before using any of the
-    Write-keywords. Prompt can be set either on `library initialization` or
+    Write-keywords. Prompt can be set either on `library importing` or
     when a new connection is opened using `Open Connection`, or using keyword
     `Set Prompt`.
     
@@ -67,7 +67,7 @@ class SSHLibrary:
 
         `timeout`, `newline` and `prompt` will be used as default values when a
         new connection is opened with `Open Connection`. These values may be
-        later changed with `Set Timeout`, `Set Newline` and `Set Prompt
+        later changed with `Set Timeout`, `Set Newline` and `Set Prompt`
         respectively.
         """
         self._cache = utils.ConnectionCache()
@@ -92,8 +92,8 @@ class SSHLibrary:
         switching between connections similarly as the index. See `Switch
         Connection` for more details about that.
         
-        Default values for timeout`, `newline` and `prompt` can be given on
-        `library initialization`. See  also `Set Timeout`, `Set Newline` and
+        Default values for `timeout`, `newline` and `prompt` can be given on
+        `library importing`. See  also `Set Timeout`, `Set Newline` and
         `Set Prompt` for more information.
 
         Examples:
@@ -362,7 +362,7 @@ class SSHLibrary:
         found, the keyword fails.
         
         The timeout is by default three seconds but can be changed either on
-        `library initialization` or by using `Set Timeout` keyword.
+        `library importing` or by using `Set Timeout` keyword.
         
         See `Read` for more information on `loglevel`.
         """
@@ -391,7 +391,7 @@ class SSHLibrary:
         Returns text up until and including the regexp.
 
         The timeout is by default three seconds but can be changed either on
-        `library initialization` or by using `Set Timeout` keyword.
+        `library importing` or by using `Set Timeout` keyword.
         
         See `Read` for more information on `loglevel`.
         Examples:
@@ -405,7 +405,7 @@ class SSHLibrary:
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the current output until prompt is found.
         
-        Prompt must have been set, either in `library import` or by using 
+        Prompt must have been set, either in `library importing` or by using 
         `Set Prompt` -keyword.
         
         See `Read` for more information on `loglevel`.

@@ -1,16 +1,15 @@
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <title>SSHLibrary - Documentation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <style>
-
   body {
     background: white;
     color: black;
   }
 
   /* Generic Table Styles */
-  
   table {
     background: white;
     border: 1px solid black;
@@ -30,7 +29,6 @@
   }    
 
   /* Columns */
-
   td.kw {
     font-weight: bold;
   }
@@ -41,8 +39,22 @@
   td.doc {
   }
 
-  /* Paragraphs */
+  /* Tables in documentation */
+  table.doc {
+    border: 1px solid gray;
+    background: transparent;
+    border-collapse: collapse;
+    empty-cells: show;
+    font-size: 0.85em;
+    font-family: arial,helvetica,sans-serif;
+  }
+  table.doc td {
+    border: 1px solid gray;
+    padding: 0.1em 0.3em;
+    height: 1.2em;
+  }
 
+  /* Paragraphs */
   .libdoc, .links {
     width: 800px;
   }
@@ -67,29 +79,47 @@
 </head>
 <body>
 <h1>SSHLibrary - Documentation</h1>
+<p><b>Version:</b> trunk</p>
 
-<h2>Introduction</h2>
-<p class='libdoc'>SSHLibrary is a test library for Robot Framework that enables executing commands over SSH connection.<br />
+<h2 id="introduction">Introduction</h2>
+<p class='libdoc'>SSH Library is a test library for Robot Framework that enables executing commands and transferring files over an SSH connection.<br />
 <br />
-SSHLibrary works with both Python and Jython interpreters. To use SSHLibrary with Python, you must first install paramiko SSH implementation[1] for Python and it's dependencies. To use SSHLibrary with Jython, you must have jar distribution of trilead SSH implementation[2] in the Classpath during test execution<br />
+SSHLibrary works with both Python and Jython interpreters. &nbsp;To use SSHLibrary with Python, you must first install paramiko SSH implementation[1] and its dependencies. &nbsp;To use SSHLibrary with Jython, you must have jar distribution of Trilead SSH implementation[2] in the CLASSPATH during test execution<br />
 <br />
 [1] <a href="http://www.lag.net/paramiko/">http://www.lag.net/paramiko/</a><br />
 [2] <a href="http://www.trilead.com/Products/Trilead_SSH_for_Java/">http://www.trilead.com/Products/Trilead_SSH_for_Java/</a><br />
 <br />
 Currently, there are two modes of operation:<br />
+<br />
 1. When keyword <a href="#Execute Command" class="name">Execute Command</a> or <a href="#Start Command" class="name">Start Command</a> is used to execute something, a new channel is opened over the SSH connection. In practice it means that no session information is stored.<br />
 <br />
-2. Keywords <a href="#Write" class="name">Write</a> and <span class="name">Read XXX</span> operate in an interactive shell, which means that changes to state are visible to next keywords. Note that in interactive mode, a prompt must be set before using any of the Write-keywords. Prompt can be set either when the library is taken into use or when a new connection is opened using <a href="#Open Connection" class="name">Open Connection</a>, or using keyword <a href="#Set Prompt" class="name">Set Prompt</a>.<br />
+2. Keywords <a href="#Write" class="name">Write</a> and <span class="name">Read XXX</span> operate in an interactive shell, which means that changes to state are visible to next keywords. Note that in interactive mode, a prompt must be set before using any of the Write-keywords. Prompt can be set either on <a href="#importing" class="name">library importing</a> or when a new connection is opened using <a href="#Open Connection" class="name">Open Connection</a>, or using keyword <a href="#Set Prompt" class="name">Set Prompt</a>.<br />
 <br />
 Both modes require that a connection is opened with <a href="#Open Connection" class="name">Open Connection</a>.</p>
+
+<h2 id="importing">Importing</h2>
+<table class="keywords">
+<tr>
+  <th class="arg">Arguments</th>
+  <th class="doc">Documentation</th>
+</tr>
+<tr>
+  <td class="arg">timeout=3, newline=LF, prompt=None</td>
+  <td class="doc">SSH Library can be imported with optional arguments.<br />
+<br />
+<span class="name">timeout</span>, <span class="name">newline</span> and <span class="name">prompt</span> will be used as default values when a new connection is opened with <a href="#Open Connection" class="name">Open Connection</a>. These values may be later changed with <a href="#Set Timeout" class="name">Set Timeout</a>, <a href="#Set Newline" class="name">Set Newline</a> and <a href="#Set Prompt" class="name">Set Prompt</a> respectively.</td>
+</tr>
+</table>
 
 <h2>Shortcuts</h2>
 <div class='links'>
 <a href="#Close All Connections" title="Closes all open connections and empties the connection cache.">Close&nbsp;All&nbsp;Connections</a>&nbsp;
 <a href="#Close Connection" title="Closes the currently active connection.">Close&nbsp;Connection</a>&nbsp;
+<a href="#Enable Ssh Logging" title="Enables the logging of SSH protocol output to given `logfile`">Enable&nbsp;Ssh&nbsp;Logging</a>&nbsp;
 <a href="#Execute Command" title="Executes command on remote host over existing SSH connection and returns stdout and/or stderr.">Execute&nbsp;Command</a>&nbsp;
 <a href="#Get File" title="Copies a file from remote host to local host using existing SSH connection.">Get&nbsp;File</a>&nbsp;
 <a href="#Login" title="Logs in to SSH server with given user information.">Login</a>&nbsp;
+<a href="#Login With Public Key" title="Logs into SSH server with given information using key-based authentication.">Login&nbsp;With&nbsp;Public&nbsp;Key</a>&nbsp;
 <a href="#Open Connection" title="Opens a new SSH connection to given `host` and `port`.">Open&nbsp;Connection</a>&nbsp;
 <a href="#Put File" title="Copies file(s) from local host to remote host using existing SSH connection.">Put&nbsp;File</a>&nbsp;
 <a href="#Read" title="Reads and returns/logs everything currently available on the output.">Read</a>&nbsp;
@@ -120,7 +150,7 @@ Both modes require that a connection is opened with <a href="#Open Connection" c
   <td class="arg"></td>
   <td class="doc">Closes all open connections and empties the connection cache.<br />
 <br />
-After this keyword new indexes get from <a href="#Open Connection" class="name">Open Connection</a> are reset to 1.<br />
+After this keyword indices returned by <a href="#Open Connection" class="name">Open Connection</a> start from 1.<br />
 <br />
 This keyword ought to be used in test or suite teardown to make sure all connections are closed.</td>
 </tr>
@@ -130,6 +160,13 @@ This keyword ought to be used in test or suite teardown to make sure all connect
   <td class="doc">Closes the currently active connection.</td>
 </tr>
 <tr>
+  <td class="kw"><a name="Enable Ssh Logging"></a>Enable Ssh Logging</td>
+  <td class="arg">logfile</td>
+  <td class="doc">Enables the logging of SSH protocol output to given <span class="name">logfile</span><br />
+<br />
+<span class="name">logfile</span> can be relative or absolute path to a file that is writable by current user. In case that it already exists, it will be overwritten.</td>
+</tr>
+<tr>
   <td class="kw"><a name="Execute Command"></a>Execute Command</td>
   <td class="arg">command, ret_mode=stdout</td>
   <td class="doc">Executes command on remote host over existing SSH connection and returns stdout and/or stderr.<br />
@@ -137,32 +174,33 @@ This keyword ought to be used in test or suite teardown to make sure all connect
 This keyword waits until the command is completed. If non-blocking behavior is required, use <a href="#Start Command" class="name">Start Command</a> instead.<br />
 <br />
 Examples:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${out}=</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Execute Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">some command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">#stdout is returned</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>${out}=</td>
+<td>Execute Command</td>
+<td>some command</td>
+<td></td>
+<td>#stdout is returned</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${err}=</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Execute Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">some command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">stderr</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">#stderr is returned</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>${err}=</td>
+<td>Execute Command</td>
+<td>some command</td>
+<td>stderr</td>
+<td>#stderr is returned</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${out}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${err}=</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Execute Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">some command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">both</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">#stdout and stderr are returned</td>
+<td>${out}</td>
+<td>${err}=</td>
+<td>Execute Command</td>
+<td>some command</td>
+<td>both</td>
+<td>#stdout and stderr are returned</td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Get File"></a>Get File</td>
@@ -179,20 +217,21 @@ Using wild cards like '*' and '?' are allowed. When wild cards are used, destina
 <br />
 Examples:<br />
 <br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Get File</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_remote_file/remote_file.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_local_file/local_file.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># single file</td>
+<td>Get File</td>
+<td>/path_to_remote_file/remote_file.txt</td>
+<td>/path_to_local_file/local_file.txt</td>
+<td># single file</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Get File</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_remote_files/*.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_local_files/</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># multiple files with wild cards</td>
+<td>Get File</td>
+<td>/path_to_remote_files/*.txt</td>
+<td>/path_to_local_files/</td>
+<td># multiple files with wild cards</td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Login"></a>Login</td>
@@ -200,13 +239,21 @@ Examples:<br />
   <td class="doc">Logs in to SSH server with given user information.<br />
 <br />
 Example:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Login</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">john</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">secret</td>
+<td>Login</td>
+<td>john</td>
+<td>secret</td>
 </tr>
-</table></td>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Login With Public Key"></a>Login With Public Key</td>
+  <td class="arg">username, keyfile, password</td>
+  <td class="doc">Logs into SSH server with given information using key-based authentication.<br />
+<br />
+<span class="name">username</span> is the username on the remote system. <span class="name">keyfile</span> is a path to a valid OpenSSH <b>private</b> key file. <span class="name">password</span> is used to unlock <span class="name">keyfile</span> if unlocking is required.</td>
 </tr>
 <tr>
   <td class="kw"><a name="Open Connection"></a>Open Connection</td>
@@ -219,90 +266,92 @@ Returns the index of this connection which can be used later to switch back to i
 <br />
 Optional <span class="name">alias</span> is a name for the connection and it can be used for switching between connections similarly as the index. See <a href="#Switch Connection" class="name">Switch Connection</a> for more details about that.<br />
 <br />
-For more information about <span class="name">timeout</span>, <span class="name">newline</span> and <span class="name">prompt</span>, see <a href="#Set Timeout" class="name">Set Timeout</a>, <a href="#Set Newline" class="name">Set Newline</a> and <a href="#Set Prompt" class="name">Set Prompt</a>, respectively.<br />
+Default values for <span class="name">timeout</span>, <span class="name">newline</span> and <span class="name">prompt</span> can be given on <a href="#importing" class="name">library importing</a>. See &nbsp;also <a href="#Set Timeout" class="name">Set Timeout</a>, <a href="#Set Newline" class="name">Set Newline</a> and <a href="#Set Prompt" class="name">Set Prompt</a> for more information.<br />
 <br />
 Examples:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myhost.net</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">yourhost.com</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">2nd conn</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># alias</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Open Connection</td>
+<td>yourhost.com</td>
+<td>2nd conn</td>
+<td># alias</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${id} =</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myhost.net</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># index to variable</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>${id} =</td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td># index to variable</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${id} =</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myhost.net</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${None}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">23</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># index and port</td>
+<td>${id} =</td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td>${None}</td>
+<td>23</td>
+<td># index and port</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myhost.net</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">3rd conn</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">25</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># alias and port</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td>3rd conn</td>
+<td>25</td>
+<td># alias and port</td>
+<td></td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Put File"></a>Put File</td>
   <td class="arg">source, destination=., mode=0744</td>
   <td class="doc">Copies file(s) from local host to remote host using existing SSH connection.<br />
 <br />
-1. If the destination is an existing file, the source file is copied over it.<br />
-2. If the destination is an existing directory, the source file is copied into it. Possible file with same name is overwritten.<br />
-3. If the destination does not exist and it ends with path separator ('/'), it is considered a directory. That directory is created and source file copied into it. Possibly missing intermediate directories are also created.<br />
+1. If the destination is an existing file, the src file is copied over it.<br />
+2. If the destination is an existing directory, the src file is copied into it. Possible file with same name is overwritten.<br />
+3. If the destination does not exist and it ends with path separator ('/'), it is considered a directory. That directory is created and src file copied into it. Possibly missing intermediate directories are also created.<br />
 4. If the destination does not exist and it does not end with path separator, it is considered a file. If the path to the file does not exist it is created.<br />
 5. By default, destination is empty and the user's home directory in the remote machine is used as destination.<br />
 <br />
-Using wild cards like '*' and '?' are allowed. When wild cards are used, destination MUST be a directory and only files are copied from the source, sub directories are ignored. If the contents of sub directories are also needed, use the keyword again. Default file permission is 0744 (-rwxr--r--) and can be changed by giving a value to the optional <span class="name">mode</span> parameter.<br />
+Using wild cards like '*' and '?' are allowed. When wild cards are used, destination MUST be a directory and only files are copied from the src, sub directories are ignored. If the contents of sub directories are also needed, use the keyword again. Default file permission is 0744 (-rwxr--r--) and can be changed by giving a value to the optional <span class="name">mode</span> parameter.<br />
 <br />
 Examples:<br />
 <br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Put File</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_local_file/local_file.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_remote_file/remote_file.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># single file</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Put File</td>
+<td>/path_to_local_file/local_file.txt</td>
+<td>/path_to_remote_file/remote_file.txt</td>
+<td># single file</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Put File</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_local_files/*.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_remote_files/</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># multiple files with wild cards</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Put File</td>
+<td>/path_to_local_files/*.txt</td>
+<td>/path_to_remote_files/</td>
+<td># multiple files with wild cards</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Put File</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_local_files/*.txt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">/path_to_remote_files/</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">0777</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># file permissions</td>
+<td>Put File</td>
+<td>/path_to_local_files/*.txt</td>
+<td>/path_to_remote_files/</td>
+<td>0777</td>
+<td># file permissions</td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Read"></a>Read</td>
@@ -317,29 +366,30 @@ Read message is always returned and logged. Default log level is either 'INFO', 
   <td class="doc">Reads and returns/logs everything currently available on the output (stdout and/or stderr).<br />
 <br />
 Examples:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${out}=</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Read Command Output</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>${out}=</td>
+<td>Read Command Output</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${err}=</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Read Command Output</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">stderr</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">#stderr is returned</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>${err}=</td>
+<td>Read Command Output</td>
+<td>stderr</td>
+<td>#stderr is returned</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${out}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${err}=</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Read Command Output</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">both</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">#stdout and stderr are returned</td>
+<td>${out}</td>
+<td>${err}=</td>
+<td>Read Command Output</td>
+<td>both</td>
+<td>#stdout and stderr are returned</td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Read Until"></a>Read Until</td>
@@ -348,7 +398,7 @@ Examples:<br />
 <br />
 Text up until and including the match will be returned, If no match is found, the keyword fails.<br />
 <br />
-The timeout is by default three seconds but can be changed using <a href="#Set Timeout" class="name">Set Timeout</a> keyword.<br />
+The timeout is by default three seconds but can be changed either on <a href="#importing" class="name">library importing</a> or by using <a href="#Set Timeout" class="name">Set Timeout</a> keyword.<br />
 <br />
 See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.</td>
 </tr>
@@ -357,7 +407,7 @@ See <a href="#Read" class="name">Read</a> for more information on <span class="n
   <td class="arg">loglevel=None</td>
   <td class="doc">Reads and returns text from the current output until prompt is found.<br />
 <br />
-Prompt must have been set, either in Library import or by using <a href="#Set Prompt" class="name">Set Prompt</a> -keyword.<br />
+Prompt must have been set, either in <a href="#importing" class="name">library importing</a> or by using <a href="#Set Prompt" class="name">Set Prompt</a> -keyword.<br />
 <br />
 See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.</td>
 </tr>
@@ -370,21 +420,22 @@ See <a href="#Read" class="name">Read</a> for more information on <span class="n
 <br />
 Returns text up until and including the regexp.<br />
 <br />
-The timeout is by default two seconds but can be changed using <a href="#Set Timeout" class="name">Set Timeout</a> keyword.<br />
+The timeout is by default three seconds but can be changed either on <a href="#importing" class="name">library importing</a> or by using <a href="#Set Timeout" class="name">Set Timeout</a> keyword.<br />
 <br />
 See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>. Examples:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Read Until Regexp</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">(#|$)</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Read Until Regexp</td>
+<td>(#|$)</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Read Until Regexp</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">some regexp</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">DEBUG</td>
+<td>Read Until Regexp</td>
+<td>some regexp</td>
+<td>DEBUG</td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Set Default Log Level"></a>Set Default Log Level</td>
@@ -408,23 +459,24 @@ Old newline is returned and it can be used to restore it later. See <a href="#Se
 Old prompt is returned and it can be used to restore it later.<br />
 <br />
 Example:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${prompt}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Set Prompt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">$</td>
+<td>${prompt}</td>
+<td>Set Prompt</td>
+<td>$</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Do Something</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Do Something</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Set Prompt</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${prompt}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Set Prompt</td>
+<td>${prompt}</td>
+<td></td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Set Timeout"></a>Set Timeout</td>
@@ -438,23 +490,24 @@ The read operations of keywords <a href="#Read Until" class="name">Read Until</a
 Old timeout is returned and it can be used to restore it later.<br />
 <br />
 Example:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${tout} =</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Set Timeout</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">2 minute 30 seconds</td>
+<td>${tout} =</td>
+<td>Set Timeout</td>
+<td>2 minute 30 seconds</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Do Something</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Do Something</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Set Timeout</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${tout}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Set Timeout</td>
+<td>${tout}</td>
+<td></td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Start Command"></a>Start Command</td>
@@ -466,12 +519,13 @@ This keyword doesn't return anything. Use <a href="#Read Command Output" class="
 Note that the <a href="#Read Command Output" class="name">Read Command Output</a> keyword always reads the output of the most recently started command.<br />
 <br />
 Example:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Start Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">some command</td>
+<td>Start Command</td>
+<td>some command</td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Switch Connection"></a>Switch Connection</td>
@@ -480,84 +534,88 @@ Example:<br />
 <br />
 Index is got from <a href="#Open Connection" class="name">Open Connection</a> and alias can be given to it.<br />
 <br />
+Returns the index of previous connection, which can be used to restore the connection later. This works with Robot Framework 2.0.2 or newer.<br />
+<br />
 Example:<br />
 <br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myhost.net</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Login</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">john</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">secret</td>
+<td>Login</td>
+<td>john</td>
+<td>secret</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Execute Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">some command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Execute Command</td>
+<td>some command</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">yourhost.com</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">2nd conn</td>
+<td>Open Connection</td>
+<td>yourhost.com</td>
+<td>2nd conn</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Login</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">root</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">password</td>
+<td>Login</td>
+<td>root</td>
+<td>password</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Start Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">another cmd</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Start Command</td>
+<td>another cmd</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Switch Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">1</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># index</td>
+<td>Switch Connection</td>
+<td>1</td>
+<td># index</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Execute Command</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">something</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Execute Command</td>
+<td>something</td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Switch Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">2nd conn</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># alias</td>
+<td>Switch Connection</td>
+<td>2nd conn</td>
+<td># alias</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Read Command Output</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Read Command Output</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Close All Connections</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Close All Connections</td>
+<td></td>
+<td></td>
 </tr>
-</table><br />
+</table>
+<br />
 Above example expects that there was no other open connections when opening the first one because it used index '1' when switching to it later. If you aren't sure about that you can store the index into a variable as below.<br />
 <br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${id} =</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Open Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myhost.net</td>
+<td>${id} =</td>
+<td>Open Connection</td>
+<td>myhost.net</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"># Do something ...</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td># Do something ...</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Switch Connection</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">${id}</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;"></td>
+<td>Switch Connection</td>
+<td>${id}</td>
+<td></td>
 </tr>
-</table></td>
+</table>
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Write"></a>Write</td>
@@ -585,25 +643,26 @@ If <span class="name">expected</span> does not appear on output within <span cla
 See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.<br />
 <br />
 Example:<br />
-<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; font-size: 0.9em; empty-cells: show;">
+<table border="1" class="doc">
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">Write Until Expected Output</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">ps -ef| grep myprocess\n</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">myprocess</td>
+<td>Write Until Expected Output</td>
+<td>ps -ef| grep myprocess\n</td>
+<td>myprocess</td>
 </tr>
 <tr>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">...</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">5s</td>
-<td style="border: 1px solid gray; padding: 0.1em 0.3em;">0.5s</td>
+<td>...</td>
+<td>5s</td>
+<td>0.5s</td>
 </tr>
-</table><br />
+</table>
+<br />
 This will write the 'ps -ef | grep myprocess\n' until 'myprocess' appears on the output. The command is written every 0.5 seconds and the keyword will fail if 'myprocess' does not appear on the output in 5 seconds.</td>
 </tr>
 </table>
 <p class="footer">
-Altogether 21 keywords.<br />
+Altogether 23 keywords.<br />
 Generated by <a href="http://code.google.com/p/robotframework/wiki/LibraryDocumentationTool">libdoc.py</a>
-on 2008-09-04 12:31:20.
+on 2009-02-26 07:50:40.
 </p>
 </body>
 </html>
