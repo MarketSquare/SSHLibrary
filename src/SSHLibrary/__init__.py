@@ -31,14 +31,14 @@ __version__ = 'trunk'
     
 
 class SSHLibrary:
-    """SSHLibrary is a test library for Robot Framework that enables 
-    executing commands over SSH connection.
+    """SSH Library is a test library for Robot Framework that enables 
+    executing commands and transferring files over an SSH connection.
     
-    SSHLibrary works with both Python and Jython interpreters.
-    To use SSHLibrary with Python, you must first install paramiko SSH 
-    implementation[1] for Python and its dependencies.
-    To use SSHLibrary with Jython, you must have jar distribution of trilead SSH 
-    implementation[2] in the Classpath during test execution
+    SSHLibrary works with both Python and Jython interpreters.  To use
+    SSHLibrary with Python, you must first install paramiko SSH
+    implementation[1] and its dependencies.  To use SSHLibrary with Jython, you
+    must have jar distribution of Trilead SSH implementation[2] in the
+    CLASSPATH during test execution
     
     [1] http://www.lag.net/paramiko/
     [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/
@@ -49,11 +49,11 @@ class SSHLibrary:
     something, a new channel is opened over the SSH connection. In practice it
     means that no session information is stored. 
     
-    2. Keywords `Write` and `Read XXX` operate in an interactive shell, which 
-    means that changes to state are visible to next keywords.
-    Note that in interactive mode, a prompt must be set before using any of the
-    Write-keywords. Prompt can be set either when the library is taken into use
-    or when a new connection is opened using `Open Connection`, or using keyword
+    2. Keywords `Write` and `Read XXX` operate in an interactive shell, which
+    means that changes to state are visible to next keywords. Note that in
+    interactive mode, a prompt must be set before using any of the
+    Write-keywords. Prompt can be set either on `library initialization` or
+    when a new connection is opened using `Open Connection`, or using keyword
     `Set Prompt`.
     
     Both modes require that a connection is opened with `Open Connection`.
@@ -63,6 +63,13 @@ class SSHLibrary:
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=3, newline='LF', prompt=None):
+        """SSH Library can be imported with optional arguments.
+
+        `timeout`, `newline` and `prompt` will be used as default values when a
+        new connection is opened with `Open Connection`. These values may be
+        later changed with `Set Timeout`, `Set Newline` and `Set Prompt
+        respectively.
+        """
         self._cache = utils.ConnectionCache()
         self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
         self._client = None
@@ -85,8 +92,9 @@ class SSHLibrary:
         switching between connections similarly as the index. See `Switch
         Connection` for more details about that.
         
-        For more information about `timeout`, `newline` and `prompt`, see 
-        `Set Timeout`, `Set Newline` and `Set Prompt`, respectively.
+        Default values for timeout`, `newline` and `prompt` can be given on
+        `library initialization`. See  also `Set Timeout`, `Set Newline` and
+        `Set Prompt` for more information.
 
         Examples:
         | Open Connection | myhost.net      |            |                     |                     |                  |
@@ -176,7 +184,7 @@ class SSHLibrary:
         self._client.login(username, password)
 
     def login_with_public_key(self, username, keyfile, password):
-        """Logs into SSH server with given information
+        """Logs into SSH server with given information using key-based authentication.
 
         `username` is the username on the remote system.
         `keyfile` is a path to a valid OpenSSH *private* key file.
@@ -353,8 +361,8 @@ class SSHLibrary:
         Text up until and including the match will be returned, If no match is
         found, the keyword fails.
         
-        The timeout is by default three seconds but can be changed using 
-        `Set Timeout` keyword.
+        The timeout is by default three seconds but can be changed either on
+        `library initialization` or by using `Set Timeout` keyword.
         
         See `Read` for more information on `loglevel`.
         """
@@ -382,8 +390,8 @@ class SSHLibrary:
         
         Returns text up until and including the regexp.
 
-        The timeout is by default two seconds but can be changed using 
-        `Set Timeout` keyword.
+        The timeout is by default three seconds but can be changed either on
+        `library initialization` or by using `Set Timeout` keyword.
         
         See `Read` for more information on `loglevel`.
         Examples:
@@ -397,7 +405,7 @@ class SSHLibrary:
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the current output until prompt is found.
         
-        Prompt must have been set, either in Library import or by using 
+        Prompt must have been set, either in `library import` or by using 
         `Set Prompt` -keyword.
         
         See `Read` for more information on `loglevel`.
