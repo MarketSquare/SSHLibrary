@@ -9,6 +9,6 @@ PROMPT = "$"
 
 PUBKEY_USERNAME = 'testkey'
 PUBKEY_PASSWORD = 'testkey'
-PUBKEY_FILE = '/home/jth/.ssh/id_rsa'
+PUBKEY_FILE = os.path.join(basedir, 'id_rsa')
 INVALID_PUBKEY_USERNAME = 'invalid_key_username'
 INVALID_PUBKEY_FILE = os.path.join(basedir, 'invalid_rsa')
