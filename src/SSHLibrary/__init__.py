@@ -170,7 +170,7 @@ class SSHLibrary:
         tests with `pybot`
         """
         if utils.is_jython:
-            self._log('SSH logging in only available with pybot')
+            self._log('SSH logging is not supported when running on Jython.', 'WARN')
         else:
             SSHClient.enable_ssh_logging(logfile)
             self._log('Enabled SSH logging to <a href="%s">file</a>.' % logfile, 'HTML')
