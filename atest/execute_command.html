@@ -73,8 +73,15 @@ th {
 <th>Value</th>
 </tr>
 <tr>
-<td>Documentation</td>
-<td>\</td>
+<td>Suite Setup</td>
+<td>Login and Move Test Files</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Suite Teardown</td>
+<td>Remove Test Files and Close Connections</td>
 <td></td>
 <td></td>
 <td></td>
@@ -88,14 +95,7 @@ th {
 </tr>
 <tr>
 <td>Resource</td>
-<td>../ssh_library_resources.html</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>Library</td>
-<td>OperatingSystem</td>
+<td>resources/ssh_library_resources.html</td>
 <td></td>
 <td></td>
 <td></td>
@@ -142,7 +142,7 @@ th {
 <th>Argument</th>
 </tr>
 <tr>
-<td><a name="test_Execute Command With Defaults">Execute Command With Defaults</a></td>
+<td>Execute Command With Defaults</td>
 <td>${stdout} =</td>
 <td>Execute Command</td>
 <td>./${TEST SCRIPT NAME}</td>
@@ -163,7 +163,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Execute Command With Stdout">Execute Command With Stdout</a></td>
+<td>Execute Command With Stdout</td>
 <td>${stdout} =</td>
 <td>Execute Command</td>
 <td>./${TEST SCRIPT NAME}</td>
@@ -184,7 +184,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Execute Command With Stderr">Execute Command With Stderr</a></td>
+<td>Execute Command With Stderr</td>
 <td>${stderr} =</td>
 <td>Execute Command</td>
 <td>./${TEST SCRIPT NAME}</td>
@@ -205,7 +205,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Execute Command With Stdout And Stderr">Execute Command With Stdout And Stderr</a></td>
+<td>Execute Command With Stdout And Stderr</td>
 <td>${stdout}</td>
 <td>${stderr} =</td>
 <td>Execute Command</td>
@@ -240,7 +240,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Start Command And Read Process Output With Defaults">Start Command And Read Process Output With Defaults</a></td>
+<td>Start Command And Read Process Output With Defaults</td>
 <td>Start Command</td>
 <td>./${TEST SCRIPT NAME}</td>
 <td></td>
@@ -268,7 +268,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Start Command And Read Process Output With Stdout">Start Command And Read Process Output With Stdout</a></td>
+<td>Start Command And Read Process Output With Stdout</td>
 <td>Start Command</td>
 <td>./${TEST SCRIPT NAME}</td>
 <td></td>
@@ -296,7 +296,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Start Command And Read Process Output With Stderr">Start Command And Read Process Output With Stderr</a></td>
+<td>Start Command And Read Process Output With Stderr</td>
 <td>Start Command</td>
 <td>./${TEST SCRIPT NAME}</td>
 <td></td>
@@ -324,7 +324,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Start Command And Read Process Output With Stdout And Stderr">Start Command And Read Process Output With Stdout And Stderr</a></td>
+<td>Start Command And Read Process Output With Stdout And Stderr</td>
 <td>Start Command</td>
 <td>./${TEST SCRIPT NAME}</td>
 <td></td>
@@ -359,7 +359,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Start Command And Execute Command">Start Command And Execute Command</a></td>
+<td>Start Command And Execute Command</td>
 <td>Start Command</td>
 <td>./${TEST SCRIPT NAME}</td>
 <td></td>
@@ -401,7 +401,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Execute Command With Output Containing Newlines">Execute Command With Output Containing Newlines</a></td>
+<td>Execute Command With Output Containing Newlines</td>
 <td>${res} =</td>
 <td>Execute Command</td>
 <td>cat ${FILE WITH NEWLINES NAME}</td>
@@ -410,7 +410,7 @@ th {
 <tr>
 <td></td>
 <td>${actual} =</td>
-<td>OperatingSystem.Get FIle</td>
+<td>OS.Get File</td>
 <td>${FILE WITH NEWLINES}</td>
 <td></td>
 </tr>
@@ -429,7 +429,7 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Execute Command With Multiple Statements">Execute Command With Multiple Statements</a></td>
+<td>Execute Command With Multiple Statements</td>
 <td>${result} =</td>
 <td>Execute Command</td>
 <td>echo -e "foo\n"; echo RC=$?</td>

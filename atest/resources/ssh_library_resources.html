@@ -81,7 +81,7 @@ th {
 </tr>
 <tr>
 <td>Variables</td>
-<td>connection.py</td>
+<td>user_information.py</td>
 <td></td>
 <td></td>
 <td></td>
@@ -238,6 +238,90 @@ th {
 <th>Argument</th>
 <th>Argument</th>
 <th>Argument</th>
+</tr>
+<tr>
+<td>Login And Move Test Files</td>
+<td>Login As Valid User</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Put File</td>
+<td>${TEST SCRIPT}</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Put File</td>
+<td>${INTERACTIVE TEST SCRIPT}</td>
+<td>/home/${USERNAME}/${INTERACTIVE TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Put File</td>
+<td>${REPEAT TEST SCRIPT}</td>
+<td>/home/${USERNAME}/${REPEAT TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Put File</td>
+<td>${FILE WITH NEWLINES}</td>
+<td>/home/${USERNAME}/</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Remove Test Files And Close Connections</td>
+<td>Execute Command</td>
+<td>rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${COUNTER NAME} ${FILE WITH NEWLINES NAME}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Close All Connections</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Login As Valid User</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Login</td>
+<td>${USERNAME}</td>
+<td>${PASSWORD}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td></td>

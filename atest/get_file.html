@@ -56,10 +56,10 @@ th {
   font-style: normal;
 }
 </style>
-<title>Put File</title>
+<title>Get File</title>
 </head>
 <body>
-<h1>Put File</h1>
+<h1>Get File</h1>
 
 <table border="1">
 <colgroup span="99">
@@ -73,15 +73,36 @@ th {
 <th>Value</th>
 </tr>
 <tr>
-<td>Documentation</td>
-<td>This suite contains test for 'Put File 'keywords These tests use some dummy test files from under the scripts directory.</td>
+<td>Suite Setup</td>
+<td>Login and Move Test Files</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
+<td>Suite Teardown</td>
+<td>Remove Test Files and Close Connections</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Test Setup</td>
+<td>Create Directory</td>
+<td>${TMPDIR}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Test Teardown</td>
+<td>Remove Directory</td>
+<td>${TMPDIR}</td>
+<td>yes</td>
+<td></td>
+</tr>
+<tr>
 <td>Resource</td>
-<td>../ssh_library_resources.html</td>
+<td>resources/ssh_library_resources.html</td>
 <td></td>
 <td></td>
 <td></td>
@@ -107,6 +128,20 @@ th {
 <th>Value</th>
 </tr>
 <tr>
+<td>${TMPDIR}</td>
+<td>robot-tmpdir</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>${TMPDIR2}</td>
+<td>robot-tmpdir2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td></td>
 <td></td>
 <td></td>
@@ -128,18 +163,11 @@ th {
 <th>Argument</th>
 </tr>
 <tr>
-<td><a name="test_Put File With Absolute Destination">Put File With Absolute Destination</a></td>
-<td>Put Files And Verify</td>
-<td>${TEST FILE}</td>
-<td>/home/${USERNAME}/</td>
-<td>${TEST FILE NAME}</td>
-</tr>
-<tr>
-<td></td>
-<td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f ${TEST FILE NAME}</td>
-<td></td>
+<td>Get File From Absolute Source</td>
+<td>Get File And Verify Listing</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}${/}</td>
+<td>${TEST SCRIPT NAME}</td>
 </tr>
 <tr>
 <td></td>
@@ -149,18 +177,25 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Put File With Relative Destination">Put File With Relative Destination</a></td>
-<td>Put Files And Verify</td>
-<td>${TEST FILE}</td>
+<td>Get File From Relative Source</td>
+<td>Get File And Verify Listing</td>
+<td>${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}${/}</td>
+<td>${TEST SCRIPT NAME}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Get File With Different Name</td>
+<td>Get File And Verify Listing</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}${/}foo.txt</td>
 <td>foo.txt</td>
-<td>foo.txt</td>
-</tr>
-<tr>
-<td></td>
-<td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f foo.txt</td>
-<td></td>
 </tr>
 <tr>
 <td></td>
@@ -170,66 +205,17 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Put File To Home Directory">Put File To Home Directory</a></td>
-<td>Put Files And Verify</td>
-<td>${TEST FILE}</td>
-<td>.</td>
-<td>${TEST FILE NAME}</td>
-</tr>
-<tr>
-<td></td>
-<td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f ${TEST FILE NAME}</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><a name="test_Put File With Different Name">Put File With Different Name</a></td>
-<td>Put Files And Verify</td>
-<td>${TEST FILE}</td>
-<td>/home/${USERNAME}/another_name.txt</td>
-<td>another_name.txt</td>
-</tr>
-<tr>
-<td></td>
-<td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f another_name.txt</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><a name="test_Put File With Pattern">Put File With Pattern</a></td>
-<td>Put Files And Verify</td>
-<td>${TEST FILE PATTERN}</td>
-<td>/home/${USERNAME}/</td>
-<td>${TEST FILE NAME}</td>
+<td>Get File With Pattern</td>
+<td>Get File And Verify Listing</td>
+<td>/home/${USERNAME}/*</td>
+<td>${TMPDIR}${/}</td>
+<td>${TEST SCRIPT NAME}</td>
 </tr>
 <tr>
 <td></td>
 <td>...</td>
-<td>${TEST FILE 2 NAME}</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}</td>
+<td>${INTERACTIVE TEST SCRIPT NAME}</td>
+<td>${REPEAT TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
@@ -240,16 +226,16 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Putting Multiple Source Files To Single File Fails">Putting Multiple Source Files To Single File Fails</a></td>
+<td>Getting Mulitple Source Files To Single File Fails</td>
 <td>Run Keyword And Expect Error</td>
 <td>ValueError: It is not possible to copy multiple source files to one destination file.</td>
-<td>Put File</td>
-<td>${TEST FILE PATTERN}</td>
+<td>SSHLibrary.Get File</td>
+<td>/home/${USERNAME}/*.sh</td>
 </tr>
 <tr>
 <td></td>
 <td>...</td>
-<td>/home/${USERNAME}/invalid.txt</td>
+<td>${TMPDIR}${/}foo</td>
 <td></td>
 <td></td>
 </tr>
@@ -261,24 +247,31 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Put File To Absolute Destination With Missing Subdirectories">Put File To Absolute Destination With Missing Subdirectories</a></td>
-<td>Put File</td>
-<td>${TEST FILE}</td>
-<td>/home/${USERNAME}/robotdir/</td>
+<td>Get File To Curdir</td>
+<td>SSHLibrary.Get File</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>.</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
-<td>Verify Listing</td>
-<td>robotdir</td>
-<td>${TEST FILE NAME}</td>
+<td>${listing} =</td>
+<td>List Files In Directory</td>
+<td>.</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${listing}</td>
+<td>${TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
 <td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -rf robotdir</td>
+<td>Remove File</td>
+<td>${TEST SCRIPT NAME}</td>
 <td></td>
 </tr>
 <tr>
@@ -289,53 +282,95 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Put File To Relative Destination With Missing Subdirectories">Put File To Relative Destination With Missing Subdirectories</a></td>
-<td>Put File</td>
-<td>${TEST FILE}</td>
-<td>robotdir/anotherdir/foo.txt</td>
+<td>Get File When Destination Directory Does Not Exist</td>
+<td>SSHLibrary.Get File</td>
+<td>/home/${USERNAME}/${TEST SCRIPT NAME}</td>
+<td>${TMPDIR}${/}missingdir${/}foo.txt</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
-<td>Verify Listing</td>
-<td>robotdir/anotherdir</td>
+<td>${listing} =</td>
+<td>List Files In Directory</td>
+<td>${TMPDIR}${/}missingdir</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${listing}</td>
 <td>foo.txt</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
-<td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -rf robotdir</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
 <td></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Put File With Pattern Matching Directory">Put File With Pattern Matching Directory</a></td>
-<td>Put Files And Verify</td>
-<td>${SCRIPTS}test_fi*</td>
-<td>/home/${USERNAME}/</td>
-<td>${TEST FILE NAME}</td>
+<td>Get File From A Path Not Under Home Directory</td>
+<td>[Setup]</td>
+<td>Create Tmp Dir And Move File</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td></td>
-<td>...</td>
-<td>${TEST FILE 2 NAME}</td>
-<td></td>
-<td></td>
+<td>Get File And Verify Listing</td>
+<td>/tmp/test_file.txt</td>
+<td>${TMPDIR}${/}</td>
+<td>test_file.txt</td>
 </tr>
 <tr>
 <td></td>
 <td>[Teardown]</td>
-<td>Execute Command</td>
-<td>rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}</td>
+<td>Remove Tmp Dir And Remote File</td>
 <td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Get File To Absolute Destination</td>
+<td>[Setup]</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>SSHLibrary.Get File</td>
+<td>${TEST SCRIPT NAME}</td>
+<td>${CURDIR}${/}${TMPDIR2}${/}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>${contents} =</td>
+<td>List Directory</td>
+<td>${CURDIR}${/}${TMPDIR2}${/}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Should Contain</td>
+<td>${contents}</td>
+<td>${TEST SCRIPT NAME}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>[Teardown]</td>
+<td>Remove Directory</td>
+<td>${CURDIR}${/}${TMPDIR2}</td>
+<td>yes</td>
 </tr>
 <tr>
 <td></td>
@@ -345,11 +380,11 @@ th {
 <td></td>
 </tr>
 <tr>
-<td><a name="test_Put File Should Fail When There Are No Source Files">Put File Should Fail When There Are No Source Files</a></td>
+<td>Get File Should Fail When There Are No Source Files</td>
 <td>Run Keyword And Expect Error</td>
-<td>There were no source files matching 'non*existing'</td>
-<td>SSHLibrary.Put File</td>
-<td>non*existing</td>
+<td>There were no source files matching 'non-existing'</td>
+<td>SSHLibrary.Get File</td>
+<td>non-existing</td>
 </tr>
 <tr>
 <td></td>
@@ -380,7 +415,7 @@ th {
 <th>Argument</th>
 </tr>
 <tr>
-<td><a name="keyword_Put Files And Verify">Put Files And Verify</a></td>
+<td>Get File And Verify Listing</td>
 <td>[Arguments]</td>
 <td>${source}</td>
 <td>${destination}</td>
@@ -388,58 +423,16 @@ th {
 </tr>
 <tr>
 <td></td>
-<td>${listing} =</td>
-<td>Execute Command</td>
-<td>ls</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td>:: FOR</td>
-<td>${filename}</td>
-<td>IN</td>
-<td>@{expected}</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>Should Not Contain</td>
-<td>${listing}</td>
-<td>${filename}</td>
-</tr>
-<tr>
-<td></td>
-<td>Put File</td>
+<td>SSHLibrary.Get File</td>
 <td>${source}</td>
 <td>${destination}</td>
 <td></td>
 </tr>
 <tr>
 <td></td>
-<td>Verify Listing</td>
-<td></td>
-<td>@{expected}</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><a name="keyword_Verify Listing">Verify Listing</a></td>
-<td>[Arguments]</td>
-<td>${dirname}</td>
-<td>@{expected}</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
 <td>${listing} =</td>
-<td>Execute Command</td>
-<td>ls ${dirname}</td>
+<td>List Files In Directory</td>
+<td>${TMPDIR}</td>
 <td></td>
 </tr>
 <tr>
@@ -455,6 +448,48 @@ th {
 <td>Should Contain</td>
 <td>${listing}</td>
 <td>${filename}</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Create Tmp Dir And Move File</td>
+<td>Put File</td>
+<td>${TEST FILE}</td>
+<td>/tmp/</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Create Directory</td>
+<td>${TMPDIR}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Remove Tmp Dir And Remote File</td>
+<td>Execute Command</td>
+<td>rm -f /tmp/test_file.txt</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Remove Directory</td>
+<td>${TMPDIR}</td>
+<td>yes</td>
+<td></td>
 </tr>
 <tr>
 <td></td>
