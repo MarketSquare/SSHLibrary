@@ -22,7 +22,7 @@ try:
     import paramiko
 except ImportError:
     raise ImportError('Importing paramiko SSH module or its dependencies failed. '
-                      'Make sure you have the required modules installed.'
+                      'Make sure you have the required modules installed.')
 
 # There doesn't seem to be a simpler way to increase banner timeout
 def _monkey_patched_start_client(self, event=None):
