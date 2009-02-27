@@ -21,7 +21,7 @@ from java.io import File, BufferedReader, InputStreamReader, IOException, \
 from robot.errors import DataError
 try:
     from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
-                             SFTPv3FileAttributes, SFTPException, DebugLogger
+        SFTPv3FileAttributes, SFTPException, DebugLogger
 except ImportError:
     raise ImportError('Importing Trilead SSH modules failed.'
                       ' Make sure you have them installed.')
@@ -45,9 +45,6 @@ class SSHClient(object):
         except IOException:
             raise DataError()
 
-    def enable_ssh_logging(self, path):
-        self.client.enableDebugging(True, Logger(path))
-        
     def close(self):
         self.client.close()
 
@@ -178,11 +175,3 @@ class SSHClient(object):
         localfile.flush()
         localfile.close()
         
-        
-class Logger(DebugLogger):
-    
-    def __init__(self, fname):
-        self._file = open(fname, 'w')
-        
-    def log(self, level, classname, message):
-        self._file.write('%d\t%s\t%s\n' % (level, classname, message))

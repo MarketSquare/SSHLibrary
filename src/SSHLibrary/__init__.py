@@ -164,6 +164,9 @@ class SSHLibrary:
         
         `logfile` can be relative or absolute path to a file that is writable by
         current user. In case that it already exists, it will be overwritten.
+        
+        Note that this keyword only works with Python, e.g. when executing the
+        tests with `pybot`
         """
         if utils.is_jython:
             self._log('SSH logging in only available with pybot')
