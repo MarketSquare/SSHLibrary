@@ -190,18 +190,22 @@ class SSHLibrary:
         `keyfile` is a path to a valid OpenSSH *private* key file.
         `password` is used to unlock `keyfile` if unlocking is required.
         """
-        if not os.path.exists(keyfile):
-            raise DataError("Given key file '%s' does not exist" % keyfile)
-        try:
-            open(keyfile).close()
-        except IOError:
-            raise DataError("Could not read key file '%s'" % keyfile)
+        self._verify_key_file(keyfile)
         self._info("Logging into '%s:%s' as '%s'." 
                     % (self._host, self._port, username))
         try:
             self._client.login_with_public_key(username, keyfile, password)
         except DataError:
             raise DataError('Login with public key failed')
+
+    def _verify_key_file(self, keyfile):
+        if not os.path.exists(keyfile):
+            raise DataError("Given key file '%s' does not exist" % keyfile)
+        try:
+            open(keyfile).close()
+        except IOError:
+            raise DataError("Could not read key file '%s'" % keyfile)
+
 
     def execute_command(self, command, ret_mode='stdout'):
         """Executes command on remote host over existing SSH connection and returns stdout and/or stderr.
