@@ -165,8 +165,11 @@ class SSHLibrary:
         `logfile` can be relative or absolute path to a file that is writable by
         current user. In case that it already exists, it will be overwritten.
         """
-        SSHClient.enable_ssh_logging(logfile)
-        self._log('Enabled SSH logging to <a href="%s">file</a>.' % logfile, 'HTML')
+        if utils.is_jython:
+            self._log('SSH logging in only available with pybot')
+        else:
+            SSHClient.enable_ssh_logging(logfile)
+            self._log('Enabled SSH logging to <a href="%s">file</a>.' % logfile, 'HTML')
 
     def close_connection(self):
         """Closes the currently active connection.
