@@ -338,6 +338,34 @@ th {
 <td></td>
 </tr>
 <tr>
+<td>Login With Inaccessible Public Key</td>
+<td>[Setup]</td>
+<td>Open Connection</td>
+<td>${HOST}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Run Keyword And Expect Error</td>
+<td>Could not read key file '${inaccessiblepubkeyfile}'</td>
+<td>Login With Public Key</td>
+<td>${PUBKEY_USERNAME}</td>
+</tr>
+<tr>
+<td></td>
+<td>...</td>
+<td>${INACCESSIBLE PUBKEY FILE}</td>
+<td>${PUBKEY_PASSWORD}</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td>Enable Logging</td>
 <td>Enable SSH Logging</td>
 <td>${OUTPUTDIR}/sshlog.txt</td>

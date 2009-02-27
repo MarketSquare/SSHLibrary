@@ -160,12 +160,12 @@ class SSHLibrary:
         self._client = None
         
     def enable_ssh_logging(self, logfile):
-        """Enables the logging of SSH protocol output to given `logfile`
+        """Enables logging of SSH protocol output to given `logfile`
         
         `logfile` can be relative or absolute path to a file that is writable by
         current user. In case that it already exists, it will be overwritten.
         """
-        self._client.enable_ssh_logging(logfile)
+        SSHClient.enable_ssh_logging(logfile)
         self._log('Enabled SSH logging to <a href="%s">file</a>.' % logfile, 'HTML')
 
     def close_connection(self):
@@ -192,6 +192,10 @@ class SSHLibrary:
         """
         if not os.path.exists(keyfile):
             raise DataError("Given key file '%s' does not exist" % keyfile)
+        try:
+            open(keyfile).close()
+        except IOError:
+            raise DataError("Could not read key file '%s'" % keyfile)
         self._info("Logging into '%s:%s' as '%s'." 
                     % (self._host, self._port, username))
         try:
