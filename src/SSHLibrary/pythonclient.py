@@ -34,10 +34,7 @@ paramiko.transport.Transport.start_client = _monkey_patched_start_client
 
 class SSHClient(object):
 
-<<<<<<< Updated upstream:src/SSHLibrary/pythonclient.py
     @ classmethod
-=======
->>>>>>> Stashed changes:src/SSHLibrary/pythonclient.py
     def enable_ssh_logging(self, path):
         paramiko.util.log_to_file(path)
     

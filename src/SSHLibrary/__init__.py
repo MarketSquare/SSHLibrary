@@ -19,9 +19,10 @@ import glob
 import re
 import posixpath
 
-from robot import utils
 from robot.errors import DataError
+from robot import utils
 
+from connectioncache import ConnectionCache
 if utils.is_jython:
     from javaclient import SSHClient
 else:
@@ -70,9 +71,9 @@ class SSHLibrary:
         later changed with `Set Timeout`, `Set Newline` and `Set Prompt`
         respectively.
         """
-        self._cache = utils.ConnectionCache()
+        self._cache = ConnectionCache()
         self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
-        self._client = None
+        self._client = self._cache.current
         self._newline = self._parse_newline(newline and newline or 'LF')
         self.set_timeout(timeout or 3)
         self._default_log_level = 'INFO'
@@ -157,7 +158,7 @@ class SSHLibrary:
             self._cache.close_all()
         except AttributeError:
             pass
-        self._client = None
+        self._client = self._cache.current
         
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given `logfile`
