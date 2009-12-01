@@ -367,6 +367,8 @@ class SSHLibrary:
         `loglevel` can be used to override the default log level, and available
         levels are TRACE, DEBUG, INFO and WARN.
         """
+        if self._client.shell is None:
+            self._client.open_shell()
         ret = self._client.read()
         self._log(ret, loglevel)
         return ret
@@ -385,6 +387,8 @@ class SSHLibrary:
         return self._read_until(expected, loglevel)
         
     def _read_until(self, expected, loglevel):
+        if self._client.shell is None:
+            self._client.open_shell()
         ret = ''
         start_time = time.time()
         while time.time() < float(self._timeout) + start_time:
