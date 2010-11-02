@@ -1,0 +1,69 @@
+*** Settings ***
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Test Setup      Create Directory  ${TMPDIR}
+Test Teardown   Remove Directory  ${TMPDIR}  yes
+Resource        resources/ssh_library_resources.txt
+
+*** Variables ***
+${TMPDIR}  robot-tmpdir
+${TMPDIR2}  robot-tmpdir2
+
+*** Test Cases ***
+Get File From Absolute Source
+    Get File And Verify Listing  /home/${USERNAME}/${TEST SCRIPT NAME}  ${TMPDIR}${/}  ${TEST SCRIPT NAME}
+
+Get File From Relative Source
+    Get File And Verify Listing  ${TEST SCRIPT NAME}  ${TMPDIR}${/}  ${TEST SCRIPT NAME}
+
+Get File With Different Name
+    Get File And Verify Listing  /home/${USERNAME}/${TEST SCRIPT NAME}  ${TMPDIR}${/}foo.txt  foo.txt
+
+Get File With Pattern
+    Get File And Verify Listing  /home/${USERNAME}/*  ${TMPDIR}${/}  ${TEST SCRIPT NAME}  ${INTERACTIVE TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
+
+Getting Mulitple Source Files To Single File Fails
+    Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.  SSHLibrary.Get File  /home/${USERNAME}/*.sh  ${TMPDIR}${/}foo
+
+Get File To Curdir
+    SSHLibrary.Get File  /home/${USERNAME}/${TEST SCRIPT NAME}  .
+    ${listing} =  List Files In Directory  .
+    Should Contain  ${listing}  ${TEST SCRIPT NAME}
+    [Teardown]  Remove File  ${TEST SCRIPT NAME}
+
+Get File When Destination Directory Does Not Exist
+    SSHLibrary.Get File  /home/${USERNAME}/${TEST SCRIPT NAME}  ${TMPDIR}${/}missingdir${/}foo.txt
+    ${listing} =  List Files In Directory  ${TMPDIR}${/}missingdir
+    Should Contain  ${listing}  foo.txt
+
+Get File From A Path Not Under Home Directory
+    [Setup]  Create Tmp Dir And Move File
+    Get File And Verify Listing  /tmp/test_file.txt  ${TMPDIR}${/}  test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
+Get File To Absolute Destination
+    [Setup]
+    SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${CURDIR}${/}${TMPDIR2}${/}
+    ${contents} =  List Directory  ${CURDIR}${/}${TMPDIR2}${/}
+    Should Contain  ${contents}  ${TEST SCRIPT NAME}
+    [Teardown]  Remove Directory  ${CURDIR}${/}${TMPDIR2}  yes
+
+Get File Should Fail When There Are No Source Files
+    Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSHLibrary.Get File  non-existing
+
+*** Keywords ***
+Get File And Verify Listing
+    [Arguments]  ${source}  ${destination}  @{expected}
+    SSHLibrary.Get File  ${source}  ${destination}
+    ${listing} =  List Files In Directory  ${TMPDIR}
+    : FOR  ${filename}  IN  @{expected}
+    \  Should Contain  ${listing}  ${filename}
+
+Create Tmp Dir And Move File
+    Put File  ${TEST FILE}  /tmp/
+    Create Directory  ${TMPDIR}
+
+Remove Tmp Dir And Remote File
+    Execute Command  rm -f /tmp/test_file.txt
+    Remove Directory  ${TMPDIR}  yes
+

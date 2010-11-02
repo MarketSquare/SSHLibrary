@@ -1,0 +1,10 @@
+*** Settings ***
+Library         SSHLibrary  3 minutes 30 seconds  ${EMPTY}  $
+
+*** Test Cases ***
+Test Library Args
+    ${default timeout} =  Set Timeout  1 minute
+    Should Be Equal  ${default timeout}  3 minutes 30 seconds
+    ${default prompt} =  Set Prompt  >>
+    Should Be Equal  ${default prompt}  $
+

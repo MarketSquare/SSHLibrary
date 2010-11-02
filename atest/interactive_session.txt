@@ -1,0 +1,74 @@
+*** Settings ***
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Test Cases ***
+Basic Interactive Session
+    ${output} =  Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    Should Contain  ${output}  ./${INTERACTIVE TEST SCRIPT NAME}
+    ${output} =  Read Until  Give your name?
+    Should Contain  ${output}  Give your name?
+    ${output} =  Write  Juha
+    Should Contain  ${output}  Juha
+    ${output} =  Read Until Prompt
+    Should Contain  ${output}  Hello Juha
+
+Interactive Session With Regular Expressions
+    Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    ${output} =  Read Until Regexp  Give.*\\?
+    Should Contain  ${output}  Give your name?
+    Write  Juha
+    Comment  Promt needs to be escaped because it might be $
+    ${output} =  Read Until Regexp  (?s).*\\${PROMPT}
+    Should Contain  ${output}  Hello Juha
+    Should End With  ${output}  ${PROMPT}
+
+Regexp Not Matching From Beginning Of Output
+    Write  ./${TEST SCRIPT NAME}
+    Read Until Regexp  std.*
+
+Interactive Session Time Out
+    Write  Foo Bar And Some Other
+    Set Timeout  1
+    ${status}  ${error} =  Run Keyword And Ignore Error  Read Until  This is not found
+    Should Be Equal  ${error}  No match found for 'This is not found' in 1 second
+
+Interactive Session Returning Stderr
+    Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    Read Until  Give your name?
+    Write  Error
+    ${output} =  Read Until  ${PROMPT}
+    Should Contain  ${output}  Hello Error
+    Should Contain  ${output}  This is Error
+
+Write Until Expected Output
+    Write Until Expected Output  ./${REPEAT TEST SCRIPT NAME}\n  3  15 seconds  0.5 seconds
+    [Teardown]  Remove Counter and Read All Data
+
+Write Until Expected Output In Case Of Time Out
+    Run Keyword And Expect Error  No match found for '11' in 5 seconds  Write Until Expected Output  ./${REPEAT TEST SCRIPT NAME}\n  11  5s  0.5s
+    [Teardown]  Remove Counter and Read All Data
+
+Write Bare And Read
+    Write Bare  ./${INTERACTIVE TEST SCRIPT NAME}\n
+    ${output} =  Read Until  name?
+    Write Bare  Janne\n
+    ${output2} =  Read Until Prompt
+    Should Contain  ${output}  Give your name?
+    Should Contain  ${output2}  Hello Janne
+    Should Contain  ${output2}  ${PROMPT}
+
+Prompt Is Not Set
+    Set Prompt  ${None}
+    Run Keyword And Expect Error  Using 'Write' or 'Write Bare' keyword requires setting prompt first. Prompt can be set either when taking library into use or when using 'Open Connection' keyword.  Write  This should fail
+
+*** Keywords ***
+Remove Counter And Read All Data
+    Execute Command  rm -f ${COUNTER NAME}
+    Read
+
+Open And Login
+    Open Connection  gaston
+    Login  testuser  test
+

@@ -1,0 +1,38 @@
+*** Settings ***
+Library         SSHLibrary  ${EMPTY}  ${EMPTY}  $
+Variables       user_information.py
+Library         OperatingSystem  WITH NAME  OS
+
+*** Variables ***
+${SCRIPTS}  ${CURDIR}${/}scripts${/}
+${TEST SCRIPT NAME}  test.sh
+${TEST SCRIPT}  ${SCRIPTS}${TEST SCRIPT NAME}
+${INTERACTIVE TEST SCRIPT NAME}  test_interactive.sh
+${INTERACTIVE TEST SCRIPT}  ${SCRIPTS}${INTERACTIVE TEST SCRIPT NAME}
+${REPEAT TEST SCRIPT NAME}  test_repeat.sh
+${REPEAT TEST SCRIPT}  ${SCRIPTS}${REPEAT TEST SCRIPT NAME}
+${COUNTER NAME}  counter.txt
+${TEST FILE NAME}  test_file.txt
+${TEST FILE}  ${SCRIPTS}${TEST FILE NAME}
+${TEST FILE 2 NAME}  test_file2.txt
+${TEST FILE 2}  ${SCRIPTS}${TEST FILE 2 NAME}
+${TEST FILE PATTERN}  ${SCRIPTS}test*.txt
+${FILE WITH NEWLINES NAME}  file_with_newlines.txt
+${FILE WITH NEWLINES}  ${SCRIPTS}${FILE WITH NEWLINES NAME}
+
+*** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put File  ${TEST SCRIPT}  /home/${USERNAME}/${TEST SCRIPT NAME}
+    Put File  ${INTERACTIVE TEST SCRIPT}  /home/${USERNAME}/${INTERACTIVE TEST SCRIPT NAME}
+    Put File  ${REPEAT TEST SCRIPT}  /home/${USERNAME}/${REPEAT TEST SCRIPT NAME}
+    Put File  ${FILE WITH NEWLINES}  /home/${USERNAME}/
+
+Remove Test Files And Close Connections
+    Execute Command  rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${COUNTER NAME} ${FILE WITH NEWLINES NAME}
+    Close All Connections
+
+Login As Valid User
+    Open Connection  ${HOST}
+    Login  ${USERNAME}  ${PASSWORD}
+

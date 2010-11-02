@@ -1,0 +1,52 @@
+*** Settings ***
+Test Teardown   Close All Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Test Cases ***
+Test Opening And Closing Connection
+    [Setup]  Open Connection  ${HOST}
+    Login  ${USERNAME}  ${PASSWORD}
+
+Switch Connection
+    ${id1} =  Open Connection  ${HOST}
+    Login  ${USERNAME}  ${PASSWORD}
+    Write  cd /tmp
+    Read Until Prompt
+    ${id2} =  Open Connection  ${HOST}  second
+    Login  ${USERNAME}  ${PASSWORD}
+    ${prev id} =  Switch Connection  ${id1}
+    Should Be Equal  ${prev id}  ${id2}
+    Write  pwd
+    ${result} =  Read Until Prompt
+    Should Contain  ${result}  /tmp
+    ${prev id} =  Switch Connection  second
+    Write  pwd
+    ${result} =  Read Until Prompt
+    Should Contain  ${result}  /home
+
+Login With Public Key
+    [Setup]  Open Connection  ${HOST}
+    Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}  ${PUBKEY_PASSWORD}
+
+Login With Non Existing Public Key
+    [Setup]  Open Connection  ${HOST}
+    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist  Login With Public Key  ${PUBKEY_USERNAME}  /invalid/path  ${PUBKEY_PASSWORD}
+
+Login With Invalid Public Key
+    [Setup]  Open Connection  ${HOST}
+    Run Keyword And Expect Error  Login with public key failed  Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
+
+Login With Inaccessible Public Key
+    [Setup]  Open Connection  ${HOST}
+    Run Keyword And Expect Error  Could not read key file '${inaccessiblepubkeyfile}'  Login With Public Key  ${PUBKEY_USERNAME}  ${INACCESSIBLE PUBKEY FILE}  ${PUBKEY_PASSWORD}
+
+Enable Logging
+    [Setup]  Remove File  ${OUTPUTDIR}/sshlog.txt
+    Enable SSH Logging  ${OUTPUTDIR}/sshlog.txt
+    Open Connection  ${HOST}
+    Login  ${username}  ${password}
+    File Should Not Be Empty  ${OUTPUTDIR}/sshlog.txt
+
+Executing Command Before Opening Connection
+    Run Keyword And Expect Error  No open connection  Execute Command  ls
+

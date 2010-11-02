@@ -1,0 +1,62 @@
+*** Settings ***
+Documentation   This suite contains test for 'Put File 'keywords These tests use some dummy test files from under the scripts directory.
+Suite Setup     Login As Valid User
+Suite Teardown  Close Connection
+Resource        resources/ssh_library_resources.txt
+
+*** Test Cases ***
+Put File With Absolute Destination
+    Put Files And Verify  ${TEST FILE}  /home/${USERNAME}/  ${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -f ${TEST FILE NAME}
+
+Put File With Relative Destination
+    Put Files And Verify  ${TEST FILE}  foo.txt  foo.txt
+    [Teardown]  Execute Command  rm -f foo.txt
+
+Put File To Home Directory
+    Put Files And Verify  ${TEST FILE}  .  ${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -f ${TEST FILE NAME}
+
+Put File With Different Name
+    Put Files And Verify  ${TEST FILE}  /home/${USERNAME}/another_name.txt  another_name.txt
+    [Teardown]  Execute Command  rm -f another_name.txt
+
+Put File With Pattern
+    Put Files And Verify  ${TEST FILE PATTERN}  /home/${USERNAME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
+
+Putting Multiple Source Files To Single File Fails
+    Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.  Put File  ${TEST FILE PATTERN}  /home/${USERNAME}/invalid.txt
+
+Put File To Absolute Destination With Missing Subdirectories
+    Put File  ${TEST FILE}  /home/${USERNAME}/robotdir/
+    Verify Listing  robotdir  ${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -rf robotdir
+
+Put File To Relative Destination With Missing Subdirectories
+    Put File  ${TEST FILE}  robotdir/anotherdir/foo.txt
+    Verify Listing  robotdir/anotherdir  foo.txt
+    [Teardown]  Execute Command  rm -rf robotdir
+
+Put File With Pattern Matching Directory
+    Put Files And Verify  ${SCRIPTS}test_fi*  /home/${USERNAME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
+
+Put File Should Fail When There Are No Source Files
+    Run Keyword And Expect Error  There were no source files matching 'non*existing'  SSHLibrary.Put File  non*existing
+
+*** Keywords ***
+Put Files And Verify
+    [Arguments]  ${source}  ${destination}  @{expected}
+    ${listing} =  Execute Command  ls
+    : FOR  ${filename}  IN  @{expected}
+    \  Should Not Contain  ${listing}  ${filename}
+    Put File  ${source}  ${destination}
+    Verify Listing  ${EMPTY}  @{expected}
+
+Verify Listing
+    [Arguments]  ${dirname}  @{expected}
+    ${listing} =  Execute Command  ls ${dirname}
+    : FOR  ${filename}  IN  @{expected}
+    \  Should Contain  ${listing}  ${filename}
+

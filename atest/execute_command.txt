@@ -1,0 +1,61 @@
+*** Settings ***
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Test Teardown   Execute Command  rm -f ${TEST FILE NAME}
+Resource        resources/ssh_library_resources.txt
+
+*** Test Cases ***
+Execute Command With Defaults
+    ${stdout} =  Execute Command  ./${TEST SCRIPT NAME}
+    Should Be Equal  ${stdout}  This is stdout
+
+Execute Command With Stdout
+    ${stdout} =  Execute Command  ./${TEST SCRIPT NAME}  STDout
+    Should Be Equal  ${stdout}  This is stdout
+
+Execute Command With Stderr
+    ${stderr} =  Execute Command  ./${TEST SCRIPT NAME}  stderr
+    Should Be Equal  ${stderr}  This is stderr
+
+Execute Command With Stdout And Stderr
+    ${stdout}  ${stderr} =  Execute Command  ./${TEST SCRIPT NAME}  Both
+    Should Be Equal  ${stdout}  This is stdout
+    Should Be Equal  ${stderr}  This is stderr
+
+Start Command And Read Process Output With Defaults
+    Start Command  ./${TEST SCRIPT NAME}
+    ${stdout} =  Read Command Output
+    Should Be Equal  ${stdout}  This is stdout
+
+Start Command And Read Process Output With Stdout
+    Start Command  ./${TEST SCRIPT NAME}
+    ${stdout} =  Read Command Output  STDOUT
+    Should Be Equal  ${stdout}  This is stdout
+
+Start Command And Read Process Output With Stderr
+    Start Command  ./${TEST SCRIPT NAME}
+    ${stderr} =  Read Command Output  stderr
+    Should Be Equal  ${stderr}  This is stderr
+
+Start Command And Read Process Output With Stdout And Stderr
+    Start Command  ./${TEST SCRIPT NAME}
+    ${stdout}  ${stderr} =  Read Command Output  both
+    Should Be Equal  ${stdout}  This is stdout
+    Should Be Equal  ${stderr}  This is stderr
+
+Start Command And Execute Command
+    Start Command  ./${TEST SCRIPT NAME}
+    ${stdout} =  Execute Command  ./${TEST SCRIPT NAME} Hello
+    Should Be Equal  ${stdout}  Hello
+    ${stdout} =  Read Command Output
+    Should Be Equal  ${stdout}  This is stdout
+
+Execute Command With Output Containing Newlines
+    ${res} =  Execute Command  cat ${FILE WITH NEWLINES NAME}
+    ${actual} =  OS.Get File  ${FILE WITH NEWLINES}
+    Should Be Equal  ${res}\n  ${actual}
+
+Execute Command With Multiple Statements
+    ${result} =  Execute Command  echo -e "foo\n"; echo RC=$?
+    Should Be Equal  ${result}  foo\n\nRC=0
+
