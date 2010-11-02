@@ -27,39 +27,39 @@ if utils.is_jython:
     from javaclient import SSHClient
 else:
     from pythonclient import SSHClient
-    
+
 __version__ = 'trunk'
-    
+
 
 class SSHLibrary:
-    """SSH Library is a test library for Robot Framework that enables 
+    """SSH Library is a test library for Robot Framework that enables
     executing commands and transferring files over an SSH connection.
-    
+
     SSHLibrary works with both Python and Jython interpreters.  To use
     SSHLibrary with Python, you must first install paramiko SSH
     implementation[1] and its dependencies.  To use SSHLibrary with Jython, you
     must have jar distribution of Trilead SSH implementation[2] in the
     CLASSPATH during test execution
-    
+
     [1] http://www.lag.net/paramiko/
     [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/
-    
+
     Currently, there are two modes of operation:
-    
-    1. When keyword `Execute Command` or `Start Command` is used to execute 
+
+    1. When keyword `Execute Command` or `Start Command` is used to execute
     something, a new channel is opened over the SSH connection. In practice it
-    means that no session information is stored. 
-    
+    means that no session information is stored.
+
     2. Keywords `Write` and `Read XXX` operate in an interactive shell, which
     means that changes to state are visible to next keywords. Note that in
     interactive mode, a prompt must be set before using any of the
     Write-keywords. Prompt can be set either on `library importing` or
     when a new connection is opened using `Open Connection`, or using keyword
     `Set Prompt`.
-    
+
     Both modes require that a connection is opened with `Open Connection`.
     """
-    
+
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
@@ -78,11 +78,11 @@ class SSHLibrary:
         self.set_timeout(timeout or 3)
         self._default_log_level = 'INFO'
         self._prompt = prompt
-        
-    def open_connection(self, host, alias=None, port=22, timeout=None, 
+
+    def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None):
         """Opens a new SSH connection to given `host` and `port`.
-    
+
         Possible already opened connections are cached.
 
         Returns the index of this connection which can be used later to switch
@@ -92,7 +92,7 @@ class SSHLibrary:
         Optional `alias` is a name for the connection and it can be used for
         switching between connections similarly as the index. See `Switch
         Connection` for more details about that.
-        
+
         Default values for `timeout`, `newline` and `prompt` can be given on
         `library importing`. See  also `Set Timeout`, `Set Newline` and
         `Set Prompt` for more information.
@@ -116,9 +116,9 @@ class SSHLibrary:
 
         Index is got from `Open Connection` and alias can be given to it.
 
-        Returns the index of previous connection, which can be used to restore 
+        Returns the index of previous connection, which can be used to restore
         the connection later. This works with Robot Framework 2.0.2 or newer.
-        
+
         Example:
 
         | Open Connection       | myhost.net   |          |
@@ -159,13 +159,13 @@ class SSHLibrary:
         except AttributeError:
             pass
         self._client = self._cache.current
-        
+
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given `logfile`
-        
+
         `logfile` can be relative or absolute path to a file that is writable by
         current user. In case that it already exists, it will be overwritten.
-        
+
         Note that this keyword only works with Python, e.g. when executing the
         tests with `pybot`
         """
@@ -198,7 +198,7 @@ class SSHLibrary:
         `password` is used to unlock `keyfile` if unlocking is required.
         """
         self._verify_key_file(keyfile)
-        self._info("Logging into '%s:%s' as '%s'." 
+        self._info("Logging into '%s:%s' as '%s'."
                     % (self._host, self._port, username))
         try:
             self._client.login_with_public_key(username, keyfile, password)
@@ -216,10 +216,15 @@ class SSHLibrary:
 
     def execute_command(self, command, ret_mode='stdout'):
         """Executes command on remote host over existing SSH connection and returns stdout and/or stderr.
-    
-        This keyword waits until the command is completed. If non-blocking 
+
+        This keyword waits until the command is completed. If non-blocking
         behavior is required, use `Start Command` instead.
-        
+
+        Multiple calls of `Execute Command` use separate SSH sessions. Thus,
+        possible changes to the environment are not shared between these calls.
+        `Write` and `Read XXX` keywords can be used for running multiple commands
+        on same session.
+
         Examples:
         | ${out}=   | Execute Command | some command    |              | #stdout is returned |                                 |
         | ${err}=   | Execute Command | some command    | stderr       | #stderr is returned |                                 |
@@ -230,13 +235,13 @@ class SSHLibrary:
 
     def start_command(self, command):
         """Starts command execution on remote host over existing SSH connection.
-    
-        This keyword doesn't return anything. Use `Read Command Output` to read 
+
+        This keyword doesn't return anything. Use `Read Command Output` to read
         the output generated from command execution.
-        
-        Note that the `Read Command Output` keyword always reads the output of 
+
+        Note that the `Read Command Output` keyword always reads the output of
         the most recently started command.
-        
+
         Example:
         | Start Command | some command |
         """
@@ -245,40 +250,43 @@ class SSHLibrary:
         self._client.start_command(command)
 
     def read_command_output(self, ret_mode='stdout'):
-        """Reads and returns/logs everything currently available on the output (stdout and/or stderr).
+        """Reads and returns/logs output (stdout and/or stderr) of a command.
+
+        Command must have been started using `Start Command` before this keyword can be used.
 
         Examples:
+        | Start Command | some command |
         | ${out}= | Read Command Output |                     |                     |                                 |
         | ${err}= | Read Command Output | stderr              | #stderr is returned |                                 |
         | ${out}  | ${err}=             | Read Command Output | both                | #stdout and stderr are returned |
         """
         self._info("Reading output of command '%s'" % self._command)
         return self._process_output(self._client.read_command_output(ret_mode))
-            
+
     def _process_output(self, output):
         if isinstance(output, tuple):
             return [self._strip_possible_newline(out) for out in output]
         return self._strip_possible_newline(output)
-        
+
     def _strip_possible_newline(self, output):
         if output.endswith('\n'):
             return output[:-1]
         return output
-        
+
     def set_timeout(self, timeout):
         """Sets the timeout used in read operations to given value.
 
-        `timeout` is given in Robot Framework's time format 
+        `timeout` is given in Robot Framework's time format
         (e.g. 1 minute 20 seconds).
 
-        The read operations of keywords `Read Until`, `Read Until Prompt`, 
-        `Read Until Regexp` and `Write Until Expected Output` will try to read 
+        The read operations of keywords `Read Until`, `Read Until Prompt`,
+        `Read Until Regexp` and `Write Until Expected Output` will try to read
         the output until either the expected text appears in the output or the
-        timeout expires. For commands that take long time to produce their 
-        output, this timeout must be set properly. 
-        
+        timeout expires. For commands that take long time to produce their
+        output, this timeout must be set properly.
+
         Old timeout is returned and it can be used to restore it later.
-        
+
         Example:
         | ${tout} = | Set Timeout | 2 minute 30 seconds |
         | Do Something |
@@ -287,37 +295,37 @@ class SSHLibrary:
         old = hasattr(self, '_timeout') and self._timeout or None
         self._timeout = utils.timestr_to_secs(timeout)
         return old is not None and utils.secs_to_timestr(old) or None
-        
+
     def set_newline(self, newline):
         """Sets the newline used by `Write` keyword.
-        
+
         Old newline is returned and it can be used to restore it later.
-        See `Set Timeout` for an example. 
+        See `Set Timeout` for an example.
         """
         old = self._newline
         self._newline = self._parse_newline(newline)
         return old
-    
+
     def _parse_newline(self, newline):
         return newline.upper().replace('LF','\n').replace('CR','\r')
 
     def set_prompt(self, prompt):
         """Sets the prompt used by `Read Until Prompt` keyword.
-        
+
         Old prompt is returned and it can be used to restore it later.
-        
+
         Example:
-        | ${prompt} | Set Prompt | $ | 
+        | ${prompt} | Set Prompt | $ |
         | Do Something |
-        | Set Prompt | ${prompt} | 
+        | Set Prompt | ${prompt} |
         """
         old = hasattr(self, '_prompt') and self._prompt or ''
         self._prompt = prompt
         return old
-    
+
     def set_default_log_level(self, level):
         """Sets the default log level used by all read keywords.
-        
+
         The possible values are TRACE, DEBUG, INFO and WARN. The default is
         INFO. The old value is returned and can be used to restore it later,
         similarly as with `Set Timeout`.
@@ -326,15 +334,15 @@ class SSHLibrary:
         old = self._default_log_level
         self._default_log_level = level.upper()
         return old
-    
+
     def write(self, text, loglevel=None):
         """Writes given text over the connection and appends newline.
-        
-        Consumes the written text (until the appended newline) from output 
+
+        Consumes the written text (until the appended newline) from output
         and returns it. Given text must not contain newlines.
-        
-        Note: This keyword does not return the possible output of the executed 
-        command. To get the output, one of the `Read XXX` keywords must be 
+
+        Note: This keyword does not return the possible output of the executed
+        command. To get the output, one of the `Read XXX` keywords must be
         used.
         """
         self.write_bare(text + self._newline)
@@ -346,7 +354,7 @@ class SSHLibrary:
         try:
             text = str(text)
         except UnicodeError:
-            raise ValueError('Only ascii characters are allowed in SSH.' 
+            raise ValueError('Only ascii characters are allowed in SSH.'
                              'Got: %s' % text)
         if self._prompt is None:
             msg = ("Using 'Write' or 'Write Bare' keyword requires setting "
@@ -362,10 +370,13 @@ class SSHLibrary:
     def read(self, loglevel=None):
         """Reads and returns/logs everything currently available on the output.
 
-        Read message is always returned and logged. Default log level is 
+        Read message is always returned and logged. Default log level is
         either 'INFO', or the level set with `Set Default Log Level`.
         `loglevel` can be used to override the default log level, and available
         levels are TRACE, DEBUG, INFO and WARN.
+
+        This keyword is most useful for reading everything from the output buffer,
+        thus clearing it.
         """
         if self._client.shell is None:
             self._client.open_shell()
@@ -378,14 +389,14 @@ class SSHLibrary:
 
         Text up until and including the match will be returned, If no match is
         found, the keyword fails.
-        
+
         The timeout is by default three seconds but can be changed either on
         `library importing` or by using `Set Timeout` keyword.
-        
+
         See `Read` for more information on `loglevel`.
         """
         return self._read_until(expected, loglevel)
-        
+
     def _read_until(self, expected, loglevel):
         if self._client.shell is None:
             self._client.open_shell()
@@ -400,19 +411,19 @@ class SSHLibrary:
         self._log(ret, loglevel)
         if not isinstance(expected, basestring):
             expected = expected.pattern
-        raise AssertionError("No match found for '%s' in %s" 
+        raise AssertionError("No match found for '%s' in %s"
                                  % (expected, utils.secs_to_timestr(self._timeout)))
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Reads from the current output until a match to `regexp` is found or timeout expires.
 
         `regexp` can be a pattern or a compiled re-object.
-        
+
         Returns text up until and including the regexp.
 
         The timeout is by default three seconds but can be changed either on
         `library importing` or by using `Set Timeout` keyword.
-        
+
         See `Read` for more information on `loglevel`.
         Examples:
         | Read Until Regexp | (#|$) |
@@ -424,35 +435,39 @@ class SSHLibrary:
 
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the current output until prompt is found.
-        
-        Prompt must have been set, either in `library importing` or by using 
+
+        Prompt must have been set, either in `library importing` or by using
         `Set Prompt` -keyword.
-        
+
         See `Read` for more information on `loglevel`.
+
+        This keyword is most useful for reading output of a single command, when
+        it is known that the output buffer is clear before the command starts and
+        that the command does not produce prompt characters in its output.
         """
         if not self._prompt:
             raise RuntimeError('Prompt is not set')
         return self.read_until(self._prompt, loglevel)
 
-    def write_until_expected_output(self, text, expected, timeout, 
+    def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
         """Writes given text repeatedly until `expected` appears in output.
-        
+
         `text` is written without appending newline. `retry_interval` defines
         the time that is waited before writing `text` again. `text` will be
-        consumed from the output before `expected` is tried to be read. 
-        
+        consumed from the output before `expected` is tried to be read.
+
         If `expected` does not appear on output within `timeout`, this keyword
-        fails. 
-        
+        fails.
+
         See `Read` for more information on `loglevel`.
-        
+
         Example:
         | Write Until Expected Output | ps -ef| grep myprocess\\n | myprocess |
         | ... | 5s | 0.5s |
-        
-        This will write the 'ps -ef | grep myprocess\\n' until 'myprocess' 
-        appears on the output. The command is written every 0.5 seconds and 
+
+        This will write the 'ps -ef | grep myprocess\\n' until 'myprocess'
+        appears on the output. The command is written every 0.5 seconds and
         the keyword will fail if 'myprocess' does not appear on the output in
         5 seconds.
         """
@@ -469,9 +484,9 @@ class SSHLibrary:
             except AssertionError:
                 pass
         self.set_timeout(old_timeout)
-        raise AssertionError("No match found for '%s' in %s" 
+        raise AssertionError("No match found for '%s' in %s"
                              % (expected, utils.secs_to_timestr(timeout)))
-        
+
     def put_file(self, source, destination='.', mode='0744'):
         """Copies file(s) from local host to remote host using existing SSH connection.
 
@@ -479,28 +494,28 @@ class SSHLibrary:
         over it.
         2. If the destination is an existing directory, the src file is
         copied into it. Possible file with same name is overwritten.
-        3. If the destination does not exist and it ends with path separator ('/'), 
-        it is considered a directory. That directory is created and src file 
+        3. If the destination does not exist and it ends with path separator ('/'),
+        it is considered a directory. That directory is created and src file
         copied into it. Possibly missing intermediate directories are also created.
         4. If the destination does not exist and it does not end with path
         separator, it is considered a file. If the path to the file does not
         exist it is created.
         5. By default, destination is empty and the user's home directory in the
         remote machine is used as destination.
-        
+
         Using wild cards like '*' and '?' are allowed.
         When wild cards are used, destination MUST be a directory and only files
-        are copied from the src, sub directories are ignored. If the contents 
+        are copied from the src, sub directories are ignored. If the contents
         of sub directories are also needed, use the keyword again.
         Default file permission is 0744 (-rwxr--r--) and can be changed by
         giving a value to the optional `mode` parameter.
-        
+
         Examples:
 
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |  0777                            | # file permissions |
-        
+
         """
         mode = int(mode,8)
         self._client.create_sftp_client()
@@ -512,25 +527,25 @@ class SSHLibrary:
             self._info("Putting '%s' to '%s'" % (src, dst))
             self._client.put_file(src, dst, mode)
         self._client.close_sftp_client()
-        
+
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep)) if os.path.isfile(f)]
         if not sources:
-            raise AssertionError("There were no source files matching '%s'" % source)  
+            raise AssertionError("There were no source files matching '%s'" % source)
         return sources
-    
+
     def _get_put_file_destinations(self, sources, dest):
         dest = dest.split(':')[-1].replace('\\', '/')
         if dest == '.':
             dest = self._client.homedir + '/'
         if len(sources) > 1 and dest[-1] != '/':
-            raise ValueError('It is not possible to copy multiple source files ' 
+            raise ValueError('It is not possible to copy multiple source files '
                              'to one destination file.')
         dirpath, filename = self._parse_path_elements(dest)
         if filename:
             return [ posixpath.join(dirpath, filename) ], dirpath
         return [ posixpath.join(dirpath, os.path.split(path)[1]) for path in sources ], dirpath
-    
+
     def _parse_path_elements(self, dest):
         if not posixpath.isabs(dest):
             dest = posixpath.join(self._client.homedir, dest)
@@ -543,27 +558,27 @@ class SSHLibrary:
         over it.
         2. If the destination is an existing directory, the source file is
         copied into it. Possible file with same name is overwritten.
-        3. If the destination does not exist and it ends with path separator 
-        ('/' in unixes, '\\' in Windows), it is considered a directory. That 
+        3. If the destination does not exist and it ends with path separator
+        ('/' in unixes, '\\' in Windows), it is considered a directory. That
         directory is created and source file copied into it. Possible missing
         intermediate directories are also created.
         4. If the destination does not exist and it does not end with path
         separator, it is considered a file. If the path to the file does not
         exist it is created.
         5. By default, destination is empty, and in that case the current working
-        directory in the local machine is used as destination. This will most 
+        directory in the local machine is used as destination. This will most
         probably be the directory where test execution was started.
 
         Using wild cards like '*' and '?' are allowed.
         When wild cards are used, destination MUST be a directory and only files
-        are copied from the source, sub directories are ignored. If the contents 
+        are copied from the source, sub directories are ignored. If the contents
         of sub directories are also needed, use the keyword again.
-        
+
         Examples:
 
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
-        
+
         """
         self._client.create_sftp_client()
         remotefiles = self._get_get_file_sources(source)
@@ -573,7 +588,7 @@ class SSHLibrary:
             self._info('Getting %s to %s' % (src, dst))
             self._client.get_file(src, dst)
         self._client.close_sftp_client()
-        
+
     def _get_get_file_sources(self, source):
         path, pattern = posixpath.split(source)
         if not path:
@@ -587,21 +602,21 @@ class SSHLibrary:
         if not sourcefiles:
             raise AssertionError("There were no source files matching '%s'" % source)
         return sourcefiles
-        
+
     def _get_get_file_destinations(self, sourcefiles, dest):
         if dest == '.':
             dest += os.sep
         is_dir = dest.endswith(os.sep)
         if not is_dir and len(sourcefiles) > 1:
-            raise ValueError('It is not possible to copy multiple source files ' 
+            raise ValueError('It is not possible to copy multiple source files '
                              'to one destination file.')
-        dest = os.path.abspath(dest.replace('/', os.sep)) 
+        dest = os.path.abspath(dest.replace('/', os.sep))
         self._create_missing_local_dirs(dest, is_dir)
         if is_dir:
             return [ os.path.join(dest, os.path.split(name)[1]) for name in sourcefiles ]
         else:
             return [ dest ]
-        
+
     def _create_missing_local_dirs(self, dest, is_dir):
         if not is_dir:
             dest = os.path.dirname(dest)
@@ -611,10 +626,10 @@ class SSHLibrary:
 
     def _info(self, msg):
         self._log(msg, 'INFO')
-        
+
     def _debug(self, msg):
         self._log(msg, 'DEBUG')
-        
+
     def _log(self, msg, level=None):
         self._is_valid_log_level(level, raise_if_invalid=True)
         msg = msg.strip()
@@ -632,4 +647,4 @@ class SSHLibrary:
         if not raise_if_invalid:
             return False
         raise AssertionError("Invalid log level '%s'" % level)
-    
+
