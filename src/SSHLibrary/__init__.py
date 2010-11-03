@@ -182,6 +182,9 @@ class SSHLibrary:
     def login(self, username, password):
         """Logs in to SSH server with given user information.
 
+        Reads and return available output. If prompt is set, everything until
+        the prompt is returned.
+
         Example:
         | Login | john | secret |
         """
@@ -196,6 +199,10 @@ class SSHLibrary:
         `username` is the username on the remote system.
         `keyfile` is a path to a valid OpenSSH *private* key file.
         `password` is used to unlock `keyfile` if unlocking is required.
+
+        Reads and return available output. If prompt is set, everything until
+        the prompt is returned.
+
         """
         self._verify_key_file(keyfile)
         self._info("Logging into '%s:%s' as '%s'."
@@ -204,6 +211,7 @@ class SSHLibrary:
             self._client.login_with_public_key(username, keyfile, password)
         except DataError:
             raise DataError('Login with public key failed')
+        return self.read_until_prompt() if self._prompt else self.read()
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
