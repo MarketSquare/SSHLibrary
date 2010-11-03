@@ -191,7 +191,7 @@ class SSHLibrary:
         self._info("Logging into '%s:%s' as '%s'."
                     % (self._host, self._port, username))
         self._client.login(username, password)
-        return self.read_until_prompt() if self._prompt else self.read()
+        return self._prompt and self.read_until_prompt() or self.read()
 
     def login_with_public_key(self, username, keyfile, password):
         """Logs into SSH server with given information using key-based authentication.
@@ -211,7 +211,7 @@ class SSHLibrary:
             self._client.login_with_public_key(username, keyfile, password)
         except DataError:
             raise DataError('Login with public key failed')
-        return self.read_until_prompt() if self._prompt else self.read()
+        return self._prompt and self.read_until_prompt() or self.read()
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
@@ -495,7 +495,7 @@ class SSHLibrary:
         raise AssertionError("No match found for '%s' in %s"
                              % (expected, utils.secs_to_timestr(timeout)))
 
-    def put_file(self, source, destination='.', mode='0744'):
+    def put_file(self, source, destination='.', mode='0744', newlines='default'):
         """Copies file(s) from local host to remote host using existing SSH connection.
 
         1. If the destination is an existing file, the src file is copied
@@ -533,7 +533,7 @@ class SSHLibrary:
         self._client.create_missing_remote_path(remotepath)
         for src, dst in zip(localfiles, remotefiles):
             self._info("Putting '%s' to '%s'" % (src, dst))
-            self._client.put_file(src, dst, mode)
+            self._client.put_file(src, dst, mode, newlines)
         self._client.close_sftp_client()
 
     def _get_put_file_sources(self, source):
