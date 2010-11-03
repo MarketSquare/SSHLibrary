@@ -18,10 +18,10 @@ import glob
 import re
 import posixpath
 
-from robot.errors import DataError
 from robot import utils
 
 from connectioncache import ConnectionCache
+from client import AuthenticationException
 if utils.is_jython:
     from javaclient import SSHClient
 else:
@@ -209,17 +209,17 @@ class SSHLibrary:
                     % (self._host, self._port, username))
         try:
             self._client.login_with_public_key(username, keyfile, password)
-        except DataError:
-            raise DataError('Login with public key failed')
+        except AuthenticationException:
+            raise RuntimeError('Login with public key failed')
         return self._prompt and self.read_until_prompt() or self.read()
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
-            raise DataError("Given key file '%s' does not exist" % keyfile)
+            raise RuntimeError("Given key file '%s' does not exist" % keyfile)
         try:
             open(keyfile).close()
         except IOError:
-            raise DataError("Could not read key file '%s'" % keyfile)
+            raise RuntimeError("Could not read key file '%s'" % keyfile)
 
 
     def execute_command(self, command, ret_mode='stdout'):

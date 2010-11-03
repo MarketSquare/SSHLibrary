@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+class AuthenticationException(RuntimeError): pass
+
+
 class SSHLibraryClient(object):
 
     def put_file(self, source, dest, mode, newline_char):

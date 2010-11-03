@@ -20,8 +20,7 @@ except ImportError:
     raise ImportError('Importing paramiko SSH module or its dependencies failed. '
                       'Make sure you have the required modules installed.')
 
-from robot.errors import DataError
-from client import SSHLibraryClient
+from client import SSHLibraryClient, AuthenticationException
 
 # There doesn't seem to be a simpler way to increase banner timeout
 def _monkey_patched_start_client(self, event=None):
@@ -51,7 +50,7 @@ class SSHClient(SSHLibraryClient):
             self.client.connect(self.host, self.port, username, password,
                                 key_filename=keyfile)
         except paramiko.AuthenticationException:
-            raise DataError()
+            raise AuthenticationException()
 
     def close(self):
         self.client.close()

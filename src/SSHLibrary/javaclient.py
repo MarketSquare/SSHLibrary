@@ -14,15 +14,15 @@
 
 
 import jarray
-from java.io import File, BufferedReader, InputStreamReader, IOException, FileOutputStream
+from java.io import (File, BufferedReader, InputStreamReader, IOException,
+                     FileOutputStream)
 try:
     from com.trilead.ssh2 import StreamGobbler, Connection, SFTPv3Client, SFTPException
 except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
-from robot.errors import DataError
-from client import SSHLibraryClient
+from client import SSHLibraryClient, AuthenticationException
 
 
 class SSHClient(SSHLibraryClient):
@@ -34,14 +34,11 @@ class SSHClient(SSHLibraryClient):
 
     def login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
-            raise AssertionError("Authentication failed for user: %s" % username)
+            raise AuthenticationException("Authentication failed for user: %s" % username)
 
     def login_with_public_key(self, username, key, password):
-        try:
-            if not self.client.authenticateWithPublicKey(username, File(key), password):
-                raise AssertionError("Authentication failed for user: %s" % username)
-        except IOException:
-            raise DataError()
+        if not self.client.authenticateWithPublicKey(username, File(key), password):
+            raise AuthenticationException()
 
     def close(self):
         self.client.close()
