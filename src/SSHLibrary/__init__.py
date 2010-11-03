@@ -515,14 +515,18 @@ class SSHLibrary:
         When wild cards are used, destination MUST be a directory and only files
         are copied from the src, sub directories are ignored. If the contents
         of sub directories are also needed, use the keyword again.
+        
         Default file permission is 0744 (-rwxr--r--) and can be changed by
         giving a value to the optional `mode` parameter.
+
+        `newlines` can be used to force newline characters that are written to
+        the remote file. Valid values are `CRLF` (for Windows) and `LF`.
 
         Examples:
 
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |  0777                            | # file permissions |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
 
         """
         mode = int(mode,8)
