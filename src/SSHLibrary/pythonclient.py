@@ -110,9 +110,17 @@ class SSHClient(SSHLibraryClient):
                 self.sftp_client.mkdir(dirname)
             self.sftp_client.chdir(dirname)
 
-    def put_file(self, source, dest, mode):
-        self.sftp_client.put(source, dest)
+    def _create_remote_file(self, dest, mode):
+        remotfile = self.sftp_client.file(dest, 'wb')
+        remotfile.set_pipelined(True)
         self.sftp_client.chmod(dest, mode)
+        return remotfile
+
+    def _write_to_remote_file(self, remotefile, data, position):
+        remotefile.write(data)
+
+    def _close_remote_file(self, remotefile):
+        remotefile.close()
 
     def listfiles(self, path):
         return[ getattr(fileinfo, 'filename', '?') for fileinfo

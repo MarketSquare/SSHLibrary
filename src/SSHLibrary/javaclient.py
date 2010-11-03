@@ -128,8 +128,7 @@ class SSHClient(SSHLibraryClient):
                 print "*INFO* Creating missing remote directory '%s'" % curdir
                 self.sftp_client.mkdir(curdir, 0744)
 
-    def put_file(self, source, dest, mode):
-        localfile = open(source, 'rb')
+    def _create_remote_file(self, dest, mode):
         remotefile = self.sftp_client.createFile(dest)
         try:
             tempstats = self.sftp_client.fstat(remotefile)
@@ -137,16 +136,13 @@ class SSHClient(SSHLibraryClient):
             self.sftp_client.fsetstat(remotefile, tempstats)
         except SFTPException:
             pass
-        size = 0
-        while True:
-            data = localfile.read(4096)
-            datalen = len(data)
-            if datalen == 0:
-                break
-            self.sftp_client.write(remotefile, size, data, 0, datalen)
-            size += datalen
+        return remotefile
+
+    def _write_to_remote_file(self, remotefile, data, position):
+        self.sftp_client.write(remotefile, position, data, 0, len(data))
+
+    def _close_remote_file(self, remotefile):
         self.sftp_client.closeFile(remotefile)
-        localfile.close()
 
     def listfiles(self, path):
         return [ fileinfo.filename for fileinfo in self.sftp_client.ls(path) if
