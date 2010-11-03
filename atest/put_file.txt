@@ -21,6 +21,10 @@ Put File With Different Name
     Put Files And Verify  ${TEST FILE}  /home/${USERNAME}/another_name.txt  another_name.txt
     [Teardown]  Execute Command  rm -f another_name.txt
 
+Put File With Newlines
+    Put Files And Verify  ${FILE WITH NEWLINES}  /home/${USERNAME}/  ${FILE WITH NEWLINES NAME}
+    [Teardown]  Execute Command  rm -f ${FILE WITH NEWLINES NAME}
+
 Put File With Pattern
     Put Files And Verify  ${TEST FILE PATTERN}  /home/${USERNAME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}

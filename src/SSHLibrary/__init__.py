@@ -495,7 +495,7 @@ class SSHLibrary:
         raise AssertionError("No match found for '%s' in %s"
                              % (expected, utils.secs_to_timestr(timeout)))
 
-    def put_file(self, source, destination='.', mode='0744', newlines='default'):
+    def put_file(self, source, destination='.', mode='0744'):
         """Copies file(s) from local host to remote host using existing SSH connection.
 
         1. If the destination is an existing file, the src file is copied
@@ -528,18 +528,18 @@ class SSHLibrary:
         mode = int(mode,8)
         self._client.create_sftp_client()
         localfiles = self._get_put_file_sources(source)
-        self._debug('Source pattern matched local files: %s' % utils.seq2str(localfiles))
         remotefiles, remotepath = self._get_put_file_destinations(localfiles, destination)
         self._client.create_missing_remote_path(remotepath)
         for src, dst in zip(localfiles, remotefiles):
             self._info("Putting '%s' to '%s'" % (src, dst))
-            self._client.put_file(src, dst, mode, newlines)
+            self._client.put_file(src, dst, mode)
         self._client.close_sftp_client()
 
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep)) if os.path.isfile(f)]
         if not sources:
             raise AssertionError("There were no source files matching '%s'" % source)
+        self._debug('Source pattern matched local files: %s' % utils.seq2str(sources))
         return sources
 
     def _get_put_file_destinations(self, sources, dest):

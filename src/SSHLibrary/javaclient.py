@@ -14,20 +14,18 @@
 
 
 import jarray
-
-from java.io import File, BufferedReader, InputStreamReader, IOException, \
-                    FileOutputStream, BufferedWriter, OutputStreamWriter
-
-from robot.errors import DataError
+from java.io import File, BufferedReader, InputStreamReader, IOException, FileOutputStream
 try:
-    from com.trilead.ssh2 import StreamGobbler, SCPClient, Connection, SFTPv3Client, \
-        SFTPv3FileAttributes, SFTPException, DebugLogger
+    from com.trilead.ssh2 import StreamGobbler, Connection, SFTPv3Client, SFTPException
 except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
+from robot.errors import DataError
+from client import SSHLibraryClient
 
-class SSHClient(object):
+
+class SSHClient(SSHLibraryClient):
 
     def __init__(self, host, port=22):
         self.client = Connection(host, port)
@@ -37,7 +35,7 @@ class SSHClient(object):
     def login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
             raise AssertionError("Authentication failed for user: %s" % username)
-        
+
     def login_with_public_key(self, username, key, password):
         try:
             if not self.client.authenticateWithPublicKey(username, File(key), password):
@@ -93,7 +91,7 @@ class SSHClient(object):
     def write(self, text):
         self._writer.write(text)
         self._writer.flush()
-        
+
     def read(self):
         data = ''
         if self._stdout.available():
@@ -101,21 +99,21 @@ class SSHClient(object):
             self._stdout.read(buf)
             data += ''.join([chr(b) for b in buf])
         return data
-    
+
     def read_char(self):
         if self._stdout.available():
             buf = jarray.zeros(1, 'b')
             self._stdout.read(buf)
             return chr(buf[0])
         return ''
-        
-    def create_sftp_client(self):                
+
+    def create_sftp_client(self):
         self.sftp_client = SFTPv3Client(self.client)
         self.homedir = self.sftp_client.canonicalPath('.') + '/'
-        
+
     def close_sftp_client(self):
         self.sftp_client.close()
-            
+
     def create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'
@@ -129,9 +127,8 @@ class SSHClient(object):
             except IOException:
                 print "*INFO* Creating missing remote directory '%s'" % curdir
                 self.sftp_client.mkdir(curdir, 0744)
-                
+
     def put_file(self, source, dest, mode):
-        size = 0
         localfile = open(source, 'rb')
         remotefile = self.sftp_client.createFile(dest)
         try:
@@ -140,6 +137,7 @@ class SSHClient(object):
             self.sftp_client.fsetstat(remotefile, tempstats)
         except SFTPException:
             pass
+        size = 0
         while True:
             data = localfile.read(4096)
             datalen = len(data)
@@ -149,11 +147,11 @@ class SSHClient(object):
             size += datalen
         self.sftp_client.closeFile(remotefile)
         localfile.close()
-        
+
     def listfiles(self, path):
         return [ fileinfo.filename for fileinfo in self.sftp_client.ls(path) if
                  fileinfo.attributes.getOctalPermissions().startswith('0100') ]
-    
+
     def get_file(self, source, dest):
         localfile = FileOutputStream(dest)
         tempstats = self.sftp_client.stat(source)
@@ -174,4 +172,3 @@ class SSHClient(object):
         self.sftp_client.closeFile(remotefile)
         localfile.flush()
         localfile.close()
-        
