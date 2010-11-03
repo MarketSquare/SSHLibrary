@@ -24,6 +24,12 @@ Switch Connection
     ${result} =  Read Until Prompt
     Should Contain  ${result}  /home
 
+Login Returns Banner Value
+    [Setup]  Open Connection  ${HOST}
+    ${ret}=  Login  ${USERNAME}  ${PASSWORD}
+    Should Contain  ${ret}  Last login
+    
+
 Login With Public Key
     [Setup]  Open Connection  ${HOST}
     Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}  ${PUBKEY_PASSWORD}

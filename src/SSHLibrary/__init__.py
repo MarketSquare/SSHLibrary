@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 import time
 import os
 import glob
@@ -189,6 +188,7 @@ class SSHLibrary:
         self._info("Logging into '%s:%s' as '%s'."
                     % (self._host, self._port, username))
         self._client.login(username, password)
+        return self.read_until_prompt() if self._prompt else self.read()
 
     def login_with_public_key(self, username, keyfile, password):
         """Logs into SSH server with given information using key-based authentication.
