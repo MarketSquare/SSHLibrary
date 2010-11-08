@@ -29,23 +29,6 @@ Login Returns Banner Value
     ${ret}=  Login  ${USERNAME}  ${PASSWORD}
     Should Contain  ${ret}  Last login
     
-
-Login With Public Key
-    [Setup]  Open Connection  ${HOST}
-    Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}  ${PUBKEY_PASSWORD}
-
-Login With Non Existing Public Key
-    [Setup]  Open Connection  ${HOST}
-    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist  Login With Public Key  ${PUBKEY_USERNAME}  /invalid/path  ${PUBKEY_PASSWORD}
-
-Login With Invalid Public Key
-    [Setup]  Open Connection  ${HOST}
-    Run Keyword And Expect Error  Login with public key failed  Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
-
-Login With Inaccessible Public Key
-    [Setup]  Open Connection  ${HOST}
-    Run Keyword And Expect Error  Could not read key file '${inaccessiblepubkeyfile}'  Login With Public Key  ${PUBKEY_USERNAME}  ${INACCESSIBLE PUBKEY FILE}  ${PUBKEY_PASSWORD}
-
 Enable Logging
     [Setup]  Remove File  ${OUTPUTDIR}/sshlog.txt
     Enable SSH Logging  ${OUTPUTDIR}/sshlog.txt

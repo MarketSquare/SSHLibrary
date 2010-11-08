@@ -1,0 +1,39 @@
+*** Settings ***
+Test Setup  Open Connection  ${HOST}
+Test Teardown   Close All Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Variables ***
+${PUBKEYDIR}        ${CURDIR}/resources/keyfiles
+${PUBKEY_USERNAME}  testkey
+${PUBKEY_PASSWORD}  ${EMPTY}
+${PUBKEY_FILE}      ${PUBKEYDIR}/id_rsa
+${INVALID_PUBKEY_USERNAME}  invalid_key_username
+${INVALID_PUBKEY_FILE}  ${PUBKEYDIR}/id_rsa_invalid
+${INACCESSIBLE_PUBKEY_FILE}   ${PUBKEYDIR}/id_rsa_inaccessible
+
+*** Test Cases ***
+Login With Public Key
+    [Setup]  Check Key Files
+    Open Connection  ${HOST}
+    Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}  ${PUBKEY_PASSWORD}
+
+Login With Non Existing Public Key
+    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist  Login With Public Key  ${PUBKEY_USERNAME}  /invalid/path  ${PUBKEY_PASSWORD}
+
+Login With Invalid Public Key
+    Run Keyword And Expect Error  Login with public key failed  Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
+
+Login With Inaccessible Public Key
+    Run Keyword And Expect Error  Could not read key file '${inaccessiblepubkeyfile}'  Login With Public Key  ${PUBKEY_USERNAME}  ${INACCESSIBLE PUBKEY FILE}  ${PUBKEY_PASSWORD}
+
+
+*** Keywords ***
+Check Key Files
+  [Documentation]  If key file directory `keyfiles` does not exist, mark these tests non-critical
+  ${keys}=  List Files in Directory  ${PUBKEYDIR}
+  Run Keyword If  len(${keys})!=3  Fail And Mark Noncritical
+
+Fail And Mark Noncritical
+    Remove Tags  regression
+    Fail  This test can be run only if an account with public key authentication has been set up. See Wiki for details.
