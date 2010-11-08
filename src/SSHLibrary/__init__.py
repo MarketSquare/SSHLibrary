@@ -27,7 +27,7 @@ if utils.is_jython:
 else:
     from pythonclient import SSHClient
 
-__version__ = 'trunk'
+__version__ = '1.0'
 
 
 class SSHLibrary:
@@ -182,7 +182,7 @@ class SSHLibrary:
     def login(self, username, password):
         """Logs in to SSH server with given user information.
 
-        Reads and return available output. If prompt is set, everything until
+        Reads and returns available output. If prompt is set, everything until
         the prompt is returned.
 
         Example:
@@ -200,7 +200,7 @@ class SSHLibrary:
         `keyfile` is a path to a valid OpenSSH *private* key file.
         `password` is used to unlock `keyfile` if unlocking is required.
 
-        Reads and return available output. If prompt is set, everything until
+        Reads and returns available output. If prompt is set, everything until
         the prompt is returned.
 
         """
