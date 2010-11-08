@@ -515,7 +515,7 @@ class SSHLibrary:
         When wild cards are used, destination MUST be a directory and only files
         are copied from the src, sub directories are ignored. If the contents
         of sub directories are also needed, use the keyword again.
-        
+
         Default file permission is 0744 (-rwxr--r--) and can be changed by
         giving a value to the optional `mode` parameter.
 

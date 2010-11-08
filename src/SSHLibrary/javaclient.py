@@ -37,7 +37,11 @@ class SSHClient(SSHLibraryClient):
             raise AuthenticationException("Authentication failed for user: %s" % username)
 
     def login_with_public_key(self, username, key, password):
-        if not self.client.authenticateWithPublicKey(username, File(key), password):
+        try:
+            if not self.client.authenticateWithPublicKey(username, File(key), password):
+                raise AuthenticationException()
+        except IOError:
+            # IOError is raised also when key file is invalid
             raise AuthenticationException()
 
     def close(self):
