@@ -1,88 +1,98 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>SSHLibrary - Documentation</title>
+<title>SSHLibrary</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
-  body {
-    background: white;
-    color: black;
-  }
+<style media="all" type="text/css">
+body {
+  background: white;
+  color: black;
+  font-size: small;
+  font-family: sans-serif;
+  padding: 0.1em 0.5em;
+}
+a.name, span.name {
+  font-style: italic;
+}
+a, a:link, a:visited {
+  color: #c30;
+}
+a:hover, a:active {
+  text-decoration: underline;
+  color: black;
+}
+div.shortcuts {
+  margin: 1em 0em;
+  font-size: 0.9em;
+}
+div.shortcuts a {
+  text-decoration: none;
+  color: black;
+}
+div.shortcuts a:hover {
+  text-decoration: underline;
+}
+table.keywords {
+  border: 2px solid black;
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 0.3em 0em;
+  width: 100%;
+}
+table.keywords th, table.keywords td {
+  border: 2px solid black;
+  padding: 0.2em;
+  vertical-align: top;
+}
+table.keywords th {
+  background: #bbb;
+  color: black;
+}
+table.keywords td.kw {
+  width: 150px;
+  font-weight: bold;
+}
+table.keywords td.arg {
+  width: 300px;
+  font-style: italic;
+}
+table.doc {
+  border: 1px solid black;
+  background: transparent;
+  border-collapse: collapse;
+  empty-cells: show;
+  font-size: 0.85em;
+}
+table.doc td {
+  border: 1px solid black;
+  padding: 0.1em 0.3em;
+  height: 1.2em;
 
-  /* Generic Table Styles */
-  table {
-    background: white;
-    border: 1px solid black;
-    border-collapse: collapse;
-    empty-cells: show;
-    margin: 0.3em 0em;
-  }
-  th, td {
-    border: 1px solid black;
-    padding: 0.2em;
-  }
-  th {
-    background: #C6C6C6;
-  }
-  td {
-    vertical-align: top;
-  }    
-
-  /* Columns */
-  td.kw {
-    font-weight: bold;
-  }
-  td.arg {
-    width: 300px;
-    font-style: italic;
-  }
-  td.doc {
-  }
-
-  /* Tables in documentation */
-  table.doc {
-    border: 1px solid gray;
-    background: transparent;
-    border-collapse: collapse;
-    empty-cells: show;
-    font-size: 0.85em;
-    font-family: arial,helvetica,sans-serif;
-  }
-  table.doc td {
-    border: 1px solid gray;
-    padding: 0.1em 0.3em;
-    height: 1.2em;
-  }
-
-  /* Paragraphs */
-  .libdoc, .links {
-    width: 800px;
-  }
-
-  /* Misc */
-  a.name, span.name {  
-    font-style: italic;
-    background: #f4f4f4;
-    text-decoration: none;
-  }
-  a:link, a:visited {
-    color: blue;
-  }
-  a:hover, a:active {
-    text-decoration: underline;
-    color: purple;
-  }
-  .footer {
-    font-size: 0.9em;
-  }
+}
+#footer {
+  font-size: 0.9em;
+}
+</style>
+<style media="print" type="text/css">
+body {
+  margin: 0px 1px;
+  padding: 0px;
+  font-size: 10px;
+}
+a {
+  text-decoration: none;
+}
 </style>
 </head>
 <body>
-<h1>SSHLibrary - Documentation</h1>
-<p><b>Version:</b> trunk</p>
+<h1>SSHLibrary</h1>
+<b>Version:</b> 1.0<br>
+<b>Scope:</b> global<br>
+<b>Named arguments: </b>
+supported
 
 <h2 id="introduction">Introduction</h2>
-<p class='libdoc'>SSH Library is a test library for Robot Framework that enables executing commands and transferring files over an SSH connection.<br />
+<p>SSH Library is a test library for Robot Framework that enables executing commands and transferring files over an SSH connection.<br />
 <br />
 SSHLibrary works with both Python and Jython interpreters. &nbsp;To use SSHLibrary with Python, you must first install paramiko SSH implementation[1] and its dependencies. &nbsp;To use SSHLibrary with Jython, you must have jar distribution of Trilead SSH implementation[2] in the CLASSPATH during test execution<br />
 <br />
@@ -98,7 +108,7 @@ Currently, there are two modes of operation:<br />
 Both modes require that a connection is opened with <a href="#Open Connection" class="name">Open Connection</a>.</p>
 
 <h2 id="importing">Importing</h2>
-<table class="keywords">
+<table border="1" class="keywords">
 <tr>
   <th class="arg">Arguments</th>
   <th class="doc">Documentation</th>
@@ -112,34 +122,56 @@ Both modes require that a connection is opened with <a href="#Open Connection" c
 </table>
 
 <h2>Shortcuts</h2>
-<div class='links'>
-<a href="#Close All Connections" title="Closes all open connections and empties the connection cache.">Close&nbsp;All&nbsp;Connections</a>&nbsp;
-<a href="#Close Connection" title="Closes the currently active connection.">Close&nbsp;Connection</a>&nbsp;
-<a href="#Enable Ssh Logging" title="Enables logging of SSH protocol output to given `logfile`">Enable&nbsp;Ssh&nbsp;Logging</a>&nbsp;
-<a href="#Execute Command" title="Executes command on remote host over existing SSH connection and returns stdout and/or stderr.">Execute&nbsp;Command</a>&nbsp;
-<a href="#Get File" title="Copies a file from remote host to local host using existing SSH connection.">Get&nbsp;File</a>&nbsp;
-<a href="#Login" title="Logs in to SSH server with given user information.">Login</a>&nbsp;
-<a href="#Login With Public Key" title="Logs into SSH server with given information using key-based authentication.">Login&nbsp;With&nbsp;Public&nbsp;Key</a>&nbsp;
-<a href="#Open Connection" title="Opens a new SSH connection to given `host` and `port`.">Open&nbsp;Connection</a>&nbsp;
-<a href="#Put File" title="Copies file(s) from local host to remote host using existing SSH connection.">Put&nbsp;File</a>&nbsp;
-<a href="#Read" title="Reads and returns/logs everything currently available on the output.">Read</a>&nbsp;
-<a href="#Read Command Output" title="Reads and returns/logs everything currently available on the output (stdout and/or stderr).">Read&nbsp;Command&nbsp;Output</a>&nbsp;
-<a href="#Read Until" title="Reads from the current output until expected is encountered or timeout expires.">Read&nbsp;Until</a>&nbsp;
-<a href="#Read Until Prompt" title="Reads and returns text from the current output until prompt is found.">Read&nbsp;Until&nbsp;Prompt</a>&nbsp;
-<a href="#Read Until Regexp" title="Reads from the current output until a match to `regexp` is found or timeout expires.">Read&nbsp;Until&nbsp;Regexp</a>&nbsp;
-<a href="#Set Default Log Level" title="Sets the default log level used by all read keywords.">Set&nbsp;Default&nbsp;Log&nbsp;Level</a>&nbsp;
-<a href="#Set Newline" title="Sets the newline used by `Write` keyword.">Set&nbsp;Newline</a>&nbsp;
-<a href="#Set Prompt" title="Sets the prompt used by `Read Until Prompt` keyword.">Set&nbsp;Prompt</a>&nbsp;
-<a href="#Set Timeout" title="Sets the timeout used in read operations to given value.">Set&nbsp;Timeout</a>&nbsp;
-<a href="#Start Command" title="Starts command execution on remote host over existing SSH connection.">Start&nbsp;Command</a>&nbsp;
-<a href="#Switch Connection" title="Switches between active connections using index or alias.">Switch&nbsp;Connection</a>&nbsp;
-<a href="#Write" title="Writes given text over the connection and appends newline.">Write</a>&nbsp;
-<a href="#Write Bare" title="Writes given text over the connection without appending newline">Write&nbsp;Bare</a>&nbsp;
-<a href="#Write Until Expected Output" title="Writes given text repeatedly until `expected` appears in output.">Write&nbsp;Until&nbsp;Expected&nbsp;Output</a>&nbsp;
+<div class='shortcuts'>
+<a href="#Close All Connections" title="Closes all open connections and empties the connection cache.">Close&nbsp;All&nbsp;Connections</a>
+&nbsp;&middot;&nbsp;
+<a href="#Close Connection" title="Closes the currently active connection.">Close&nbsp;Connection</a>
+&nbsp;&middot;&nbsp;
+<a href="#Enable Ssh Logging" title="Enables logging of SSH protocol output to given `logfile`">Enable&nbsp;Ssh&nbsp;Logging</a>
+&nbsp;&middot;&nbsp;
+<a href="#Execute Command" title="Executes command on remote host over existing SSH connection and returns stdout and/or stderr.">Execute&nbsp;Command</a>
+&nbsp;&middot;&nbsp;
+<a href="#Get File" title="Copies a file from remote host to local host using existing SSH connection.">Get&nbsp;File</a>
+&nbsp;&middot;&nbsp;
+<a href="#Login" title="Logs in to SSH server with given user information.">Login</a>
+&nbsp;&middot;&nbsp;
+<a href="#Login With Public Key" title="Logs into SSH server with given information using key-based authentication.">Login&nbsp;With&nbsp;Public&nbsp;Key</a>
+&nbsp;&middot;&nbsp;
+<a href="#Open Connection" title="Opens a new SSH connection to given `host` and `port`.">Open&nbsp;Connection</a>
+&nbsp;&middot;&nbsp;
+<a href="#Put File" title="Copies file(s) from local host to remote host using existing SSH connection.">Put&nbsp;File</a>
+&nbsp;&middot;&nbsp;
+<a href="#Read" title="Reads and returns/logs everything currently available on the output.">Read</a>
+&nbsp;&middot;&nbsp;
+<a href="#Read Command Output" title="Reads and returns/logs output (stdout and/or stderr) of a command.">Read&nbsp;Command&nbsp;Output</a>
+&nbsp;&middot;&nbsp;
+<a href="#Read Until" title="Reads from the current output until expected is encountered or timeout expires.">Read&nbsp;Until</a>
+&nbsp;&middot;&nbsp;
+<a href="#Read Until Prompt" title="Reads and returns text from the current output until prompt is found.">Read&nbsp;Until&nbsp;Prompt</a>
+&nbsp;&middot;&nbsp;
+<a href="#Read Until Regexp" title="Reads from the current output until a match to `regexp` is found or timeout expires.">Read&nbsp;Until&nbsp;Regexp</a>
+&nbsp;&middot;&nbsp;
+<a href="#Set Default Log Level" title="Sets the default log level used by all read keywords.">Set&nbsp;Default&nbsp;Log&nbsp;Level</a>
+&nbsp;&middot;&nbsp;
+<a href="#Set Newline" title="Sets the newline used by `Write` keyword.">Set&nbsp;Newline</a>
+&nbsp;&middot;&nbsp;
+<a href="#Set Prompt" title="Sets the prompt used by `Read Until Prompt` keyword.">Set&nbsp;Prompt</a>
+&nbsp;&middot;&nbsp;
+<a href="#Set Timeout" title="Sets the timeout used in read operations to given value.">Set&nbsp;Timeout</a>
+&nbsp;&middot;&nbsp;
+<a href="#Start Command" title="Starts command execution on remote host over existing SSH connection.">Start&nbsp;Command</a>
+&nbsp;&middot;&nbsp;
+<a href="#Switch Connection" title="Switches between active connections using index or alias.">Switch&nbsp;Connection</a>
+&nbsp;&middot;&nbsp;
+<a href="#Write" title="Writes given text over the connection and appends newline.">Write</a>
+&nbsp;&middot;&nbsp;
+<a href="#Write Bare" title="Writes given text over the connection without appending newline">Write&nbsp;Bare</a>
+&nbsp;&middot;&nbsp;
+<a href="#Write Until Expected Output" title="Writes given text repeatedly until `expected` appears in output.">Write&nbsp;Until&nbsp;Expected&nbsp;Output</a>
 </div>
 
 <h2>Keywords</h2>
-<table class="keywords">
+<table border="1" class="keywords">
 <tr>
   <th class="kw">Keyword</th>
   <th class="arg">Arguments</th>
@@ -157,7 +189,8 @@ This keyword ought to be used in test or suite teardown to make sure all connect
 <tr>
   <td class="kw"><a name="Close Connection"></a>Close Connection</td>
   <td class="arg"></td>
-  <td class="doc">Closes the currently active connection.</td>
+  <td class="doc">Closes the currently active connection.<br />
+</td>
 </tr>
 <tr>
   <td class="kw"><a name="Enable Ssh Logging"></a>Enable Ssh Logging</td>
@@ -174,6 +207,8 @@ Note that this keyword only works with Python, e.g. when executing the tests wit
   <td class="doc">Executes command on remote host over existing SSH connection and returns stdout and/or stderr.<br />
 <br />
 This keyword waits until the command is completed. If non-blocking behavior is required, use <a href="#Start Command" class="name">Start Command</a> instead.<br />
+<br />
+Multiple calls of <a href="#Execute Command" class="name">Execute Command</a> use separate SSH sessions. Thus, possible changes to the environment are not shared between these calls. <a href="#Write" class="name">Write</a> and <span class="name">Read XXX</span> keywords can be used for running multiple commands on same session.<br />
 <br />
 Examples:<br />
 <table border="1" class="doc">
@@ -240,6 +275,8 @@ Examples:<br />
   <td class="arg">username, password</td>
   <td class="doc">Logs in to SSH server with given user information.<br />
 <br />
+Reads and returns available output. If prompt is set, everything until the prompt is returned.<br />
+<br />
 Example:<br />
 <table border="1" class="doc">
 <tr>
@@ -255,7 +292,9 @@ Example:<br />
   <td class="arg">username, keyfile, password</td>
   <td class="doc">Logs into SSH server with given information using key-based authentication.<br />
 <br />
-<span class="name">username</span> is the username on the remote system. <span class="name">keyfile</span> is a path to a valid OpenSSH <b>private</b> key file. <span class="name">password</span> is used to unlock <span class="name">keyfile</span> if unlocking is required.</td>
+<span class="name">username</span> is the username on the remote system. <span class="name">keyfile</span> is a path to a valid OpenSSH <b>private</b> key file. <span class="name">password</span> is used to unlock <span class="name">keyfile</span> if unlocking is required.<br />
+<br />
+Reads and returns available output. If prompt is set, everything until the prompt is returned.</td>
 </tr>
 <tr>
   <td class="kw"><a name="Open Connection"></a>Open Connection</td>
@@ -317,7 +356,7 @@ Examples:<br />
 </tr>
 <tr>
   <td class="kw"><a name="Put File"></a>Put File</td>
-  <td class="arg">source, destination=., mode=0744</td>
+  <td class="arg">source, destination=., mode=0744, newlines=default</td>
   <td class="doc">Copies file(s) from local host to remote host using existing SSH connection.<br />
 <br />
 1. If the destination is an existing file, the src file is copied over it.<br />
@@ -326,7 +365,11 @@ Examples:<br />
 4. If the destination does not exist and it does not end with path separator, it is considered a file. If the path to the file does not exist it is created.<br />
 5. By default, destination is empty and the user's home directory in the remote machine is used as destination.<br />
 <br />
-Using wild cards like '*' and '?' are allowed. When wild cards are used, destination MUST be a directory and only files are copied from the src, sub directories are ignored. If the contents of sub directories are also needed, use the keyword again. Default file permission is 0744 (-rwxr--r--) and can be changed by giving a value to the optional <span class="name">mode</span> parameter.<br />
+Using wild cards like '*' and '?' are allowed. When wild cards are used, destination MUST be a directory and only files are copied from the src, sub directories are ignored. If the contents of sub directories are also needed, use the keyword again.<br />
+<br />
+Default file permission is 0744 (-rwxr--r--) and can be changed by giving a value to the optional <span class="name">mode</span> parameter.<br />
+<br />
+<span class="name">newlines</span> can be used to force newline characters that are written to the remote file. Valid values are <span class="name">CRLF</span> (for Windows) and <span class="name">LF</span>.<br />
 <br />
 Examples:<br />
 <br />
@@ -337,6 +380,7 @@ Examples:<br />
 <td>/path_to_remote_file/remote_file.txt</td>
 <td># single file</td>
 <td></td>
+<td></td>
 </tr>
 <tr>
 <td>Put File</td>
@@ -344,13 +388,15 @@ Examples:<br />
 <td>/path_to_remote_files/</td>
 <td># multiple files with wild cards</td>
 <td></td>
+<td></td>
 </tr>
 <tr>
 <td>Put File</td>
 <td>/path_to_local_files/*.txt</td>
 <td>/path_to_remote_files/</td>
 <td>0777</td>
-<td># file permissions</td>
+<td>CRLF</td>
+<td># file permissions and forcing Windows newlines</td>
 </tr>
 </table>
 </td>
@@ -360,15 +406,26 @@ Examples:<br />
   <td class="arg">loglevel=None</td>
   <td class="doc">Reads and returns/logs everything currently available on the output.<br />
 <br />
-Read message is always returned and logged. Default log level is either 'INFO', or the level set with <a href="#Set Default Log Level" class="name">Set Default Log Level</a>. <span class="name">loglevel</span> can be used to override the default log level, and available levels are TRACE, DEBUG, INFO and WARN.</td>
+Read message is always returned and logged. Default log level is either 'INFO', or the level set with <a href="#Set Default Log Level" class="name">Set Default Log Level</a>. <span class="name">loglevel</span> can be used to override the default log level, and available levels are TRACE, DEBUG, INFO and WARN.<br />
+<br />
+This keyword is most useful for reading everything from the output buffer, thus clearing it.</td>
 </tr>
 <tr>
   <td class="kw"><a name="Read Command Output"></a>Read Command Output</td>
   <td class="arg">ret_mode=stdout</td>
-  <td class="doc">Reads and returns/logs everything currently available on the output (stdout and/or stderr).<br />
+  <td class="doc">Reads and returns/logs output (stdout and/or stderr) of a command.<br />
+<br />
+Command must have been started using <a href="#Start Command" class="name">Start Command</a> before this keyword can be used.<br />
 <br />
 Examples:<br />
 <table border="1" class="doc">
+<tr>
+<td>Start Command</td>
+<td>some command</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
 <tr>
 <td>${out}=</td>
 <td>Read Command Output</td>
@@ -411,7 +468,9 @@ See <a href="#Read" class="name">Read</a> for more information on <span class="n
 <br />
 Prompt must have been set, either in <a href="#importing" class="name">library importing</a> or by using <a href="#Set Prompt" class="name">Set Prompt</a> -keyword.<br />
 <br />
-See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.</td>
+See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.<br />
+<br />
+This keyword is most useful for reading output of a single command, when it is known that the output buffer is clear before the command starts and that the command does not produce prompt characters in its output.</td>
 </tr>
 <tr>
   <td class="kw"><a name="Read Until Regexp"></a>Read Until Regexp</td>
@@ -661,10 +720,10 @@ Example:<br />
 This will write the 'ps -ef | grep myprocess\n' until 'myprocess' appears on the output. The command is written every 0.5 seconds and the keyword will fail if 'myprocess' does not appear on the output in 5 seconds.</td>
 </tr>
 </table>
-<p class="footer">
+<p id="footer">
 Altogether 23 keywords.<br />
 Generated by <a href="http://code.google.com/p/robotframework/wiki/LibraryDocumentationTool">libdoc.py</a>
-on 2009-02-27 10:46:41.
+on 2010-11-08 09:47:00.
 </p>
 </body>
 </html>
