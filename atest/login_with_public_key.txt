@@ -25,7 +25,9 @@ Login With Invalid Public Key
     Run Keyword And Expect Error  Login with public key failed  Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
 
 Login With Inaccessible Public Key
+    [Setup]  Run Keywords  Remove Read Permission  Open Connection To Test Host
     Run Keyword And Expect Error  Could not read key file '${inaccessiblepubkeyfile}'  Login With Public Key  ${PUBKEY_USERNAME}  ${INACCESSIBLE PUBKEY FILE}  ${PUBKEY_PASSWORD}
+    [Teardown]  Run Keywords  Grant Read Permission  Close All Connections
 
 
 *** Keywords ***
@@ -37,3 +39,9 @@ Check Key Files
 Fail And Mark Noncritical
     Remove Tags  regression
     Fail  This test can be run only if an account with public key authentication has been set up. See Wiki for details.
+
+Remove Read Permission
+    Run  chmod -r ${INACCESSIBLE_PUBKEY_FILE}
+
+Grant Read Permission
+    Run  chmod +r ${INACCESSIBLE_PUBKEY_FILE}

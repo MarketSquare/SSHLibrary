@@ -33,6 +33,9 @@ Remove Test Files And Close Connections
     Close All Connections
 
 Login As Valid User
-    Open Connection  ${HOST}
+    Open Connection To Test Host
     Login  ${USERNAME}  ${PASSWORD}
+
+Open Connection To Test Host
+    Open Connection  ${HOST}
 
