@@ -34,7 +34,7 @@ class SSHLibrary:
     """SSH Library is a test library for Robot Framework that enables
     executing commands and transferring files over an SSH connection.
 
-    SSHLibrary works with both Python and Jython interpreters.  To use
+    SSHLibrary works with both Python and Jython interpreters. To use
     SSHLibrary with Python, you must first install paramiko SSH
     implementation[1] and its dependencies.  To use SSHLibrary with Jython, you
     must have jar distribution of Trilead SSH implementation[2] in the
@@ -69,6 +69,12 @@ class SSHLibrary:
         new connection is opened with `Open Connection`. These values may be
         later changed with `Set Timeout`, `Set Newline` and `Set Prompt`
         respectively.
+
+        Examples:
+
+        | Library  | SSHLibrary | # normal import |
+
+        | Library  | SSHLibray  | 10 |  | > | # Set timout and prompt, use default newline |
         """
         self._cache = ConnectionCache()
         self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
