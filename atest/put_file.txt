@@ -33,7 +33,7 @@ Put File And Specify Remote Newlines
     [Setup]  Create Directory  ${TMPDIR}
     Put File And Specify Newlines  ${FILE WITH NEWLINES}  /home/${USERNAME}/  CRLF  ${FILE WITH NEWLINES NAME}
     SSHLibrary.Get File  /home/${USERNAME}/${FILE WITH NEWLINES NAME}  ${TMPDIR}${/}
-    ${content}=  OS.Get Binary File  /home/${USERNAME}/${FILE WITH NEWLINES NAME}
+    ${content}=  OS.Get Binary File  ${TMPDIR}${/}${FILE WITH NEWLINES NAME}
     ${expected}=  OS.Get File  ${FILE WITH NEWLINES}
     ${expected}=  Replace String  ${expected}  \n  \r\n
     Should Be Equal  ${content}  ${expected}
@@ -75,7 +75,6 @@ Put File And Specify Newlines
     Vefify Remote Files do Not Exist  @{expected}
     Put File  ${source}  ${destination}  newlines=${newlines}
     Verify Remote Files Exist  ${EMPTY}  @{expected}
-    
 
 Vefify Remote Files do Not Exist
     [Arguments]  @{expected}
