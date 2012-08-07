@@ -26,8 +26,9 @@ if utils.is_jython:
     from javaclient import SSHClient
 else:
     from pythonclient import SSHClient
+from version import VERSION
 
-__version__ = 'trunk'
+__version__ = VERSION
 
 
 class SSHLibrary:
