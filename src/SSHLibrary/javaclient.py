@@ -58,22 +58,21 @@ class SSHClient(SSHLibraryClient):
         return outputs
 
     def _read_outputs(self, sess, ret_mode):
-        stdoutReader = BufferedReader(InputStreamReader(StreamGobbler(sess.getStdout())))
-        stderrReader = BufferedReader(InputStreamReader(StreamGobbler(sess.getStderr())))
-        stdout = self._read_from_stream(stdoutReader)
-        stderr = self._read_from_stream(stderrReader)
-        if ret_mode.lower()=='both':
+        stdout = self._read_from_stream(sess.getStdout())
+        stderr = self._read_from_stream(sess.getStderr())
+        if ret_mode.lower() == 'both':
             return stdout, stderr
-        if ret_mode.lower()=='stderr':
+        if ret_mode.lower() == 'stderr':
             return stderr
         return stdout
 
-    def _read_from_stream(self, streamReader):
+    def _read_from_stream(self, stream):
+        reader = BufferedReader(InputStreamReader(StreamGobbler(stream)))
         result = ''
-        line = streamReader.readLine()
+        line = reader.readLine()
         while line is not None:
             result += line + '\n'
-            line = streamReader.readLine()
+            line = reader.readLine()
         return result
 
     def start_command(self, command):
