@@ -92,16 +92,16 @@ class SSHLibrary:
         Possible already opened connections are cached.
 
         Returns the index of this connection which can be used later to switch
-        back to it. Index starts from 1 and is reset back to it when `Close All`
+        back to it. Indexing starts from 1 and is reset when `Close All`
         keyword is used.
 
         Optional `alias` is a name for the connection and it can be used for
         switching between connections similarly as the index. See `Switch
         Connection` for more details about that.
 
-        Default values for `timeout`, `newline` and `prompt` can be given on
-        `library importing`. See  also `Set Timeout`, `Set Newline` and
-        `Set Prompt` for more information.
+        If `timeout`, `newline` or `prompt` are not given, the default values
+        set in `library importing` are used. See  also `Set Timeout`,
+        `Set Newline` and `Set Prompt` for more information.
 
         Examples:
         | Open Connection | myhost.net      |            |                     |                     |                  |
@@ -169,17 +169,20 @@ class SSHLibrary:
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given `logfile`
 
-        `logfile` can be relative or absolute path to a file that is writable by
-        current user. In case that it already exists, it will be overwritten.
+        `logfile` can be relative or absolute path to a file that is writable
+        by current user. In case that it already exists, it will be
+        overwritten.
 
         Note that this keyword only works with Python, e.g. when executing the
         tests with `pybot`
         """
         if utils.is_jython:
-            self._log('SSH logging is not supported when running on Jython.', 'WARN')
+            self._log('SSH logging is not supported when running on Jython.',
+                      'WARN')
         else:
             SSHClient.enable_ssh_logging(logfile)
-            self._log('Enabled SSH logging to <a href="%s">file</a>.' % logfile, 'HTML')
+            self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
+                      'HTML')
 
     def close_connection(self):
         """Closes the currently active connection.
@@ -201,7 +204,7 @@ class SSHLibrary:
         return self.read_until_prompt() if self._client.prompt else self.read()
 
     def login_with_public_key(self, username, keyfile, password):
-        """Logs into SSH server with given information using key-based authentication.
+        """Logs into SSH server with using key-based authentication.
 
         `username` is the username on the remote system.
         `keyfile` is a path to a valid OpenSSH *private* key file.
@@ -228,17 +231,16 @@ class SSHLibrary:
         except IOError:
             raise RuntimeError("Could not read key file '%s'" % keyfile)
 
-
     def execute_command(self, command, ret_mode='stdout'):
-        """Executes command on remote host over existing SSH connection and returns stdout and/or stderr.
+        """Executes command with current client. Returns stdout and/or stderr.
 
         This keyword waits until the command is completed. If non-blocking
         behavior is required, use `Start Command` instead.
 
         Multiple calls of `Execute Command` use separate SSH sessions. Thus,
         possible changes to the environment are not shared between these calls.
-        `Write` and `Read XXX` keywords can be used for running multiple commands
-        on same session.
+        `Write` and `Read XXX` keywords can be used for running multiple
+        commands on same session.
 
         Examples:
         | ${out}=   | Execute Command | some command    |              | #stdout is returned |                                 |
@@ -246,10 +248,11 @@ class SSHLibrary:
         | ${out}    | ${err}=         | Execute Command | some command | both                | #stdout and stderr are returned |
         """
         self._info("Executing command '%s'" % command)
-        return self._process_output(self._client.execute_command(command, ret_mode))
+        return self._process_output(self._client.execute_command(command,
+                                                                 ret_mode))
 
     def start_command(self, command):
-        """Starts command execution on remote host over existing SSH connection.
+        """Starts command execution on remote host.
 
         This keyword doesn't return anything. Use `Read Command Output` to read
         the output generated from command execution.
@@ -267,7 +270,8 @@ class SSHLibrary:
     def read_command_output(self, ret_mode='stdout'):
         """Reads and returns/logs output (stdout and/or stderr) of a command.
 
-        Command must have been started using `Start Command` before this keyword can be used.
+        Command must have been started using `Start Command` before this
+        keyword can be used.
 
         Examples:
         | Start Command | some command |
@@ -369,8 +373,7 @@ class SSHLibrary:
         used.
         """
         self.write_bare(text + self._newline)
-        data = self.read_until(self._newline, loglevel)
-        return data
+        return self.read_until(self._newline, loglevel)
 
     def write_bare(self, text):
         """Writes given text over the connection without appending newline"""
@@ -394,8 +397,8 @@ class SSHLibrary:
         `loglevel` can be used to override the default log level, and available
         levels are TRACE, DEBUG, INFO and WARN.
 
-        This keyword is most useful for reading everything from the output buffer,
-        thus clearing it.
+        This keyword is most useful for reading everything from the output
+        buffer, thus clearing it.
         """
         if self._client.shell is None:
             self._client.open_shell()
@@ -404,7 +407,7 @@ class SSHLibrary:
         return ret
 
     def read_until(self, expected, loglevel=None):
-        """Reads from the current output until expected is encountered or timeout expires.
+        """Reads output until expected is encountered or timeout expires.
 
         Text up until and including the match will be returned, If no match is
         found, the keyword fails.
@@ -431,10 +434,10 @@ class SSHLibrary:
         if not isinstance(expected, basestring):
             expected = expected.pattern
         raise AssertionError("No match found for '%s' in %s"
-                                 % (expected, utils.secs_to_timestr(self._timeout)))
+                % (expected, utils.secs_to_timestr(self._timeout)))
 
     def read_until_regexp(self, regexp, loglevel=None):
-        """Reads from the current output until a match to `regexp` is found or timeout expires.
+        """Reads output until a match to `regexp` is found or timeout expires.
 
         `regexp` can be a pattern or a compiled re-object.
 
@@ -513,25 +516,26 @@ class SSHLibrary:
                              % (expected, utils.secs_to_timestr(timeout)))
 
     def put_file(self, source, destination='.', mode='0744', newlines='default'):
-        """Copies file(s) from local host to remote host using existing SSH connection.
+        """Copies file(s) from local host to remote host.
 
-        1. If the destination is an existing file, the src file is copied
-        over it.
-        2. If the destination is an existing directory, the src file is
-        copied into it. Possible file with same name is overwritten.
-        3. If the destination does not exist and it ends with path separator ('/'),
-        it is considered a directory. That directory is created and src file
-        copied into it. Possibly missing intermediate directories are also created.
+        1. If the destination is an existing file, the source file is copied
+           over it.
+        2. If the destination is an existing directory, the source file is
+           copied into it. Possible file with same name is overwritten.
+        3. If the destination does not exist and it ends with path separator
+           ('/'), it is considered a directory. That directory is created and
+           the source file copied into it. Possibly missing intermediate
+           directories are also created.
         4. If the destination does not exist and it does not end with path
-        separator, it is considered a file. If the path to the file does not
-        exist it is created.
-        5. By default, destination is empty and the user's home directory in the
-        remote machine is used as destination.
+           separator, it is considered a file. If the path to the file does
+           not exist it is created.
+        5. If destination is not given, the user's home directory
+           in the remote machine is used as destination.
 
         Using wild cards like '*' and '?' are allowed.
-        When wild cards are used, destination MUST be a directory and only files
-        are copied from the src, sub directories are ignored. If the contents
-        of sub directories are also needed, use the keyword again.
+        When wild cards are used, destination MUST be a directory and only
+        files are copied from the source, sub directories are ignored. If the
+        contents of sub directories are also needed, use the keyword again.
 
         Default file permission is 0744 (-rwxr--r--) and can be changed by
         giving a value to the optional `mode` parameter.
@@ -546,35 +550,41 @@ class SSHLibrary:
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
 
         """
-        mode = int(mode,8)
+        mode = int(mode, 8)
         self._client.create_sftp_client()
         localfiles = self._get_put_file_sources(source)
-        remotefiles, remotepath = self._get_put_file_destinations(localfiles, destination)
+        remotefiles, remotepath = self._get_put_file_destinations(localfiles,
+                                                                  destination)
         self._client.create_missing_remote_path(remotepath)
         for src, dst in zip(localfiles, remotefiles):
             self._info("Putting '%s' to '%s'" % (src, dst))
-            self._client.put_file(src, dst, mode,
-                                  {'CRLF': '\r\n', 'LF': '\n'}.get(newlines, None))
+            newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newlines, None)
+            self._client.put_file(src, dst, mode, newline)
         self._client.close_sftp_client()
 
     def _get_put_file_sources(self, source):
-        sources = [f for f in glob.glob(source.replace('/', os.sep)) if os.path.isfile(f)]
+        sources = [f for f in glob.glob(source.replace('/', os.sep))
+                   if os.path.isfile(f)]
         if not sources:
-            raise AssertionError("There were no source files matching '%s'" % source)
-        self._debug('Source pattern matched local files: %s' % utils.seq2str(sources))
-        return sources
+            raise AssertionError("There were no source files matching '%s'" %
+                                 source)
+        self._debug('Source pattern matched local files: %s' %
+                    utils.seq2str(sources)) return sources
 
     def _get_put_file_destinations(self, sources, dest):
         dest = dest.split(':')[-1].replace('\\', '/')
         if dest == '.':
             dest = self._client.homedir + '/'
         if len(sources) > 1 and dest[-1] != '/':
-            raise ValueError('It is not possible to copy multiple source files '
-                             'to one destination file.')
+            raise ValueError('It is not possible to copy multiple source '
+                             'files to one destination file.')
         dirpath, filename = self._parse_path_elements(dest)
         if filename:
-            return [ posixpath.join(dirpath, filename) ], dirpath
-        return [ posixpath.join(dirpath, os.path.split(path)[1]) for path in sources ], dirpath
+            files = [posixpath.join(dirpath, filename)]
+        else:
+            files = [posixpath.join(dirpath, os.path.split(path)[1])
+                     for path in sources]
+        return files, dirpath
 
     def _parse_path_elements(self, dest):
         if not posixpath.isabs(dest):
@@ -582,27 +592,27 @@ class SSHLibrary:
         return posixpath.split(dest)
 
     def get_file(self, source, destination='.'):
-        """Copies a file from remote host to local host using existing SSH connection.
+        """Copies a file from remote host to local host.
 
         1. If the destination is an existing file, the source file is copied
-        over it.
+           over it.
         2. If the destination is an existing directory, the source file is
-        copied into it. Possible file with same name is overwritten.
+           copied into it. Possible file with same name is overwritten.
         3. If the destination does not exist and it ends with path separator
-        ('/' in unixes, '\\' in Windows), it is considered a directory. That
-        directory is created and source file copied into it. Possible missing
-        intermediate directories are also created.
+           ('/' in unixes, '\\' in Windows), it is considered a directory.
+           That directory is created and source file copied into it. Possible
+           missing intermediate directories are also created.
         4. If the destination does not exist and it does not end with path
-        separator, it is considered a file. If the path to the file does not
-        exist it is created.
-        5. By default, destination is empty, and in that case the current working
-        directory in the local machine is used as destination. This will most
-        probably be the directory where test execution was started.
+           separator, it is considered a file. If the path to the file does
+           not exist it is created.
+        5. If the destination is not given, the current working directory in
+           the local machine is used as destination. This will most probably
+           be the directory where test execution was started.
 
         Using wild cards like '*' and '?' are allowed.
-        When wild cards are used, destination MUST be a directory and only files
-        are copied from the source, sub directories are ignored. If the contents
-        of sub directories are also needed, use the keyword again.
+        When wild cards are used, destination MUST be a directory, and files
+        matching the pattern are copied, but sub directories are ignored. If
+        the contents of sub directories are also needed, use the keyword again.
 
         Examples:
 
@@ -612,7 +622,8 @@ class SSHLibrary:
         """
         self._client.create_sftp_client()
         remotefiles = self._get_get_file_sources(source)
-        self._debug('Source pattern matched remote files: %s' % utils.seq2str(remotefiles))
+        self._debug('Source pattern matched remote files: %s' %
+                    utils.seq2str(remotefiles))
         localfiles = self._get_get_file_destinations(remotefiles, destination)
         for src, dst in zip(remotefiles, localfiles):
             self._info('Getting %s to %s' % (src, dst))
@@ -630,7 +641,8 @@ class SSHLibrary:
                     filename = posixpath.join(path, filename)
                 sourcefiles.append(filename)
         if not sourcefiles:
-            raise AssertionError("There were no source files matching '%s'" % source)
+            raise AssertionError("There were no source files matching '%s'" %
+                                 source)
         return sourcefiles
 
     def _get_get_file_destinations(self, sourcefiles, dest):
@@ -638,20 +650,21 @@ class SSHLibrary:
             dest += os.sep
         is_dir = dest.endswith(os.sep)
         if not is_dir and len(sourcefiles) > 1:
-            raise ValueError('It is not possible to copy multiple source files '
-                             'to one destination file.')
+            raise ValueError('It is not possible to copy multiple source '
+                             'files to one destination file.')
         dest = os.path.abspath(dest.replace('/', os.sep))
         self._create_missing_local_dirs(dest, is_dir)
         if is_dir:
-            return [ os.path.join(dest, os.path.split(name)[1]) for name in sourcefiles ]
-        else:
-            return [ dest ]
+            return [os.path.join(dest, os.path.split(name)[1])
+                    for name in sourcefiles]
+        return [dest]
 
     def _create_missing_local_dirs(self, dest, is_dir):
         if not is_dir:
             dest = os.path.dirname(dest)
         if not os.path.exists(dest):
-            self._info("Creating missing local directories for path '%s'" % dest)
+            self._info("Creating missing local directories for path '%s'" %
+                        dest)
             os.makedirs(dest)
 
     def _info(self, msg):
@@ -677,4 +690,3 @@ class SSHLibrary:
         if not raise_if_invalid:
             return False
         raise AssertionError("Invalid log level '%s'" % level)
-
