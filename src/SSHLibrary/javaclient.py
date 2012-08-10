@@ -17,7 +17,8 @@ import jarray
 from java.io import (File, BufferedReader, InputStreamReader, IOException,
                      FileOutputStream)
 try:
-    from com.trilead.ssh2 import StreamGobbler, Connection, SFTPv3Client, SFTPException
+    from com.trilead.ssh2 import (StreamGobbler, Connection, SFTPv3Client,
+            SFTPException)
 except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
@@ -27,18 +28,20 @@ from client import SSHLibraryClient, AuthenticationException
 
 class SSHClient(SSHLibraryClient):
 
-    def __init__(self, host, port=22):
-        self.client = Connection(host, port)
-        self.client.connect()
-        self.shell = None
+    def _create_client(self):
+        client = Connection(self.host, self.port)
+        client.connect()
+        return client
 
     def login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
-            raise AuthenticationException("Authentication failed for user: %s" % username)
+            raise AuthenticationException("Authentication failed for user: %s"
+                                          % username)
 
     def login_with_public_key(self, username, key, password):
         try:
-            if not self.client.authenticateWithPublicKey(username, File(key), password):
+            if not self.client.authenticateWithPublicKey(username, File(key),
+                                                         password):
                 raise AuthenticationException()
         except IOError:
             # IOError is raised also when key file is invalid

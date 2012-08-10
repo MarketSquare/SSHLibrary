@@ -54,8 +54,8 @@ class SSHLibrary:
     means that changes to state are visible to next keywords. Note that in
     interactive mode, a prompt must be set before using any of the
     Write-keywords. Prompt can be set either on `library importing` or
-    when a new connection is opened using `Open Connection`, or using keyword
-    `Set Prompt`.
+    when a new connection is opened using `Open Connection`, or using
+    keywords `Set Prompt` or `Set Default Prompt`.
 
     Both modes require that a connection is opened with `Open Connection`.
     """
@@ -64,18 +64,18 @@ class SSHLibrary:
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=3, newline='LF', prompt=None):
-        """SSH Library can be imported with optional arguments.
+        """SSH Library allows some import time configuration.
 
-        `timeout`, `newline` and `prompt` will be used as default values when a
-        new connection is opened with `Open Connection`. These values may be
-        later changed with `Set Timeout`, `Set Newline` and `Set Prompt`
+        `timeout`, `newline` and `prompt` set default values for new
+        connections opened with `Open Connection`.These values may be later
+        changed with `Set Timeout`, `Set Newline` and `Set Default Prompt`,
         respectively.
 
         Examples:
 
         | Library  | SSHLibrary | # normal import |
 
-        | Library  | SSHLibray  | 10 |  | > | # Set timout and prompt, use default newline |
+        | Library  | SSHLibrary  | 10 |  | > | # Set timeout and prompt, use default newline |
         """
         self._cache = ConnectionCache()
         self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
@@ -83,7 +83,7 @@ class SSHLibrary:
         self._newline = self._parse_newline(newline and newline or 'LF')
         self.set_timeout(timeout or 3)
         self._default_log_level = 'INFO'
-        self._prompt = prompt
+        self._default_prompt = prompt
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None):
@@ -111,10 +111,10 @@ class SSHLibrary:
         | Open Connection | myhost.net      | 3rd conn   | 25                  | # alias and port    |                  |
         """
         self._host, self._port = host, port
-        self._timeout = timeout and int(timeout) or self._timeout
-        self._newline = newline and self._parse_newline(newline) or self._newline
-        self._prompt = prompt and prompt or self._prompt
-        self._client = SSHClient(host, int(port))
+        self._timeout = int(timeout) if timeout else self._timeout
+        self._newline = self._parse_newline(newline) if newline else self._newline
+        prompt = prompt and prompt or self._default_prompt
+        self._client = SSHClient(host, int(port), prompt)
         return self._cache.register(self._client, alias)
 
     def switch_connection(self, index_or_alias):
@@ -198,7 +198,7 @@ class SSHLibrary:
         self._info("Logging into '%s:%s' as '%s'."
                     % (self._host, self._port, username))
         self._client.login(username, password)
-        return self._prompt and self.read_until_prompt() or self.read()
+        return self.read_until_prompt() if self._client.prompt else self.read()
 
     def login_with_public_key(self, username, keyfile, password):
         """Logs into SSH server with given information using key-based authentication.
@@ -218,7 +218,7 @@ class SSHLibrary:
             self._client.login_with_public_key(username, keyfile, password)
         except AuthenticationException:
             raise RuntimeError('Login with public key failed')
-        return self._prompt and self.read_until_prompt() or self.read()
+        return self.read_until_prompt() if self._client.prompt else self.read()
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
@@ -325,17 +325,25 @@ class SSHLibrary:
         return newline.upper().replace('LF','\n').replace('CR','\r')
 
     def set_prompt(self, prompt):
-        """Sets the prompt used by `Read Until Prompt` keyword.
+        """Sets the prompt used by the current connection.
 
-        Old prompt is returned and it can be used to restore it later.
+        Returns the previous prompt.
 
         Example:
-        | ${prompt} | Set Prompt | $ |
+        | ${old_prompt}= | Set Prompt | $ |
         | Do Something |
-        | Set Prompt | ${prompt} |
+        | Set Prompt | ${old_prompt} |
         """
-        old = hasattr(self, '_prompt') and self._prompt or ''
-        self._prompt = prompt
+        old = self._client.prompt or ''
+        self._client.prompt = prompt
+        return old
+
+    def set_default_prompt(self, prompt):
+        """Sets the default prompt used by new connections.
+
+        Returns the previous default prompt.
+        """
+        old, self._default_prompt = self._default_prompt, prompt
         return old
 
     def set_default_log_level(self, level):
@@ -371,11 +379,7 @@ class SSHLibrary:
         except UnicodeError:
             raise ValueError('Only ascii characters are allowed in SSH.'
                              'Got: %s' % text)
-        if self._prompt is None:
-            msg = ("Using 'Write' or 'Write Bare' keyword requires setting "
-                   "prompt first. Prompt can be set either when taking library "
-                   "into use or when using 'Open Connection' keyword.")
-            raise RuntimeError(msg)
+        self._ensure_prompt_is_set()
         if self._client.shell is None:
             self._client.open_shell()
             self.read_until_prompt('INFO')
@@ -449,20 +453,26 @@ class SSHLibrary:
         return self._read_until(regexp, loglevel)
 
     def read_until_prompt(self, loglevel=None):
-        """Reads and returns text from the current output until prompt is found.
+        """Reads and returns text from the output until prompt is found.
 
         Prompt must have been set, either in `library importing` or by using
         `Set Prompt` -keyword.
 
         See `Read` for more information on `loglevel`.
 
-        This keyword is most useful for reading output of a single command, when
-        it is known that the output buffer is clear before the command starts and
-        that the command does not produce prompt characters in its output.
+        This keyword is useful for reading output of a single command when
+        output of previous command has been read and the command does not
+        produce prompt characters in its output.
         """
-        if not self._prompt:
-            raise RuntimeError('Prompt is not set')
-        return self.read_until(self._prompt, loglevel)
+        self._ensure_prompt_is_set()
+        return self.read_until(self._client.prompt, loglevel)
+
+    def _ensure_prompt_is_set(self):
+        if self._client.prompt is None:
+            raise RuntimeError("Using 'Read Until Prompt', 'Write' or "
+                "'Write Bare' keyword requires setting prompt first. "
+                "Prompt can be set either when taking library into use or "
+                "when using 'Open Connection' keyword.")
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):

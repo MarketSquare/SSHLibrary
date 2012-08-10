@@ -12,10 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-class AuthenticationException(RuntimeError): pass
+
+class AuthenticationException(RuntimeError):
+    pass
 
 
 class SSHLibraryClient(object):
+
+    def __init__(self, host, port, prompt):
+        self.host = host
+        self.port = port
+        self.prompt = prompt
+        self.shell = None
+        self.client = self._create_client()
 
     def put_file(self, source, dest, mode, newline_char):
         remotefile = self._create_remote_file(dest, mode)

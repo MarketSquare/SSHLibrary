@@ -17,30 +17,34 @@ import posixpath
 try:
     import paramiko
 except ImportError:
-    raise ImportError('Importing paramiko SSH module or its dependencies failed. '
-                      'Make sure you have the required modules installed.')
+    raise ImportError(
+            'Importing paramiko SSH module failed.\n'
+            'Ensure that paramiko and pycrypto modules are installed.'
+            )
 
 from client import SSHLibraryClient, AuthenticationException
+
 
 # There doesn't seem to be a simpler way to increase banner timeout
 def _monkey_patched_start_client(self, event=None):
     self.banner_timeout = 45
     self._orig_start_client(event)
 
-paramiko.transport.Transport._orig_start_client = paramiko.transport.Transport.start_client
+
+paramiko.transport.Transport._orig_start_client = \
+        paramiko.transport.Transport.start_client
 paramiko.transport.Transport.start_client = _monkey_patched_start_client
 
 
 class SSHClient(SSHLibraryClient):
 
-    enable_ssh_logging = staticmethod(lambda path: paramiko.util.log_to_file(path))
+    enable_ssh_logging = staticmethod(lambda path:
+            paramiko.util.log_to_file(path))
 
-    def __init__(self, host, port=22):
-        self.client = paramiko.SSHClient()
-        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.host = host
-        self.port = port
-        self.shell = None
+    def _create_client(self):
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        return client
 
     def login(self, username, password):
         self.client.connect(self.host, self.port, username, password)

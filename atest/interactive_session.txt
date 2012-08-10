@@ -61,7 +61,9 @@ Write Bare And Read
 
 Prompt Is Not Set
     Set Prompt  ${None}
-    Run Keyword And Expect Error  Using 'Write' or 'Write Bare' keyword requires setting prompt first. Prompt can be set either when taking library into use or when using 'Open Connection' keyword.  Write  This should fail
+    Run Keyword And Expect Error
+    ...    Using 'Read Until Prompt', 'Write' or 'Write Bare' keyword requires setting prompt first. *
+    ...    Write    This should fail
 
 *** Keywords ***
 Remove Counter And Read All Data
