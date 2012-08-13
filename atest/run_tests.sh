@@ -1,5 +1,23 @@
 OUTDIR=results
-COMMON_FLAGS="-d $OUTDIR -P src -P lib/trilead-ssh2-build213.jar --critical regression"
+PYBOT=
+JYBOT=
+if [ $1 = "pybot" ] ; then
+    PYBOT=true;
+    shift
+elif [ $1 = "jybot" ] ; then
+    JYBOT=true;
+    shift
+else
+    PYBOT=true
+    JYBOT=true
+fi
 
-pybot $COMMON_FLAGS -l pybot_log -r pybot_report -o pybot_output $* atest 
-jybot $COMMON_FLAGS -l jybot_log -r jybot_report -o jybot_output $* atest
+COMMON_FLAGS="-d $OUTDIR -l NONE -r NONE -P src -P lib/trilead-ssh2-build213.jar --critical regression"
+
+if [ $PYBOT != "" ]; then
+    pybot $COMMON_FLAGS -o pybot_output $* atest
+fi
+if [ $JYBOT != "" ]; then
+    jybot $COMMON_FLAGS -o jybot_output $* atest
+fi
+rebot -d $OUTDIR $OUTDIR/*.xml
