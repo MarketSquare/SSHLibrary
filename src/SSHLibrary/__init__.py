@@ -569,7 +569,8 @@ class SSHLibrary:
             raise AssertionError("There were no source files matching '%s'" %
                                  source)
         self._debug('Source pattern matched local files: %s' %
-                    utils.seq2str(sources)) return sources
+                    utils.seq2str(sources))
+        return sources
 
     def _get_put_file_destinations(self, sources, dest):
         dest = dest.split(':')[-1].replace('\\', '/')
