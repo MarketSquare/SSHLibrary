@@ -76,8 +76,8 @@ class SSHClient(SSHLibraryClient):
             return stderr.read()
         return stdout.read()
 
-    def open_shell(self):
-        self.shell = self.client.invoke_shell()
+    def open_shell(self, term_type, width, height):
+        self.shell = self.client.invoke_shell(term_type, width, height)
 
     def write(self, text):
         self.shell.sendall(text)

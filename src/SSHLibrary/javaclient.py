@@ -84,9 +84,9 @@ class SSHClient(SSHLibraryClient):
         self.sess.close()
         return outputs
 
-    def open_shell(self):
+    def open_shell(self, term_type, width, height):
         self.shell = self.client.openSession()
-        self.shell.requestDumbPTY()
+        self.shell.requestPTY(term_type, width, height, 0, 0, None)
         self.shell.startShell()
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()

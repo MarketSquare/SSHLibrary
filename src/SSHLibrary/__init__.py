@@ -289,6 +289,22 @@ class SSHLibrary:
             return [_strip_possible_newline(out) for out in output]
         return _strip_possible_newline(output)
 
+    def open_shell(self, term_type='vt100', width=80, height=24):
+        """Open new shell for running multiple subsequent commands.
+
+        `term_type` defines the terminal type for this shell, and `width`
+        and `height` can be configured to control the virtual size of the
+        opened terminal.
+
+        Keywords `Write` and `Write Bare` can be used to write to this shell
+        and keyword `Read Until` and it's variants can be used to read the
+        command outputs.
+
+        This keyword was added in version 1.1.
+        """
+
+        self._client.open_shell(term_type, width, height)
+
     def set_timeout(self, timeout):
         """Sets the timeout used in read operations to given value.
 
@@ -386,7 +402,7 @@ class SSHLibrary:
 
     def _ensure_open_shell(self, for_writing=False):
         if self._client.shell is None:
-            self._client.open_shell()
+            self.open_shell()
             if for_writing:
                 self.read_until_prompt('INFO')
 
