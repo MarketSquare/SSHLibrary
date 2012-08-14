@@ -59,9 +59,12 @@ class SSHClient(SSHLibraryClient):
     def close(self):
         self.client.close()
 
-    def execute_command(self, command, ret_mode):
-        _, stdout, stderr = self.client.exec_command(command)
-        return self._read_command_output(stdout, stderr, ret_mode)
+    def _execute_command(self, command):
+        channel = self.client.get_transport().open_session()
+        channel.exec_command(command)
+        stdout = channel.makefile('rb', -1)
+        stderr = channel.makefile_stderr('rb', -1)
+        return stdout.read(), stderr.read(), channel.recv_exit_status()
 
     def start_command(self, command):
         _, self.stdout, self.stderr = self.client.exec_command(command)

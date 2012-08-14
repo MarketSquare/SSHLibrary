@@ -26,6 +26,24 @@ class SSHLibraryClient(object):
         self.shell = None
         self.client = self._create_client()
 
+    def execute_command(self, command, want_stdout, want_stderr, want_rc):
+        stdout, stderr, rc = self._execute_command(command)
+        ret = []
+        if want_stdout:
+            ret.append(self._process_output(stdout))
+        if want_stderr:
+            ret.append(self._process_output(stderr))
+        if want_rc:
+            ret.append(rc)
+        if len(ret) == 1:
+            return ret[0]
+        return ret
+
+    def _process_output(self, text):
+        if text.endswith('\n'):
+            return text[:-1]
+        return text
+
     def put_file(self, source, dest, mode, newline_char):
         remotefile = self._create_remote_file(dest, mode)
         localfile = open(source, 'rb')

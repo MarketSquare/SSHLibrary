@@ -50,12 +50,14 @@ class SSHClient(SSHLibraryClient):
     def close(self):
         self.client.close()
 
-    def execute_command(self, command, ret_mode):
-        sess = self.client.openSession()
-        sess.execCommand(command)
-        outputs = self._read_outputs(sess, ret_mode)
-        sess.close()
-        return outputs
+    def _execute_command(self, command):
+        session = self.client.openSession()
+        session.execCommand(command)
+        stdout = self._read_from_stream(session.getStdout())
+        stderr = self._read_from_stream(session.getStderr())
+        rc = session.getExitStatus()
+        session.close()
+        return stdout, stderr, rc
 
     def _read_outputs(self, sess, ret_mode):
         stdout = self._read_from_stream(sess.getStdout())

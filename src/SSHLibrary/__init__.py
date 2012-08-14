@@ -303,8 +303,17 @@ class SSHLibrary:
         except IOError:
             raise RuntimeError("Could not read key file '%s'" % keyfile)
 
-    def execute_command(self, command, ret_mode='stdout'):
-        """Executes command with current client. Returns stdout and/or stderr.
+    def execute_command(self, command, return_stdout=True,
+                        return_stderr=False, return_rc=False):
+        """Executes command and returns combination of stdout, stderr and return code.
+
+        `return_stdout`, `return_stderr` and `return_rc` are used to
+        configure whether the return value includes the command's stdout,
+        stderr or return code, respectively.  If only one of these evaluates
+        to true, the corresponding value is returned.  Otherwise a tuple
+        containing all requested values is returned.
+
+        By default, only stdout is returned.
 
         This keyword waits until the command is completed. If non-blocking
         behavior is required, use `Start Command` instead.
@@ -312,16 +321,33 @@ class SSHLibrary:
         Multiple calls of `Execute Command` use separate SSH sessions. Thus,
         possible changes to the environment are not shared between these calls.
         `Write` and `Read XXX` keywords can be used for running multiple
-        commands on same session.
+        commands in the same session.
 
         Examples:
-        | ${out}=   | Execute Command | some command    |              | #stdout is returned |                                 |
-        | ${err}=   | Execute Command | some command    | stderr       | #stderr is returned |                                 |
-        | ${out}    | ${err}=         | Execute Command | some command | both                | #stdout and stderr are returned |
+        | ${stdout}= | Execute Command | ${cmd} |
+        | ${stdout} | ${stderr}= | Execute Command | ${cmd} | return_stderr=yes |
+        | ${rc}= | Execute Command | ${cmd} | return_stdout=${EMPTY} | return_rc=true |
+
+        In the first example, only stdout is returned, in the second, both
+        stdout and stderr are returned and in the last only return code is
+        returned.
         """
         self._info("Executing command '%s'" % command)
-        return self._process_output(self._client.execute_command(command,
-                                                                 ret_mode))
+        return self._client.execute_command(command,
+                *self._options_for_exec_command(return_stdout, return_stderr,
+                                                return_rc))
+
+    def _options_for_exec_command(self, stdout, stderr, rc):
+        if not isinstance(stdout, basestring):
+            return stdout, stderr, rc
+        # Handle legacy options for configuring returned outputs
+        stdout = stdout.lower()
+        if stdout == 'stderr':
+            return False, True, rc
+        if stdout == 'both':
+            return True, True, rc
+        return stdout, stderr, rc
+
     def start_command(self, command):
         """Starts command execution on remote host.
 
