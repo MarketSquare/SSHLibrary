@@ -14,6 +14,7 @@ fi
 
 COMMON_FLAGS="-d $OUTDIR -l NONE -r NONE -P src -P lib/trilead-ssh2-build213.jar --critical regression"
 
+rm $OUTDIR/*
 if [ "$PYBOT" != "" ] ; then
     pybot $COMMON_FLAGS -o pybot_output $* atest
 fi
