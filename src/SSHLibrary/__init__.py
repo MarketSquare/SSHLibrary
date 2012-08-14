@@ -72,15 +72,12 @@ class SSHLibrary:
         respectively.
 
         Examples:
-
         | Library  | SSHLibrary | # normal import |
-
         | Library  | SSHLibrary  | 10 |  | > | # Set timeout and prompt, use default newline |
         """
         self._cache = ConnectionCache()
-        self._cache.current_index = None # For backwards compatibility, before Robot 2.0.2
         self._client = self._cache.current
-        self._newline = self._parse_newline(newline and newline or 'LF')
+        self._newline = self._parse_newline(newline or 'LF')
         self.set_timeout(timeout or 3)
         self._default_log_level = 'INFO'
         self._default_prompt = prompt
@@ -325,7 +322,6 @@ class SSHLibrary:
         self._info("Executing command '%s'" % command)
         return self._process_output(self._client.execute_command(command,
                                                                  ret_mode))
-
     def start_command(self, command):
         """Starts command execution on remote host.
 
@@ -372,12 +368,11 @@ class SSHLibrary:
         opened terminal.
 
         Keywords `Write` and `Write Bare` can be used to write to this shell
-        and keyword `Read Until` and it's variants can be used to read the
+        and keyword `Read Until` and its variants can be used to read the
         command outputs.
 
         This keyword was added in version 1.1.
         """
-
         self._client.open_shell(term_type, width, height)
 
     def write(self, text, loglevel=None):
@@ -394,11 +389,14 @@ class SSHLibrary:
         return self.read_until(self._newline, loglevel)
 
     def write_bare(self, text):
-        """Writes given text over the connection without appending newline"""
+        """Writes given text over the connection without appending newline.
+
+        Unlike `Write` does not consume the written text from the output.
+        """
         try:
             text = str(text)
         except UnicodeError:
-            raise ValueError('Only ascii characters are allowed in SSH.'
+            raise ValueError('Only ASCII characters are allowed in SSH.'
                              'Got: %s' % text)
         self._ensure_prompt_is_set()
         self._ensure_open_shell(for_writing=True)
