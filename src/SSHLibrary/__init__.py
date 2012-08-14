@@ -283,14 +283,11 @@ class SSHLibrary:
         return self._process_output(self._client.read_command_output(ret_mode))
 
     def _process_output(self, output):
+        def _strip_possible_newline(text):
+            return text[:-1] if text.endswith('\n') else text
         if isinstance(output, tuple):
-            return [self._strip_possible_newline(out) for out in output]
-        return self._strip_possible_newline(output)
-
-    def _strip_possible_newline(self, output):
-        if output.endswith('\n'):
-            return output[:-1]
-        return output
+            return [_strip_possible_newline(out) for out in output]
+        return _strip_possible_newline(output)
 
     def set_timeout(self, timeout):
         """Sets the timeout used in read operations to given value.
