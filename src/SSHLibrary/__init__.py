@@ -189,6 +189,81 @@ class SSHLibrary:
         """
         self._client.close()
 
+    def set_timeout(self, timeout):
+        """Sets the timeout used in read operations to given value.
+
+        `timeout` is given in Robot Framework's time format
+        (e.g. 1 minute 20 seconds).
+
+        The read operations of keywords `Read Until`, `Read Until Prompt`,
+        `Read Until Regexp` and `Write Until Expected Output` will try to read
+        the output until either the expected text appears in the output or the
+        timeout expires. For commands that take long time to produce their
+        output, this timeout must be set properly.
+
+        Old timeout is returned and it can be used to restore it later.
+
+        Example:
+        | ${tout} = | Set Timeout | 2 minute 30 seconds |
+        | Do Something |
+        | Set Timeout | ${tout} |
+        """
+        old = hasattr(self, '_timeout') and self._timeout or None
+        self._timeout = utils.timestr_to_secs(timeout)
+        return old is not None and utils.secs_to_timestr(old) or None
+
+    def set_newline(self, newline):
+        """Sets the newline used by `Write` keyword.
+
+        Old newline is returned and it can be used to restore it later.
+        See `Set Timeout` for an example.
+        """
+        old = self._newline
+        self._newline = self._parse_newline(newline)
+        return old
+
+    def _parse_newline(self, newline):
+        return newline.upper().replace('LF','\n').replace('CR','\r')
+
+    def set_prompt(self, prompt):
+        """Sets the prompt used by the current connection.
+
+        Returns the previous prompt.
+
+        The behavior of this keyword was changed in version 1.1, see also
+        `Set Default Prompt`.
+
+        Example:
+        | ${old_prompt}= | Set Prompt | $ |
+        | Do Something |
+        | Set Prompt | ${old_prompt} |
+        """
+        old = self._client.prompt or ''
+        self._client.prompt = prompt
+        return old
+
+    def set_default_prompt(self, prompt):
+        """Sets the default prompt used by new connections.
+
+        Returns the previous default prompt.
+
+        This keyword was added in version 1.1.
+        """
+        old, self._default_prompt = self._default_prompt, prompt
+        return old
+
+    def set_default_log_level(self, level):
+        """Sets the default log level used by all read keywords.
+
+        The possible values are TRACE, DEBUG, INFO and WARN. The default is
+        INFO. The old value is returned and can be used to restore it later,
+        similarly as with `Set Timeout`.
+        """
+        self._is_valid_log_level(level, raise_if_invalid=True)
+        old = self._default_log_level
+        self._default_log_level = level.upper()
+        return old
+
     def login(self, username, password):
         """Logs in to SSH server with given user information.
 
@@ -304,76 +379,6 @@ class SSHLibrary:
         """
 
         self._client.open_shell(term_type, width, height)
-
-    def set_timeout(self, timeout):
-        """Sets the timeout used in read operations to given value.
-
-        `timeout` is given in Robot Framework's time format
-        (e.g. 1 minute 20 seconds).
-
-        The read operations of keywords `Read Until`, `Read Until Prompt`,
-        `Read Until Regexp` and `Write Until Expected Output` will try to read
-        the output until either the expected text appears in the output or the
-        timeout expires. For commands that take long time to produce their
-        output, this timeout must be set properly.
-
-        Old timeout is returned and it can be used to restore it later.
-
-        Example:
-        | ${tout} = | Set Timeout | 2 minute 30 seconds |
-        | Do Something |
-        | Set Timeout | ${tout} |
-        """
-        old = hasattr(self, '_timeout') and self._timeout or None
-        self._timeout = utils.timestr_to_secs(timeout)
-        return old is not None and utils.secs_to_timestr(old) or None
-
-    def set_newline(self, newline):
-        """Sets the newline used by `Write` keyword.
-
-        Old newline is returned and it can be used to restore it later.
-        See `Set Timeout` for an example.
-        """
-        old = self._newline
-        self._newline = self._parse_newline(newline)
-        return old
-
-    def _parse_newline(self, newline):
-        return newline.upper().replace('LF','\n').replace('CR','\r')
-
-    def set_prompt(self, prompt):
-        """Sets the prompt used by the current connection.
-
-        Returns the previous prompt.
-
-        Example:
-        | ${old_prompt}= | Set Prompt | $ |
-        | Do Something |
-        | Set Prompt | ${old_prompt} |
-        """
-        old = self._client.prompt or ''
-        self._client.prompt = prompt
-        return old
-
-    def set_default_prompt(self, prompt):
-        """Sets the default prompt used by new connections.
-
-        Returns the previous default prompt.
-        """
-        old, self._default_prompt = self._default_prompt, prompt
-        return old
-
-    def set_default_log_level(self, level):
-        """Sets the default log level used by all read keywords.
-
-        The possible values are TRACE, DEBUG, INFO and WARN. The default is
-        INFO. The old value is returned and can be used to restore it later,
-        similarly as with `Set Timeout`.
-        """
-        self._is_valid_log_level(level, raise_if_invalid=True)
-        old = self._default_log_level
-        self._default_log_level = level.upper()
-        return old
 
     def write(self, text, loglevel=None):
         """Writes given text over the connection and appends newline.
