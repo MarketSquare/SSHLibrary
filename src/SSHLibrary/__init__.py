@@ -121,16 +121,6 @@ class SSHLibrary:
         self._client.open_shell(term_type, width, height)
         return self._cache.register(self._client, alias)
 
-    def open_shell(self):
-        """Open new shell for running multiple subsequent commands.
-
-        Keywords `Write` and `Write Bare` can be used to write to this shell
-        and keyword `Read Until` and its variants can be used to read the
-        command outputs.
-
-        This keyword was added in version 1.1.
-        """
-
     def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.
 
