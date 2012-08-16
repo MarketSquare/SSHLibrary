@@ -83,7 +83,8 @@ class SSHLibrary:
         self._default_prompt = prompt
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
-                        newline=None, prompt=None):
+                        newline=None, prompt=None, term_type='vt100',
+                        width=80, height=24):
         """Opens a new SSH connection to given `host` and `port`.
 
         Possible already opened connections are cached.
@@ -100,19 +101,35 @@ class SSHLibrary:
         set in `library importing` are used. See  also `Set Timeout`,
         `Set Newline` and `Set Prompt` for more information.
 
+        Starting from SSHLibrary 1.1, a shell is also opened automatically.
+        `term_type` defines the terminal type for this shell, and `width`
+        and `height` can be configured to control the virtual size of it.
+
         Examples:
-        | Open Connection | myhost.net      |            |                     |                     |                  |
-        | Open Connection | yourhost.com    | 2nd conn   | # alias             |                     |                  |
-        | ${id} =         | Open Connection | myhost.net | # index to variable |                     |                  |
-        | ${id} =         | Open Connection | myhost.net | ${None}             | 23                  | # index and port |
-        | Open Connection | myhost.net      | 3rd conn   | 25                  | # alias and port    |                  |
+        | Open Connection | myhost.net      | | | | |
+        | Open Connection | yourhost.com    | 2nd conn   | # alias | |
+        | ${id} =         | Open Connection | myhost.net | # index to variable | |
+        | Open Connection | myhost.net      | port=23  | # different port | |
+        | Open Connection | myhost.net      | newline=CRLF | prompt=# | #set newline and prompt |
+        | Open Connection | myhost.net      | term_type=ansi | width=40 | #confgiure shell |
         """
         self._host, self._port = host, port
         self._timeout = int(timeout) if timeout else self._timeout
         self._newline = self._parse_newline(newline) if newline else self._newline
         prompt = prompt and prompt or self._default_prompt
         self._client = SSHClient(host, int(port), prompt)
+        self._client.open_shell(term_type, width, height)
         return self._cache.register(self._client, alias)
+
+    def open_shell(self):
+        """Open new shell for running multiple subsequent commands.
+
+        Keywords `Write` and `Write Bare` can be used to write to this shell
+        and keyword `Read Until` and its variants can be used to read the
+        command outputs.
+
+        This keyword was added in version 1.1.
+        """
 
     def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.
@@ -385,21 +402,6 @@ class SSHLibrary:
         if isinstance(output, tuple):
             return [_strip_possible_newline(out) for out in output]
         return _strip_possible_newline(output)
-
-    def open_shell(self, term_type='vt100', width=80, height=24):
-        """Open new shell for running multiple subsequent commands.
-
-        `term_type` defines the terminal type for this shell, and `width`
-        and `height` can be configured to control the virtual size of the
-        opened terminal.
-
-        Keywords `Write` and `Write Bare` can be used to write to this shell
-        and keyword `Read Until` and its variants can be used to read the
-        command outputs.
-
-        This keyword was added in version 1.1.
-        """
-        self._client.open_shell(term_type, width, height)
 
     def write(self, text, loglevel=None):
         """Writes given text over the connection and appends newline.
