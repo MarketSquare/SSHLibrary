@@ -10,11 +10,11 @@ Execute Command With Defaults
     Should Be Equal  ${stdout}  This is stdout
 
 Execute Command And Return Stderr
-    ${stderr} =  Execute Command  ./${TEST SCRIPT NAME}    \   stderr=want
+    ${stderr} =  Execute Command  ./${TEST SCRIPT NAME}    \   return_stderr=yes
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command And Return Rc
-    ${rc} =  Execute Command  ./${TEST SCRIPT NAME}    stdout=${FALSE}   rc=${true}
+    ${rc} =  Execute Command  ./${TEST SCRIPT NAME}    return_stdout=${FALSE}   return_rc=${true}
     Should Be Equal  ${rc}  ${0}
 
 Execute Command And Return All Values
