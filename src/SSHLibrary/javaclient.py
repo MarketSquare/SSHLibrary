@@ -51,22 +51,21 @@ class SSHClient(SSHLibraryClient):
         self.client.close()
 
     def _execute_command(self, command):
-        session = self.client.openSession()
-        session.execCommand(command)
+        session = self._start_command(command)
+        return self._read_command_output(session)
+
+    def _read_command_output(self, session=None):
+        session = session or self.sess
         stdout = self._read_from_stream(session.getStdout())
         stderr = self._read_from_stream(session.getStderr())
         rc = session.getExitStatus()
         session.close()
         return stdout, stderr, rc
 
-    def _read_outputs(self, sess, ret_mode):
-        stdout = self._read_from_stream(sess.getStdout())
-        stderr = self._read_from_stream(sess.getStderr())
-        if ret_mode.lower() == 'both':
-            return stdout, stderr
-        if ret_mode.lower() == 'stderr':
-            return stderr
-        return stdout
+    def _start_command(self, command):
+        session = self.client.openSession()
+        session.execCommand(command)
+        return session
 
     def _read_from_stream(self, stream):
         reader = BufferedReader(InputStreamReader(StreamGobbler(stream)))
@@ -78,13 +77,7 @@ class SSHClient(SSHLibraryClient):
         return result
 
     def start_command(self, command):
-        self.sess = self.client.openSession()
-        self.sess.execCommand(command)
-
-    def read_command_output(self, ret_mode):
-        outputs = self._read_outputs(self.sess, ret_mode)
-        self.sess.close()
-        return outputs
+        self.sess = self._start_command(command)
 
     def open_shell(self, term_type, width, height):
         self.shell = self.client.openSession()

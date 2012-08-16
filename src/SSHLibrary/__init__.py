@@ -341,20 +341,8 @@ class SSHLibrary:
         returned.
         """
         self._info("Executing command '%s'" % command)
-        return self._client.execute_command(command,
-                *self._options_for_exec_command(return_stdout, return_stderr,
-                                                return_rc))
-
-    def _options_for_exec_command(self, stdout, stderr, rc):
-        if not isinstance(stdout, basestring):
-            return stdout, stderr, rc
-        # Handle legacy options for configuring returned outputs
-        stdout = stdout.lower()
-        if stdout == 'stderr':
-            return False, True, rc
-        if stdout == 'both':
-            return True, True, rc
-        return stdout, stderr, rc
+        opts = self._output_options(return_stdout, return_stderr, return_rc)
+        return self._client.execute_command(command, *opts)
 
     def start_command(self, command):
         """Starts command execution on remote host.
@@ -372,7 +360,8 @@ class SSHLibrary:
         self._command = command
         self._client.start_command(command)
 
-    def read_command_output(self, ret_mode='stdout'):
+    def read_command_output(self, return_stdout=True, return_stderr=False,
+                            return_rc=False):
         """Reads and returns/logs output (stdout and/or stderr) of a command.
 
         Command must have been started using `Start Command` before this
@@ -385,14 +374,19 @@ class SSHLibrary:
         | ${out}  | ${err}=             | Read Command Output | both                | #stdout and stderr are returned |
         """
         self._info("Reading output of command '%s'" % self._command)
-        return self._process_output(self._client.read_command_output(ret_mode))
+        opts = self._output_options(return_stdout, return_stderr, return_rc)
+        return self._client.read_command_output(*opts)
 
-    def _process_output(self, output):
-        def _strip_possible_newline(text):
-            return text[:-1] if text.endswith('\n') else text
-        if isinstance(output, tuple):
-            return [_strip_possible_newline(out) for out in output]
-        return _strip_possible_newline(output)
+    def _output_options(self, stdout, stderr, rc):
+        if not isinstance(stdout, basestring):
+            return stdout, stderr, rc
+        # Handle legacy options for configuring returned outputs
+        stdout = stdout.lower()
+        if stdout == 'stderr':
+            return False, True, rc
+        if stdout == 'both':
+            return True, True, rc
+        return stdout, stderr, rc
 
     def write(self, text, loglevel=None):
         """Writes given text over the connection and appends newline.

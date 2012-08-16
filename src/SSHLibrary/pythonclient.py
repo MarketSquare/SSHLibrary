@@ -60,24 +60,22 @@ class SSHClient(SSHLibraryClient):
         self.client.close()
 
     def _execute_command(self, command):
+        channel, stdout, stderr = self._start_command(command)
+        return stdout.read(), stderr.read(), channel.recv_exit_status()
+
+    def _start_command(self, command):
         channel = self.client.get_transport().open_session()
         channel.exec_command(command)
         stdout = channel.makefile('rb', -1)
         stderr = channel.makefile_stderr('rb', -1)
-        return stdout.read(), stderr.read(), channel.recv_exit_status()
+        return channel, stdout, stderr
 
     def start_command(self, command):
-        _, self.stdout, self.stderr = self.client.exec_command(command)
+        self.channel, self.stdout, self.stderr = self._start_command(command)
 
-    def read_command_output(self, ret_mode):
-        return self._read_command_output(self.stdout, self.stderr, ret_mode)
-
-    def _read_command_output(self, stdout, stderr, ret_mode):
-        if ret_mode.lower() == 'both':
-            return stdout.read(), stderr.read()
-        if ret_mode.lower() == 'stderr':
-            return stderr.read()
-        return stdout.read()
+    def _read_command_output(self):
+        return self.stdout.read(), self.stderr.read(), \
+            self.channel.recv_exit_status()
 
     def open_shell(self, term_type, width, height):
         self.shell = self.client.invoke_shell(term_type, width, height)

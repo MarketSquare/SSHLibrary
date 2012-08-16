@@ -26,18 +26,30 @@ class SSHLibraryClient(object):
         self.shell = None
         self.client = self._create_client()
 
-    def execute_command(self, command, want_stdout, want_stderr, want_rc):
+    def execute_command(self, command, return_stdout, return_stderr,
+                        return_rc):
         stdout, stderr, rc = self._execute_command(command)
+        return self._return_outputs(stdout, stderr, rc, return_stdout,
+                                    return_stderr, return_rc)
+
+    def _return_outputs(self, stdout, stderr, rc, return_stdout, return_stderr,
+                        return_rc):
         ret = []
-        if want_stdout:
+        print return_stdout, return_stderr, return_rc
+        if return_stdout:
             ret.append(self._process_output(stdout))
-        if want_stderr:
+        if return_stderr:
             ret.append(self._process_output(stderr))
-        if want_rc:
+        if return_rc:
             ret.append(rc)
         if len(ret) == 1:
             return ret[0]
         return ret
+
+    def read_command_output(self, return_stdout, return_stderr, return_rc):
+        stdout, stderr, rc = self._read_command_output()
+        return self._return_outputs(stdout, stderr, rc, return_stdout,
+                                    return_stderr, return_rc)
 
     def _process_output(self, text):
         if text.endswith('\n'):
