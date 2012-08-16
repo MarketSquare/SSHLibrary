@@ -117,8 +117,8 @@ class SSHLibrary:
         self._timeout = int(timeout) if timeout else self._timeout
         self._newline = self._parse_newline(newline) if newline else self._newline
         prompt = prompt and prompt or self._default_prompt
+        self._term_type, self._width, self._height = term_type, width, height
         self._client = SSHClient(host, int(port), prompt)
-        self._client.open_shell(term_type, width, height)
         return self._cache.register(self._client, alias)
 
     def switch_connection(self, index_or_alias):
@@ -280,6 +280,7 @@ class SSHLibrary:
         self._info("Logging into '%s:%s' as '%s'."
                     % (self._host, self._port, username))
         self._client.login(username, password)
+        self._client.open_shell(self._term_type, self._width, self._height)
         return self.read_until_prompt() if self._client.prompt else self.read()
 
     def login_with_public_key(self, username, keyfile, password):
