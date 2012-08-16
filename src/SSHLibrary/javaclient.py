@@ -23,10 +23,10 @@ except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
-from client import SSHLibraryClient, AuthenticationException
+from core import SSHClient, Command, AuthenticationException
 
 
-class SSHClient(SSHLibraryClient):
+class JavaSSHClient(SSHClient):
 
     def _create_client(self):
         client = Connection(self.host, self.port)
@@ -50,34 +50,10 @@ class SSHClient(SSHLibraryClient):
     def close(self):
         self.client.close()
 
-    def _execute_command(self, command):
-        session = self._start_command(command)
-        return self._read_command_output(session)
-
-    def _read_command_output(self, session=None):
-        session = session or self.sess
-        stdout = self._read_from_stream(session.getStdout())
-        stderr = self._read_from_stream(session.getStderr())
-        rc = session.getExitStatus()
-        session.close()
-        return stdout, stderr, rc
-
     def _start_command(self, command):
-        session = self.client.openSession()
-        session.execCommand(command)
-        return session
-
-    def _read_from_stream(self, stream):
-        reader = BufferedReader(InputStreamReader(StreamGobbler(stream)))
-        result = ''
-        line = reader.readLine()
-        while line is not None:
-            result += line + '\n'
-            line = reader.readLine()
-        return result
-
-    def start_command(self, command):
-        self.sess = self._start_command(command)
+        cmd = RemoteCommand(command)
+        cmd.run_in(self.client.openSession())
+        return cmd
 
     def open_shell(self, term_type, width, height):
         self.shell = self.client.openSession()
@@ -166,3 +142,25 @@ class SSHClient(SSHLibraryClient):
         self.sftp_client.closeFile(remotefile)
         localfile.flush()
         localfile.close()
+
+
+class RemoteCommand(Command):
+
+    def _execute(self):
+        self._session.execCommand(self._command)
+
+    def _read_outputs(self):
+        stdout = self._read_from_stream(self._session.getStdout())
+        stderr = self._read_from_stream(self._session.getStderr())
+        rc = self._session.getExitStatus()
+        self._session.close()
+        return stdout, stderr, rc
+
+    def _read_from_stream(self, stream):
+        reader = BufferedReader(InputStreamReader(StreamGobbler(stream)))
+        result = ''
+        line = reader.readLine()
+        while line is not None:
+            result += line + '\n'
+            line = reader.readLine()
+        return result

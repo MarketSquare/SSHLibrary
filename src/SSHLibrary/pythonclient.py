@@ -22,7 +22,7 @@ except ImportError:
             'Ensure that paramiko and pycrypto modules are installed.'
             )
 
-from client import SSHLibraryClient, AuthenticationException
+from core import SSHClient, Command, AuthenticationException
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -36,8 +36,7 @@ paramiko.transport.Transport._orig_start_client = \
 paramiko.transport.Transport.start_client = _monkey_patched_start_client
 
 
-class SSHClient(SSHLibraryClient):
-
+class PythonSSHClient(SSHClient):
     enable_ssh_logging = staticmethod(lambda path:
             paramiko.util.log_to_file(path))
 
@@ -59,23 +58,10 @@ class SSHClient(SSHLibraryClient):
     def close(self):
         self.client.close()
 
-    def _execute_command(self, command):
-        channel, stdout, stderr = self._start_command(command)
-        return stdout.read(), stderr.read(), channel.recv_exit_status()
-
     def _start_command(self, command):
-        channel = self.client.get_transport().open_session()
-        channel.exec_command(command)
-        stdout = channel.makefile('rb', -1)
-        stderr = channel.makefile_stderr('rb', -1)
-        return channel, stdout, stderr
-
-    def start_command(self, command):
-        self.channel, self.stdout, self.stderr = self._start_command(command)
-
-    def _read_command_output(self):
-        return self.stdout.read(), self.stderr.read(), \
-            self.channel.recv_exit_status()
+        cmd = RemoteCommand(command)
+        cmd.run_in(self.client.get_transport().open_session())
+        return cmd
 
     def open_shell(self, term_type, width, height):
         self.shell = self.client.invoke_shell(term_type, width, height)
@@ -127,9 +113,23 @@ class SSHClient(SSHLibraryClient):
         remotefile.close()
 
     def listfiles(self, path):
-        return[ getattr(fileinfo, 'filename', '?') for fileinfo
+        return [getattr(fileinfo, 'filename', '?') for fileinfo
                 in self.sftp_client.listdir_attr(path)
-                if stat.S_ISREG(fileinfo.st_mode) or stat.S_IFMT(fileinfo.st_mode) == 0 ]
+                if stat.S_ISREG(fileinfo.st_mode) or
+                        stat.S_IFMT(fileinfo.st_mode) == 0]
 
     def get_file(self, source, dest):
         self.sftp_client.get(source, dest)
+
+
+class RemoteCommand(Command):
+
+    def _execute(self):
+        self._session.exec_command(self._command)
+
+    def _read_outputs(self):
+        stdout = self._session.makefile('rb', -1).read()
+        stderr = self._session.makefile_stderr('rb', -1).read()
+        rc = self._session.recv_exit_status()
+        self._session.close()
+        return stdout, stderr, rc

@@ -23,9 +23,9 @@ from robot import utils
 from connectioncache import ConnectionCache
 from client import AuthenticationException
 if utils.is_jython:
-    from javaclient import SSHClient
+    from javaclient import JavaSSHClient as SSHClient
 else:
-    from pythonclient import SSHClient
+    from pythonclient import PythonSSHClient as SSHClient
 from version import VERSION
 
 __version__ = VERSION
@@ -367,20 +367,17 @@ class SSHLibrary:
         Command must have been started using `Start Command` before this
         keyword can be used.
 
-        Examples:
-        | Start Command | some command |
-        | ${out}= | Read Command Output |                     |                     |                                 |
-        | ${err}= | Read Command Output | stderr              | #stderr is returned |                                 |
-        | ${out}  | ${err}=             | Read Command Output | both                | #stdout and stderr are returned |
+        See `Execute Command` for examples about how the return value can
+        be configured using `return_stdout`, `return_stderr` and `return_rc`.
         """
         self._info("Reading output of command '%s'" % self._command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
         return self._client.read_command_output(*opts)
 
     def _output_options(self, stdout, stderr, rc):
+        # Handle legacy options for configuring returned outputs
         if not isinstance(stdout, basestring):
             return stdout, stderr, rc
-        # Handle legacy options for configuring returned outputs
         stdout = stdout.lower()
         if stdout == 'stderr':
             return False, True, rc

@@ -17,7 +17,30 @@ class AuthenticationException(RuntimeError):
     pass
 
 
-class SSHLibraryClient(object):
+class Command(object):
+    """Base class for remote commands."""
+
+    def __init__(self, command):
+        self._command = command
+        self._session = None
+
+    def run_in(self, session):
+        """Run this command in given SSH session.
+
+        :param session: a session in an already open SSH connection
+        """
+        self._session = session
+        self._execute()
+
+    def read_outputs(self):
+        """Return outputs of this command.
+
+        :return: a 3-tuple of stdout, stderr and return code.
+        """
+        return self._read_outputs()
+
+
+class SSHClient(object):
 
     def __init__(self, host, port, prompt):
         self.host = host
@@ -25,36 +48,29 @@ class SSHLibraryClient(object):
         self.prompt = prompt
         self.shell = None
         self.client = self._create_client()
+        self._commands = []
 
     def execute_command(self, command, return_stdout, return_stderr,
                         return_rc):
-        stdout, stderr, rc = self._execute_command(command)
-        return self._return_outputs(stdout, stderr, rc, return_stdout,
-                                    return_stderr, return_rc)
+        self.start_command(command)
+        return self.read_command_output(return_stdout, return_stderr,
+                                        return_rc)
 
-    def _return_outputs(self, stdout, stderr, rc, return_stdout, return_stderr,
-                        return_rc):
+    def start_command(self, command):
+        self._commands.append(self._start_command(command))
+
+    def read_command_output(self, return_stdout, return_stderr, return_rc):
+        stdout, stderr, rc = self._commands.pop().read_outputs()
         ret = []
-        print return_stdout, return_stderr, return_rc
         if return_stdout:
-            ret.append(self._process_output(stdout))
+            ret.append(stdout.rstrip('\n'))
         if return_stderr:
-            ret.append(self._process_output(stderr))
+            ret.append(stderr.rstrip('\n'))
         if return_rc:
             ret.append(rc)
         if len(ret) == 1:
             return ret[0]
         return ret
-
-    def read_command_output(self, return_stdout, return_stderr, return_rc):
-        stdout, stderr, rc = self._read_command_output()
-        return self._return_outputs(stdout, stderr, rc, return_stdout,
-                                    return_stderr, return_rc)
-
-    def _process_output(self, text):
-        if text.endswith('\n'):
-            return text[:-1]
-        return text
 
     def put_file(self, source, dest, mode, newline_char):
         remotefile = self._create_remote_file(dest, mode)
