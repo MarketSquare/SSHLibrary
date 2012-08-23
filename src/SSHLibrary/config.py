@@ -91,8 +91,13 @@ class LogLevelEntry(Entry):
     Given string must be on of 'TRACE', 'DEBUG', 'INFO' or 'WARN', case
     insensitively.
     """
+    LEVELS = ('TRACE', 'DEBUG', 'INFO', 'WARN')
+
     def _parse_value(self, value):
-        return value.upper()
+        value = value.upper()
+        if value not in self.LEVELS:
+            raise ConfigurationException('Invalid log level: %s' % value)
+        return value
 
 
 class NewlineEntry(Entry):
