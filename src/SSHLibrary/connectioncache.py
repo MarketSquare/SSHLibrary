@@ -15,7 +15,7 @@
 from robot.utils.normalizing import NormalizedDict
 
 
-class ConnectionCache:
+class ConnectionCache(object):
 
     """Connection cache for different Robot test libraries that use connections.
 
