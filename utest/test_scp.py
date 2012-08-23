@@ -27,15 +27,16 @@ class MySSHLibrary(SSHLibrary):
     _get_get_file_sources = lambda self, x: x
 
 
-class TestClient(unittest.TestCase):
+class TestRemoteAndLocalPathResolution(unittest.TestCase):
 
     def test_put_file(self):
-        data = [ (['foo.txt'], 'foo.txt', ['/home/foo.txt']),
-                 (['txt.bar'], 'c:/tmp/foo.txt', ['/tmp/foo.txt']),
-                 (['FOO.TXT'], '.', ['/home/FOO.TXT']),
-                 (['foo.txt', 'bar.sh', 'BAZ.my'], '/opt/Files/',
-                  ['/opt/Files/foo.txt', '/opt/Files/bar.sh', '/opt/Files/BAZ.my']),
-                 (['myfile'], '\\tmp\\', ['/tmp/myfile']) ]
+        data = [(['foo.txt'], 'foo.txt', ['/home/foo.txt']),
+                (['txt.bar'], 'c:/tmp/foo.txt', ['/tmp/foo.txt']),
+                (['FOO.TXT'], '.', ['/home/FOO.TXT']),
+                (['foo.txt', 'bar.sh', 'BAZ.my'], '/opt/Files/',
+                    ['/opt/Files/foo.txt', '/opt/Files/bar.sh',
+                     '/opt/Files/BAZ.my']),
+                (['myfile'], '\\tmp\\', ['/tmp/myfile'])]
         for src, dest, exp in data:
             client = _MockClient()
             lib = MySSHLibrary()
@@ -44,12 +45,12 @@ class TestClient(unittest.TestCase):
             self.assertEquals(client.putfile_record, exp)
 
     def test_get_file(self):
-        data = [ (['foo.txt'], '/home/test/', ['/home/test/foo.txt']),
-                 (['myf.xyzzy'], '/home/yzzyx.myf', ['/home/yzzyx.myf']),
-                 (['FOO.sh', 'bar.TXT'], '/home/', ['/home/FOO.sh', '/home/bar.TXT']),
-                 (['/home/baz.file'], '.', [os.path.join(os.path.abspath(os.curdir), 'baz.file')]),
-              #  (['\\myfile'], '/home/', ['/home/myfile'])
-                 ]
+        data = [(['foo.txt'], '/home/test/', ['/home/test/foo.txt']),
+                (['myf.xyzzy'], '/home/yzzyx.myf', ['/home/yzzyx.myf']),
+                (['FOO.sh', 'bar.TXT'], '/home/',
+                    ['/home/FOO.sh', '/home/bar.TXT']),
+                (['/home/baz.file'], '.',
+                    [os.path.join(os.path.abspath(os.curdir), 'baz.file')])]
         for src, dest, exp in data:
             client = _MockClient()
             lib = MySSHLibrary()
