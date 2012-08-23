@@ -21,7 +21,9 @@ import posixpath
 from robot import utils
 
 from connectioncache import ConnectionCache
-from client import AuthenticationException
+from core import AuthenticationException
+from config import (Configuration, StringEntry, NewlineEntry, TimeEntry,
+        IntegerEntry, LogLevelEntry)
 if utils.is_jython:
     from javaclient import JavaSSHClient as SSHClient
 else:
@@ -31,6 +33,30 @@ from version import VERSION
 __version__ = VERSION
 
 
+class DefaultConfig(Configuration):
+
+    def __init__(self, timeout, newline, prompt, log_level):
+        Configuration.__init__(self,
+                timeout=TimeEntry(timeout or 3),
+                newline=NewlineEntry(newline or 'LF'),
+                prompt=StringEntry(prompt),
+                log_level=LogLevelEntry(log_level or 'INFO'))
+
+
+class ClientConfig(Configuration):
+
+    def __init__(self, host, alias, port, timeout, newline, prompt,
+                 term_type, width, height, defaults):
+        Configuration.__init__(self,
+                host=StringEntry(host),
+                alias=StringEntry(alias),
+                port=IntegerEntry(port or 22),
+                timeout=TimeEntry(timeout or defaults.timeout),
+                newline=StringEntry(newline or defaults.newline),
+                prompt=StringEntry(prompt or defaults.prompt),
+                term_type=StringEntry(term_type or 'vt100'),
+                width=IntegerEntry(width or 80),
+                height=IntegerEntry(height or 24))
 
 
 class DeprecatedKeywords(object):
@@ -93,24 +119,56 @@ class SSHLibrary(DeprecatedKeywords):
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, timeout=3, newline='LF', prompt=None):
+    def __init__(self, timeout=3, newline='LF', prompt=None,
+                 log_level='INFO'):
         """SSH Library allows some import time configuration.
 
         `timeout`, `newline` and `prompt` set default values for new
-        connections opened with `Open Connection`.These values may be later
-        changed with `Set Timeout`, `Set Newline` and `Set Default Prompt`,
-        respectively.
+        connections opened with `Open Connection`. The default values may
+        later be changed using `Set Default Configuration` and settings
+        of a single connection with `Set Client Configuration`.
+
+        `log_level` sets the default log level used to log return values of
+        `Read Until` variants. It can also be later changed using `Set
+        Default Configuration`.
 
         Examples:
-        | Library  | SSHLibrary | # normal import |
-        | Library  | SSHLibrary  | 10 |  | > | # Set timeout and prompt, use default newline |
+        | Library | SSHLibrary | # use default values |
+        | Library | SSHLibrary | timeout=10 | prompt=> |
         """
         self._cache = ConnectionCache()
-        self._client = self._cache.current
-        self._newline = self._parse_newline(newline or 'LF')
-        self.set_timeout(timeout or 3)
-        self._default_log_level = 'INFO'
-        self._default_prompt = prompt
+        self._config = DefaultConfig(timeout, newline, prompt, log_level)
+
+    @property
+    def ssh_client(self):
+        return self._cache.current
+
+    def set_default_configuration(self, **entries):
+        """Update the default configuration values.
+
+        This keyword can only be used using named argument syntax. The names
+        of accepted arguments are the same as can be given in the `library
+        importing`.
+
+        Example:
+            | Set Default Configuration | newline=CRLF | prompt=$ |
+        """
+        self._config.update(**entries)
+
+    def set_client_configuration(self, **entries):
+        """Update the client configuration values.
+
+        Works on the currently selected connection. At least one connection
+        must have been opened using `Open Connection`.
+
+        This keyword can only be used using named argument syntax. The names
+        of accepted arguments are the same as can be given to the `Open
+        Connection` keyword.
+
+        Example:
+            | Set Client Configuration | term_type=ansi | timeout=2 hours |
+        """
+        self.ssh_client.config.update(**entries)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type='vt100',
@@ -128,28 +186,26 @@ class SSHLibrary(DeprecatedKeywords):
         Connection` for more details about that.
 
         If `timeout`, `newline` or `prompt` are not given, the default values
-        set in `library importing` are used. See  also `Set Timeout`,
-        `Set Newline` and `Set Prompt` for more information.
+        set in `library importing` are used. See also `Set Default
+        Configuration`.
 
-        Starting from SSHLibrary 1.1, a shell is also opened automatically.
-        `term_type` defines the terminal type for this shell, and `width`
-        and `height` can be configured to control the virtual size of it.
+        Starting from SSHLibrary 1.1, a shell session is also opened
+        automatically by this keyword. `term_type` defines the terminal type
+        for this shell, and `width` and `height` can be configured to control
+        the virtual size of it.
+
+        All of the client configuration options can be later updated using
+        `Set Client Configuration`.
 
         Examples:
-        | Open Connection | myhost.net      | | | | |
-        | Open Connection | yourhost.com    | 2nd conn   | # alias | |
-        | ${id} =         | Open Connection | myhost.net | # index to variable | |
-        | Open Connection | myhost.net      | port=23  | # different port | |
-        | Open Connection | myhost.net      | newline=CRLF | prompt=# | #set newline and prompt |
-        | Open Connection | myhost.net      | term_type=ansi | width=40 | #confgiure shell |
+        | Open Connection | myhost.net |
+        | Open Connection | yourhost.com | alias=2nd conn | port=23 |prompt=# |
+        | Open Connection | myhost.net | term_type=ansi | width=40 |
+        | ${id} =         | Open Connection | myhost.net |
         """
-        self._host, self._port = host, port
-        self._timeout = int(timeout) if timeout else self._timeout
-        self._newline = self._parse_newline(newline) if newline else self._newline
-        prompt = prompt and prompt or self._default_prompt
-        self._term_type, self._width, self._height = term_type, width, height
-        self._client = SSHClient(host, int(port), prompt)
-        return self._cache.register(self._client, alias)
+        config = ClientConfig(host, alias, port, timeout, newline, prompt,
+                              term_type, width, height, self._config)
+        return self._cache.register(SSHClient(config), config.alias)
 
     def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.
@@ -157,7 +213,7 @@ class SSHLibrary(DeprecatedKeywords):
         Index is got from `Open Connection` and alias can be given to it.
 
         Returns the index of previous connection, which can be used to restore
-        the connection later. This works with Robot Framework 2.0.2 or newer.
+        the connection later.
 
         Example:
 
@@ -183,7 +239,7 @@ class SSHLibrary(DeprecatedKeywords):
         | Switch Connection  | ${id}           |            |
         """
         old_index = self._cache.current_index
-        self._client = self._cache.switch(index_or_alias)
+        self._cache.switch(index_or_alias)
         return old_index
 
     def close_all_connections(self):
@@ -198,7 +254,6 @@ class SSHLibrary(DeprecatedKeywords):
             self._cache.close_all()
         except AttributeError:
             pass
-        self._client = self._cache.current
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given `logfile`
@@ -221,7 +276,7 @@ class SSHLibrary(DeprecatedKeywords):
     def close_connection(self):
         """Closes the currently active connection.
         """
-        self._client.close()
+        self.ssh_client.close()
 
     def login(self, username, password):
         """Logs in to SSH server with given user information.
@@ -232,11 +287,11 @@ class SSHLibrary(DeprecatedKeywords):
         Example:
         | Login | john | secret |
         """
-        self._info("Logging into '%s:%s' as '%s'."
-                    % (self._host, self._port, username))
-        self._client.login(username, password)
-        self._client.open_shell(self._term_type, self._width, self._height)
-        return self.read_until_prompt() if self._client.prompt else self.read()
+        self._log_login(username)
+        self.ssh_client.login(username, password)
+        self.ssh_client.open_shell()
+        return self.read_until_prompt() if self.ssh_client.config.prompt else \
+                    self.read()
 
     def login_with_public_key(self, username, keyfile, password):
         """Logs into SSH server with using key-based authentication.
@@ -250,13 +305,17 @@ class SSHLibrary(DeprecatedKeywords):
 
         """
         self._verify_key_file(keyfile)
-        self._info("Logging into '%s:%s' as '%s'."
-                    % (self._host, self._port, username))
+        self._log_login(username)
         try:
-            self._client.login_with_public_key(username, keyfile, password)
+            self.ssh_client.login_with_public_key(username, keyfile, password)
         except AuthenticationException:
             raise RuntimeError('Login with public key failed')
-        return self.read_until_prompt() if self._client.prompt else self.read()
+        return self.read_until_prompt() if self.ssh_client.config.prompt else \
+                    self.read()
+
+    def _log_login(self, username):
+        self._info("Logging into '%s:%s' as '%s'."
+                    % (self.ssh_client.host, self.ssh_client.port, username))
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
@@ -297,7 +356,7 @@ class SSHLibrary(DeprecatedKeywords):
         """
         self._info("Executing command '%s'" % command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
-        return self._client.execute_command(command, *opts)
+        return self.ssh_client.execute_command(command, *opts)
 
     def start_command(self, command):
         """Starts command execution on remote host.
@@ -313,7 +372,7 @@ class SSHLibrary(DeprecatedKeywords):
         """
         self._info("Starting command '%s'" % command)
         self._command = command
-        self._client.start_command(command)
+        self.ssh_client.start_command(command)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
@@ -327,7 +386,7 @@ class SSHLibrary(DeprecatedKeywords):
         """
         self._info("Reading output of command '%s'" % self._command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
-        return self._client.read_command_output(*opts)
+        return self.ssh_client.read_command_output(*opts)
 
     def _output_options(self, stdout, stderr, rc):
         # Handle legacy options for configuring returned outputs
@@ -350,8 +409,8 @@ class SSHLibrary(DeprecatedKeywords):
         command. To get the output, one of the `Read XXX` keywords must be
         used.
         """
-        self.write_bare(text + self._newline)
-        return self.read_until(self._newline, loglevel)
+        self.write_bare(text + self._config.newline)
+        return self.read_until(self._config.newline, loglevel)
 
     def write_bare(self, text):
         """Writes given text over the connection without appending newline.
@@ -366,10 +425,10 @@ class SSHLibrary(DeprecatedKeywords):
         self._ensure_prompt_is_set()
         self._ensure_open_shell(for_writing=True)
         self._info("Writing %s" % repr(text))
-        self._client.write(text)
+        self.ssh_client.write(text)
 
     def _ensure_open_shell(self, for_writing=False):
-        if self._client.shell is None:
+        if self.ssh_client.shell is None:
             self.open_shell()
             if for_writing:
                 self.read_until_prompt('INFO')
@@ -386,7 +445,7 @@ class SSHLibrary(DeprecatedKeywords):
         buffer, thus clearing it.
         """
         self._ensure_open_shell()
-        ret = self._client.read()
+        ret = self.ssh_client.read()
         self._log(ret, loglevel)
         return ret
 
@@ -407,8 +466,8 @@ class SSHLibrary(DeprecatedKeywords):
         self._ensure_open_shell()
         ret = ''
         start_time = time.time()
-        while time.time() < float(self._timeout) + start_time:
-            ret += self._client.read_char()
+        while time.time() < float(self._config.timeout) + start_time:
+            ret += self.ssh_client.read_char()
             if (isinstance(expected, basestring) and expected in ret) or \
                (not isinstance(expected, basestring) and expected.search(ret)):
                 self._log(ret, loglevel)
@@ -417,7 +476,7 @@ class SSHLibrary(DeprecatedKeywords):
         if not isinstance(expected, basestring):
             expected = expected.pattern
         raise AssertionError("No match found for '%s' in %s"
-                % (expected, utils.secs_to_timestr(self._timeout)))
+                % (expected, utils.secs_to_timestr(self._config.timeout)))
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Reads output until a match to `regexp` is found or timeout expires.
@@ -451,10 +510,10 @@ class SSHLibrary(DeprecatedKeywords):
         produce prompt characters in its output.
         """
         self._ensure_prompt_is_set()
-        return self.read_until(self._client.prompt, loglevel)
+        return self.read_until(self.ssh_client.config.prompt, loglevel)
 
     def _ensure_prompt_is_set(self):
-        if self._client.prompt is None:
+        if not self.ssh_client.config.prompt:
             raise RuntimeError("Using 'Read Until Prompt', 'Write' or "
                 "'Write Bare' keyword requires setting prompt first. "
                 "Prompt can be set either when taking library into use or "
@@ -534,16 +593,16 @@ class SSHLibrary(DeprecatedKeywords):
 
         """
         mode = int(mode, 8)
-        self._client.create_sftp_client()
+        self.ssh_client.create_sftp_client()
         localfiles = self._get_put_file_sources(source)
         remotefiles, remotepath = self._get_put_file_destinations(localfiles,
                                                                   destination)
-        self._client.create_missing_remote_path(remotepath)
+        self.ssh_client.create_missing_remote_path(remotepath)
         for src, dst in zip(localfiles, remotefiles):
             self._info("Putting '%s' to '%s'" % (src, dst))
             newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newlines, None)
-            self._client.put_file(src, dst, mode, newline)
-        self._client.close_sftp_client()
+            self.ssh_client.put_file(src, dst, mode, newline)
+        self.ssh_client.close_sftp_client()
 
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep))
@@ -558,7 +617,7 @@ class SSHLibrary(DeprecatedKeywords):
     def _get_put_file_destinations(self, sources, dest):
         dest = dest.split(':')[-1].replace('\\', '/')
         if dest == '.':
-            dest = self._client.homedir + '/'
+            dest = self.ssh_client.homedir + '/'
         if len(sources) > 1 and dest[-1] != '/':
             raise ValueError('It is not possible to copy multiple source '
                              'files to one destination file.')
@@ -572,7 +631,7 @@ class SSHLibrary(DeprecatedKeywords):
 
     def _parse_path_elements(self, dest):
         if not posixpath.isabs(dest):
-            dest = posixpath.join(self._client.homedir, dest)
+            dest = posixpath.join(self.ssh_client.homedir, dest)
         return posixpath.split(dest)
 
     def get_file(self, source, destination='.'):
@@ -604,22 +663,22 @@ class SSHLibrary(DeprecatedKeywords):
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
 
         """
-        self._client.create_sftp_client()
+        self.ssh_client.create_sftp_client()
         remotefiles = self._get_get_file_sources(source)
         self._debug('Source pattern matched remote files: %s' %
                     utils.seq2str(remotefiles))
         localfiles = self._get_get_file_destinations(remotefiles, destination)
         for src, dst in zip(remotefiles, localfiles):
             self._info('Getting %s to %s' % (src, dst))
-            self._client.get_file(src, dst)
-        self._client.close_sftp_client()
+            self.ssh_client.get_file(src, dst)
+        self.ssh_client.close_sftp_client()
 
     def _get_get_file_sources(self, source):
         path, pattern = posixpath.split(source)
         if not path:
             path = '.'
         sourcefiles = []
-        for filename in self._client.listfiles(path):
+        for filename in self.ssh_client.listfiles(path):
             if utils.matches(filename, pattern):
                 if path:
                     filename = posixpath.join(path, filename)
@@ -661,7 +720,7 @@ class SSHLibrary(DeprecatedKeywords):
         self._is_valid_log_level(level, raise_if_invalid=True)
         msg = msg.strip()
         if level is None:
-            level = self._default_log_level
+            level = self._config.log_level
         if msg != '':
             print '*%s* %s' % (level.upper(), msg)
 

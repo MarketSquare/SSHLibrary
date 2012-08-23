@@ -42,10 +42,10 @@ class Command(object):
 
 class SSHClient(object):
 
-    def __init__(self, host, port, prompt):
-        self.host = host
-        self.port = port
-        self.prompt = prompt
+    def __init__(self, config):
+        self.host = config.host
+        self.port = config.port
+        self.config = config
         self.shell = None
         self.client = self._create_client()
         self._commands = []

@@ -55,9 +55,10 @@ class JavaSSHClient(SSHClient):
         cmd.run_in(self.client.openSession())
         return cmd
 
-    def open_shell(self, term_type, width, height):
+    def open_shell(self):
         self.shell = self.client.openSession()
-        self.shell.requestPTY(term_type, width, height, 0, 0, None)
+        self.shell.requestPTY(self.config.term_type, self.config.width,
+                self.config.height, 0, 0, None)
         self.shell.startShell()
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()

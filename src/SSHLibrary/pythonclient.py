@@ -63,8 +63,9 @@ class PythonSSHClient(SSHClient):
         cmd.run_in(self.client.get_transport().open_session())
         return cmd
 
-    def open_shell(self, term_type, width, height):
-        self.shell = self.client.invoke_shell(term_type, width, height)
+    def open_shell(self):
+        self.shell = self.client.invoke_shell(self.config.term_type,
+                self.config.width, self.config.height)
 
     def write(self, text):
         self.shell.sendall(text)
