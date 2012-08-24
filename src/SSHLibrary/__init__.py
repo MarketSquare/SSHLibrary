@@ -20,10 +20,10 @@ import posixpath
 
 from robot import utils
 
-from config import (Configuration, StringEntry, NewlineEntry, TimeEntry,
-        IntegerEntry, LogLevelEntry)
 from connectioncache import ConnectionCache
-from core import AuthenticationException
+from core import AuthenticationException, ClientConfig
+from config import (Configuration, StringEntry, NewlineEntry, TimeEntry,
+        LogLevelEntry)
 from deprecated import DeprecatedSSHLibraryKeywords
 from version import VERSION
 if utils.is_jython:
@@ -32,32 +32,6 @@ else:
     from pythonclient import PythonSSHClient as SSHClient
 
 __version__ = VERSION
-
-
-class DefaultConfig(Configuration):
-
-    def __init__(self, timeout, newline, prompt, log_level):
-        Configuration.__init__(self,
-                timeout=TimeEntry(timeout or 3),
-                newline=NewlineEntry(newline or 'LF'),
-                prompt=StringEntry(prompt),
-                log_level=LogLevelEntry(log_level or 'INFO'))
-
-
-class ClientConfig(Configuration):
-
-    def __init__(self, host, alias, port, timeout, newline, prompt,
-                 term_type, width, height, defaults):
-        Configuration.__init__(self,
-                host=StringEntry(host),
-                alias=StringEntry(alias),
-                port=IntegerEntry(port or 22),
-                timeout=TimeEntry(timeout or defaults.timeout),
-                newline=StringEntry(newline or defaults.newline),
-                prompt=StringEntry(prompt or defaults.prompt),
-                term_type=StringEntry(term_type or 'vt100'),
-                width=IntegerEntry(width or 80),
-                height=IntegerEntry(height or 24))
 
 
 class SSHLibrary(DeprecatedSSHLibraryKeywords):
@@ -706,3 +680,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         if not raise_if_invalid:
             return False
         raise AssertionError("Invalid log level '%s'" % level)
+
+
+class DefaultConfig(Configuration):
+
+    def __init__(self, timeout, newline, prompt, log_level):
+        Configuration.__init__(self,
+                timeout=TimeEntry(timeout or 3),
+                newline=NewlineEntry(newline or 'LF'),
+                prompt=StringEntry(prompt),
+                log_level=LogLevelEntry(log_level or 'INFO'))

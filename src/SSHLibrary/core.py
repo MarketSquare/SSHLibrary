@@ -12,6 +12,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from config import Configuration, StringEntry, TimeEntry, IntegerEntry
+
+
+class ClientConfig(Configuration):
+
+    def __init__(self, host, alias, port, timeout, newline, prompt,
+                 term_type, width, height, defaults):
+        Configuration.__init__(self,
+                host=StringEntry(host),
+                alias=StringEntry(alias),
+                port=IntegerEntry(port or 22),
+                timeout=TimeEntry(timeout or defaults.timeout),
+                newline=StringEntry(newline or defaults.newline),
+                prompt=StringEntry(prompt or defaults.prompt),
+                term_type=StringEntry(term_type or 'vt100'),
+                width=IntegerEntry(width or 80),
+                height=IntegerEntry(height or 24))
+
 
 class AuthenticationException(RuntimeError):
     pass
