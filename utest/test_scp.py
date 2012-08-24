@@ -40,7 +40,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
         for src, dest, exp in data:
             client = _MockClient()
             lib = MySSHLibrary()
-            lib._client = client
+            lib._cache.register(client)
             lib.put_file(src, dest, '0744')
             self.assertEquals(client.putfile_record, exp)
 
@@ -54,7 +54,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
         for src, dest, exp in data:
             client = _MockClient()
             lib = MySSHLibrary()
-            lib._client = client
+            lib._cache.register(client)
             lib.get_file(src, dest)
             self.assertEquals(client.getfile_record, exp)
 
