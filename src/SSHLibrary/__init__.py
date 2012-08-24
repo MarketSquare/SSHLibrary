@@ -366,15 +366,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
             raise ValueError('Only ASCII characters are allowed in SSH.'
                              'Got: %s' % text)
         self._ensure_prompt_is_set()
-        self._ensure_open_shell(for_writing=True)
         self._info("Writing %s" % repr(text))
         self.ssh_client.write(text)
-
-    def _ensure_open_shell(self, for_writing=False):
-        if self.ssh_client.shell is None:
-            self.open_shell()
-            if for_writing:
-                self.read_until_prompt('INFO')
 
     def read(self, loglevel=None):
         """Reads and returns/logs everything currently available on the output.
@@ -387,7 +380,6 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         This keyword is most useful for reading everything from the output
         buffer, thus clearing it.
         """
-        self._ensure_open_shell()
         ret = self.ssh_client.read()
         self._log(ret, loglevel)
         return ret
@@ -406,7 +398,6 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._read_until(expected, loglevel)
 
     def _read_until(self, expected, loglevel):
-        self._ensure_open_shell()
         ret = ''
         start_time = time.time()
         while time.time() < float(self._config.timeout) + start_time:
