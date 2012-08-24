@@ -1,5 +1,5 @@
 *** Settings ***
-Defaults Tags      pybot   jybot
+Default Tags      pybot   jybot
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
 
@@ -41,3 +41,12 @@ Enable Logging
 Executing Command Before Opening Connection
     Run Keyword And Expect Error  No open connection  Execute Command  ls
 
+Get Connections
+    Open Connection   ${HOST}   prompt=>>
+    Open Connection   ${HOST}   alias=saila
+    ${conns} =   Get Connections
+    Should Be Equal    ${conns[0].host}    ${HOST}
+    Should Be Equal    ${conns[1].host}    ${HOST}
+    Should Be Equal    ${conns[0].prompt}    >>
+    Should Be Equal    ${conns[1].alias}    saila
+    Should Be Equal    ${conns[0].term_type}    vt100

@@ -26,6 +26,9 @@ class Configuration(object):
     def __init__(self, **entries):
         self._config = entries
 
+    def __str__(self):
+        return '\n'.join(['%s=%s' % (k, v) for k, v in self._config.items()])
+
     def update(self, **entries):
         """Update configuration entries.
 
@@ -71,6 +74,9 @@ class Entry(object):
 
     def __init__(self, initial=None):
         self._value = self._create_value(initial)
+
+    def __str__(self):
+        return str(self._value)
 
     @property
     def value(self):

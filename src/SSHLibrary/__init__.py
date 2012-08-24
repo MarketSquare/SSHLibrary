@@ -200,6 +200,26 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         except AttributeError:
             pass
 
+    def get_connections(self):
+        """Return information about opened connections.
+
+        The return value is a list of objects that describe the connection.
+        These objects have attributes that correspond to the argument names
+        of `Open Connection`.
+
+        Example:
+        | Open Connection | somehost  | prompt=>> |
+        | Open Connection | otherhost | timeout=5 minutes |
+        | ${info} = | Get Connections |
+        | Should Be Equal | ${info[0].host} | somehost |
+        | Should Be Equal | ${info[1].timeout} | 5 minutes |
+        """
+        # TODO: could the ConnectionCache be enhanced to be iterable?
+        configs = [c.config for c in self._cache._connections]
+        for c in configs:
+            self._log(str(c))
+        return configs
+
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given `logfile`
 
