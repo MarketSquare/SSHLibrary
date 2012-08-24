@@ -37,8 +37,11 @@ paramiko.transport.Transport.start_client = _monkey_patched_start_client
 
 
 class PythonSSHClient(SSHClient):
-    enable_ssh_logging = staticmethod(lambda path:
-            paramiko.util.log_to_file(path))
+
+    @staticmethod
+    def enable_logging(path):
+        paramiko.util.log_to_file(path)
+        return True
 
     def _create_client(self):
         client = paramiko.SSHClient()

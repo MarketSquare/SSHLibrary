@@ -28,6 +28,10 @@ from core import SSHClient, Command, AuthenticationException
 
 class JavaSSHClient(SSHClient):
 
+    @staticmethod
+    def enable_logging(logfile):
+        return False
+
     def _create_client(self):
         client = Connection(self.host, self.port)
         client.connect()

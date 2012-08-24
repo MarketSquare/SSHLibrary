@@ -212,11 +212,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Note that this keyword only works with Python, e.g. when executing the
         tests with `pybot`
         """
-        if utils.is_jython:
-            self._log('SSH logging is not supported when running on Jython.',
-                      'WARN')
-        else:
-            SSHClient.enable_ssh_logging(logfile)
+        if SSHClient.enable_logging(logfile):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
