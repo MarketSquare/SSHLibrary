@@ -90,7 +90,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def ssh_client(self):
         return self._cache.current
 
-    def set_default_configuration(self, **entries):
+    def set_default_configuration(self, *entries):
         """Update the default configuration values.
 
         This keyword can only be used using named argument syntax. The names
@@ -100,9 +100,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example:
             | Set Default Configuration | newline=CRLF | prompt=$ |
         """
-        self._config.update(**entries)
+        self._config.update_with_strings(*entries)
 
-    def set_client_configuration(self, **entries):
+    def set_client_configuration(self, *entries):
         """Update the client configuration values.
 
         Works on the currently selected connection. At least one connection
@@ -115,7 +115,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example:
             | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
-        self.ssh_client.config.update(**entries)
+        self.ssh_client.config.update_with_strings(*entries)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type='vt100',

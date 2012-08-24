@@ -23,13 +23,36 @@ class Configuration(object):
         assert cfg.name == 'John Doe'
     """
 
-    def __init__(self, **config):
-        self._config = config
+    def __init__(self, **entries):
+        self._config = entries
 
-    def update(self, **config):
-        """Update configuration entries. See `__init__` for an example."""
-        for name in config:
-            self._config[name].set(config[name])
+    def update(self, **entries):
+        """Update configuration entries.
+
+        :param entries: entries to be updated, keyword argument names must
+            match existing entry names.
+
+        See `__init__` for an example.
+        """
+        for name in entries:
+            self._config[name].set(entries[name])
+
+    def update_with_strings(self, *entries):
+        """Update configuration entries.
+
+        :param entries: entries to be updated as strings in format name=value.
+
+        Example:
+        cfg = Configuration(name=StringEntry('initial'))
+        assert cfg.name == initial
+        cfg.update('name=John Doe')
+        assert cfg.name == 'John Doe'
+        """
+        updated = {}
+        for e in entries:
+            name, value = e.split('=', 1)
+            updated[name] = value
+        self.update(**updated)
 
     def __getattr__(self, name):
         if name in self._config:
