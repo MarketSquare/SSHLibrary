@@ -20,15 +20,16 @@ import posixpath
 
 from robot import utils
 
-from connectioncache import ConnectionCache
-from core import AuthenticationException
 from config import (Configuration, StringEntry, NewlineEntry, TimeEntry,
         IntegerEntry, LogLevelEntry)
+from connectioncache import ConnectionCache
+from core import AuthenticationException
+from deprecated import DeprecatedSSHLibraryKeywords
+from version import VERSION
 if utils.is_jython:
     from javaclient import JavaSSHClient as SSHClient
 else:
     from pythonclient import PythonSSHClient as SSHClient
-from version import VERSION
 
 __version__ = VERSION
 
@@ -59,35 +60,7 @@ class ClientConfig(Configuration):
                 height=IntegerEntry(height or 24))
 
 
-class DeprecatedKeywords(object):
-    """Mixin class containing deprecated keywords"""
-
-    def set_timeout(self, timeout):
-        """*DEPRECATED* Use `Set Default Configuration` instead."""
-        old = self._config.timeout
-        self._config.update(timeout=timeout)
-        return utils.secs_to_timestr(old)
-
-    def set_newline(self, newline):
-        """*DEPRECATED* Use `Set Default Configuration` instead."""
-        old = self._config.newline
-        self._config.update(newline=newline)
-        return old
-
-    def set_prompt(self, prompt):
-        """*DEPRECATED* Use `Set Default Configuration` instead."""
-        old = self._config.prompt or ''
-        self._config.update(prompt=prompt)
-        return old
-
-    def set_default_log_level(self, level):
-        """*DEPRECATED* Use `Set Default Configuration` instead."""
-        old = self._config.loglevel
-        self._config.update(loglevel=level)
-        return old
-
-
-class SSHLibrary(DeprecatedKeywords):
+class SSHLibrary(DeprecatedSSHLibraryKeywords):
     """SSH Library is a test library for Robot Framework that enables
     executing commands and transferring files over an SSH connection.
 
