@@ -70,7 +70,7 @@ class PythonSSHClient(SSHClient):
         self.shell = self.client.invoke_shell(self.config.term_type,
                 self.config.width, self.config.height)
 
-    def write(self, text):
+    def _write(self, text):
         self.shell.sendall(text)
 
     def read(self):

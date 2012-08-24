@@ -21,7 +21,7 @@ import posixpath
 from robot import utils
 
 from connectioncache import ConnectionCache
-from core import AuthenticationException, ClientConfig
+from core import AuthenticationException, ClientConfig, SSHClientException
 from config import (Configuration, StringEntry, NewlineEntry, TimeEntry,
         LogLevelEntry)
 from deprecated import DeprecatedSSHLibraryKeywords
@@ -352,7 +352,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         command. To get the output, one of the `Read XXX` keywords must be
         used.
         """
-        self.write_bare(text + self._config.newline)
+        self._write(text, add_newline=True)
         return self.read_until(self._config.newline, loglevel)
 
     def write_bare(self, text):
@@ -360,14 +360,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Unlike `Write` does not consume the written text from the output.
         """
-        try:
-            text = str(text)
-        except UnicodeError:
-            raise ValueError('Only ASCII characters are allowed in SSH.'
-                             'Got: %s' % text)
-        self._ensure_prompt_is_set()
+        self._write(text)
+
+    def _write(self, text, add_newline=False):
         self._info("Writing %s" % repr(text))
-        self.ssh_client.write(text)
+        try:
+            self.ssh_client.write(text, add_newline)
+        except SSHClientException, e:
+            raise RuntimeError(e)
 
     def read(self, loglevel=None):
         """Reads and returns/logs everything currently available on the output.
@@ -443,15 +443,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         output of previous command has been read and the command does not
         produce prompt characters in its output.
         """
-        self._ensure_prompt_is_set()
         return self.read_until(self.ssh_client.config.prompt, loglevel)
-
-    def _ensure_prompt_is_set(self):
-        if not self.ssh_client.config.prompt:
-            raise RuntimeError("Using 'Read Until Prompt', 'Write' or "
-                "'Write Bare' keyword requires setting prompt first. "
-                "Prompt can be set either when taking library into use or "
-                "when using 'Open Connection' keyword.")
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):

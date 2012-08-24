@@ -67,7 +67,7 @@ class JavaSSHClient(SSHClient):
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()
 
-    def write(self, text):
+    def _write(self, text):
         self._writer.write(text)
         self._writer.flush()
 

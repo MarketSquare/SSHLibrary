@@ -63,9 +63,7 @@ Prompt Is Not Set
     [Teardown]    Switch Connection    1
     Set Prompt  ${None}
     Login as Valid User
-    Run Keyword And Expect Error
-    ...    Using 'Read Until Prompt', 'Write' or 'Write Bare' keyword requires setting prompt first. *
-    ...    Write    This should fail
+    Run Keyword And Expect Error    Prompt is not set.    Write    This should fail
 
 *** Keywords ***
 Remove Counter And Read All Data

@@ -35,6 +35,10 @@ class AuthenticationException(RuntimeError):
     pass
 
 
+class SSHClientException(RuntimeError):
+    pass
+
+
 class Command(object):
     """Base class for remote commands."""
 
@@ -89,6 +93,26 @@ class SSHClient(object):
         if len(ret) == 1:
             return ret[0]
         return ret
+
+    def write(self, text, add_newline=False):
+        """Write `text` in shell session.
+
+        :param str text: the text to be written, must be ASCII.
+        :param bool add_newline: if True, a newline will be added to `text`.
+        """
+        self._ensure_prompt_is_set()
+        try:
+            text = str(text)
+        except UnicodeError:
+            raise SSHClientException('Invalid input, only ASCII characters '
+                                     'are allowed. Got: %s' % text)
+        if add_newline:
+            text += self.config.newline
+        self._write(text)
+
+    def _ensure_prompt_is_set(self):
+        if not self.config.prompt:
+            raise SSHClientException('Prompt is not set.')
 
     def put_file(self, source, dest, mode, newline_char):
         remotefile = self._create_remote_file(dest, mode)
