@@ -12,16 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import time
 import os
 import glob
-import re
 import posixpath
 
 from robot import utils
 
 from connectioncache import ConnectionCache
-from core import AuthenticationException, ClientConfig, SSHClientException
+from core import ClientConfig, SSHClientException
 from config import (Configuration, StringEntry, NewlineEntry, TimeEntry,
         LogLevelEntry)
 from deprecated import DeprecatedSSHLibraryKeywords
@@ -230,11 +228,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example:
         | Login | john | secret |
         """
-        self._log_login(username)
-        self.ssh_client.login(username, password)
-        self.ssh_client.open_shell()
-        return self.read_until_prompt() if self.ssh_client.config.prompt else \
-                    self.read()
+        return self._login(self.ssh_client.login, username, password)
 
     def login_with_public_key(self, username, keyfile, password):
         """Logs into SSH server with using key-based authentication.
@@ -245,28 +239,17 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Reads and returns available output. If prompt is set, everything until
         the prompt is returned.
-
         """
-        self._verify_key_file(keyfile)
-        self._log_login(username)
-        try:
-            self.ssh_client.login_with_public_key(username, keyfile, password)
-        except AuthenticationException:
-            raise RuntimeError('Login with public key failed')
-        return self.read_until_prompt() if self.ssh_client.config.prompt else \
-                    self.read()
+        return self._login(self.ssh_client.login_with_public_key, username,
+                           keyfile, password)
 
-    def _log_login(self, username):
+    def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."
-                    % (self.ssh_client.host, self.ssh_client.port, username))
-
-    def _verify_key_file(self, keyfile):
-        if not os.path.exists(keyfile):
-            raise RuntimeError("Given key file '%s' does not exist" % keyfile)
+                   % (self.ssh_client.host, self.ssh_client.port, username))
         try:
-            open(keyfile).close()
-        except IOError:
-            raise RuntimeError("Could not read key file '%s'" % keyfile)
+            return login_method(username, *args)
+        except SSHClientException, e:
+            raise RuntimeError(e)
 
     def execute_command(self, command, return_stdout=True,
                         return_stderr=False, return_rc=False):
@@ -411,8 +394,6 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Read Until Regexp | (#|$) |
         | Read Until Regexp | some regexp  | DEBUG |
         """
-        if isinstance(regexp, basestring):
-            regexp = re.compile(regexp)
         reader = lambda: self.ssh_client.read_until_regexp(regexp)
         return self._read_and_log(reader, loglevel)
 

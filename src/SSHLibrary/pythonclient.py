@@ -22,7 +22,7 @@ except ImportError:
             'Ensure that paramiko and pycrypto modules are installed.'
             )
 
-from core import SSHClient, Command, AuthenticationException
+from core import SSHClient, Command, SSHClientException
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -48,15 +48,15 @@ class PythonSSHClient(SSHClient):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         return client
 
-    def login(self, username, password):
+    def _login(self, username, password):
         self.client.connect(self.host, self.port, username, password)
 
-    def login_with_public_key(self, username, keyfile, password):
+    def _login_with_public_key(self, username, keyfile, password):
         try:
             self.client.connect(self.host, self.port, username, password,
                                 key_filename=keyfile)
         except paramiko.AuthenticationException:
-            raise AuthenticationException()
+            raise SSHClientException
 
     def close(self):
         self.client.close()

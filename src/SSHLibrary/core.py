@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
+import re
 import time
 
 from config import Configuration, StringEntry, TimeEntry, IntegerEntry
@@ -31,10 +33,6 @@ class ClientConfig(Configuration):
                 term_type=StringEntry(term_type or 'vt100'),
                 width=IntegerEntry(width or 80),
                 height=IntegerEntry(height or 24))
-
-
-class AuthenticationException(RuntimeError):
-    pass
 
 
 class SSHClientException(RuntimeError):
@@ -73,6 +71,51 @@ class SSHClient(object):
         self.shell = None
         self.client = self._create_client()
         self._commands = []
+
+    def login(self, username, password):
+        """Login using given credentials.
+
+        :param str username: username to log in with
+        :param str password: password for `username`
+        :returns: If prompt is defined, read and return output until prompt.
+            Otherwise all output is read and returned.
+        """
+        try:
+            self._login(username, password)
+        except SSHClientException:
+            msg = 'Authentication failed for user: %s' % username
+            raise SSHClientException(msg)
+        return self._finalize_login()
+
+    def login_with_public_key(self, username, keyfile, password):
+        """Login using given credentials.
+
+        :param str username: username to log in with
+        :param str keyfile: path to a valid OpenSSH keyfile
+        :param str password: password used in unlocking the keyfile
+        :returns: If prompt is defined, read and return output until prompt.
+            Otherwise all output is read and returned.
+        """
+        self._verify_key_file(keyfile)
+        try:
+            self._login_with_public_key(username, keyfile, password)
+        except SSHClientException:
+            msg = 'Login with public key failed for user: %s' % username
+            raise SSHClientException(msg)
+        return self._finalize_login()
+
+    def _finalize_login(self):
+        self.open_shell()
+        return self.read_until_prompt() if self.config.prompt else self.read()
+
+    def _verify_key_file(self, keyfile):
+        if not os.path.exists(keyfile):
+            raise SSHClientException("Given key file '%s' does not exist" %
+                                     keyfile)
+        try:
+            open(keyfile).close()
+        except IOError:
+            raise SSHClientException("Could not read key file '%s'" % keyfile)
 
     def execute_command(self, command, return_stdout, return_stderr,
                         return_rc):
@@ -155,12 +198,14 @@ class SSHClient(object):
     def read_until_regexp(self, regexp):
         """Read and return from the output until regexp matches.
 
-        :param regexp: a compiled regexp obect used for matching
+        :param regexp: a pattern or a compiled regexp obect used for matching
         :raises SSHClientException: if match is not found in output when
             timeout expires.
 
         timeout is defined with :py:methc:`open_connection()`
         """
+        if isinstance(regexp, basestring):
+            regexp = re.compile(regexp)
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
     def write_until_expected(self, text, expected, timeout, interval):

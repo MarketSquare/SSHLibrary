@@ -23,7 +23,7 @@ except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
-from core import SSHClient, Command, AuthenticationException
+from core import SSHClient, Command, SSHClientException
 
 
 class JavaSSHClient(SSHClient):
@@ -37,19 +37,19 @@ class JavaSSHClient(SSHClient):
         client.connect()
         return client
 
-    def login(self, username, password):
+    def _login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
-            raise AuthenticationException("Authentication failed for user: %s"
-                                          % username)
+            raise SSHClientException
 
-    def login_with_public_key(self, username, key, password):
+    def _login_with_public_key(self, username, keyfile, password):
         try:
-            if not self.client.authenticateWithPublicKey(username, File(key),
-                                                         password):
-                raise AuthenticationException()
+            success = self.client.authenticateWithPublicKey(
+                            username, File(keyfile), password)
+            if not success:
+                raise SSHClientException
         except IOError:
             # IOError is raised also when key file is invalid
-            raise AuthenticationException()
+            raise SSHClientException
 
     def close(self):
         self.client.close()
