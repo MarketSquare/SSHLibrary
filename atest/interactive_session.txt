@@ -28,11 +28,11 @@ Regexp Not Matching From Beginning Of Output
     Write  ./${TEST SCRIPT NAME}
     Read Until Regexp  std.*
 
-Interactive Session Time Out
+Interactive Session Timeout
     Write  Foo Bar And Some Other
-    Set Timeout  1
+    Set Client Configuration   timeout=1
     ${status}  ${error} =  Run Keyword And Ignore Error  Read Until  This is not found
-    Should Be Equal  ${error}  No match found for 'This is not found' in 1 second
+    Should Start With  ${error}  No match found for 'This is not found' in 1 second
 
 Interactive Session Returning Stderr
     Write  ./${INTERACTIVE TEST SCRIPT NAME}
