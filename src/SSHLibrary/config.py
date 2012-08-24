@@ -48,11 +48,13 @@ class Configuration(object):
         cfg.update('name=John Doe')
         assert cfg.name == 'John Doe'
         """
-        updated = {}
         for e in entries:
             name, value = e.split('=', 1)
-            updated[name] = value
-        self.update(**updated)
+            self.update(**{name: value})
+
+    def get(self, name):
+        """Return entry corresponding to name."""
+        return self._config[name]
 
     def __getattr__(self, name):
         if name in self._config:
@@ -106,6 +108,9 @@ class TimeEntry(Entry):
     """
     def _parse_value(self, value):
         return utils.timestr_to_secs(value) if value else None
+
+    def __str__(self):
+        return utils.secs_to_timestr(self._value)
 
 
 class LogLevelEntry(Entry):
