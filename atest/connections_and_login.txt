@@ -1,4 +1,5 @@
 *** Settings ***
+Defaults Tags      pybot   jybot
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
 
@@ -28,8 +29,9 @@ Login Returns Banner Value
     [Setup]  Open Connection  ${HOST}
     ${ret}=  Login  ${USERNAME}  ${PASSWORD}
     Should Contain  ${ret}  Last login
-    
+
 Enable Logging
+    [Tags]    pybot
     [Setup]  Remove File  ${OUTPUTDIR}/sshlog.txt
     Enable SSH Logging  ${OUTPUTDIR}/sshlog.txt
     Open Connection  ${HOST}

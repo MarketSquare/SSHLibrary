@@ -16,9 +16,9 @@ COMMON_FLAGS="-d $OUTDIR -l NONE -r NONE -P src -P lib/trilead-ssh2-build213.jar
 
 rm $OUTDIR/*
 if [ "$PYBOT" != "" ] ; then
-    pybot $COMMON_FLAGS -o pybot_output $* atest
+    pybot $COMMON_FLAGS -o pybot_output -i pybot $* atest
 fi
 if [ "$JYBOT" != "" ] ; then
-    jybot $COMMON_FLAGS -o jybot_output $* atest
+    jybot $COMMON_FLAGS -o jybot_output -i jybot $* atest
 fi
 rebot -d $OUTDIR $OUTDIR/*.xml

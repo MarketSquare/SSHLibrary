@@ -1,9 +1,10 @@
 *** Settings ***
 Documentation   This suite contains test for 'Put File 'keywords These tests use some dummy test files from under the scripts directory.
+Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
 Suite Teardown  Run Keywords  Close Connection  Remove Local Tempdir
 Resource        resources/ssh_library_resources.txt
-Library  String
+Library         String
 
 *** Variables ***
 ${TMPDIR}  robot-tmpdir

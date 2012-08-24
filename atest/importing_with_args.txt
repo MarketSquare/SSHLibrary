@@ -1,5 +1,6 @@
 *** Settings ***
 Library         SSHLibrary  3 minutes 30 seconds  ${EMPTY}  $
+Force Tags      pybot   jybot
 
 *** Test Cases ***
 Test Library Args

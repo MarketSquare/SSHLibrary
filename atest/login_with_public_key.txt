@@ -1,5 +1,6 @@
 *** Settings ***
-Test Setup  Open Connection  ${HOST}
+Force Tags      pybot   jybot
+Test Setup      Open Connection  ${HOST}
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
 
@@ -22,7 +23,8 @@ Login With Non Existing Public Key
     Run Keyword And Expect Error  Given key file '/invalid/path' does not exist  Login With Public Key  ${PUBKEY_USERNAME}  /invalid/path  ${PUBKEY_PASSWORD}
 
 Login With Invalid Public Key
-    Run Keyword And Expect Error  Login with public key failed  Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
+    Run Keyword And Expect Error  Login with public key failed for user: testkey
+    ...    Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
 
 Login With Inaccessible Public Key
     [Setup]  Run Keywords  Remove Read Permission  Open Connection To Test Host
