@@ -1,0 +1,43 @@
+###
+# To run these tests, install SSHLibrary and execute `pybot examples`
+# By default the connection is made using parameters read from the resource
+# file. They can be changed by defining them from the command line:
+# pybot -v host:somehos -v user:somebody -v password:secret
+###
+
+
+*** Test Cases ***
+Execute single commmand
+    ${result}=    Execute command    ${LS}
+
+Executing multiple commands
+    [Documentation]   Since each Execute command is executed in separate
+    ...    session, using `cd` between `ls` calls has no effect on results.
+    ${result1}=    Execute command    ${LS}
+    Execute command    cd /
+    ${result2}=    Execute command    ${LS}
+    Should be equal    ${result1}    ${result2}
+
+All return values of execute command
+    [Documentation]   To return stderr or rc with execute command, use corresponding
+    ...   named argument, where the argument value may be any non empty string.
+    ${stdout}    ${stderr}    ${rc}=
+    ...    Execute Command    ${LS}   include   return_stderr=yes    return_rc=sure
+    Should be equal    ${stderr}    ${EMPTY}
+    Should be equal as integers    ${rc}    0
+
+Command in session
+    [Documentation]    Write and Read keywords operate on same session, so
+    ...    state between keyword calls is preserved.
+    Write    ${LS}
+    ${result1}=    Read until prompt
+    Write    cd /
+    Read until prompt
+    Write    ${LS}
+    ${result2}=    Read until prompt
+    Should not be equal     ${result1}    ${result2}
+
+
+*** Settings ***
+Resource    example_resource.txt
+Suite Setup    Open connection and login

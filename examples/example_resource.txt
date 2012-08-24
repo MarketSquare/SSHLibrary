@@ -1,0 +1,15 @@
+*** Keywords ***
+Open connection and log in
+    Open Connection   ${HOST}   prompt=${PROMPT}
+    Login   ${USERNAME}    ${PASSWORD}
+
+
+*** Settings ***
+Library    SSHLibrary
+
+*** Variables ***
+${HOST}     localhost
+${USERNAME}    test
+${PASSWORD}    test
+${PROMPT}    $
+${LS}   ls -a --color=never
