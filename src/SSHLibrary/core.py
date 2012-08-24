@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import time
+
 from config import Configuration, StringEntry, TimeEntry, IntegerEntry
 
 
@@ -109,6 +111,89 @@ class SSHClient(object):
         if add_newline:
             text += self.config.newline
         self._write(text)
+
+    def read(self):
+        """Read and return currently available output."""
+        return self._read()
+
+    def read_char(self):
+        """Read and return a single character from current session."""
+        return self._read_char()
+
+    def read_until(self, expected):
+        """Read and return from the output until expected.
+
+        :param str expected: text to look for in the output
+        :raises SSHClientException: if expected is not found in output when
+            timeout expires.
+
+        timeout is defined with :py:methc:`open_connection()`
+        """
+        return self._read_until(lambda s: expected in s, expected)
+
+    def read_until_newline(self):
+        """Read and return from the output up to the first newline character.
+
+        :raises SSHClientException: if newline is not found in output when
+            timeout expires.
+
+        timeout is defined with :py:methc:`open_connection()`
+        """
+        return self.read_until(self.config.newline)
+
+    def read_until_prompt(self):
+        """Read and return from the output until prompt.
+
+        :raises SSHClientException: if prompt is not set or it is not found
+            in output when timeout expires.
+
+        prompt and timeout are defined with :py:methc:`open_connection()`
+        """
+        self._ensure_prompt_is_set()
+        return self.read_until(self.config.prompt)
+
+    def read_until_regexp(self, regexp):
+        """Read and return from the output until regexp matches.
+
+        :param regexp: a compiled regexp obect used for matching
+        :raises SSHClientException: if match is not found in output when
+            timeout expires.
+
+        timeout is defined with :py:methc:`open_connection()`
+        """
+        return self._read_until(lambda s: regexp.search(s), regexp.pattern)
+
+    def write_until_expected(self, text, expected, timeout, interval):
+        """Write text until expected output appears or timeout expires.
+
+        :param str text: Text to be written using #write_bare().
+        :param str expected: Text to look for in the output.
+        :param int timeout: The timeout during which `expected` must appear
+            in the output, in seconds.
+        :param int interval: Time to wait between repeated writings'
+        """
+        timeout = TimeEntry(timeout)
+        starttime = time.time()
+        while time.time() - starttime < timeout.value:
+            self.write(text)
+            try:
+                return self._read_until(lambda s: expected in s,
+                                        expected, timeout=interval)
+            except SSHClientException:
+                pass
+        raise SSHClientException("No match found for '%s' in %s."
+                                 % (expected, timeout))
+
+    def _read_until(self, matcher, expected, timeout=None):
+        ret = ''
+        timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
+        start_time = time.time()
+        while time.time() < float(timeout.value) + start_time:
+            ret += self._read_char()
+            if matcher(ret):
+                return ret
+        raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
+                                 % (expected, timeout, ret))
 
     def _ensure_prompt_is_set(self):
         if not self.config.prompt:

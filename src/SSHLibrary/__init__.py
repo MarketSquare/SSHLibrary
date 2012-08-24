@@ -353,7 +353,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         used.
         """
         self._write(text, add_newline=True)
-        return self.read_until(self._config.newline, loglevel)
+        return self._read_and_log(self.ssh_client.read_until_newline, loglevel)
 
     def write_bare(self, text):
         """Writes given text over the connection without appending newline.
@@ -380,9 +380,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         This keyword is most useful for reading everything from the output
         buffer, thus clearing it.
         """
-        ret = self.ssh_client.read()
-        self._log(ret, loglevel)
-        return ret
+        return self._read_and_log(self.ssh_client.read, loglevel)
 
     def read_until(self, expected, loglevel=None):
         """Reads output until expected is encountered or timeout expires.
@@ -395,27 +393,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         See `Read` for more information on `loglevel`.
         """
-        return self._read_until(expected, loglevel)
-
-    def _read_until(self, expected, loglevel):
-        ret = ''
-        start_time = time.time()
-        while time.time() < float(self._config.timeout) + start_time:
-            ret += self.ssh_client.read_char()
-            if (isinstance(expected, basestring) and expected in ret) or \
-               (not isinstance(expected, basestring) and expected.search(ret)):
-                self._log(ret, loglevel)
-                return ret
-        self._log(ret, loglevel)
-        if not isinstance(expected, basestring):
-            expected = expected.pattern
-        raise AssertionError("No match found for '%s' in %s"
-                % (expected, utils.secs_to_timestr(self._config.timeout)))
+        reader = lambda: self.ssh_client.read_until(expected)
+        return self._read_and_log(reader, loglevel)
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Reads output until a match to `regexp` is found or timeout expires.
 
-        `regexp` can be a pattern or a compiled re-object.
+        `regexp` can be a pattern or a compiled regexp-object.
 
         Returns text up until and including the regexp.
 
@@ -429,7 +413,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """
         if isinstance(regexp, basestring):
             regexp = re.compile(regexp)
-        return self._read_until(regexp, loglevel)
+        reader = lambda: self.ssh_client.read_until_regexp(regexp)
+        return self._read_and_log(reader, loglevel)
 
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the output until prompt is found.
@@ -443,7 +428,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         output of previous command has been read and the command does not
         produce prompt characters in its output.
         """
-        return self.read_until(self.ssh_client.config.prompt, loglevel)
+        return self._read_and_log(self.ssh_client.read_until_prompt, loglevel)
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
@@ -469,19 +454,17 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """
         timeout = utils.timestr_to_secs(timeout)
         retry_interval = utils.timestr_to_secs(retry_interval)
-        old_timeout = self.set_timeout(retry_interval)
-        starttime = time.time()
-        while time.time() - starttime < timeout:
-            self.write_bare(text)
-            try:
-                ret = self._read_until(expected, loglevel)
-                self.set_timeout(old_timeout)
-                return ret
-            except AssertionError:
-                pass
-        self.set_timeout(old_timeout)
-        raise AssertionError("No match found for '%s' in %s"
-                             % (expected, utils.secs_to_timestr(timeout)))
+        reader = lambda: self.ssh_client.write_until_expected(
+                            text, expected, timeout, retry_interval)
+        self._read_and_log(reader, loglevel)
+
+    def _read_and_log(self, reader, loglevel):
+        try:
+            output = reader()
+        except SSHClientException, e:
+            raise RuntimeError(e)
+        self._log(output, loglevel)
+        return output
 
     def put_file(self, source, destination='.', mode='0744', newlines='default'):
         """Copies file(s) from local host to remote host.
@@ -643,21 +626,17 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._log(msg, 'DEBUG')
 
     def _log(self, msg, level=None):
-        self._is_valid_log_level(level, raise_if_invalid=True)
+        level = self._active_log_level(level)
         msg = msg.strip()
-        if level is None:
-            level = self._config.log_level
         if msg != '':
-            print '*%s* %s' % (level.upper(), msg)
+            print '*%s* %s' % (level, msg)
 
-    def _is_valid_log_level(self, level, raise_if_invalid=False):
+    def _active_log_level(self, level):
         if level is None:
-            return True
+            return self._config.log_level
         if isinstance(level, basestring) and \
                 level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
-            return True
-        if not raise_if_invalid:
-            return False
+            return level.upper()
         raise AssertionError("Invalid log level '%s'" % level)
 
 

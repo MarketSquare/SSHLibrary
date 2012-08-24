@@ -73,13 +73,13 @@ class PythonSSHClient(SSHClient):
     def _write(self, text):
         self.shell.sendall(text)
 
-    def read(self):
+    def _read(self):
         data = ''
         while self.shell.recv_ready():
             data += self.shell.recv(100000)
         return data
 
-    def read_char(self):
+    def _read_char(self):
         if self.shell.recv_ready():
             return self.shell.recv(1)
         return ''

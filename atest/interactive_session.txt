@@ -47,7 +47,7 @@ Write Until Expected Output
     [Teardown]  Remove Counter and Read All Data
 
 Write Until Expected Output In Case Of Time Out
-    Run Keyword And Expect Error  No match found for '11' in 5 seconds  Write Until Expected Output  ./${REPEAT TEST SCRIPT NAME}\n  11  5s  0.5s
+    Run Keyword And Expect Error  No match found for '11' in 2 seconds.  Write Until Expected Output  ./${REPEAT TEST SCRIPT NAME}\n  11  2s  0.5s
     [Teardown]  Remove Counter and Read All Data
 
 Write Bare And Read

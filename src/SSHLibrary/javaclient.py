@@ -71,7 +71,7 @@ class JavaSSHClient(SSHClient):
         self._writer.write(text)
         self._writer.flush()
 
-    def read(self):
+    def _read(self):
         data = ''
         if self._stdout.available():
             buf = jarray.zeros(self._stdout.available(), 'b')
@@ -79,7 +79,7 @@ class JavaSSHClient(SSHClient):
             data += ''.join([chr(b) for b in buf])
         return data
 
-    def read_char(self):
+    def _read_char(self):
         if self._stdout.available():
             buf = jarray.zeros(1, 'b')
             self._stdout.read(buf)
