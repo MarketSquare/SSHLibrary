@@ -16,7 +16,8 @@ import os
 import re
 import time
 
-from config import Configuration, StringEntry, TimeEntry, IntegerEntry
+from config import (Configuration, StringEntry, TimeEntry, IntegerEntry,
+        NewlineEntry)
 
 
 class ClientConfig(Configuration):
@@ -28,7 +29,7 @@ class ClientConfig(Configuration):
                 alias=StringEntry(alias),
                 port=IntegerEntry(port or 22),
                 timeout=TimeEntry(timeout or defaults.timeout),
-                newline=StringEntry(newline or defaults.newline),
+                newline=NewlineEntry(newline or defaults.newline),
                 prompt=StringEntry(prompt or defaults.prompt),
                 term_type=StringEntry(term_type or 'vt100'),
                 width=IntegerEntry(width or 80),
