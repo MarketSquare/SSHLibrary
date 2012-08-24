@@ -170,7 +170,7 @@ class SSHClient(object):
         :raises SSHClientException: if expected is not found in output when
             timeout expires.
 
-        timeout is defined with :py:methc:`open_connection()`
+        timeout is defined with :py:meth:`open_connection()`
         """
         return self._read_until(lambda s: expected in s, expected)
 
@@ -180,7 +180,7 @@ class SSHClient(object):
         :raises SSHClientException: if newline is not found in output when
             timeout expires.
 
-        timeout is defined with :py:methc:`open_connection()`
+        timeout is defined with :py:meth:`open_connection()`
         """
         return self.read_until(self.config.newline)
 
@@ -190,7 +190,7 @@ class SSHClient(object):
         :raises SSHClientException: if prompt is not set or it is not found
             in output when timeout expires.
 
-        prompt and timeout are defined with :py:methc:`open_connection()`
+        prompt and timeout are defined with :py:meth:`open_connection()`
         """
         self._ensure_prompt_is_set()
         return self.read_until(self.config.prompt)
@@ -202,7 +202,7 @@ class SSHClient(object):
         :raises SSHClientException: if match is not found in output when
             timeout expires.
 
-        timeout is defined with :py:methc:`open_connection()`
+        timeout is defined with :py:meth:`open_connection()`
         """
         if isinstance(regexp, basestring):
             regexp = re.compile(regexp)
