@@ -23,10 +23,11 @@ except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
-from core import SSHClient, Command, SSHClientException
+from .client import AbstractSSHClient
+from .core import SSHClientException, Command
 
 
-class JavaSSHClient(SSHClient):
+class JavaSSHClient(AbstractSSHClient):
 
     @staticmethod
     def enable_logging(logfile):
@@ -124,8 +125,8 @@ class JavaSSHClient(SSHClient):
         self.sftp_client.closeFile(remotefile)
 
     def listfiles(self, path):
-        return [ fileinfo.filename for fileinfo in self.sftp_client.ls(path) if
-                 fileinfo.attributes.getOctalPermissions().startswith('0100') ]
+        return [finfo.filename for finfo in self.sftp_client.ls(path) if
+                finfo.attributes.getOctalPermissions().startswith('0100')]
 
     def get_file(self, source, dest):
         localfile = FileOutputStream(dest)
@@ -136,12 +137,13 @@ class JavaSSHClient(SSHClient):
         arraysize = 4096
         data = jarray.zeros(arraysize, 'b')
         while True:
-            moredata = self.sftp_client.read(remotefile, size, data, 0, arraysize)
+            moredata = self.sftp_client.read(remotefile, size, data, 0,
+                                             arraysize)
             datalen = len(data)
-            if moredata==-1:
+            if moredata == -1:
                 break
-            if remotefilesize-size < arraysize:
-                datalen = remotefilesize-size
+            if remotefilesize - size < arraysize:
+                datalen = remotefilesize - size
             localfile.write(data, 0, datalen)
             size += datalen
         self.sftp_client.closeFile(remotefile)

@@ -22,7 +22,8 @@ except ImportError:
             'Ensure that paramiko and pycrypto modules are installed.'
             )
 
-from core import SSHClient, Command, SSHClientException
+from .client import AbstractSSHClient
+from .core import Command, SSHClientException
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -36,7 +37,7 @@ paramiko.transport.Transport._orig_start_client = \
 paramiko.transport.Transport.start_client = _monkey_patched_start_client
 
 
-class PythonSSHClient(SSHClient):
+class PythonSSHClient(AbstractSSHClient):
 
     @staticmethod
     def enable_logging(path):
