@@ -22,18 +22,18 @@ from config import (Configuration, StringEntry, TimeEntry, IntegerEntry,
 
 class ClientConfig(Configuration):
 
-    def __init__(self, host, alias, port, timeout, newline, prompt,
-                 term_type, width, height, defaults):
+    def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
+                 prompt=None, term_type='vt100', width=80, height=24):
         Configuration.__init__(self,
                 host=StringEntry(host),
                 alias=StringEntry(alias),
-                port=IntegerEntry(port or 22),
-                timeout=TimeEntry(timeout or defaults.timeout),
-                newline=NewlineEntry(newline or defaults.newline),
-                prompt=StringEntry(prompt or defaults.prompt),
-                term_type=StringEntry(term_type or 'vt100'),
-                width=IntegerEntry(width or 80),
-                height=IntegerEntry(height or 24))
+                port=IntegerEntry(port),
+                timeout=TimeEntry(timeout),
+                newline=NewlineEntry(newline),
+                prompt=StringEntry(prompt),
+                term_type=StringEntry(term_type),
+                width=IntegerEntry(width),
+                height=IntegerEntry(height))
 
 
 class SSHClientException(RuntimeError):

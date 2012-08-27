@@ -148,8 +148,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Open Connection | myhost.net | term_type=ansi | width=40 |
         | ${id} =         | Open Connection | myhost.net |
         """
+        timeout = timeout or self._config.timeout
+        newline = newline or self._config.newline
+        prompt = prompt or self._config.prompt
         config = ClientConfig(host, alias, port, timeout, newline, prompt,
-                              term_type, width, height, self._config)
+                              term_type, width, height)
         return self._cache.register(SSHClient(config), config.alias)
 
     def switch_connection(self, index_or_alias):
