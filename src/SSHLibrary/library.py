@@ -437,8 +437,6 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         the keyword will fail if 'myprocess' does not appear on the output in
         5 seconds.
         """
-        timeout = utils.timestr_to_secs(timeout)
-        retry_interval = utils.timestr_to_secs(retry_interval)
         reader = lambda: self.ssh_client.write_until_expected(
                             text, expected, timeout, retry_interval)
         self._read_and_log(reader, loglevel)

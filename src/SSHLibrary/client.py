@@ -201,16 +201,19 @@ class AbstractSSHClient(object):
         :param str text: Text to be written using #write_bare().
         :param str expected: Text to look for in the output.
         :param int timeout: The timeout during which `expected` must appear
-            in the output, in seconds.
-        :param int interval: Time to wait between repeated writings'
+            in the output. Can be defined either as seconds or as a Robot
+            Framework time string, e.g. 1 minute 20 seconds.
+        :param int interval: Time to wait between repeated writings. Can be
+            defined similarly as `timeout`.
         """
         timeout = TimeEntry(timeout)
+        interval = TimeEntry(interval)
         starttime = time.time()
         while time.time() - starttime < timeout.value:
             self.write(text)
             try:
                 return self._read_until(lambda s: expected in s,
-                                        expected, timeout=interval)
+                                        expected, timeout=interval.value)
             except SSHClientException:
                 pass
         raise SSHClientException("No match found for '%s' in %s."
