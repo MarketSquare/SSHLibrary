@@ -62,7 +62,7 @@ Put File With Pattern Matching Directory
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
 
 Put File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There were no source files matching 'non*existing'  SSHLibrary.Put File  non*existing
+    Run Keyword And Expect Error  There are no source files matching 'non*existing'  SSHLibrary.Put File  non*existing
 
 *** Keywords ***
 Put Files And Verify
@@ -74,7 +74,7 @@ Put Files And Verify
 Put File And Specify Newlines
     [Arguments]  ${source}  ${destination}  ${newlines}  @{expected}
     Vefify Remote Files do Not Exist  @{expected}
-    Put File  ${source}  ${destination}  newlines=${newlines}
+    Put File  ${source}  ${destination}  newline=${newlines}
     Verify Remote Files Exist  ${EMPTY}  @{expected}
 
 Vefify Remote Files do Not Exist

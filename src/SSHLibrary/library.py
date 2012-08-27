@@ -1,9 +1,3 @@
-import os
-import glob
-import posixpath
-
-from robot import utils
-
 from .client import SSHClient, AbstractSSHClient
 from .connectioncache import ConnectionCache
 from .core import DefaultConfig, ClientConfig, SSHClientException
@@ -449,85 +443,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._log(output, loglevel)
         return output
 
-    def put_file(self, source, destination='.', mode='0744', newlines='default'):
-        """Copies file(s) from local host to remote host.
-
-        1. If the destination is an existing file, the source file is copied
-           over it.
-        2. If the destination is an existing directory, the source file is
-           copied into it. Possible file with same name is overwritten.
-        3. If the destination does not exist and it ends with path separator
-           ('/'), it is considered a directory. That directory is created and
-           the source file copied into it. Possibly missing intermediate
-           directories are also created.
-        4. If the destination does not exist and it does not end with path
-           separator, it is considered a file. If the path to the file does
-           not exist it is created.
-        5. If destination is not given, the user's home directory
-           in the remote machine is used as destination.
-
-        Using wild cards like '*' and '?' are allowed.
-        When wild cards are used, destination MUST be a directory and only
-        files are copied from the source, sub directories are ignored. If the
-        contents of sub directories are also needed, use the keyword again.
-
-        Default file permission is 0744 (-rwxr--r--) and can be changed by
-        giving a value to the optional `mode` parameter.
-
-        `newlines` can be used to force newline characters that are written to
-        the remote file. Valid values are `CRLF` (for Windows) and `LF`.
-
-        Examples:
-
-        | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
-
-        """
-        mode = int(mode, 8)
-        self.ssh_client.create_sftp_client()
-        localfiles = self._get_put_file_sources(source)
-        remotefiles, remotepath = self._get_put_file_destinations(localfiles,
-                                                                  destination)
-        self.ssh_client.create_missing_remote_path(remotepath)
-        for src, dst in zip(localfiles, remotefiles):
-            self._info("Putting '%s' to '%s'" % (src, dst))
-            newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newlines, None)
-            self.ssh_client.put_file(src, dst, mode, newline)
-        self.ssh_client.close_sftp_client()
-
-    def _get_put_file_sources(self, source):
-        sources = [f for f in glob.glob(source.replace('/', os.sep))
-                   if os.path.isfile(f)]
-        if not sources:
-            raise AssertionError("There were no source files matching '%s'" %
-                                 source)
-        self._debug('Source pattern matched local files: %s' %
-                    utils.seq2str(sources))
-        return sources
-
-    def _get_put_file_destinations(self, sources, dest):
-        dest = dest.split(':')[-1].replace('\\', '/')
-        if dest == '.':
-            dest = self.ssh_client.homedir + '/'
-        if len(sources) > 1 and dest[-1] != '/':
-            raise ValueError('It is not possible to copy multiple source '
-                             'files to one destination file.')
-        dirpath, filename = self._parse_path_elements(dest)
-        if filename:
-            files = [posixpath.join(dirpath, filename)]
-        else:
-            files = [posixpath.join(dirpath, os.path.split(path)[1])
-                     for path in sources]
-        return files, dirpath
-
-    def _parse_path_elements(self, dest):
-        if not posixpath.isabs(dest):
-            dest = posixpath.join(self.ssh_client.homedir, dest)
-        return posixpath.split(dest)
-
     def get_file(self, source, destination='.'):
-        """Copies a file from remote host to local host.
+        """Copies file(s) from remote host to local host.
 
         1. If the destination is an existing file, the source file is copied
            over it.
@@ -544,63 +461,64 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            the local machine is used as destination. This will most probably
            be the directory where test execution was started.
 
-        Using wild cards like '*' and '?' are allowed.
+        Using wild cards like '*' and '?' are allowed in the source.
         When wild cards are used, destination MUST be a directory, and files
         matching the pattern are copied, but sub directories are ignored. If
         the contents of sub directories are also needed, use the keyword again.
 
         Examples:
-
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
 
         """
-        self.ssh_client.create_sftp_client()
-        remotefiles = self._get_get_file_sources(source)
-        self._debug('Source pattern matched remote files: %s' %
-                    utils.seq2str(remotefiles))
-        localfiles = self._get_get_file_destinations(remotefiles, destination)
-        for src, dst in zip(remotefiles, localfiles):
-            self._info('Getting %s to %s' % (src, dst))
-            self.ssh_client.get_file(src, dst)
-        self.ssh_client.close_sftp_client()
+        return self._run_sftp_command(self.ssh_client.get_file, source,
+                                      destination)
 
-    def _get_get_file_sources(self, source):
-        path, pattern = posixpath.split(source)
-        if not path:
-            path = '.'
-        sourcefiles = []
-        for filename in self.ssh_client.listfiles(path):
-            if utils.matches(filename, pattern):
-                if path:
-                    filename = posixpath.join(path, filename)
-                sourcefiles.append(filename)
-        if not sourcefiles:
-            raise AssertionError("There were no source files matching '%s'" %
-                                 source)
-        return sourcefiles
+    def put_file(self, source, destination='.', mode='0744',
+                 newline='default'):
+        """Copies file(s) from local host to remote host.
 
-    def _get_get_file_destinations(self, sourcefiles, dest):
-        if dest == '.':
-            dest += os.sep
-        is_dir = dest.endswith(os.sep)
-        if not is_dir and len(sourcefiles) > 1:
-            raise ValueError('It is not possible to copy multiple source '
-                             'files to one destination file.')
-        dest = os.path.abspath(dest.replace('/', os.sep))
-        self._create_missing_local_dirs(dest, is_dir)
-        if is_dir:
-            return [os.path.join(dest, os.path.split(name)[1])
-                    for name in sourcefiles]
-        return [dest]
+        1. If the destination is an existing file, the source file is copied
+           over it.
+        2. If the destination is an existing directory, the source file is
+           copied into it. Possible file with same name is overwritten.
+        3. If the destination does not exist and it ends with path separator
+           ('/'), it is considered a directory. That directory is created and
+           the source file copied into it. Possibly missing intermediate
+           directories are also created.
+        4. If the destination does not exist and it does not end with path
+           separator, it is considered a file. If the path to the file does
+           not exist it is created.
+        5. If destination is not given, the user's home directory
+           in the remote machine is used as destination.
 
-    def _create_missing_local_dirs(self, dest, is_dir):
-        if not is_dir:
-            dest = os.path.dirname(dest)
-        if not os.path.exists(dest):
-            self._info("Creating missing local directories for path '%s'" %
-                        dest)
-            os.makedirs(dest)
+        Using wild cards like '*' and '?' are allowed in the source.
+        When wild cards are used, destination MUST be a directory and only
+        files are copied from the source, sub directories are ignored. If the
+        contents of sub directories are also needed, use the keyword again.
+
+        Default file permission is 0744 (-rwxr--r--) and can be changed by
+        giving a value to the optional `mode` parameter.
+
+        `newline` can be used to force newline characters that are written to
+        the remote file. Valid values are `CRLF` (for Windows) and `LF`.
+
+        Examples:
+        | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
+
+        """
+        cmd = self.ssh_client.put_file
+        return self._run_sftp_command(cmd, source, destination, mode, newline)
+
+    def _run_sftp_command(self, command, *args):
+        try:
+            sources, destinations = command(*args)
+        except SSHClientException, e:
+            raise RuntimeError(e)
+        for src, dst in zip(sources, destinations):
+            self._info("'%s' -> '%s'" % (src, dst))
 
     def _info(self, msg):
         self._log(msg, 'INFO')

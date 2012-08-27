@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 import jarray
 from java.io import (File, BufferedReader, InputStreamReader, IOException,
                      FileOutputStream)
@@ -23,7 +22,7 @@ except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
-from .client import AbstractSSHClient
+from .client import AbstractSSHClient, AbstractSFTPClient
 from .core import SSHClientException, Command
 
 
@@ -87,57 +86,61 @@ class JavaSSHClient(AbstractSSHClient):
             return chr(buf[0])
         return ''
 
-    def create_sftp_client(self):
-        self.sftp_client = SFTPv3Client(self.client)
-        self.homedir = self.sftp_client.canonicalPath('.') + '/'
+    def _create_sftp_client(self):
+        return SFTPClient(self.client)
 
-    def close_sftp_client(self):
-        self.sftp_client.close()
 
-    def create_missing_remote_path(self, path):
+class SFTPClient(AbstractSFTPClient):
+
+    def _create_client(self, ssh_client):
+        return SFTPv3Client(ssh_client)
+
+    def _resolve_homedir(self):
+        return self._client.canonicalPath('.') + '/'
+
+    def _create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'
         else:
-            curdir = self.sftp_client.canonicalPath('.')
+            curdir = self._client.canonicalPath('.')
         for dirname in path.split('/'):
             if dirname:
                 curdir = '%s/%s' % (curdir, dirname)
             try:
-                self.sftp_client.stat(curdir)
+                self._client.stat(curdir)
             except IOException:
-                print "*INFO* Creating missing remote directory '%s'" % curdir
-                self.sftp_client.mkdir(curdir, 0744)
+                self._client.mkdir(curdir, 0744)
 
     def _create_remote_file(self, dest, mode):
-        remotefile = self.sftp_client.createFile(dest)
+        remotefile = self._client.createFile(dest)
         try:
-            tempstats = self.sftp_client.fstat(remotefile)
+            tempstats = self._client.fstat(remotefile)
             tempstats.permissions = mode
-            self.sftp_client.fsetstat(remotefile, tempstats)
+            self._client.fsetstat(remotefile, tempstats)
         except SFTPException:
             pass
         return remotefile
 
     def _write_to_remote_file(self, remotefile, data, position):
-        self.sftp_client.write(remotefile, position, data, 0, len(data))
+        self._client.write(remotefile, position, data, 0, len(data))
 
     def _close_remote_file(self, remotefile):
-        self.sftp_client.closeFile(remotefile)
+        self._client.closeFile(remotefile)
 
-    def listfiles(self, path):
-        return [finfo.filename for finfo in self.sftp_client.ls(path) if
+    def _listfiles(self, path):
+        return [finfo.filename for finfo in self._client.ls(path) if
                 finfo.attributes.getOctalPermissions().startswith('0100')]
 
-    def get_file(self, source, dest):
+    def _get_file(self, source, dest):
         localfile = FileOutputStream(dest)
-        tempstats = self.sftp_client.stat(source)
+        tempstats = self._client.stat(source)
         remotefilesize = tempstats.size
-        remotefile = self.sftp_client.openFileRO(source)
+        remotefile = self._client.openFileRO(source)
         size = 0
         arraysize = 4096
         data = jarray.zeros(arraysize, 'b')
         while True:
-            moredata = self.sftp_client.read(remotefile, size, data, 0,
+            moredata = self._client.read(remotefile, size, data, 0,
                                              arraysize)
             datalen = len(data)
             if moredata == -1:
@@ -146,7 +149,7 @@ class JavaSSHClient(AbstractSSHClient):
                 datalen = remotefilesize - size
             localfile.write(data, 0, datalen)
             size += datalen
-        self.sftp_client.closeFile(remotefile)
+        self._client.closeFile(remotefile)
         localfile.flush()
         localfile.close()
 

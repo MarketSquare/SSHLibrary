@@ -22,7 +22,7 @@ except ImportError:
             'Ensure that paramiko and pycrypto modules are installed.'
             )
 
-from .client import AbstractSSHClient
+from .client import AbstractSSHClient, AbstractSFTPClient
 from .core import Command, SSHClientException
 
 
@@ -85,31 +85,20 @@ class PythonSSHClient(AbstractSSHClient):
             return self.shell.recv(1)
         return ''
 
-    def create_sftp_client(self):
-        self.sftp_client = self.client.open_sftp()
-        self.homedir = self.sftp_client.normalize('.') + '/'
+    def _create_sftp_client(self):
+        return SFTPClient(self.client)
 
-    def close_sftp_client(self):
-        self.sftp_client.close()
 
-    def create_missing_remote_path(self, path):
-        if path == '.':
-            return
-        if posixpath.isabs(path):
-            self.sftp_client.chdir('/')
-        else:
-            self.sftp_client.chdir('.')
-        for dirname in path.split('/'):
-            if dirname and dirname not in self.sftp_client.listdir(self.sftp_client.getcwd()):
-                print "*INFO* Creating missing remote directory '%s'" % dirname
-                self.sftp_client.mkdir(dirname)
-            self.sftp_client.chdir(dirname)
+class SFTPClient(AbstractSFTPClient):
 
-    def _create_remote_file(self, dest, mode):
-        remotfile = self.sftp_client.file(dest, 'wb')
-        remotfile.set_pipelined(True)
-        self.sftp_client.chmod(dest, mode)
-        return remotfile
+    def _create_client(self, ssh_client):
+        return ssh_client.open_sftp()
+
+    def _resolve_homedir(self):
+        return self._client.normalize('.') + '/'
+
+    def _get_file(self, source, dest):
+        self._client.get(source, dest)
 
     def _write_to_remote_file(self, remotefile, data, position):
         remotefile.write(data)
@@ -117,14 +106,30 @@ class PythonSSHClient(AbstractSSHClient):
     def _close_remote_file(self, remotefile):
         remotefile.close()
 
-    def listfiles(self, path):
+    def _create_missing_remote_path(self, path):
+        if path == '.':
+            return
+        if posixpath.isabs(path):
+            self._client.chdir('/')
+        else:
+            self._client.chdir('.')
+        for dirname in path.split('/'):
+            cwd = self._client.getcwd()
+            if dirname and dirname not in self._client.listdir(cwd):
+                self._client.mkdir(dirname)
+            self._client.chdir(dirname)
+
+    def _create_remote_file(self, dest, mode):
+        remotfile = self._client.file(dest, 'wb')
+        remotfile.set_pipelined(True)
+        self._client.chmod(dest, mode)
+        return remotfile
+
+    def _listfiles(self, path):
         return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self.sftp_client.listdir_attr(path)
+                in self._client.listdir_attr(path)
                 if stat.S_ISREG(fileinfo.st_mode) or
                         stat.S_IFMT(fileinfo.st_mode) == 0]
-
-    def get_file(self, source, dest):
-        self.sftp_client.get(source, dest)
 
 
 class RemoteCommand(Command):

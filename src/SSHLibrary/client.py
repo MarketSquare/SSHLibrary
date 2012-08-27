@@ -12,10 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import with_statement
+
 import sys
 import os
 import re
 import time
+import glob
+
+from robot import utils
 
 from .core import SSHClientException, TimeEntry
 
@@ -234,17 +239,154 @@ class AbstractSSHClient(object):
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
 
-    def put_file(self, source, dest, mode, newline_char):
+    def put_file(self, source, destination='.', mode='0744',
+                 newline='default', path_separator='/'):
+        """Put file(s) from localhost to remote host.
+
+        :param source: Local file path. May be a simple pattern containing
+            '*' and '?', in which case all matching files are tranferred
+        :param destintation: Remote path. If many files are transferred,
+            must be a directory. Defaults to users home directory.
+        :param mode: File permissions for the remote file. Defined as a
+            Unix file format string, e.g. '0600'
+        :param newline: Newline character to be used in the remote file.
+            Default is 'LF', i.e. the line feed character.
+        :param path_separator: The path separator on the remote machine.
+            Must be defined if the remote machine runs Windows.
+        """
+        sftp_client = self._create_sftp_client()
+        sources, destinations = sftp_client.put_file(
+                source, destination, mode, newline, path_separator)
+        sftp_client.close()
+        return sources, destinations
+
+    def get_file(self, source, destination='.', path_separator='/'):
+        """Get file(s) from the remote host to localhost.
+
+        :param source: Remote file path. May be a simple pattern containing
+            '*' and '?', in which case all matching files are tranferred
+            :param destintation: Local path. If many files are transferred,
+            must be a directory. Defaults to current working directory.
+        :param path_separator: The path separator on the remote machine.
+            Must be defined if the remote machine runs Windows.
+        """
+        sftp_client = self._create_sftp_client()
+        sources, destinations = sftp_client.get_file(
+                source, destination, path_separator)
+        sftp_client.close()
+        return sources, destinations
+
+
+class AbstractSFTPClient(object):
+
+    def __init__(self, ssh_client):
+        self._client = self._create_client(ssh_client)
+        self._homedir = self._resolve_homedir()
+
+    def close(self):
+        self._client.close()
+
+    def get_file(self, sources, destination, path_separator='/'):
+        remotefiles = self._get_get_file_sources(sources, path_separator)
+        localfiles = self._get_get_file_destinations(remotefiles, destination)
+        for src, dst in zip(remotefiles, localfiles):
+            self._get_file(src, dst)
+        return remotefiles, localfiles
+
+    def _get_get_file_sources(self, source, path_separator):
+        if path_separator in source:
+            path, pattern = source.rsplit(path_separator, 1)
+        else:
+            path, pattern = '', source
+        if not path:
+            path = '.'
+        sourcefiles = []
+        for filename in self._listfiles(path):
+            if utils.matches(filename, pattern):
+                if path:
+                    filename = path_separator.join([path, filename])
+                sourcefiles.append(filename)
+        if not sourcefiles:
+            msg = "There were no source files matching '%s'" % source
+            raise SSHClientException(msg)
+        return sourcefiles
+
+    def _get_get_file_destinations(self, sourcefiles, dest):
+        if dest == '.':
+            dest += os.sep
+        is_dir = dest.endswith(os.sep)
+        if not is_dir and len(sourcefiles) > 1:
+            msg = 'Cannot copy multiple source files to one destination file.'
+            raise SSHClientException(msg)
+        dest = os.path.abspath(dest.replace('/', os.sep))
+        self._create_missing_local_dirs(dest, is_dir)
+        if is_dir:
+            return [os.path.join(dest, os.path.split(name)[1])
+                    for name in sourcefiles]
+        return [dest]
+
+    def _create_missing_local_dirs(self, dest, is_dir):
+        if not is_dir:
+            dest = os.path.dirname(dest)
+        if not os.path.exists(dest):
+            os.makedirs(dest)
+
+    def put_file(self, sources, destination, mode, newline,
+                  path_separator='/'):
+        mode = int(mode, 8)
+        newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
+        localfiles = self._get_put_file_sources(sources)
+        remotefiles, remotedir = self._get_put_file_destinations(
+                    localfiles, destination, path_separator)
+        self._create_missing_remote_path(remotedir)
+        for src, dst in zip(localfiles, remotefiles):
+            self._put_file(src, dst, mode, newline)
+        return localfiles, remotefiles
+
+    def _put_file(self, source, dest, mode, newline_char):
         remotefile = self._create_remote_file(dest, mode)
-        localfile = open(source, 'rb')
-        position = 0
-        while True:
-            data = localfile.read(4096)
-            if not data:
-                break
-            if newline_char and '\n' in data:
-                data = data.replace('\n', newline_char)
-            self._write_to_remote_file(remotefile, data, position)
-            position += len(data)
-        self._close_remote_file(remotefile)
-        localfile.close()
+        with open(source, 'rb') as localfile:
+            position = 0
+            while True:
+                data = localfile.read(4096)
+                if not data:
+                    break
+                if newline_char and '\n' in data:
+                    data = data.replace('\n', newline_char)
+                self._write_to_remote_file(remotefile, data, position)
+                position += len(data)
+            self._close_remote_file(remotefile)
+
+    def _parse_path_elements(self, dest, path_separator):
+        def _isabs(path):
+            if dest.startswith(path_separator):
+                return True
+            if path_separator == '\\' and path[1:3] == ':\\':
+                return True
+            return False
+        if not _isabs(dest):
+            dest = path_separator.join([self._homedir, dest])
+        return dest.rsplit(path_separator, 1)
+
+    def _get_put_file_sources(self, source):
+        sources = [f for f in glob.glob(source.replace('/', os.sep))
+                   if os.path.isfile(f)]
+        if not sources:
+            msg = "There are no source files matching '%s'" % source
+            raise SSHClientException(msg)
+        return sources
+
+    def _get_put_file_destinations(self, sources, dest, path_separator):
+        dest = dest.split(':')[-1].replace('\\', '/')
+        if dest == '.':
+            dest = self._homedir + '/'
+        if len(sources) > 1 and dest[-1] != '/':
+            raise ValueError('It is not possible to copy multiple source '
+                             'files to one destination file.')
+        dirpath, filename = self._parse_path_elements(dest, path_separator)
+        if filename:
+            files = [path_separator.join([dirpath, filename])]
+        else:
+            files = [path_separator.join([dirpath, os.path.split(path)[1]])
+                     for path in sources]
+        return files, dirpath

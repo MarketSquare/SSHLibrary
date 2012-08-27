@@ -24,7 +24,7 @@ Get File With Pattern
     Get File And Verify Listing  /home/${USERNAME}/*  ${TMPDIR}${/}  ${TEST SCRIPT NAME}  ${INTERACTIVE TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
 
 Getting Mulitple Source Files To Single File Fails
-    Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.  SSHLibrary.Get File  /home/${USERNAME}/*.sh  ${TMPDIR}${/}foo
+    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  /home/${USERNAME}/*.sh  ${TMPDIR}${/}foo
 
 Get File To Curdir
     SSHLibrary.Get File  /home/${USERNAME}/${TEST SCRIPT NAME}  .
