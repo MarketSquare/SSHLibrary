@@ -8,8 +8,7 @@ __version__ = VERSION
 
 
 class SSHLibrary(DeprecatedSSHLibraryKeywords):
-    """SSH Library is a test library for Robot Framework that enables
-    executing commands and transferring files over an SSH connection.
+    """Robot Framework test library for SSH and SCP.
 
     SSHLibrary works with both Python and Jython interpreters. To use
     SSHLibrary with Python, you must first install paramiko SSH
@@ -173,10 +172,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         This keyword ought to be used in test or suite teardown to make sure
         all connections are closed.
         """
-        try:
-            self._cache.close_all()
-        except AttributeError:
-            pass
+        self._cache.close_all()
 
     def get_connections(self):
         """Return information about opened connections.
@@ -185,12 +181,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         These objects have attributes that correspond to the argument names
         of `Open Connection`.
 
+        Connection information is also logged.
+
         Example:
         | Open Connection | somehost  | prompt=>> |
         | Open Connection | otherhost | timeout=5 minutes |
-        | ${info} = | Get Connections |
-        | Should Be Equal | ${info[0].host} | somehost |
-        | Should Be Equal | ${info[1].timeout} | 5 minutes |
+        | ${conn1} | ${conn2}= | Get Connections |
+        | Should Be Equal | ${conn1.host} | somehost |
+        | Should Be Equal | ${conn2.timeout} | 5 minutes |
         """
         # TODO: could the ConnectionCache be enhanced to be iterable?
         configs = [c.config for c in self._cache._connections]
@@ -206,15 +204,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         overwritten.
 
         Note that this keyword only works with Python, e.g. when executing the
-        tests with `pybot`
+        tests with `pybot`.
         """
         if AbstractSSHClient.enable_logging(logfile):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
     def close_connection(self):
-        """Closes the currently active connection.
-        """
+        """Closes the currently active connection."""
         self.ssh_client.close()
 
     def login(self, username, password):
@@ -529,7 +526,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def _log(self, msg, level=None):
         level = self._active_log_level(level)
         msg = msg.strip()
-        if msg != '':
+        if msg:
             print '*%s* %s' % (level, msg)
 
     def _active_log_level(self, level):

@@ -27,6 +27,10 @@ from .core import ClientConfig, SSHClientException, TimeEntry
 
 def SSHClient(host, alias=None, port=22, timeout=3, newline='LF', prompt=None,
               term_type='vt100', width=80, height=24):
+    """Create new SSH client with given configuration options.
+
+    :returns: Platform specific implementation of `AbstracSSHClient`
+    """
     return _SSHClientClass()(ClientConfig(host, alias, port, timeout, newline,
                                           prompt, term_type, width, height))
 
