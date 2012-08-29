@@ -1,6 +1,22 @@
-from .client import SSHClient, AbstractSSHClient
+#  Copyright 2008-2012 Nokia Siemens Networks Oyj
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from .abstractclient import SSHClientException
+from .client import SSHClient
+from config import (Configuration, StringEntry, TimeEntry, LogLevelEntry,
+        NewlineEntry)
 from .connectioncache import ConnectionCache
-from .core import DefaultConfig, SSHClientException
 from .deprecated import DeprecatedSSHLibraryKeywords
 from .version import VERSION
 
@@ -206,7 +222,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Note that this keyword only works with Python, e.g. when executing the
         tests with `pybot`.
         """
-        if AbstractSSHClient.enable_logging(logfile):
+        if SSHClient.enable_logging(logfile):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
@@ -536,3 +552,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                 level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
             return level.upper()
         raise AssertionError("Invalid log level '%s'" % level)
+
+
+class DefaultConfig(Configuration):
+
+    def __init__(self, timeout, newline, prompt, log_level):
+        Configuration.__init__(self,
+                timeout=TimeEntry(timeout or 3),
+                newline=NewlineEntry(newline or 'LF'),
+                prompt=StringEntry(prompt),
+                log_level=LogLevelEntry(log_level or 'INFO'))
+

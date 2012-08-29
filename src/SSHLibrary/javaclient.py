@@ -22,8 +22,8 @@ except ImportError:
     raise ImportError('Importing Trilead SSH classes failed. '
                       'Make sure you have the Trilead jar file in CLASSPATH.')
 
-from .client import AbstractSSHClient, AbstractSFTPClient
-from .core import SSHClientException, Command
+from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
+        AbstractCommand, SSHClientException)
 
 
 class JavaSSHClient(AbstractSSHClient):
@@ -154,7 +154,7 @@ class SFTPClient(AbstractSFTPClient):
         localfile.close()
 
 
-class RemoteCommand(Command):
+class RemoteCommand(AbstractCommand):
 
     def _execute(self):
         self._session.execCommand(self._command)

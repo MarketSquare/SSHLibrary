@@ -22,8 +22,8 @@ except ImportError:
             'Ensure that paramiko and pycrypto modules are installed.'
             )
 
-from .client import AbstractSSHClient, AbstractSFTPClient
-from .core import Command, SSHClientException
+from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
+        AbstractCommand, SSHClientException)
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -132,7 +132,7 @@ class SFTPClient(AbstractSFTPClient):
                         stat.S_IFMT(fileinfo.st_mode) == 0]
 
 
-class RemoteCommand(Command):
+class RemoteCommand(AbstractCommand):
 
     def _execute(self):
         self._session.exec_command(self._command)
