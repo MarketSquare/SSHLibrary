@@ -1,6 +1,6 @@
 from .client import SSHClient, AbstractSSHClient
 from .connectioncache import ConnectionCache
-from .core import DefaultConfig, ClientConfig, SSHClientException
+from .core import DefaultConfig, SSHClientException
 from .deprecated import DeprecatedSSHLibraryKeywords
 from .version import VERSION
 
@@ -126,9 +126,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
         prompt = prompt or self._config.prompt
-        config = ClientConfig(host, alias, port, timeout, newline, prompt,
-                              term_type, width, height)
-        return self._cache.register(SSHClient(config), config.alias)
+        client = SSHClient(host, alias, port, timeout, newline, prompt,
+                           term_type, width, height)
+        return self._cache.register(client, alias)
 
     def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.

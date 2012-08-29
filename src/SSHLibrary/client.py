@@ -22,11 +22,13 @@ import glob
 
 from robot import utils
 
-from .core import SSHClientException, TimeEntry
+from .core import ClientConfig, SSHClientException, TimeEntry
 
 
-def SSHClient(config):
-    return _SSHClientClass()(config)
+def SSHClient(host, alias=None, port=22, timeout=3, newline='LF', prompt=None,
+              term_type='vt100', width=80, height=24):
+    return _SSHClientClass()(ClientConfig(host, alias, port, timeout, newline,
+                                          prompt, term_type, width, height))
 
 
 def _SSHClientClass():
