@@ -50,12 +50,17 @@ class AbstractSSHClient(object):
 
         :param ClientConfig config: the configuration used by this client
         """
-        self.host = config.host
-        self.port = config.port
         self.config = config
-        self.shell = None
         self.client = self._create_client()
         self._commands = []
+
+    @property
+    def host(self):
+        return self.config.host
+
+    @property
+    def port(self):
+        return self.config.port
 
     @staticmethod
     def enable_logging(path):
