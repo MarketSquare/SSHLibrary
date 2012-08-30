@@ -348,7 +348,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         used.
         """
         self._write(text, add_newline=True)
-        return self._read_and_log(self.ssh_client.read_until_newline, loglevel)
+        return self._read_and_log(loglevel, self.ssh_client.read_until_newline)
 
     def write_bare(self, text):
         """Writes given text over the connection without appending newline.
@@ -375,7 +375,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         This keyword is most useful for reading everything from the output
         buffer, thus clearing it.
         """
-        return self._read_and_log(self.ssh_client.read, loglevel)
+        return self._read_and_log(loglevel, self.ssh_client.read)
 
     def read_until(self, expected, loglevel=None):
         """Reads output until expected is encountered or timeout expires.
@@ -388,8 +388,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         See `Read` for more information on `loglevel`.
         """
-        reader = lambda: self.ssh_client.read_until(expected)
-        return self._read_and_log(reader, loglevel)
+        return self._read_and_log(loglevel, self.ssh_client.read_until,
+                                  expected)
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Reads output until a match to `regexp` is found or timeout expires.
@@ -406,8 +406,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Read Until Regexp | (#|$) |
         | Read Until Regexp | some regexp  | DEBUG |
         """
-        reader = lambda: self.ssh_client.read_until_regexp(regexp)
-        return self._read_and_log(reader, loglevel)
+        return self._read_and_log(loglevel, self.ssh_client.read_until_regexp,
+                                  regexp)
 
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the output until prompt is found.
@@ -421,7 +421,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         output of previous command has been read and the command does not
         produce prompt characters in its output.
         """
-        return self._read_and_log(self.ssh_client.read_until_prompt, loglevel)
+        return self._read_and_log(loglevel, self.ssh_client.read_until_prompt)
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
@@ -445,13 +445,12 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         the keyword will fail if 'myprocess' does not appear on the output in
         5 seconds.
         """
-        reader = lambda: self.ssh_client.write_until_expected(
-                            text, expected, timeout, retry_interval)
-        self._read_and_log(reader, loglevel)
+        self._read_and_log(loglevel, self.ssh_client.write_until_expected,
+                           text, expected, timeout, retry_interval)
 
-    def _read_and_log(self, reader, loglevel):
+    def _read_and_log(self, loglevel, reader, *args):
         try:
-            output = reader()
+            output = reader(*args)
         except SSHClientException, e:
             raise RuntimeError(e)
         self._log(output, loglevel)
@@ -563,4 +562,3 @@ class DefaultConfig(Configuration):
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
                 log_level=LogLevelEntry(log_level or 'INFO'))
-
