@@ -299,7 +299,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """
         self._info("Executing command '%s'" % command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
-        return self.ssh_client.execute_command(command, *opts)
+        stdout, stderr, rc = self.ssh_client.execute_command(command)
+        return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
         """Starts command execution on remote host.
@@ -329,7 +330,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """
         self._info("Reading output of command '%s'" % self._command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
-        return self.ssh_client.read_command_output(*opts)
+        stdout, stderr, rc = self.ssh_client.read_command_output()
+        return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _output_options(self, stdout, stderr, rc):
         # Handle legacy options for configuring returned outputs
@@ -341,6 +343,19 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         if stdout == 'both':
             return True, True, rc
         return stdout, stderr, rc
+
+    def _return_command_output(self, stdout, stderr, rc,
+                               return_stdout, return_stderr, return_rc):
+        ret = []
+        if return_stdout:
+            ret.append(stdout.rstrip('\n'))
+        if return_stderr:
+            ret.append(stderr.rstrip('\n'))
+        if return_rc:
+            ret.append(rc)
+        if len(ret) == 1:
+            return ret[0]
+        return ret
 
     def write(self, text, loglevel=None):
         """Writes given text over the connection and appends newline.

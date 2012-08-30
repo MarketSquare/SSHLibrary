@@ -121,27 +121,24 @@ class AbstractSSHClient(object):
         except IOError:
             raise SSHClientException("Could not read key file '%s'" % keyfile)
 
-    def execute_command(self, command, return_stdout, return_stderr,
-                        return_rc):
+    def execute_command(self, command):
+        """Execute given command over existing connection.
+
+        :returns: 3-tuple (stdout, stderr, return_code)
+        """
         self.start_command(command)
-        return self.read_command_output(return_stdout, return_stderr,
-                                        return_rc)
+        return self.read_command_output()
 
     def start_command(self, command):
+        """Execute given command over existing connection."""
         self._commands.append(self._start_command(command))
 
-    def read_command_output(self, return_stdout, return_stderr, return_rc):
-        stdout, stderr, rc = self._commands.pop().read_outputs()
-        ret = []
-        if return_stdout:
-            ret.append(stdout.rstrip('\n'))
-        if return_stderr:
-            ret.append(stderr.rstrip('\n'))
-        if return_rc:
-            ret.append(rc)
-        if len(ret) == 1:
-            return ret[0]
-        return ret
+    def read_command_output(self):
+        """Read output of a previously started command.
+
+        :returns: 3-tuple (stdout, stderr, return_code)
+        """
+        return self._commands.pop().read_outputs()
 
     def write(self, text, add_newline=False):
         """Write `text` in shell session.
