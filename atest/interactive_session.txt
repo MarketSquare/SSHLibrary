@@ -60,18 +60,7 @@ Write Bare And Read
     Should Contain  ${output2}  Hello Janne
     Should Contain  ${output2}  ${PROMPT}
 
-Prompt Is Not Set
-    [Teardown]    Switch Connection    1
-    Set Prompt  ${None}
-    Login as Valid User
-    Run Keyword And Expect Error    Prompt is not set.    Write    This should fail
-
 *** Keywords ***
 Remove Counter And Read All Data
     Execute Command  rm -f ${COUNTER NAME}
     Read
-
-Open And Login
-    Open Connection  gaston
-    Login  testuser  test
-
