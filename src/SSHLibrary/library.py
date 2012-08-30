@@ -475,7 +475,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', path_separator='/'):
         """Copies file(s) from remote host to local host.
 
         1. If the destination is an existing file, the source file is copied
@@ -498,16 +498,20 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         matching the pattern are copied, but sub directories are ignored. If
         the contents of sub directories are also needed, use the keyword again.
 
+        `path_separator` the path separator character used in the remote
+        machine. With Windows machines, this must be defined as '\\'. Added
+        in version 1.1.
+
         Examples:
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
 
         """
         return self._run_sftp_command(self.ssh_client.get_file, source,
-                                      destination)
+                                      destination, path_separator)
 
     def put_file(self, source, destination='.', mode='0744',
-                 newline='default'):
+                 newline='default', path_separator='/'):
         """Copies file(s) from local host to remote host.
 
         1. If the destination is an existing file, the source file is copied
@@ -535,6 +539,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         `newline` can be used to force newline characters that are written to
         the remote file. Valid values are `CRLF` (for Windows) and `LF`.
 
+        `path_separator` the path separator character used in the remote
+        machine. With Windows machines, this must be defined as '\\'. Added
+        in version 1.1.
+
         Examples:
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
@@ -542,7 +550,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         """
         cmd = self.ssh_client.put_file
-        return self._run_sftp_command(cmd, source, destination, mode, newline)
+        return self._run_sftp_command(cmd, source, destination, mode, newline,
+                                      path_separator)
 
     def _run_sftp_command(self, command, *args):
         try:
