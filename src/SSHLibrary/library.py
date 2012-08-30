@@ -25,33 +25,34 @@ __version__ = VERSION
 
 
 class SSHLibrary(DeprecatedSSHLibraryKeywords):
-    """Robot Framework test library for SSH and SCP.
+    """Robot Framework test library for SSH and SFTP.
 
-    SSHLibrary works with both Python and Jython interpreters. To use
-    SSHLibrary with Python, you must first install paramiko SSH
-    implementation[1] and its dependencies.  To use SSHLibrary with Jython, you
-    must have jar distribution of Trilead SSH implementation[2] in the
+    SSHLibrary works with both Python and Jython interpreters.
+
+    To use SSHLibrary with Python, you must first install paramiko SSH
+    implementation[1] and its dependencies.  For Jython, you must have jar
+    distribution of Trilead SSH implementation[2] in the
     CLASSPATH during test execution
 
     [1] http://www.lag.net/paramiko/
     [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/
 
-    Currently, there are two modes of operation:
+    The library supports multiple connections to different hosts.
 
-    1. When keyword `Execute Command` or `Start Command` is used to execute
-    something, a new channel is opened over the SSH connection. In practice it
-    means that no session information is stored.
+    A connection must always be opened using `Open Connection` before the
+    other keywords work.
+
+    For executing commands, there are two possibilities:
+
+    1. `Execute Command` or `Start Command`. These keywords open a new session
+    using the connection, possible state changes are not preserved.
 
     2. Keywords `Write` and `Read XXX` operate in an interactive shell, which
     means that changes to state are visible to next keywords. Note that in
     interactive mode, a prompt must be set before using any of the
     Write-keywords. Prompt can be set either on `library importing` or
-    when a new connection is opened using `Open Connection`, or using
-    keywords `Set Prompt` or `Set Default Prompt`.
-
-    Both modes require that a connection is opened with `Open Connection`.
+    when a new connection is opened using `Open Connection`.
     """
-
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
@@ -83,9 +84,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                   prompt=None, loglevel=None):
         """Update the default configuration values.
 
-        This keyword can only be used using named argument syntax. The names
-        of accepted arguments are the same as can be given in the `library
-        importing`.
+        Only parameters whose value is other than `None` are updated.
 
         Example:
             | Set Default Configuration | newline=CRLF | prompt=$ |
@@ -100,9 +99,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Works on the currently selected connection. At least one connection
         must have been opened using `Open Connection`.
 
-        This keyword can only be used using named argument syntax. The names
-        of accepted arguments are the same as can be given to the `Open
-        Connection` keyword.
+        Only parameters whose value is other than `None` are updated.
 
         Example:
             | Set Client Configuration | term_type=ansi | timeout=2 hours |
@@ -135,8 +132,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         for this shell, and `width` and `height` can be configured to control
         the virtual size of it.
 
-        All of the client configuration options can be later updated using
-        `Set Client Configuration`.
+        Client configuration options other than `host`, `port` and `alias`
+        can be later updated using `Set Client Configuration`.
 
         Examples:
         | Open Connection | myhost.net |
@@ -276,7 +273,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         configure whether the return value includes the command's stdout,
         stderr or return code, respectively.  If only one of these evaluates
         to true, the corresponding value is returned.  Otherwise a tuple
-        containing all requested values is returned.
+        containing all requested values is returned. These arguments were
+        added in SSHLibrary 1.1, but the old way of configuring the return
+        values is also supported.
 
         By default, only stdout is returned.
 
@@ -303,7 +302,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
-        """Starts command execution on remote host.
+        """Starts command execution on remote host and return immediately.
 
         This keyword doesn't return anything. Use `Read Command Output` to read
         the output generated from command execution.
@@ -387,8 +386,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def read(self, loglevel=None):
         """Reads and returns/logs everything currently available on the output.
 
-        Read message is always returned and logged. Default log level is
-        either 'INFO', or the level set with `Set Default Log Level`.
+        Read message is always returned and logged. Default log level is set
+        either in `library importing`, or using `Set Default Configuration`.
         `loglevel` can be used to override the default log level, and available
         levels are TRACE, DEBUG, INFO and WARN.
 
@@ -432,8 +431,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the output until prompt is found.
 
-        Prompt must have been set, either in `library importing` or by using
-        `Set Prompt` -keyword.
+        Prompt must have been set, either in `library importing` or when
+        the connection was opened using `Open Connection`.
 
         See `Read` for more information on `loglevel`.
 
