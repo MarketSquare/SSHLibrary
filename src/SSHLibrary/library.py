@@ -12,11 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from robot.utils import ConnectionCache
+
 from .abstractclient import SSHClientException
 from .client import SSHClient
 from config import (Configuration, StringEntry, TimeEntry, LogLevelEntry,
         NewlineEntry)
-from .connectioncache import ConnectionCache
 from .deprecated import DeprecatedSSHLibraryKeywords
 from .version import VERSION
 
