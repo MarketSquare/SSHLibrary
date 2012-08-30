@@ -18,18 +18,18 @@ class TestSSHLibraryConfiguration(unittest.TestCase):
     def test_set_default_confguarition(self):
         timeout, newline, prompt, level = 1, '\r\n', '>', 'DEBUG'
         lib = SSHLibrary()
-        lib.set_default_configuration('timeout=%s' % timeout,
-                                      'newline=%s' % newline,
-                                      'prompt=%s' % prompt,
-                                      'log_level=%s' % level)
+        lib.set_default_configuration(timeout=timeout,
+                                      newline=newline,
+                                      prompt=prompt,
+                                      loglevel=level)
         self._assert_config(lib._config, timeout, newline, prompt, level)
 
     def _assert_config(self, cfg, timeout=3, newline='\n', prompt=None,
-                       log_level='INFO'):
+                       loglevel='INFO'):
         self.assertEquals(cfg.timeout, timeout)
         self.assertEquals(cfg.newline, newline)
         self.assertEquals(cfg.prompt, prompt)
-        self.assertEquals(cfg.log_level, log_level)
+        self.assertEquals(cfg.loglevel, loglevel)
 
 
 class TestSSHClientConfiguration(unittest.TestCase):
@@ -45,12 +45,12 @@ class TestSSHClientConfiguration(unittest.TestCase):
         self._assert_config(lib.ssh_client.config, timeout=5)
 
     def test_set_client_confguration(self):
-        port, term_type = 23, 'ansi'
+        timeout, term_type = 23, 'ansi'
         lib = SSHLibrary()
         lib.open_connection(HOSTNAME)
-        lib.set_client_configuration('port=%d' % port,
-                                     'term_type=%s' % term_type)
-        self._assert_config(lib.ssh_client.config, port=port,
+        lib.set_client_configuration(timeout=timeout,
+                                     term_type=term_type)
+        self._assert_config(lib.ssh_client.config, timeout=timeout,
                             term_type=term_type)
 
 

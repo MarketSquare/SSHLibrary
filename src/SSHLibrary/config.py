@@ -33,27 +33,14 @@ class Configuration(object):
         """Update configuration entries.
 
         :param entries: entries to be updated, keyword argument names must
-            match existing entry names.
+            match existing entry names. If any value in `**entries` is None,
+            the corresponding entry is *not* updated.
 
         See `__init__` for an example.
         """
-        for name in entries:
-            self._config[name].set(entries[name])
-
-    def update_with_strings(self, *entries):
-        """Update configuration entries.
-
-        :param entries: entries to be updated as strings in format name=value.
-
-        Example:
-        cfg = Configuration(name=StringEntry('initial'))
-        assert cfg.name == initial
-        cfg.update('name=John Doe')
-        assert cfg.name == 'John Doe'
-        """
-        for e in entries:
-            name, value = e.split('=', 1)
-            self.update(**{name: value})
+        for name, value in entries.items():
+            if value is not None:
+                self._config[name].set(value)
 
     def get(self, name):
         """Return entry corresponding to name."""

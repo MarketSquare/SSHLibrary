@@ -56,7 +56,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=3, newline='LF', prompt=None,
-                 log_level='INFO'):
+                 loglevel='INFO'):
         """SSH Library allows some import time configuration.
 
         `timeout`, `newline` and `prompt` set default values for new
@@ -64,7 +64,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         later be changed using `Set Default Configuration` and settings
         of a single connection with `Set Client Configuration`.
 
-        `log_level` sets the default log level used to log return values of
+        `loglevel` sets the default log level used to log return values of
         `Read Until` variants. It can also be later changed using `Set
         Default Configuration`.
 
@@ -73,13 +73,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Library | SSHLibrary | timeout=10 | prompt=> |
         """
         self._cache = ConnectionCache()
-        self._config = DefaultConfig(timeout, newline, prompt, log_level)
+        self._config = DefaultConfig(timeout, newline, prompt, loglevel)
 
     @property
     def ssh_client(self):
         return self._cache.current
 
-    def set_default_configuration(self, *entries):
+    def set_default_configuration(self, timeout=None, newline=None,
+                                  prompt=None, loglevel=None):
         """Update the default configuration values.
 
         This keyword can only be used using named argument syntax. The names
@@ -89,9 +90,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example:
             | Set Default Configuration | newline=CRLF | prompt=$ |
         """
-        self._config.update_with_strings(*entries)
+        self._config.update(timeout=timeout, newline=newline, prompt=prompt,
+                            loglevel=loglevel)
 
-    def set_client_configuration(self, *entries):
+    def set_client_configuration(self, timeout=None, newline=None, prompt=None,
+                                 term_type='vt100', width=80, height=24):
         """Update the client configuration values.
 
         Works on the currently selected connection. At least one connection
@@ -104,7 +107,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example:
             | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
-        self.ssh_client.config.update_with_strings(*entries)
+        self.ssh_client.config.update(timeout=timeout, newline=newline,
+                                      prompt=prompt, term_type=term_type,
+                                      width=width, height=height)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type='vt100',
@@ -540,14 +545,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._log(msg, 'DEBUG')
 
     def _log(self, msg, level=None):
-        level = self._active_log_level(level)
+        level = self._active_loglevel(level)
         msg = msg.strip()
         if msg:
             print '*%s* %s' % (level, msg)
 
-    def _active_log_level(self, level):
+    def _active_loglevel(self, level):
         if level is None:
-            return self._config.log_level
+            return self._config.loglevel
         if isinstance(level, basestring) and \
                 level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
             return level.upper()
@@ -556,9 +561,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
 class DefaultConfig(Configuration):
 
-    def __init__(self, timeout, newline, prompt, log_level):
+    def __init__(self, timeout, newline, prompt, loglevel):
         Configuration.__init__(self,
                 timeout=TimeEntry(timeout or 3),
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
-                log_level=LogLevelEntry(log_level or 'INFO'))
+                loglevel=LogLevelEntry(loglevel or 'INFO'))
