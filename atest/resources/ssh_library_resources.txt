@@ -19,6 +19,7 @@ ${TEST FILE 2}  ${SCRIPTS}${TEST FILE 2 NAME}
 ${TEST FILE PATTERN}  ${SCRIPTS}test*.txt
 ${FILE WITH NEWLINES NAME}  file_with_newlines.txt
 ${FILE WITH NEWLINES}  ${SCRIPTS}${FILE WITH NEWLINES NAME}
+${SPECIAL CHARS FILE}  ${SCRIPTS}foo%2Fbar.txt
 
 *** Keywords ***
 Login And Move Test Files

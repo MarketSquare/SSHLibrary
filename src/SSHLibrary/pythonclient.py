@@ -32,9 +32,22 @@ def _monkey_patched_start_client(self, event=None):
     self._orig_start_client(event)
 
 
+# See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
+def _monkey_patched_log(self, level, msg, *args):
+    escape = lambda s: s.replace('%', '%%')
+    if isinstance(msg, basestring):
+        msg = escape(msg)
+    else:
+        msg = [escape(m) for m in msg]
+    return self._orig_log(level, msg, *args)
+
+
 paramiko.transport.Transport._orig_start_client = \
         paramiko.transport.Transport.start_client
 paramiko.transport.Transport.start_client = _monkey_patched_start_client
+paramiko.sftp_client.SFTPClient._orig_log = \
+        paramiko.sftp_client.SFTPClient._log
+paramiko.sftp_client.SFTPClient._log = _monkey_patched_log
 
 
 class PythonSSHClient(AbstractSSHClient):
