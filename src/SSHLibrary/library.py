@@ -34,8 +34,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     distribution of Trilead SSH implementation[2] in the
     CLASSPATH during test execution
 
-    [1] http://www.lag.net/paramiko/
-    [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/
+    | [1] http://www.lag.net/paramiko/
+    | [2] http://www.trilead.com/Products/Trilead_SSH_for_Java/
 
     The library supports multiple connections to different hosts.
 
@@ -248,7 +248,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """Logs into SSH server with using key-based authentication.
 
         `username` is the username on the remote system.
-        `keyfile` is a path to a valid OpenSSH *private* key file.
+        `keyfile` is a path to a valid OpenSSH private key file.
         `password` is used to unlock `keyfile` if unlocking is required.
 
         Reads and returns available output. If prompt is set, everything until
