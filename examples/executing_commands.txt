@@ -1,11 +1,3 @@
-###
-# To run these tests, install SSHLibrary and execute `pybot examples`
-# By default the connection is made using parameters read from the resource
-# file. They can be changed by defining them from the command line:
-# pybot -v host:somehos -v user:somebody -v password:secret
-###
-
-
 *** Test Cases ***
 Execute single commmand
     ${result}=    Execute command    ${LS}
