@@ -1,35 +1,32 @@
+*** Settings ***
+Suite Setup       Open connection and login
+Resource          example_resource.txt
+
 *** Test Cases ***
 Execute single commmand
-    ${result}=    Execute command    ${LS}
+    [Documentation]    `Execute Command` is the easiest keyword for running\na single command. It returns the output by default.
+    ${output}=    Execute Command    ${LS}
+
+Execute command return values
+    [Documentation]    To return stderr or RC with `Execute Command`, give\ncorresponding named arguments any non-empty value.
+    ${stdout}    ${stderr}    ${rc}=    Execute Command    ${LS}    include    return_stderr=yes
+    ...    return_rc=sure
+    Should Be Equal    ${stderr}    ${EMPTY}
+    Should Be Equal As Integers    ${rc}    0
 
 Executing multiple commands
-    [Documentation]   Since each Execute command is executed in separate
-    ...    session, using `cd` between `ls` calls has no effect on results.
-    ${result1}=    Execute command    ${LS}
-    Execute command    cd /
-    ${result2}=    Execute command    ${LS}
+    [Documentation]    Because each `Execute Command` is executed in a separate\nsession, using `cd` between `ls` calls has no effect on results.
+    ${result1}=    Execute Command    ${LS}
+    Execute Command    cd /
+    ${result2}=    Execute Command    ${LS}
     Should be equal    ${result1}    ${result2}
 
-All return values of execute command
-    [Documentation]   To return stderr or rc with execute command, use corresponding
-    ...   named argument, where the argument value may be any non empty string.
-    ${stdout}    ${stderr}    ${rc}=
-    ...    Execute Command    ${LS}   include   return_stderr=yes    return_rc=sure
-    Should be equal    ${stderr}    ${EMPTY}
-    Should be equal as integers    ${rc}    0
-
 Command in session
-    [Documentation]    Write and Read keywords operate on same session, so
-    ...    state between keyword calls is preserved.
+    [Documentation]    Write and Read keywords operate on same session, so\nstate between keyword calls is preserved.
     Write    ${LS}
-    ${result1}=    Read until prompt
+    ${result1}=    Read Until Prompt
     Write    cd /
-    Read until prompt
+    Read Until Prompt
     Write    ${LS}
-    ${result2}=    Read until prompt
-    Should not be equal     ${result1}    ${result2}
-
-
-*** Settings ***
-Resource    example_resource.txt
-Suite Setup    Open connection and login
+    ${result2}=    Read Until Prompt
+    Should Not Be Equal    ${result1}    ${result2}
