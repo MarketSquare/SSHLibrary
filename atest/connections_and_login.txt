@@ -23,7 +23,7 @@ Switch Connection
     ${prev id} =  Switch Connection  second
     Write  pwd
     ${result} =  Read Until Prompt
-    Should Contain  ${result}  /home
+    Should Contain  ${result}  ~
 
 Login Returns Banner Value
     [Setup]  Open Connection  ${HOST}
@@ -39,7 +39,7 @@ Enable Logging
     File Should Not Be Empty  ${OUTPUTDIR}/sshlog.txt
 
 Executing Command Before Opening Connection
-    Run Keyword And Expect Error  No open connection  Execute Command  ls
+    Run Keyword And Expect Error  No open connection.  Execute Command  ls
 
 Get Connections
     Open Connection   ${HOST}   prompt=>>
