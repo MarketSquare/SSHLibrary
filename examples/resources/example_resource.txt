@@ -6,7 +6,7 @@ ${HOST}           localhost
 ${USERNAME}       test
 ${PASSWORD}       test
 ${PROMPT}         $
-${LS}             ls -a --color=never
+${LS}             ls -a
 
 *** Keywords ***
 Open connection and log in

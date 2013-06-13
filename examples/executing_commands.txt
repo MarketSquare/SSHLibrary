@@ -1,6 +1,6 @@
 *** Settings ***
 Suite Setup       Open connection and login
-Resource          example_resource.txt
+Resource          resources/example_resource.txt
 
 *** Test Cases ***
 Execute single commmand
