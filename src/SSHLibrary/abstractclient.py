@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from __future__ import with_statement
+from fnmatch import fnmatchcase
 
 import os
 import re
@@ -311,7 +312,7 @@ class AbstractSFTPClient(object):
             path = '.'
         sourcefiles = []
         for filename in self._listfiles(path):
-            if utils.matches(filename, pattern):
+            if fnmatchcase(filename, pattern):
                 if path:
                     filename = path_separator.join([path, filename])
                 sourcefiles.append(filename)
