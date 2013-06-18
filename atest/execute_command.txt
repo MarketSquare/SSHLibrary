@@ -44,6 +44,6 @@ Execute Command With Output Containing Newlines
     Should Be Equal  ${res}\n  ${actual}
 
 Execute Command With Multiple Statements
-    ${result} =  Execute Command  echo -e "foo\n"; echo RC=$?
+    ${result} =  Execute Command  echo "foo\n"; echo RC=$?
     Should Be Equal  ${result}  foo\n\nRC=0
 

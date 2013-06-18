@@ -23,7 +23,7 @@ Switch Connection
     ${prev id} =  Switch Connection  second
     Write  pwd
     ${result} =  Read Until Prompt
-    Should Contain  ${result}  ~
+    Should Contain  ${result}  /home/test
 
 Login Returns Banner Value
     [Setup]  Open Connection  ${HOST}
