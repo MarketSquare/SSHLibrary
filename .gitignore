@@ -5,6 +5,6 @@
 log.html
 report.html
 output.xml
+atest/results
 atest/resources/keyfiles/id_rsa
 atest/sshlog.txt
-results/
