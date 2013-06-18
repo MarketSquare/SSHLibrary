@@ -24,10 +24,10 @@ ${SPECIAL CHARS FILE}  ${SCRIPTS}foo%2Fbar.txt
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
-    Put File  ${TEST SCRIPT}  /home/${USERNAME}/${TEST SCRIPT NAME}
-    Put File  ${INTERACTIVE TEST SCRIPT}  /home/${USERNAME}/${INTERACTIVE TEST SCRIPT NAME}
-    Put File  ${REPEAT TEST SCRIPT}  /home/${USERNAME}/${REPEAT TEST SCRIPT NAME}
-    Put File  ${FILE WITH NEWLINES}  /home/${USERNAME}/
+    Put File  ${TEST SCRIPT}  ${USER HOME}/${TEST SCRIPT NAME}
+    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}/${INTERACTIVE TEST SCRIPT NAME}
+    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/${REPEAT TEST SCRIPT NAME}
+    Put File  ${FILE WITH NEWLINES}  ${USER HOME}/
 
 Remove Test Files And Close Connections
     Execute Command  rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${COUNTER NAME} ${FILE WITH NEWLINES NAME}
@@ -39,4 +39,3 @@ Login As Valid User
 
 Open Connection To Test Host
     Open Connection  ${HOST}
-
