@@ -1,5 +1,5 @@
 *** Settings ***
-Default Tags      pybot   jybot
+Default Tags    pybot   jybot
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
 

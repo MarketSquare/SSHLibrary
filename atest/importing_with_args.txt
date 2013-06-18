@@ -1,11 +1,19 @@
 *** Settings ***
-Library         SSHLibrary  3 minutes 30 seconds  ${EMPTY}  $
+Library         SSHLibrary  3 minutes 30 seconds  ${EMPTY}  >>
 Force Tags      pybot   jybot
 
 *** Test Cases ***
 Test Library Args
-    ${default timeout} =  Set Timeout  1 minute
-    Should Be Equal  ${default timeout}  3 minutes 30 seconds
-    Open Connection    localhost
-    ${default prompt} =  Set Prompt  >>
-    Should Be Equal  ${default prompt}  $
+    [Setup]  Open Connections
+    ${conn}=  Get Connections
+    Should Be Equal As Integers  ${conn[0].timeout}  210
+    Should Be Equal  ${conn[0].prompt}  >>
+    Should Be Equal As Integers  ${conn[1].timeout}  60
+    Should Be Equal  ${conn[1].prompt}  >>
+    [Teardown]  Close All Connections
+
+*** Keywords ***
+Open Connections
+    Open Connection  localhost
+    Set Default Configuration  timeout=1 minute
+    Open Connection  localhost
