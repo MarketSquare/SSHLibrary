@@ -4,26 +4,50 @@ Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
-Test Opening And Closing Connection
-    [Setup]  Open Connection  ${HOST}
-    Login  ${USERNAME}  ${PASSWORD}
+Open Connection
+    Login As Valid User
+
+Close Connection
+    [Setup]  Login As Valid User
+    Close Connection
+    Connection Should Be Closed
+
+Get Connection Id
+    ${no_connection} =  Get Connection Id
+    Should Be Equal  ${no_connection}  ${NONE}
+    ${conn1_id} =  Login As Valid User
+    ${current_id} =  Get Connection Id
+    Should Be Equal  ${current_id}  ${conn1_id}
+    ${conn2_id} =  Login As Valid User
+    ${current_id} =  Get Connection Id
+    Should Be Equal  ${current_id}  ${conn2_id}
+    Close Connection
+    Switch Connection  ${conn1_id}
+    ${current_id} =  Get Connection Id
+    Should Be Equal  ${current_id}  ${conn1_id}
+    Close Connection
+    ${no_connection} =  Get Connection Id
+    Should Be Equal  ${no_connection}  ${NONE}
 
 Switch Connection
-    ${id1} =  Open Connection  ${HOST}
-    Login  ${USERNAME}  ${PASSWORD}
+    ${conn1_id} =  Login As Valid User  one
     Write  cd /tmp
     Read Until Prompt
-    ${id2} =  Open Connection  ${HOST}  second
-    Login  ${USERNAME}  ${PASSWORD}
-    ${prev id} =  Switch Connection  ${id1}
-    Should Be Equal  ${prev id}  ${id2}
+    ${conn_id2} =  Login As Valid User  second
+    ${prev id} =  Switch Connection  ${conn1_id}
+    Should Be Equal  ${prev id}  ${conn_id2}
     Write  pwd
-    ${result} =  Read Until Prompt
-    Should Contain  ${result}  /tmp
+    ${output} =  Read Until Prompt
+    Should Contain  ${output}  /tmp
     ${prev id} =  Switch Connection  second
     Write  pwd
     ${result} =  Read Until Prompt
     Should Contain  ${result}  ${USER HOME}
+
+Switch Connection To None
+    [Setup]   Login As Valid User
+    Switch Connection  ${NONE}
+    Connection Should Be Closed
 
 Login Returns Banner Value
     [Setup]  Open Connection  ${HOST}
@@ -38,13 +62,11 @@ Enable Logging
     Login  ${username}  ${password}
     File Should Not Be Empty  ${OUTPUTDIR}/sshlog.txt
 
-Executing Command Before Opening Connection
-    Run Keyword And Expect Error  No open connection.  Execute Command  ls
-
 Get Connections
     Open Connection   ${HOST}   prompt=>>
     Open Connection   ${HOST}   alias=saila
     ${conns} =   Get Connections
+    Length Should Be   ${conns}  2
     Should Be Equal    ${conns[0].host}    ${HOST}
     Should Be Equal    ${conns[1].host}    ${HOST}
     Should Be Equal    ${conns[0].prompt}    >>

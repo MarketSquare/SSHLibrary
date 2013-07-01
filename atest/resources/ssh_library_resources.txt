@@ -34,8 +34,15 @@ Remove Test Files And Close Connections
     Close All Connections
 
 Login As Valid User
-    Open Connection To Test Host
+    [Arguments]  ${options}=${EMPTY}
+    ${id} =  Open Connection To Test Host  ${options}
     Login  ${USERNAME}  ${PASSWORD}
+    [Return]  ${id}
 
 Open Connection To Test Host
-    Open Connection  ${HOST}
+    [Arguments]  ${options}=${EMPTY}
+    ${id} =  Open Connection  ${HOST}  ${options}
+    [Return]  ${id}
+
+Connection Should Be Closed
+    Run Keyword And Expect Error  No open connection.  Write  pwd

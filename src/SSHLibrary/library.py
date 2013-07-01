@@ -148,13 +148,30 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                            term_type, width, height)
         return self._cache.register(client, alias)
 
+    def get_connection_id(self):
+        """Returns the index of the currently active connection.
+
+          If no connection is currently active, `None` is returned.
+
+        Example:
+
+        | ${old_connection} = | Get Connection Id |
+        | Open Connection     | yourhost.com |
+        | # Do something with yourhost.com | |
+        | Close Connection    | |
+        | Switch Connection   | ${old_connection} |
+        """
+        return self._cache.current_index
+
     def switch_connection(self, index_or_alias):
         """Switches between active connections using index or alias.
 
         Index is got from `Open Connection` and alias can be given to it.
+        If `None` is given as argument `index_or_alias`, the currently active
+        connection is is closed.
 
-        Returns the index of previous connection, which can be used to restore
-        the connection later.
+        The keyword always returns the index of the previous connection,
+        which can be used to reuse the connection later.
 
         Example:
 
@@ -173,14 +190,17 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Above example expects that there was no other open connections when
         opening the first one because it used index '1' when switching to it
         later. If you aren't sure about that you can store the index into
-        a variable as below.
+        a variable as below:
 
         | ${id} =            | Open Connection | myhost.net |
         | # Do something ... |
         | Switch Connection  | ${id}           |            |
         """
-        old_index = self._cache.current_index
-        self._cache.switch(index_or_alias)
+        old_index = self.get_connection_id()
+        if index_or_alias is None:
+            self.close_connection()
+        else:
+            self._cache.switch(index_or_alias)
         return old_index
 
     def close_all_connections(self):
@@ -232,6 +252,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def close_connection(self):
         """Closes the currently active connection."""
         self.ssh_client.close()
+        self._cache.current = self._cache._no_current
 
     def login(self, username, password):
         """Logs in to SSH server with given user information.
