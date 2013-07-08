@@ -33,7 +33,8 @@ class SSHClientException(RuntimeError):
 class ClientConfig(Configuration):
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
-                 prompt=None, term_type='vt100', width=80, height=24):
+                 prompt=None, encoding='utf-8', term_type='vt100', width=80,
+                 height=24):
         Configuration.__init__(self,
                 host=StringEntry(host),
                 alias=StringEntry(alias),
@@ -41,6 +42,7 @@ class ClientConfig(Configuration):
                 timeout=TimeEntry(timeout),
                 newline=NewlineEntry(newline),
                 prompt=StringEntry(prompt),
+                encoding=StringEntry(encoding),
                 term_type=StringEntry(term_type),
                 width=IntegerEntry(width),
                 height=IntegerEntry(height))
@@ -53,10 +55,11 @@ class AbstractSSHClient(object):
     """
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
-                 prompt=None, term_type='vt100', width=80, height=24):
+                 prompt=None, encoding='utf-8', term_type='vt100', width=80,
+                 height=24):
         """Create new SSHClient based on arguments."""
         self.config = ClientConfig(host, alias, port, timeout, newline,
-                                   prompt, term_type, width, height)
+                                   prompt, encoding, term_type, width, height)
         self.client = self._create_client()
         self._commands = []
 
@@ -148,11 +151,6 @@ class AbstractSSHClient(object):
         :param bool add_newline: if True, a newline will be added to `text`.
         """
         self._ensure_prompt_is_set()
-        try:
-            text = str(text)
-        except UnicodeError:
-            raise SSHClientException('Invalid input, only ASCII characters '
-                                     'are allowed. Got: %s' % text)
         if add_newline:
             text += self.config.newline
         self._write(text)
@@ -235,13 +233,14 @@ class AbstractSSHClient(object):
                                  % (expected, timeout))
 
     def _read_until(self, matcher, expected, timeout=None):
-        ret = ''
+        ret = u''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         start_time = time.time()
         while time.time() < float(timeout.value) + start_time:
             ret += self._read_char()
             if matcher(ret):
                 return ret
+
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
                                  % (expected, timeout, ret))
 

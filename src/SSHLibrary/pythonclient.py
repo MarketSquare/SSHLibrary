@@ -94,9 +94,16 @@ class PythonSSHClient(AbstractSSHClient):
         return data
 
     def _read_char(self):
+        data = ''
         if self.shell.recv_ready():
-            return self.shell.recv(1)
-        return ''
+            while True:
+                try:
+                    data += self.shell.recv(1)
+                    data.decode(self.config.encoding)
+                    break
+                except UnicodeDecodeError:
+                    pass
+        return data.decode(self.config.encoding)
 
     def _create_sftp_client(self):
         return SFTPClient(self.client)

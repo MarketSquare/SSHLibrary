@@ -1,0 +1,19 @@
+*** Settings ***
+Default Tags    pybot   jybot
+Suite Setup     Login And Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Test Cases ***
+Listing Files Containing Non-ASCII Characters
+    ${output}=  Execute Command  ls
+    Should Contain  ${output}  aaääöö.txt
+
+Reading And Writing
+    Write Bare  ./${INTERACTIVE TEST SCRIPT NAME}\n
+    ${output} =  Read Until  name?
+    Write Bare  ääöö\n
+    ${output2} =  Read Until Prompt
+    Should Contain  ${output}  Give your name?
+    Should Contain  ${output2}  Hello ääöö
+    Should Contain  ${output2}  ${PROMPT}

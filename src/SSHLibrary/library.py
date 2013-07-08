@@ -57,7 +57,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=3, newline='LF', prompt=None,
-                 loglevel='INFO'):
+                 encoding='utf-8', loglevel='INFO'):
         """SSH Library allows some import time configuration.
 
         `timeout`, `newline` and `prompt` set default values for new
@@ -74,14 +74,15 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Library | SSHLibrary | timeout=10 | prompt=> |
         """
         self._cache = ConnectionCache()
-        self._config = DefaultConfig(timeout, newline, prompt, loglevel)
+        self._config = DefaultConfig(timeout, newline, prompt, loglevel,
+                                     encoding)
 
     @property
     def ssh_client(self):
         return self._cache.current
 
     def set_default_configuration(self, timeout=None, newline=None,
-                                  prompt=None, loglevel=None):
+                                  prompt=None, encoding=None, loglevel=None):
         """Update the default configuration values.
 
         Only parameters whose value is other than `None` are updated.
@@ -90,10 +91,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
             | Set Default Configuration | newline=CRLF | prompt=$ |
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
-                            loglevel=loglevel)
+                            loglevel=loglevel, encoding=encoding)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
-                                 term_type='vt100', width=80, height=24):
+                                 encoding=None, term_type='vt100', width=80,
+                                 height=24):
         """Update the client configuration values.
 
         Works on the currently selected connection. At least one connection
@@ -105,12 +107,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
             | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
         self.ssh_client.config.update(timeout=timeout, newline=newline,
-                                      prompt=prompt, term_type=term_type,
+                                      prompt=prompt, encoding=encoding,
+                                      term_type=term_type,
                                       width=width, height=height)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
-                        newline=None, prompt=None, term_type='vt100',
-                        width=80, height=24):
+                        newline=None, prompt=None, encoding=None,
+                        term_type='vt100', width=80, height=24):
         """Opens a new SSH connection to given `host` and `port`.
 
         Possible already opened connections are cached.
@@ -144,8 +147,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
         prompt = prompt or self._config.prompt
+        encoding = encoding or self._config.encoding
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height)
+                           encoding, term_type, width, height)
         return self._cache.register(client, alias)
 
     def get_connection_id(self):
@@ -319,6 +323,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """
         self._info("Executing command '%s'" % command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
+        command = command.encode(self._config.encoding)
         stdout, stderr, rc = self.ssh_client.execute_command(command)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
@@ -368,9 +373,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                return_stdout, return_stderr, return_rc):
         ret = []
         if return_stdout:
-            ret.append(stdout.rstrip('\n'))
+            ret.append(stdout.decode(self._config.encoding).rstrip('\n'))
         if return_stderr:
-            ret.append(stderr.rstrip('\n'))
+            ret.append(stderr.decode(self._config.encoding).rstrip('\n'))
         if return_rc:
             ret.append(rc)
         if len(ret) == 1:
@@ -398,8 +403,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._write(text)
 
     def _write(self, text, add_newline=False):
-        self._info("Writing %s" % repr(text))
+        self._info("Writing %s" % text)
         try:
+            text = text.encode(self._config.encoding)
             self.ssh_client.write(text, add_newline)
         except SSHClientException, e:
             raise RuntimeError(e)
@@ -480,7 +486,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Write Until Expected Output | ps -ef| grep myprocess\\n | myprocess |
         | ... | 5s | 0.5s |
 
-        This will write the 'ps -ef | grep myprocess\\n' until 'myprocess'
+        This will write the  'ps -ef | grep myprocess\\n' until 'myprocess'
         appears on the output. The command is written every 0.5 seconds and
         the keyword will fail if 'myprocess' does not appear on the output in
         5 seconds.
@@ -605,9 +611,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
 class DefaultConfig(Configuration):
 
-    def __init__(self, timeout, newline, prompt, loglevel):
+    def __init__(self, timeout, newline, prompt, loglevel, encoding):
         Configuration.__init__(self,
                 timeout=TimeEntry(timeout or 3),
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
-                loglevel=LogLevelEntry(loglevel or 'INFO'))
+                loglevel=LogLevelEntry(loglevel or 'INFO'),
+                encoding=StringEntry(encoding))

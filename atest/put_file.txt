@@ -2,7 +2,7 @@
 Documentation   This suite contains test for 'Put File 'keywords These tests use some dummy test files from under the scripts directory.
 Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
-Suite Teardown  Run Keywords  Close Connection  Remove Local Tempdir
+Suite Teardown  Run Keywords  Remove Test Files and Close Connections  Remove Local Tempdir
 Resource        resources/ssh_library_resources.txt
 Library         String
 
