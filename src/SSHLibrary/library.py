@@ -126,9 +126,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         switching between connections similarly as the index. See `Switch
         Connection` for more details about that.
 
-        If `timeout`, `newline` or `prompt` are not given, the default values
-        set in `library importing` are used. See also `Set Default
-        Configuration`.
+        If `timeout`, `newline`, `prompt` or `encoding` are not given,
+        the default values set in `library importing` are used.
+        See also `Set Default Configuration`.
 
         Starting from SSHLibrary 1.1, a shell session is also opened
         automatically by this keyword. `term_type` defines the terminal type

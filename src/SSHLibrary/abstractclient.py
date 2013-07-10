@@ -148,7 +148,7 @@ class AbstractSSHClient(object):
     def write(self, text, add_newline=False):
         """Write `text` in shell session.
 
-        :param str text: the text to be written, must be ASCII.
+        :param str text: the text to be written
         :param bool add_newline: if True, a newline will be added to `text`.
         """
         text = text.encode(self.config.encoding)
