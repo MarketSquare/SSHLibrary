@@ -615,4 +615,4 @@ class DefaultConfig(Configuration):
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
                 loglevel=LogLevelEntry(loglevel or 'INFO'),
-                encoding=StringEntry(encoding))
+                encoding=StringEntry(encoding or 'UTF-8'))
