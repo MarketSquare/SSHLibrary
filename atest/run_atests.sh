@@ -3,10 +3,14 @@ OUTPUT_ROOT="atest/results"
 
 if [ "$1" == "jython" ]; then
     shift
-    jybot $COMMON_ARGS -P lib/trilead-ssh2-build213.jar -d $OUTPUT_ROOT/jython -i jybot $*
+    OUTPUT_DIR="$OUTPUT_ROOT/jython"
+    rm -rf $OUTPUT_DIR 2> /dev/null
+    jybot $COMMON_ARGS -P lib/trilead-ssh2-build213.jar -d $OUTPUT_DIR -i jybot $*
 elif [ "$1" == "python" ]; then
     shift
-    pybot $COMMON_ARGS -d $OUTPUT_ROOT/python -i pybot $*
+    OUTPUT_DIR="$OUTPUT_ROOT/python"
+    rm -rf $OUTPUT_DIR 2> /dev/null
+    pybot $COMMON_ARGS -d $OUTPUT_DIR -i pybot $*
 else
     echo "Usage: atest/run_atests.sh (python|jython) <target>"
     exit 1
