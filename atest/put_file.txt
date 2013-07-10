@@ -30,6 +30,10 @@ Put File With Newlines
     Put Files And Verify  ${FILE WITH NEWLINES}  ${USER HOME}/  ${FILE WITH NEWLINES NAME}
     [Teardown]  Execute Command  rm -f ${FILE WITH NEWLINES NAME}
 
+Put File With Non-ASCII Characters
+    Put Files And Verify  ${FILE WITH NON-ASCII}  ${USER HOME}/  ${FILE WITH NON-ASCII NAME}
+    [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
+
 Put File And Specify Remote Newlines
     [Setup]  Create Directory  ${TMPDIR}
     Put File And Specify Newlines  ${FILE WITH NEWLINES}  ${USER HOME}/  CRLF  ${FILE WITH NEWLINES NAME}

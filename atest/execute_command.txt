@@ -47,3 +47,7 @@ Execute Command With Multiple Statements
     ${result} =  Execute Command  echo "foo\n"; echo RC=$?
     Should Be Equal  ${result}  foo\n\nRC=0
 
+Executing Command With Non-ASCII characters
+    ${result}=  Execute Command  echo 'aaääöö'
+    Should Contain  ${result}  aaääöö
+

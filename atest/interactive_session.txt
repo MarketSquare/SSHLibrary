@@ -15,6 +15,13 @@ Basic Interactive Session
     ${output} =  Read Until Prompt
     Should Contain  ${output}  Hello Juha
 
+Interactive Session With Non-ASCII characters
+    Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    ${output} =  Write  aaääöö
+    Should Contain  ${output}  aaääöö
+    ${output} =  Read Until Prompt
+    Should Contain  ${output}  Hello aaääöö
+
 Interactive Session With Regular Expressions
     Write  ./${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Read Until Regexp  Give.*\\?
