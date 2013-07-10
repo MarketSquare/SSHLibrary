@@ -339,7 +339,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Start Command | some command |
         """
         self._info("Starting command '%s'" % command)
-        self._command = command
+        self._last_command = command
         self.ssh_client.start_command(command)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
@@ -352,7 +352,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         See `Execute Command` for examples about how the return value can
         be configured using `return_stdout`, `return_stderr` and `return_rc`.
         """
-        self._info("Reading output of command '%s'" % self._command)
+        self._info("Reading output of command '%s'" % self._last_command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
         stdout, stderr, rc = self.ssh_client.read_command_output()
         return self._return_command_output(stdout, stderr, rc, *opts)
@@ -368,8 +368,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
             return True, True, rc
         return stdout, stderr, rc
 
-    def _return_command_output(self, stdout, stderr, rc,
-                               return_stdout, return_stderr, return_rc):
+    def _return_command_output(self, stdout, stderr, rc, return_stdout,
+                               return_stderr, return_rc):
         ret = []
         if return_stdout:
             ret.append(stdout.rstrip('\n'))

@@ -155,10 +155,7 @@ class SFTPClient(AbstractSFTPClient):
 
 class RemoteCommand(AbstractCommand):
 
-    def _execute(self):
-        self._session.execCommand(self._command)
-
-    def _read_outputs(self):
+    def read_outputs(self):
         stdout = self._read_from_stream(self._session.getStdout())
         stderr = self._read_from_stream(self._session.getStderr())
         rc = self._session.getExitStatus()
@@ -173,3 +170,6 @@ class RemoteCommand(AbstractCommand):
             result += line + '\n'
             line = reader.readLine()
         return result
+
+    def _execute(self):
+        self._session.execCommand(self._command)

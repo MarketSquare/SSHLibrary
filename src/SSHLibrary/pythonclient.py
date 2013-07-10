@@ -148,12 +148,13 @@ class SFTPClient(AbstractSFTPClient):
 
 class RemoteCommand(AbstractCommand):
 
-    def _execute(self):
-        self._session.exec_command(self._command)
-
-    def _read_outputs(self):
+    def read_outputs(self):
         stdout = self._session.makefile('rb', -1).read().decode(self._encoding)
-        stderr = self._session.makefile_stderr('rb', -1).read().decode(self._encoding)
+        stderr = self._session.makefile_stderr('rb', -1).read().decode(
+            self._encoding)
         rc = self._session.recv_exit_status()
         self._session.close()
         return stdout, stderr, rc
+
+    def _execute(self):
+        self._session.exec_command(self._command)

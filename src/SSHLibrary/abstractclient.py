@@ -427,4 +427,4 @@ class AbstractCommand(object):
 
         :return: a 3-tuple of stdout, stderr and return code.
         """
-        return self._read_outputs()
+        raise NotImplementedError
