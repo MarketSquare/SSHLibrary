@@ -127,8 +127,8 @@ class SFTPClient(AbstractSFTPClient):
         self._client.closeFile(remotefile)
 
     def _listfiles(self, path):
-        return [finfo.filename for finfo in self._client.ls(path) if
-                finfo.attributes.getOctalPermissions().startswith('0100')]
+        return [finfo.filename for finfo in self._client.ls(path)
+                if finfo.attributes.getOctalPermissions().startswith('0100')]
 
     def _get_file(self, source, dest):
         localfile = FileOutputStream(dest)

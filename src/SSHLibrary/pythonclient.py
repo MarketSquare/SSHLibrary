@@ -143,7 +143,7 @@ class SFTPClient(AbstractSFTPClient):
         return [getattr(fileinfo, 'filename', '?') for fileinfo
                 in self._client.listdir_attr(path)
                 if stat.S_ISREG(fileinfo.st_mode) or
-                        stat.S_IFMT(fileinfo.st_mode) == 0]
+                   stat.S_IFMT(fileinfo.st_mode) == 0]
 
 
 class RemoteCommand(AbstractCommand):
