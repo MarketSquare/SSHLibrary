@@ -233,14 +233,17 @@ class AbstractSSHClient(object):
                                  % (expected, timeout))
 
     def _read_until(self, matcher, expected, timeout=None):
-        ret = u''
+        ret = ''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         start_time = time.time()
         while time.time() < float(timeout.value) + start_time:
-            ret += self._read_char()
-            if matcher(ret):
-                return ret
-
+            try:
+                ret += self._read_char()
+                decoded_string = ret.decode(self.config.encoding)
+                if matcher(decoded_string):
+                    return decoded_string
+            except UnicodeDecodeError:
+                pass
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
                                  % (expected, timeout, ret))
 
@@ -404,8 +407,9 @@ class AbstractSFTPClient(object):
 class AbstractCommand(object):
     """Base class for remote commands."""
 
-    def __init__(self, command):
+    def __init__(self, command, encoding):
         self._command = command
+        self._encoding = encoding
         self._session = None
 
     def run_in(self, session):

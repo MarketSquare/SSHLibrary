@@ -55,7 +55,7 @@ class JavaSSHClient(AbstractSSHClient):
         self.client.close()
 
     def _start_command(self, command):
-        cmd = RemoteCommand(command)
+        cmd = RemoteCommand(command, self.config.encoding)
         cmd.run_in(self.client.openSession())
         return cmd
 
@@ -72,19 +72,18 @@ class JavaSSHClient(AbstractSSHClient):
         self._writer.flush()
 
     def _read(self):
-        data = ''
-        if self._stdout.available():
-            buf = jarray.zeros(self._stdout.available(), 'b')
-            self._stdout.read(buf)
-            data += ''.join([chr(b) for b in buf])
-        return data
+         data = ''
+         if self._stdout.available():
+             buf = jarray.zeros(self._stdout.available(), 'b')
+             self._stdout.read(buf)
+             data = ''.join([chr(c) for c in buf])
+         return data
 
     def _read_char(self):
-        if self._stdout.available():
-            buf = jarray.zeros(1, 'b')
-            self._stdout.read(buf)
-            return chr(buf[0])
-        return ''
+         data = ''
+         if self._stdout.available():
+             data = chr(self._stdout.read())
+         return data
 
     def _create_sftp_client(self):
         return SFTPClient(self.client)
@@ -167,7 +166,7 @@ class RemoteCommand(AbstractCommand):
         return stdout, stderr, rc
 
     def _read_from_stream(self, stream):
-        reader = BufferedReader(InputStreamReader(StreamGobbler(stream)))
+        reader = BufferedReader(InputStreamReader(StreamGobbler(stream), self._encoding))
         result = ''
         line = reader.readLine()
         while line is not None:

@@ -12,8 +12,8 @@ Listing Files Containing Non-ASCII Characters
 Reading And Writing
     Write Bare  ./${INTERACTIVE TEST SCRIPT NAME}\n
     ${output} =  Read Until  name?
-    Write Bare  ääöö\n
+    Write Bare  aaääöö\n
     ${output2} =  Read Until Prompt
     Should Contain  ${output}  Give your name?
-    Should Contain  ${output2}  Hello ääöö
+    Should Contain  ${output2}  Hello aaääöö
     Should Contain  ${output2}  ${PROMPT}

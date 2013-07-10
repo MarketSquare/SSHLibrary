@@ -373,9 +373,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                return_stdout, return_stderr, return_rc):
         ret = []
         if return_stdout:
-            ret.append(stdout.decode(self._config.encoding).rstrip('\n'))
+            ret.append(stdout.rstrip('\n'))
         if return_stderr:
-            ret.append(stderr.decode(self._config.encoding).rstrip('\n'))
+            ret.append(stderr.rstrip('\n'))
         if return_rc:
             ret.append(rc)
         if len(ret) == 1:
