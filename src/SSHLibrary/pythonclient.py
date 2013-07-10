@@ -90,7 +90,7 @@ class PythonSSHClient(AbstractSSHClient):
     def _read(self):
         data = ''
         while self.shell.recv_ready():
-            data += self.shell.recv(100000)
+            data += self.shell.recv(4096)
         return data
 
     def _read_char(self):
