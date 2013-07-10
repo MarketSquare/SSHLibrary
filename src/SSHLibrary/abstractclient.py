@@ -33,8 +33,8 @@ class SSHClientException(RuntimeError):
 class ClientConfig(Configuration):
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
-                 prompt=None, encoding='utf-8', term_type='vt100', width=80,
-                 height=24):
+                 prompt=None, term_type='vt100', width=80, height=24,
+                 encoding='UTF-8'):
         Configuration.__init__(self,
                 host=StringEntry(host),
                 alias=StringEntry(alias),
@@ -42,10 +42,10 @@ class ClientConfig(Configuration):
                 timeout=TimeEntry(timeout),
                 newline=NewlineEntry(newline),
                 prompt=StringEntry(prompt),
-                encoding=StringEntry(encoding),
                 term_type=StringEntry(term_type),
                 width=IntegerEntry(width),
-                height=IntegerEntry(height))
+                height=IntegerEntry(height),
+                encoding=StringEntry(encoding))
 
 
 class AbstractSSHClient(object):
@@ -55,11 +55,11 @@ class AbstractSSHClient(object):
     """
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
-                 prompt=None, encoding='utf-8', term_type='vt100', width=80,
-                 height=24):
+                 prompt=None, term_type='vt100', width=80, height=24,
+                 encoding='UTF-8'):
         """Create new SSHClient based on arguments."""
         self.config = ClientConfig(host, alias, port, timeout, newline,
-                                   prompt, encoding, term_type, width, height)
+                                   prompt, term_type, width, height, encoding)
         self.client = self._create_client()
         self._commands = []
 
@@ -135,6 +135,7 @@ class AbstractSSHClient(object):
 
     def start_command(self, command):
         """Execute given command over existing connection."""
+        command = command.encode(self.config.encoding)
         self._commands.append(self._start_command(command))
 
     def read_command_output(self):
@@ -150,6 +151,7 @@ class AbstractSSHClient(object):
         :param str text: the text to be written, must be ASCII.
         :param bool add_newline: if True, a newline will be added to `text`.
         """
+        text = text.encode(self.config.encoding)
         self._ensure_prompt_is_set()
         if add_newline:
             text += self.config.newline
