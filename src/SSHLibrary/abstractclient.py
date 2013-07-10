@@ -76,7 +76,7 @@ class AbstractSSHClient(object):
         """Log SSH events to file.
 
         :param path: A filename where the log events are written
-        :returns: Whether logging was succesfully enabled.
+        :returns: Whether logging was successfully enabled.
         """
         raise NotImplementedError
 
