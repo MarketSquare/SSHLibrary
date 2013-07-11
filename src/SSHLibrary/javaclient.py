@@ -163,7 +163,8 @@ class RemoteCommand(AbstractCommand):
         return stdout, stderr, rc
 
     def _read_from_stream(self, stream):
-        reader = BufferedReader(InputStreamReader(StreamGobbler(stream), self._encoding))
+        reader = BufferedReader(InputStreamReader(StreamGobbler(stream),
+                                                  self._encoding))
         result = ''
         line = reader.readLine()
         while line is not None:
