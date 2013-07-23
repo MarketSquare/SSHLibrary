@@ -39,24 +39,24 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
-    Only one connection is active at a time. This means that keywords
-    executed only affect the active connection. Active connection can be
+    Only one connection is active at a time. This means that most of the
+    keywords only affect the active connection. Active connection can be
     switched using `Switch Connection` keyword.
 
     For executing commands on the remote host, there are two possibilities:
 
     1. `Execute Command` or `Start Command`. These keywords open a new session
-    using the connection. Possible state changes are not preserved.
+    using the connection. Possible changes to state are not preserved.
 
     2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
     `Read Command Output`, `Read Until`, `Read Until Prompt` and
-    `Read Until Regexp` operate in an interactive shell, which
-    means that changes to state are visible to next keywords. Note that in
+    `Read Until Regexp` keywords operate in an interactive shell, which
+    means that changes to state are visible to later keywords. Note that in
     interactive mode, prompt must be set before using any of the
     Write-keywords.
 
-    Prompt, as well as the other settings, can be configured as defaults for
-    all the upcoming connections on `library importing` or later by using
+    Prompt, as well as the other settings can be configured as defaults for
+    all the upcoming connections on `library importing` or by using keyword
     `Set Default Configuration`. Settings overriding these defaults can be
     given as arguments to `Open Connection`. Currently active, already open
     connection can be configured with `Set Client Configuration`.
@@ -78,9 +78,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         and settings of the active, already open connection with
         `Set Client Configuration`.
 
-        `loglevel` sets the default log level used to log the return values of
-        `Read Until` variants. It can also be later changed with `Set
-        Default Configuration`.
+        `loglevel` sets the default log level to log the output read by
+        `Read Until` variants. Default log level can also be later changed
+        with `Set Default Configuration`.
 
         Examples:
         | Library | SSHLibrary | # use default values |
@@ -109,10 +109,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type='vt100', width=80, height=24,
                                  encoding=None):
-        """Update the client configuration values.
+        """Update the active connection configuration values.
 
-        Works on the currently active connection. At least one connection
-        must have been opened using `Open Connection`.
+        At least one connection must have been opened using `Open Connection`.
 
         Only parameters whose value is other than `None` are updated.
 
@@ -129,7 +128,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                         height=24, encoding=None):
         """Opens a new SSH connection to given `host` and `port`.
 
-        Possible already opened connections are cached.
+        The new connection is made active. Possible existing connections
+        are left open in the background.
 
         Returns the index of this connection which can be used later to switch
         back to it. Indices start from '1' and are reset when `Close All
@@ -148,13 +148,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         for this shell, and `width` and `height` can be configured to control
         the virtual size of it.
 
-        Client configuration options other than `host`, `port` and `alias`
+        Client configuration options, other than `host`, `port` and `alias`
         can be later updated with `Set Client Configuration`.
 
         Examples:
-        | Open Connection | myhost.net |
-        | Open Connection | yourhost.com | alias=2nd conn | port=23 |prompt=# |
-        | Open Connection | myhost.net | term_type=ansi | width=40 |
+        | Open Connection | myhost.net      |
+        | Open Connection | yourhost.com    | alias=2nd conn | port=23 |prompt=# |
+        | Open Connection | myhost.net      | term_type=ansi | width=40 |
         | ${index} =      | Open Connection | myhost.net |
         """
         timeout = timeout or self._config.timeout
@@ -172,9 +172,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Example:
         | ${old_connection} = | Get Connection Id |
-        | Open Connection     | yourhost.com |
-        | # Do something with yourhost.com | |
-        | Close Connection    | |
+        | Open Connection     | yourhost.com      |
+        | # Do something with yourhost.com |      |
+        | Close Connection    |                   |
         | Switch Connection   | ${old_connection} |
         """
         return self._cache.current_index
@@ -186,8 +186,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         If `None` is given as argument `index_or_alias`, the currently active
         connection is is closed.
 
-        The keyword always returns the index of the previous active connection,
-        which can be used to reuse that connection later.
+        The keyword always returns the index of the previously active
+        connection, which can be used to reuse that connection later.
 
         Example:
         | Open Connection       | myhost.net   |          |
@@ -203,7 +203,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Close All Connections |              |          |
 
         Above example expects that there was no other open connections when
-        opening the first one. Thus index '1' can be used to switch to it
+        opening the first one. Thus index '1' can be used to switch back to it
         later. If you aren't sure about connection index you can store it
         into a variable as below:
 
@@ -219,10 +219,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return old_index
 
     def close_all_connections(self):
-        """Closes all the open connections and empties the connection cache.
+        """Closes all open connections and empties the connection cache.
 
-        After this, the connection indices returned by `Open Connection` start
-        from 1.
+        After this keyword, the connection indices returned by `Open Connection`
+        start from 1.
 
         This keyword is ought to be used either in test or suite teardown to
         make sure all the connections are closed before the test execution
@@ -231,13 +231,15 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._cache.close_all()
 
     def get_connections(self):
-        """Return information about all the open connections.
+        """Return information about all open connections.
 
         The return value is a list of objects that describe the connection.
         These objects have attributes that correspond to the argument names
         of `Open Connection`.
 
-        Connection information is also logged.
+        This keyword also logs the connection information. Default log level
+        is set either on `library importing` or with
+        `Set Default Configuration`.
 
         Example:
         | Open Connection | somehost  | prompt=>> |
@@ -267,7 +269,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                       'HTML')
 
     def close_connection(self):
-        """Closes the currently active connection."""
+        """Closes the currently active connection.
+
+        No other connection is made active by this keyword. Use
+        `Switch Connection` to switch to another connection.
+        """
         self.ssh_client.close()
         self._cache.current = self._cache._no_current
 
@@ -315,7 +321,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         If only one of the arguments evaluates true, the corresponding value is
         returned instead of a tuple.
 
-        By default, only the command stdout is returned as a value:
+        Example that returns only the command stdout as a value:
         | ${stdout}= | Execute Command | ${cmd} |
 
         Example that returns both stdout and stderr as a tuple:
@@ -324,13 +330,15 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example that returns only the return code as a value:
         | ${rc}= | Execute Command | ${cmd} | return_stdout=${EMPTY} | return_rc=true |
 
-        This keyword waits until the command is completed. If non-blocking
-        behavior is required, use `Start Command` instead.
+        This keyword waits until the command execution is finished.
+        If non-blocking behavior is required, use `Start Command` instead.
 
         Multiple calls of `Execute Command` use separate SSH sessions. Thus,
         possible changes to the environment are not shared between these calls.
-        `Write` and `Read XXX` keywords can be used for running multiple
+        `Write` and `Read` keywords can be used for running multiple
         commands in the same session.
+
+        This keyword also logs the executed command with log level INFO.
         """
         self._info("Executing command '%s'" % command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
@@ -338,9 +346,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
-        """Starts command execution on the remote host and returns immediately.
+        """Starts execution of the `command` on the remote host and returns
+        immediately.
 
-        This keyword doesn't return anything. Use `Read Command Output` to read
+        This keyword does not return anything. Use `Read Command Output` to read
         the output generated by the command execution.
 
         Note that the `Read Command Output` keyword always reads the output of
@@ -348,6 +357,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Example:
         | Start Command | ./myjobscript.sh |
+
+        This keyword also logs the started command with log level INFO.
         """
         self._info("Starting command '%s'" % command)
         self._last_command = command
@@ -355,14 +366,16 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
-        """Reads output of the most recent started command and returns stdout,
-        stderr and/or return value of the command.
+        """Reads output of the most recent started command and returns a
+        combination of stdout, stderr and the return code of the command.
 
         Command must have been started using `Start Command` before this
         keyword can be used.
 
-        See `Execute Command` for examples about how the return value can
+        See `Execute Command` for examples on how the return value can
         be configured using `return_stdout`, `return_stderr` and `return_rc`.
+
+        This keyword also logs the read command with log level INFO.
         """
         self._info("Reading output of command '%s'" % self._last_command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
@@ -396,12 +409,19 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def write(self, text, loglevel=None):
         """Writes the given `text` over the connection and appends a newline.
 
-        Consumes the written `text` (until the appended newline) from output
-        and returns it. Given `text` must not contain newlines.
+        Consumes the written `text` (until the appended newline) from the server
+        output and returns it. Given `text` must not contain newlines.
 
-        Note: This keyword does not return the possible output of the executed
-        command. To get the output, one of the `Read XXX` keywords must be
+        Note: This keyword does not return any output of the executed
+        command. To get the output, one of the `Read` keywords must be
         used.
+
+        This keyword logs the written `text with log level INFO.
+
+        This keyword also logs the read output. Default log level is set
+        either on `library importing` or with `Set Default Configuration`.
+        `loglevel` can be used to override the default log level.
+        Possible levels are TRACE, DEBUG, INFO and WARN.
         """
         self._write(text, add_newline=True)
         return self._read_and_log(loglevel, self.ssh_client.read_until_newline)
@@ -411,7 +431,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         a newline.
 
         Unlike `Write`, this keyword does not consume the written text from
-        the output.
+        the server output.
+
+        Note: This keyword does not return any output of the executed
+        command. To get the output, one of the `Read` keywords must be
+        used.
+
+        This keyword logs the written `text with log level INFO.
         """
         self._write(text)
 
@@ -423,31 +449,32 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
             raise RuntimeError(e)
 
     def read(self, loglevel=None):
-        """Reads and returns everything currently available on the output.
+        """Reads and returns everything currently available on the
+        server output.
 
         This keyword is most useful for reading everything from the output.
         After being read, the output buffer is cleared.
 
-        This keyword also logs the read output. Default log level is set
+        This keyword logs the read output. Default log level is set
         either on `library importing` or with `Set Default Configuration`.
-
         `loglevel` can be used to override the default log level.
         Possible levels are TRACE, DEBUG, INFO and WARN.
         """
         return self._read_and_log(loglevel, self.ssh_client.read)
 
     def read_until(self, expected, loglevel=None):
-        """Reads output until the `expected` is encountered or timeout expires.
+        """Reads the server output until the `expected` is encountered or
+        timeout expires.
 
         Text up until and including the `expected` will be returned.
         If no match is found, the keyword fails.
 
-        The timeout is three seconds by default. Timeout can be changed
-        either on `library importing`, by using keywords
-        `Set Default Configuration` or `Set Client Configuration`,
-        or when opening a new connection with `Open Connection`.
+        The timeout is three seconds by default. Timeout can be set
+        either on `library importing', with `Set Default Configuration` or
+        as an argument to `Open Connection`. For active connection,
+        `Set Client Configuration` can be used.
 
-        This keyword also logs the read output.
+        This keyword logs the read output.
         See `Read` for more information on `loglevel`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until,
@@ -456,22 +483,22 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def read_until_regexp(self, regexp, loglevel=None):
         """Reads output until a match to `regexp` is found or timeout expires.
 
-        `regexp` can be a pattern or a compiled regexp-object.
+        `regexp` can be a pattern or a compiled regexp object.
 
         Returns text up until and including the `regexp.
 
-        The timeout is three seconds by default. Timeout can be changed
-        either on `library importing`, by using keywords
-        `Set Default Configuration` or `Set Client Configuration`,
-        or when opening a new connection with `Open Connection`.
+        The timeout is three seconds by default. Timeout can be set
+        either on `library importing', with `Set Default Configuration` or
+        as an argument to `Open Connection`. For currently active connection,
+        `Set Client Configuration` can be used.
 
-        This keyword also logs the read output.
+        This keyword logs the read output.
         See `Read` for more information on `loglevel`.
 
         Example:
         | Read Until Regexp | (#|$) |
 
-        Example that logs the read output with level DEBUG:
+        Example that logs the read output with log level DEBUG:
         | Read Until Regexp | some regexp  | DEBUG |
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until_regexp,
@@ -480,14 +507,16 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the output until the prompt is found.
 
-        Prompt must have been set, either on `library importing` or when
-        the connection was opened using `Open Connection`.
+        Prompt must have been set before this keyword. Prompt can be set
+        either on `library importing', with `Set Default Configuration` or
+        as an argument to `Open Connection`. For currently active connection,
+        `Set Client Configuration` can be used.
 
         This keyword is useful for reading output of a single command when
         output of previous command has been read and the command does not
         produce prompt characters in its output.
 
-        This keyword also logs the read output.
+        This keyword logs the read output.
         See `Read` for more information on `loglevel`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until_prompt)
@@ -504,7 +533,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        This keyword also logs the read output.
+        This keyword logs the read output.
         See `Read` for more information on `loglevel`.
 
         Example:
@@ -528,80 +557,86 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return output
 
     def get_file(self, source, destination='.', path_separator='/'):
-        """Copies file(s) from the remote host (`source`) to the local host
-        (`destination`).
+        """Downloads file(s) from the remote host to the local host.
 
-        1. If the `destination` is an existing file, the `source` file is copied
+        `source` is a path on the remote machine.
+
+        `destination` is the target path on the local machine.
+
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. On Unix-Likes, this is '/' which is also
+        the default value. With Windows remotes, this must be set as '\\'.
+        This option was added in SSHLibrary 1.1.
+
+        1. If `destination` is an existing file, `source` file is copied
            over it.
-        2. If the `destination` is an existing directory, the `source` file is
+        2. If `destination` is an existing directory, `source` file is
            copied into it. Possible file with the same name is overwritten.
-        3. If the `destination` does not exist and it ends with the path
-           separator ('/' in POSIXes, '\\' in Windows), it is considered a
-           directory. The directory is then created and `source` file copied
-           into it. Possible missing intermediate directories are also created.
-        4. If the `destination` does not exist and it does not end with the path
-           separator, it is considered a file. If the path to the file does
-           not exist, it is created.
-        5. If `destination` is not given, the current working directory in
+        3. If `destination` does not exist and it ends with `path_
+           separator`, it is considered a directory. The directory is then
+           created and `source` file is copied into it. Possible missing
+           intermediate directories are also created.
+        4. If `destination` does not exist and does not end with
+           `path_separator`, it is considered a file. If the path to the file
+           does not exist, it is created.
+        5. If `destination` is not given, the current working directory on
            the local machine is used as the destination. This will most probably
            be the directory where the test execution was started.
 
-        Using wildcards like '*' and '?' is possible in the `source`.
+        Using wildcards like '*' and '?' is possible in `source`.
         When wildcards are used, `destination` MUST be a directory, and files
-        matching the pattern are copied, but subdirectories are ignored. If
-        the contents of subdirectories are also needed, use the keyword again.
-
-        `path_separator` is the path separator character used in the remote
-        machine. With Windows machines, this must be defined as '\\'.
-        This option was added in SSHLibrary 1.1.
+        matching the pattern are copied, but subdirectories are ignored.
+        If the contents of subdirectories are also needed, use the keyword again.
 
         Examples:
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
-
         """
         return self._run_sftp_command(self.ssh_client.get_file, source,
                                       destination, path_separator)
 
     def put_file(self, source, destination='.', mode='0744',
                  newline='default', path_separator='/'):
-        """Copies file(s) from the local host (`source`) to the remote host
-        (`destination`).
+        """Uploads file(s) from the local host to the remote host.
 
-        1. If the `destination` is an existing file, the `source` file is copied
-           over it.
-        2. If the `destination` is an existing directory, the `source` file is
-           copied into it. Possible file with same name is overwritten.
-        3. If the `destination` does not exist and it ends with the path
-           separator ('/' in POSIXes, '\\' in Windows), it is considered a
-           directory. The directory is then created and the `source` file copied
-           into it. Possibly missing intermediate directories are also created.
-        4. If the `destination` does not exist and it does not end with the path
-           separator, it is considered a file. If the path to the file does
-           not exist it is created.
-        5. If `destination` is not given, the user's home directory
-           in the remote machine is used as the destination.
+        `source` is the path on the local machine.
 
-        Using wildcards like '*' and '?' is possible in the `source`.
-        When wildcards are used, `destination` MUST be a directory and only
-        files are copied from the `source`, subdirectories being ignored. If the
-        contents of subdirectories are also needed, use the keyword again.
+        `destination` is the target path on the remote machine.
 
-        Default file permission is 0744 (-rwxr--r--) and can be changed by
-        giving a value to the optional `mode` parameter.
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. On Unix-Likes, this is '/' which is also
+        the default value. With Windows remotes, this must be set as '\\'.
+        This option was added in SSHLibrary 1.1.
+
+        `mode` argument can be used to set the target file permission.
+        Numeric values are accepted. The default value is 0744 (-rwxr--r--).
 
         `newline` can be used to force newline characters that are written to
         the remote file. Valid values are `CRLF` (for Windows) and `LF`.
 
-        `path_separator` is the path separator character used in the remote
-        machine. With Windows machines, this must be defined as '\\'.
-        This option was added in SSHLibrary 1.1.
+        1. If `destination` is an existing file, `source` file is copied
+           over it.
+        2. If `destination` is an existing directory, `source` file is
+           copied into it. Possible file with same name is overwritten.
+        3. If `destination` does not exist and it ends with `path_
+           separator`, it is considered a directory. The directory is then
+           created and `source` file copied into it. Possibly missing
+           intermediate directories are also created.
+        4. If `destination` does not exist and it does not end with
+           `path_separator, it is considered a file. If the path to the file
+           does not exist, it is created.
+        5. If `destination` is not given, the user's home directory
+           on the remote machine is used as the destination.
+
+        Using wildcards like '*' and '?' is possible in `source`.
+        When wildcards are used, `destination` MUST be a directory and only
+        files are copied from `source`, subdirectories being ignored. If the
+        contents of subdirectories are also needed, use the keyword again.
 
         Examples:
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
-
         """
         cmd = self.ssh_client.put_file
         return self._run_sftp_command(cmd, source, destination, mode, newline,
