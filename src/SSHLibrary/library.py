@@ -65,7 +65,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=3, newline='LF', prompt=None, loglevel='INFO',
-                 encoding='UTF-8'):
+                 encoding='utf8'):
         """SSH Library allows some import time configuration.
 
         `timeout`, `newline`, `prompt` and `encoding` all set default values for
@@ -679,4 +679,4 @@ class DefaultConfig(Configuration):
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
                 loglevel=LogLevelEntry(loglevel or 'INFO'),
-                encoding=StringEntry(encoding or 'UTF-8'))
+                encoding=StringEntry(encoding or 'utf8'))

@@ -34,7 +34,7 @@ class ClientConfig(Configuration):
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 encoding='UTF-8'):
+                 encoding='utf8'):
         Configuration.__init__(self,
                 host=StringEntry(host),
                 alias=StringEntry(alias),
@@ -56,7 +56,7 @@ class AbstractSSHClient(object):
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 encoding='UTF-8'):
+                 encoding='utf8'):
         """Create new SSHClient based on arguments."""
         self.config = ClientConfig(host, alias, port, timeout, newline,
                                    prompt, term_type, width, height, encoding)
