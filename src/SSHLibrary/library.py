@@ -68,19 +68,32 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                  encoding='utf8'):
         """SSH Library allows some import time configuration.
 
-        `timeout`, `newline`, `prompt` and `encoding` all set default values for
-        new connections opened with `Open Connection`.
-
-        Starting from SSHLibrary 1.2, `encoding` is assumed as UTF-8 by
-        default.
-
-        The default values may later be changed with `Set Default Configuration`
-        and settings of the active, already open connection with
+        Configuration may later be changed with `Set Default Configuration`
+        and settings of an active, already open connection with
         `Set Client Configuration`.
 
+        `timeout` is used both by `Read Until` and `Write Until` variants and
+        given as a number of seconds. The default is 3 seconds.
+
+        `newline` is the line break used by the operating system on the remote.
+        The default is 'LF' which is the default on Unix-like operating systems.
+
+        `prompt` is a character or a character sequence that is used by
+        `Read Until Prompt`.  Prompt must be set before the keyword can be
+        can be used.
+
+        `encoding` is the character encoding of inputs and outputs.
+        Possible `encoding` values are listed in [3]. Starting from
+        SSHLibrary 1.2, the default is UTF-8.
+
+        | [3] http://docs.python.org/2/library/codecs.html#standard-encodings
+
+        `timeout`, `newline`, `prompt` and `encoding` values set here may
+        later be overridden per connection by giving them as arguments
+        to `Open Connection`.
+
         `loglevel` sets the default log level to log the output read by
-        `Read Until` variants. Default log level can also be later changed
-        with `Set Default Configuration`.
+        `Read Until` variants.
 
         Examples:
         | Library | SSHLibrary | # use default values |
@@ -133,7 +146,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Returns the index of this connection which can be used later to switch
         back to it. Indices start from '1' and are reset when `Close All
-        Connections` keyword is used.
+        Connections` is used.
 
         Optional `alias` can be given as a name for the connection and can be
         used for switching between connections similarly as the index.
@@ -186,8 +199,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         If `None` is given as argument `index_or_alias`, the currently active
         connection is is closed.
 
-        The keyword always returns the index of the previously active
-        connection, which can be used to reuse that connection later.
+        This keyword returns the index of the previously active connection,
+        which can be used to reuse that connection later.
 
         Example:
         | Open Connection       | myhost.net   |          |
