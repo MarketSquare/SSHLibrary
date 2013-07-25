@@ -20,8 +20,6 @@ import re
 import time
 import glob
 
-from robot import utils
-
 from .config import (Configuration, StringEntry, TimeEntry, IntegerEntry,
         NewlineEntry)
 
