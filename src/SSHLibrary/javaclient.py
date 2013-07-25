@@ -128,13 +128,18 @@ class SFTPClient(AbstractSFTPClient):
 
     def _listfiles(self, path):
         return [finfo.filename for finfo in self._client.ls(path)
-                if finfo.attributes.getOctalPermissions().startswith('0100')]
+                if finfo.attributes.isRegularFile()]
 
-    def _get_file(self, source, dest):
-        localfile = FileOutputStream(dest)
-        tempstats = self._client.stat(source)
+    def _listdirs(self, path):
+        return [finfo.filename for finfo in self._client.ls(path)
+                if finfo.attributes.isDirectory() and
+                finfo.filename not in ('.', '..')]
+
+    def _get_file(self, remotepath, localpath):
+        localfile = FileOutputStream(localpath)
+        tempstats = self._client.stat(remotepath)
         remotefilesize = tempstats.size
-        remotefile = self._client.openFileRO(source)
+        remotefile = self._client.openFileRO(remotepath)
         size = 0
         arraysize = 4096
         data = jarray.zeros(arraysize, 'b')

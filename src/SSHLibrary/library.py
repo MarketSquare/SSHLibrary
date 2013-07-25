@@ -608,6 +608,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._run_sftp_command(self.ssh_client.get_file, source,
                                       destination, path_separator)
 
+    def get_dir(self, source, destination='.', path_separator='/'):
+        return self._run_sftp_command(self.ssh_client.get_dir, source,
+                                      destination, path_separator)
+
     def put_file(self, source, destination='.', mode='0744',
                  newline='default', path_separator='/'):
         """Uploads file(s) from the local host to the remote host.
@@ -651,8 +655,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
         """
-        cmd = self.ssh_client.put_file
-        return self._run_sftp_command(cmd, source, destination, mode, newline,
+        return self._run_sftp_command(self.ssh_client.put_file, source,
+                                      destination, mode, newline,
+                                      path_separator)
+
+    def put_dir(self, source, destination='.', mode='0744',
+                newline='default', path_separator='/'):
+        return self._run_sftp_command(self.ssh_client.put_dir, source,
+                                      destination, mode, newline,
                                       path_separator)
 
     def _run_sftp_command(self, command, *args):

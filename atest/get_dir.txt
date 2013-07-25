@@ -1,0 +1,43 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Test Setup      Create Directory  robot-tmpdir
+Test Teardown   Remove Directory  robot-tmpdir  True
+Resource        resources/ssh_library_resources.txt
+Library         Collections
+
+*** Test Cases ***
+Get Dir Using Absolute Source
+    Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir
+
+Get Dir Using Relative Source
+    Get Dir And Verify Content  test_root  robot-tmpdir
+
+Get Dir Using Different Name
+    Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir/foo
+
+
+*** Keywords ***
+Get Dir And Verify Content
+    [Arguments]  ${source}  ${destination}
+    SSHLibrary.Get Dir  ${source}  ${destination}
+    ${target_path} =  List Directory  ${destination}
+    ${expected} =  Create List  test_root
+    Lists Should Be Equal  ${target_path}  ${expected}
+    ${test_root} =  List Directory  ${destination}/test_root
+    ${expected} =  Create List  subdir  ${TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
+    Lists Should Be Equal  ${test_root}  ${expected}
+    ${sub_dir} =  List Directory  ${destination}/test_root/subdir
+    ${expected} =  Create List  ${INTERACTIVE TEST SCRIPT NAME}
+    Lists Should Be Equal  ${sub_dir}  ${expected}
+
+Login And Move Test Files
+    Login As Valid User
+    Put File  ${TEST SCRIPT}  ${USER HOME}/test_root/
+    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}/test_root/subdir/
+    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/test_root/
+
+Remove Test Files and Close Connections
+    Execute Command  rm -rf ${USER HOME}/test_root
+    Close All Connections

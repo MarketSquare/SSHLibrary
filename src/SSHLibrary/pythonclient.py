@@ -14,6 +14,7 @@
 
 import stat
 import posixpath
+
 try:
     import paramiko
 except ImportError:
@@ -111,8 +112,8 @@ class SFTPClient(AbstractSFTPClient):
     def _resolve_homedir(self):
         return self._client.normalize('.') + '/'
 
-    def _get_file(self, source, dest):
-        self._client.get(source, dest)
+    def _get_file(self, remotepath, localpath):
+        self._client.get(remotepath, localpath)
 
     def _write_to_remote_file(self, remotefile, data, position):
         remotefile.write(data)
@@ -142,8 +143,12 @@ class SFTPClient(AbstractSFTPClient):
     def _listfiles(self, path):
         return [getattr(fileinfo, 'filename', '?') for fileinfo
                 in self._client.listdir_attr(path)
-                if stat.S_ISREG(fileinfo.st_mode) or
-                   stat.S_IFMT(fileinfo.st_mode) == 0]
+                if stat.S_ISREG(fileinfo.st_mode)]
+
+    def _listdirs(self, path):
+        return [getattr(fileinfo, 'filename', '?') for fileinfo
+                in self._client.listdir_attr(path)
+                if stat.S_ISDIR(fileinfo.st_mode)]
 
 
 class RemoteCommand(AbstractCommand):

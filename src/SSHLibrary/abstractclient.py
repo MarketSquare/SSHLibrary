@@ -283,8 +283,15 @@ class AbstractSSHClient(object):
             Must be defined if the remote machine runs Windows.
         """
         sftp_client = self._create_sftp_client()
-        sources, destinations = sftp_client.get_file(
-                source, destination, path_separator)
+        sources, destinations = sftp_client.get_file(source, destination,
+                                                     path_separator)
+        sftp_client.close()
+        return sources, destinations
+
+    def get_dir(self, source, destination='.', path_separator='/'):
+        sftp_client = self._create_sftp_client()
+        sources, destinations = sftp_client.get_dir(source, destination,
+                                                    path_separator)
         sftp_client.close()
         return sources, destinations
 
@@ -298,11 +305,25 @@ class AbstractSFTPClient(object):
     def close(self):
         self._client.close()
 
-    def get_file(self, sources, destination, path_separator='/'):
-        remotefiles = self._get_get_file_sources(sources, path_separator)
+    def get_file(self, source, destination, path_separator='/'):
+        remotefiles = self._get_get_file_sources(source, path_separator)
         localfiles = self._get_get_file_destinations(remotefiles, destination)
         for src, dst in zip(remotefiles, localfiles):
             self._get_file(src, dst)
+        return remotefiles, localfiles
+
+    def get_dir(self, source, destination, path_separator='/'):
+        remotefiles = []
+        localfiles = []
+        subdirs = [os.path.split(source)[1]]
+        for path in subdirs:
+            [subdirs.append(os.path.join(path, subdir_name))
+             for subdir_name in self._listdirs(path)]
+            remote_path = path + path_separator + "*"
+            local_path = os.path.join(destination, path) + path_separator
+            r, l = self.get_file(remote_path, local_path, path_separator)
+            remotefiles.extend(r)
+            localfiles.extend(l)
         return remotefiles, localfiles
 
     def _get_get_file_sources(self, source, path_separator):
