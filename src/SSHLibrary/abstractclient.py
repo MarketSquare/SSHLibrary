@@ -376,16 +376,16 @@ class AbstractSFTPClient(object):
             self._put_file(src, dst, mode, newline)
         return localfiles, remotefiles
 
-    def _put_file(self, source, dest, mode, newline_char):
-        remotefile = self._create_remote_file(dest, mode)
+    def _put_file(self, source, destination, mode, newline):
+        remotefile = self._create_remote_file(destination, mode)
         with open(source, 'rb') as localfile:
             position = 0
             while True:
                 data = localfile.read(4096)
                 if not data:
                     break
-                if newline_char and '\n' in data:
-                    data = data.replace('\n', newline_char)
+                if newline and '\n' in data:
+                    data = data.replace('\n', newline)
                 self._write_to_remote_file(remotefile, data, position)
                 position += len(data)
             self._close_remote_file(remotefile)

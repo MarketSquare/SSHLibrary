@@ -62,7 +62,7 @@ Put File To Relative Destination With Missing Subdirectories
     [Teardown]  Execute Command  rm -rf robotdir
 
 Put File With Pattern Matching Directory
-    Put Files And Verify  ${SCRIPTS}test_fi*  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    Put Files And Verify  ${TEXTFILES}test_fi*  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
 
 Put File Should Fail When There Are No Source Files
@@ -71,7 +71,7 @@ Put File Should Fail When There Are No Source Files
 Put File with special characters in filename
     [Documentation]    http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
     Enable SSH Logging     ${TEMPDIR}${/}ssh_log.txt
-    Put File  ${SPECIAL CHARS FILE}  ${USER HOME}/robotdir/
+    Put File  ${FILE WITH SPECIAL CHARS}  ${USER HOME}/robotdir/
     Verify Remote Files Exist  robotdir  foo%2Fbar.txt
     [Teardown]  Execute Command  rm -rf robotdir
 
