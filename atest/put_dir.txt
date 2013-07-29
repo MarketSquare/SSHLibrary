@@ -1,7 +1,7 @@
 *** Settings ***
 Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
-Suite Teardown  Run Keywords  Remove Test Files and Close Connections
+Suite Teardown  Close All Connections
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
@@ -30,12 +30,15 @@ Put Dir And Verify
 
 Verify Remote Dir Does Not Exist
     [Arguments]  ${expected}
-    ${rc} =  Execute Command  test -d ${expected}  return_stdout=${EMPTY}  return_rc=true
-    Should Be Equal As Integers  ${rc}  1
+    ${stdout} =  Execute Command  ls ${expected}
+    Should Not Contain  ${stdout}  ${expected}
 
 Verify Remote Dir Structure Exists
     [Arguments]  ${expected}
-    ${rc} =  Execute Command  test -d ${expected}  return_stdout=${EMPTY}  return_rc=true
-    Should Be Equal As Integers  ${rc}  0
-    ${rc} =  Execute Command  test -d ${expected}/special  return_stdout=${EMPTY}  return_rc=true
-    Should Be Equal As Integers  ${rc}  0
+    ${stdout} =  Execute Command  ls ${expected}
+    Should Contain  ${stdout}  ${TEST FILE NAME}
+    Should Contain  ${stdout}  ${TEST FILE 2 NAME}
+    Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
+    Should Contain  ${stdout}  special
+    ${stdout} =  Execute Command  ls ${expected}/special
+    Should Contain  ${stdout}  ${FILE WITH SPECIAL CHARS NAME}
