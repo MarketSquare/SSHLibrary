@@ -11,7 +11,7 @@ Execute Command With Defaults
     Should Be Equal  ${stdout}  This is stdout
 
 Execute Command And Return Stderr
-    ${stderr} =  Execute Command  ./${TEST SCRIPT NAME}    \   return_stderr=yes
+    ${stderr} =  Execute Command  ./${TEST SCRIPT NAME}  return_stdout=${FALSE}  return_stderr=yes
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command And Return Rc
@@ -19,8 +19,7 @@ Execute Command And Return Rc
     Should Be Equal As Integers  ${rc}  0
 
 Execute Command And Return All Values
-    ${stdout}    ${stderr}    ${rc}=
-    ...    Execute Command   ./${TEST SCRIPT NAME}    foo    bar    baz
+    ${stdout}  ${stderr}  ${rc} =  Execute Command  ./${TEST SCRIPT NAME}  foo  bar  baz
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
     Should Be Equal As Integers  ${rc}  0
