@@ -3,8 +3,10 @@ Library         SSHLibrary  ${EMPTY}  ${EMPTY}  $
 Variables       user_information.py
 
 *** Variables ***
-${SCRIPTS}    ${CURDIR}${/}..${/}testdata${/}scripts
-${TEXTFILES}  ${CURDIR}${/}..${/}testdata${/}textfiles
+${TESTDATA}   ${CURDIR}${/}..${/}testdata
+${SCRIPTS}    ${TESTDATA}${/}scripts
+${TEXTFILES}  ${TESTDATA}${/}textfiles
+${SPECIAL TEXTFILES}  ${TEXTFILES}${/}special
 ${TEST SCRIPT NAME}  test.sh
 ${TEST SCRIPT}  ${SCRIPTS}${/}${TEST SCRIPT NAME}
 ${INTERACTIVE TEST SCRIPT NAME}  test_interactive.sh
@@ -18,21 +20,21 @@ ${TEST FILE 2}  ${TEXTFILES}${/}${TEST FILE 2 NAME}
 ${FILE WITH NEWLINES NAME}  file_with_newlines.txt
 ${FILE WITH NEWLINES}  ${TEXTFILES}${/}${FILE WITH NEWLINES NAME}
 ${FILE WITH NON-ASCII NAME}  aaääöö.txt
-${FILE WITH NON-ASCII}  ${TEXTFILES}${/}special${/}${FILE WITH NON-ASCII NAME}
+${FILE WITH NON-ASCII}  ${SPECIAL TEXTFILES}${/}${FILE WITH NON-ASCII NAME}
 ${FILE WITH SPECIAL CHARS NAME}  foo%2Fbar.txt
-${FILE WITH SPECIAL CHARS}  ${TEXTFILES}${/}special${/}${FILE WITH SPECIAL CHARS NAME}
+${FILE WITH SPECIAL CHARS}  ${SPECIAL TEXTFILES}${/}${FILE WITH SPECIAL CHARS NAME}
 
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
-    Put File  ${TEST SCRIPT}  ${USER HOME}/${TEST SCRIPT NAME}
-    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}/${INTERACTIVE TEST SCRIPT NAME}
-    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/${REPEAT TEST SCRIPT NAME}
+    Put File  ${TEST SCRIPT}  ${USER HOME}/
+    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}/
+    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/
     Put File  ${FILE WITH NEWLINES}  ${USER HOME}/
     Put File  ${FILE WITH NON-ASCII}  ${USER HOME}/
 
 Remove Test Files And Close Connections
-    Execute Command  rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${FILE WITH NEWLINES NAME} ${FILE WITH NON-ASCII NAME}
+    Execute Command  rm -f ${TEST SCRIPT NAME} ${INTERACTIVE TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${FILE WITH NEWLINES NAME} ${FILE WITH NON-ASCII NAME}
     Close All Connections
 
 Login As Valid User
