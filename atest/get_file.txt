@@ -4,6 +4,7 @@ Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
 Test Teardown   Remove Directory  ${TMPDIR}  yes
 Resource        resources/ssh_library_resources.txt
+Library         OperatingSystem
 
 *** Variables ***
 ${TMPDIR}   robot-tmpdir

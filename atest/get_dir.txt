@@ -3,6 +3,7 @@ Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
 Resource        resources/ssh_library_resources.txt
+Library         OperatingSystem
 Library         Collections
 
 *** Test Cases ***

@@ -2,6 +2,7 @@
 Default Tags    pybot   jybot
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
+Library         OperatingSystem
 
 *** Test Cases ***
 Open Connection

@@ -1,7 +1,6 @@
 *** Settings ***
 Library         SSHLibrary  ${EMPTY}  ${EMPTY}  $
 Variables       user_information.py
-Library         OperatingSystem  WITH NAME  OS
 
 *** Variables ***
 ${SCRIPTS}  ${CURDIR}${/}..${/}testdata${/}scripts

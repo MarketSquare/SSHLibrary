@@ -4,6 +4,7 @@ Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
 Resource        resources/ssh_library_resources.txt
+Library         OperatingSystem  WITH NAME  OS
 Library         String
 
 *** Variables ***

@@ -3,6 +3,7 @@ Force Tags      pybot   jybot
 Test Setup      Open Connection  ${HOST}
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
+Library         OperatingSystem
 
 *** Variables ***
 ${PUBKEYDIR}        ${CURDIR}/testdata/keyfiles
