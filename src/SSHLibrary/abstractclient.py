@@ -272,6 +272,14 @@ class AbstractSSHClient(object):
         sftp_client.close()
         return sources, destinations
 
+    def put_dir(self, source, destination='.', mode='0744',
+                newline='default', path_separator='/'):
+        sftp_client = self._create_sftp_client()
+        sources, destinations = sftp_client.put_dir(source, destination, mode,
+                                                    newline, path_separator)
+        sftp_client.close()
+        return sources, destinations
+
     def get_file(self, source, destination='.', path_separator='/'):
         """Get file(s) from the remote host to localhost.
 
@@ -305,25 +313,25 @@ class AbstractSFTPClient(object):
     def close(self):
         self._client.close()
 
-    def get_file(self, source, destination, path_separator='/'):
-        remotefiles = self._get_get_file_sources(source, path_separator)
-        localfiles = self._get_get_file_destinations(remotefiles, destination)
-        for src, dst in zip(remotefiles, localfiles):
-            self._get_file(src, dst)
-        return remotefiles, localfiles
-
     def get_dir(self, source, destination, path_separator='/'):
         remotefiles = []
         localfiles = []
         subdirs = [os.path.split(source)[1]]
         for path in subdirs:
-            [subdirs.append(os.path.join(path, subdir_name))
+            [subdirs.append(path_separator.join([path, subdir_name]))
              for subdir_name in self._listdirs(path)]
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
             r, l = self.get_file(remote_path, local_path, path_separator)
             remotefiles.extend(r)
             localfiles.extend(l)
+        return remotefiles, localfiles
+
+    def get_file(self, source, destination, path_separator='/'):
+        remotefiles = self._get_get_file_sources(source, path_separator)
+        localfiles = self._get_get_file_destinations(remotefiles, destination)
+        for src, dst in zip(remotefiles, localfiles):
+            self._get_file(src, dst)
         return remotefiles, localfiles
 
     def _get_get_file_sources(self, source, path_separator):
@@ -364,6 +372,27 @@ class AbstractSFTPClient(object):
         if not os.path.exists(dest):
             os.makedirs(dest)
 
+    def put_dir(self, source, destination, mode, newline, path_separator='/'):
+        os.chdir(os.path.split(source)[0])
+        parent = os.path.split(source)[1]
+        localfiles = []
+        remotefiles = []
+        for path, _, files in os.walk(parent):
+            for file in files:
+                local_path = os.path.join(path, file)
+                if destination.endswith('./'):
+                    remote_path = path_separator.join([path, file])
+                elif destination.endswith('/'):
+                    remote_path = path_separator.join([destination[:-1], path,
+                                                       file])
+                else:
+                    remote_path = path_separator.join([destination, file])
+                l, r = self.put_file(local_path, remote_path, mode, newline,
+                                     path_separator)
+                localfiles.extend(l)
+                remotefiles.extend(r)
+        return localfiles, remotefiles
+
     def put_file(self, sources, destination, mode, newline,
                   path_separator='/'):
         mode = int(mode, 8)
@@ -375,31 +404,6 @@ class AbstractSFTPClient(object):
         for src, dst in zip(localfiles, remotefiles):
             self._put_file(src, dst, mode, newline)
         return localfiles, remotefiles
-
-    def _put_file(self, source, destination, mode, newline):
-        remotefile = self._create_remote_file(destination, mode)
-        with open(source, 'rb') as localfile:
-            position = 0
-            while True:
-                data = localfile.read(4096)
-                if not data:
-                    break
-                if newline and '\n' in data:
-                    data = data.replace('\n', newline)
-                self._write_to_remote_file(remotefile, data, position)
-                position += len(data)
-            self._close_remote_file(remotefile)
-
-    def _parse_path_elements(self, dest, path_separator):
-        def _isabs(path):
-            if dest.startswith(path_separator):
-                return True
-            if path_separator == '\\' and path[1:3] == ':\\':
-                return True
-            return False
-        if not _isabs(dest):
-            dest = path_separator.join([self._homedir, dest])
-        return dest.rsplit(path_separator, 1)
 
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep))
@@ -423,6 +427,31 @@ class AbstractSFTPClient(object):
             files = [path_separator.join([dirpath, os.path.split(path)[1]])
                      for path in sources]
         return files, dirpath
+
+    def _parse_path_elements(self, dest, path_separator):
+        def _isabs(path):
+            if dest.startswith(path_separator):
+                return True
+            if path_separator == '\\' and path[1:3] == ':\\':
+                return True
+            return False
+        if not _isabs(dest):
+            dest = path_separator.join([self._homedir, dest])
+        return dest.rsplit(path_separator, 1)
+
+    def _put_file(self, source, destination, mode, newline):
+        remotefile = self._create_remote_file(destination, mode)
+        with open(source, 'rb') as localfile:
+            position = 0
+            while True:
+                data = localfile.read(4096)
+                if not data:
+                    break
+                if newline and '\n' in data:
+                    data = data.replace('\n', newline)
+                self._write_to_remote_file(remotefile, data, position)
+                position += len(data)
+            self._close_remote_file(remotefile)
 
 
 class AbstractCommand(object):

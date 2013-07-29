@@ -1,0 +1,40 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login As Valid User
+Suite Teardown  Run Keywords  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+
+
+*** Test Cases ***
+Put Dir With Absolute Destination
+    Put Dir And Verify  ${TEXTFILES}  ${USER HOME}/new_dir/  ${USER HOME}/new_dir/textfiles
+    [Teardown]  Execute Command  rm -rf ${USER HOME}/new_dir
+
+Put Dir With Relative Destination
+    Put Dir And Verify  ${TEXTFILES}  new_dir/  ${USER HOME}/new_dir/textfiles
+    [Teardown]  Execute Command  rm -rf ${USER HOME}/new_dir
+
+Put Dir To Home Directory
+    Put Dir And Verify  ${TEXTFILES}  ./  ${USER HOME}/textfiles
+    [Teardown]  Execute Command  rm -rf ${USER HOME}/textfiles
+
+Put Dir With Different Name
+    Put Dir And Verify  ${TEXTFILES}  ${USER HOME}/another_dir_name  ${USER HOME}/another_dir_name
+    [Teardown]  Execute Command  rm -rf ${USER HOME}/another_dir_name
+
+*** Keywords ***
+Put Dir And Verify
+    [Arguments]  ${source}  ${destination}  ${expected}
+    Verify Remote Dir Does Not Exist  ${expected}
+    Put Dir  ${source}  ${destination}
+    Verify Remote Dir Exists  ${expected}
+
+Verify Remote Dir Does Not Exist
+    [Arguments]  ${expected}
+    ${rc} =  Execute Command  test -d ${expected}  return_stdout=${EMPTY}  return_rc=true
+    Should Be Equal As Integers  ${rc}  1
+
+Verify Remote Dir Exists
+    [Arguments]  ${expected}
+    ${rc} =  Execute Command  test -d ${expected}  return_stdout=${EMPTY}  return_rc=true
+    Should Be Equal As Integers  ${rc}  0
