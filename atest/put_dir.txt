@@ -26,14 +26,16 @@ Put Dir And Verify
     [Arguments]  ${source}  ${destination}  ${expected}
     Verify Remote Dir Does Not Exist  ${expected}
     Put Dir  ${source}  ${destination}
-    Verify Remote Dir Exists  ${expected}
+    Verify Remote Dir Structure Exists  ${expected}
 
 Verify Remote Dir Does Not Exist
     [Arguments]  ${expected}
     ${rc} =  Execute Command  test -d ${expected}  return_stdout=${EMPTY}  return_rc=true
     Should Be Equal As Integers  ${rc}  1
 
-Verify Remote Dir Exists
+Verify Remote Dir Structure Exists
     [Arguments]  ${expected}
     ${rc} =  Execute Command  test -d ${expected}  return_stdout=${EMPTY}  return_rc=true
+    Should Be Equal As Integers  ${rc}  0
+    ${rc} =  Execute Command  test -d ${expected}/special  return_stdout=${EMPTY}  return_rc=true
     Should Be Equal As Integers  ${rc}  0

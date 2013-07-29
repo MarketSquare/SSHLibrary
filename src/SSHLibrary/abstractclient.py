@@ -386,7 +386,10 @@ class AbstractSFTPClient(object):
                     remote_path = path_separator.join([destination[:-1], path,
                                                        file])
                 else:
-                    remote_path = path_separator.join([destination, file])
+                    path_without_parent = path.replace(parent, '')
+                    remote_path = path_separator.join([destination,
+                                                       path_without_parent,
+                                                       file])
                 l, r = self.put_file(local_path, remote_path, mode, newline,
                                      path_separator)
                 localfiles.extend(l)
