@@ -55,7 +55,7 @@ Login Returns Banner Value
     Should Contain  ${ret}  Last login
 
 Enable Logging
-    [Tags]    pybot
+    [Tags]   pybot
     [Setup]  Remove File  ${OUTPUTDIR}/sshlog.txt
     Enable SSH Logging  ${OUTPUTDIR}/sshlog.txt
     Open Connection  ${HOST}

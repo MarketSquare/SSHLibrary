@@ -1,9 +1,8 @@
 *** Settings ***
-Resource        resources/ssh_library_resources.txt
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Teardown   Execute Command  rm -f ${TEST FILE NAME}
+Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
 Execute Command With Defaults

@@ -1,7 +1,8 @@
 *** Settings ***
+Documentation   This suite contains test for 'Put File 'keywords These tests use some dummy test files from under the scripts directory.
 Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
-Suite Teardown  Run Keywords  Remove Test Files and Close Connections  Remove Local Tempdir
+Suite Teardown  Close All Connections
 Resource        resources/ssh_library_resources.txt
 Library         String
 
@@ -41,7 +42,7 @@ Put File And Specify Remote Newlines
     ${expected}=  OS.Get File  ${FILE WITH NEWLINES}
     ${expected}=  Replace String  ${expected}  \n  \r\n
     Should Be Equal  ${content}  ${expected}
-    [Teardown]  Execute Command  rm -f ${FILE WITH NEWLINES NAME}
+    [Teardown]  Remove Local Temp Dir And Remote File
 
 Put File With Pattern
     Put Files And Verify  ${TEST FILE PATTERN}  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
@@ -61,7 +62,7 @@ Put File To Relative Destination With Missing Subdirectories
     [Teardown]  Execute Command  rm -rf robotdir
 
 Put File With Pattern Matching Directory
-    Put Files And Verify  ${TEXTFILES}/test_fi*  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    Put Files And Verify  ${TEXTFILES}${/}test_fi*  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
 
 Put File Should Fail When There Are No Source Files
@@ -99,5 +100,6 @@ Verify Remote Files Exist
     : FOR  ${filename}  IN  @{expected}
     \  Should Contain  ${listing}  ${filename}
 
-Remove Local Tempdir
+Remove Local Temp Dir And Remote File
     Remove Directory  ${TMPDIR}  yes
+    Execute Command  rm -f ${FILE WITH NEWLINES NAME}

@@ -2,7 +2,6 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Setup      Create Directory  ${TMPDIR}
 Test Teardown   Remove Directory  ${TMPDIR}  yes
 Resource        resources/ssh_library_resources.txt
 
@@ -43,7 +42,6 @@ Get File From A Path Not Under Home Directory
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    [Setup]
     SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${CURDIR}${/}${TMPDIR2}${/}
     ${contents} =  List Directory  ${CURDIR}${/}${TMPDIR2}${/}
     Should Contain  ${contents}  ${TEST SCRIPT NAME}

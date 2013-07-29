@@ -2,20 +2,21 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Setup      Create Directory  robot-tmpdir
-Test Teardown   Remove Directory  robot-tmpdir  True
 Resource        resources/ssh_library_resources.txt
 Library         Collections
 
 *** Test Cases ***
 Get Dir Using Absolute Source
     Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir
+    [Teardown]  Remove Directory  robot-tmpdir  True
 
 Get Dir Using Relative Source
     Get Dir And Verify Content  test_root  robot-tmpdir
+    [Teardown]  Remove Directory  robot-tmpdir  True
 
 Get Dir Using Different Name
     Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir/foo
+    [Teardown]  Remove Directory  robot-tmpdir  True
 
 *** Keywords ***
 Get Dir And Verify Content
