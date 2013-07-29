@@ -2,29 +2,25 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Teardown   Remove Directory  ${TMPDIR}  yes
+Test Teardown   Remove Directory  ${LOCAL TMPDIR}  yes
 Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem
 
-*** Variables ***
-${TMPDIR}   robot-tmpdir
-${TMPDIR2}  robot-tmpdir2
-
 *** Test Cases ***
 Get File From Absolute Source
-    Get File And Verify Listing  ${USER HOME}/${TEST SCRIPT NAME}  ${TMPDIR}${/}  ${TEST SCRIPT NAME}
+    Get File And Verify Listing  ${USER HOME}/${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}  ${TEST SCRIPT NAME}
 
 Get File From Relative Source
-    Get File And Verify Listing  ${TEST SCRIPT NAME}  ${TMPDIR}${/}  ${TEST SCRIPT NAME}
+    Get File And Verify Listing  ${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}  ${TEST SCRIPT NAME}
 
 Get File With Different Name
-    Get File And Verify Listing  ${USER HOME}/${FILE WITH NON-ASCII NAME}  ${TMPDIR}${/}foo.txt  foo.txt
+    Get File And Verify Listing  ${USER HOME}/${FILE WITH NON-ASCII NAME}  ${LOCAL TMPDIR}${/}foo.txt  foo.txt
 
 Get File With Pattern
-    Get File And Verify Listing  ${USER HOME}/*  ${TMPDIR}${/}  ${TEST SCRIPT NAME}  ${INTERACTIVE TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
+    Get File And Verify Listing  ${USER HOME}/*  ${LOCAL TMPDIR}${/}  ${TEST SCRIPT NAME}  ${INTERACTIVE TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
 
 Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  ${USER HOME}/*.sh  ${TMPDIR}${/}foo
+    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  ${USER HOME}/*.sh  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
     SSHLibrary.Get File  ${USER HOME}/${TEST SCRIPT NAME}  .
@@ -33,20 +29,20 @@ Get File To Curdir
     [Teardown]  Remove File  ${TEST SCRIPT NAME}
 
 Get File When Destination Directory Does Not Exist
-    SSHLibrary.Get File  ${USER HOME}/${TEST SCRIPT NAME}  ${TMPDIR}${/}missingdir${/}foo.txt
-    ${listing} =  List Files In Directory  ${TMPDIR}${/}missingdir
+    SSHLibrary.Get File  ${USER HOME}/${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
+    ${listing} =  List Files In Directory  ${LOCAL TMPDIR}${/}missingdir
     Should Contain  ${listing}  foo.txt
 
 Get File From A Path Not Under Home Directory
     [Setup]  Create Tmp Dir And Move File
-    Get File And Verify Listing  /tmp/test_file.txt  ${TMPDIR}${/}  test_file.txt
+    Get File And Verify Listing  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${CURDIR}${/}${TMPDIR2}${/}
-    ${contents} =  List Directory  ${CURDIR}${/}${TMPDIR2}${/}
+    SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${CURDIR}${/}${LOCAL TMPDIR}${/}
+    ${contents} =  List Directory  ${CURDIR}${/}${LOCAL TMPDIR}${/}
     Should Contain  ${contents}  ${TEST SCRIPT NAME}
-    [Teardown]  Remove Directory  ${CURDIR}${/}${TMPDIR2}  yes
+    [Teardown]  Remove Directory  ${CURDIR}${/}${LOCAL TMPDIR}  yes
 
 Get File Should Fail When There Are No Source Files
     Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSHLibrary.Get File  non-existing
@@ -55,15 +51,15 @@ Get File Should Fail When There Are No Source Files
 Get File And Verify Listing
     [Arguments]  ${source}  ${destination}  @{expected}
     SSHLibrary.Get File  ${source}  ${destination}
-    ${listing} =  List Files In Directory  ${TMPDIR}
+    ${listing} =  List Files In Directory  ${LOCAL TMPDIR}
     : FOR  ${filename}  IN  @{expected}
     \  Should Contain  ${listing}  ${filename}
 
 Create Tmp Dir And Move File
     Put File  ${TEST FILE}  /tmp/
-    Create Directory  ${TMPDIR}
+    Create Directory  ${LOCAL TMPDIR}
 
 Remove Tmp Dir And Remote File
     Execute Command  rm -f /tmp/test_file.txt
-    Remove Directory  ${TMPDIR}  yes
+    Remove Directory  ${LOCAL TMPDIR}  yes
 

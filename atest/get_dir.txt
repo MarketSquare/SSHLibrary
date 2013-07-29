@@ -8,16 +8,16 @@ Library         Collections
 
 *** Test Cases ***
 Get Dir Using Absolute Source
-    Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir
-    [Teardown]  Remove Directory  robot-tmpdir  True
+    Get Dir And Verify Content  ${USER HOME}/test_root  ${LOCAL TMPDIR}
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  True
 
 Get Dir Using Relative Source
-    Get Dir And Verify Content  test_root  robot-tmpdir
-    [Teardown]  Remove Directory  robot-tmpdir  True
+    Get Dir And Verify Content  test_root  ${LOCAL TMPDIR}
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  True
 
 Get Dir Using Different Name
-    Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir/foo
-    [Teardown]  Remove Directory  robot-tmpdir  True
+    Get Dir And Verify Content  ${USER HOME}/test_root  ${LOCAL TMPDIR}${/}foo
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  True
 
 *** Keywords ***
 Get Dir And Verify Content
