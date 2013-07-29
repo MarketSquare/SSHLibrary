@@ -15,15 +15,15 @@ Execute Command And Return Stderr
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command And Return Rc
-    ${rc} =  Execute Command  ./${TEST SCRIPT NAME}    return_stdout=${FALSE}   return_rc=${true}
-    Should Be Equal  ${rc}  ${0}
+    ${rc} =  Execute Command  ./${TEST SCRIPT NAME}  return_stdout=${FALSE}  return_rc=${true}
+    Should Be Equal As Integers  ${rc}  0
 
 Execute Command And Return All Values
     ${stdout}    ${stderr}    ${rc}=
     ...    Execute Command   ./${TEST SCRIPT NAME}    foo    bar    baz
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
-    Should Be Equal  ${rc}  ${0}
+    Should Be Equal As Integers  ${rc}  0
 
 Execute Command With Legacy Stdout Config
     ${stdout} =  Execute Command  ./${TEST SCRIPT NAME}  STDout
