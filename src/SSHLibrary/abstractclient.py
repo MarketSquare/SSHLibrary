@@ -316,7 +316,7 @@ class AbstractSFTPClient(object):
     def get_dir(self, source, destination, path_separator='/'):
         remotefiles = []
         localfiles = []
-        subdirs = [os.path.split(source)[1]]
+        subdirs = [os.path.basename(source)]
         for path in subdirs:
             [subdirs.append(path_separator.join([path, subdir_name]))
              for subdir_name in self._listdirs(path)]
@@ -362,7 +362,7 @@ class AbstractSFTPClient(object):
         dest = os.path.abspath(dest.replace('/', os.sep))
         self._create_missing_local_dirs(dest, is_dir)
         if is_dir:
-            return [os.path.join(dest, os.path.split(name)[1])
+            return [os.path.join(dest, os.path.basename(name))
                     for name in sourcefiles]
         return [dest]
 
@@ -373,8 +373,8 @@ class AbstractSFTPClient(object):
             os.makedirs(dest)
 
     def put_dir(self, source, destination, mode, newline, path_separator='/'):
-        os.chdir(os.path.split(source)[0])
-        parent = os.path.split(source)[1]
+        os.chdir(os.path.dirname(source))
+        parent = os.path.basename(source)
         localfiles = []
         remotefiles = []
         for path, _, files in os.walk(parent):
@@ -427,7 +427,7 @@ class AbstractSFTPClient(object):
         if filename:
             files = [path_separator.join([dirpath, filename])]
         else:
-            files = [path_separator.join([dirpath, os.path.split(path)[1]])
+            files = [path_separator.join([dirpath, os.path.basename(path)])
                      for path in sources]
         return files, dirpath
 
