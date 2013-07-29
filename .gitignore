@@ -3,4 +3,4 @@
 *.pyc
 *.class
 atest/results
-atest/resources/keyfiles/id_rsa
+atest/testdata/keyfiles/id_rsa

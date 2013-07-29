@@ -4,14 +4,14 @@ Variables       user_information.py
 Library         OperatingSystem  WITH NAME  OS
 
 *** Variables ***
-${SCRIPTS}  ${CURDIR}${/}scripts${/}
-${TEXTFILES}  ${CURDIR}${/}textfiles
+${SCRIPTS}  ${CURDIR}${/}..${/}testdata${/}scripts
+${TEXTFILES}  ${CURDIR}${/}..${/}testdata${/}textfiles
 ${TEST SCRIPT NAME}  test.sh
-${TEST SCRIPT}  ${SCRIPTS}${TEST SCRIPT NAME}
+${TEST SCRIPT}  ${SCRIPTS}${/}${TEST SCRIPT NAME}
 ${INTERACTIVE TEST SCRIPT NAME}  test_interactive.sh
-${INTERACTIVE TEST SCRIPT}  ${SCRIPTS}${INTERACTIVE TEST SCRIPT NAME}
+${INTERACTIVE TEST SCRIPT}  ${SCRIPTS}${/}${INTERACTIVE TEST SCRIPT NAME}
 ${REPEAT TEST SCRIPT NAME}  test_repeat.sh
-${REPEAT TEST SCRIPT}  ${SCRIPTS}${REPEAT TEST SCRIPT NAME}
+${REPEAT TEST SCRIPT}  ${SCRIPTS}${/}${REPEAT TEST SCRIPT NAME}
 ${COUNTER NAME}  counter.txt
 ${TEST FILE NAME}  test_file.txt
 ${TEST FILE}  ${TEXTFILES}${/}${TEST FILE NAME}

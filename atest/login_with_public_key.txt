@@ -5,7 +5,7 @@ Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
 
 *** Variables ***
-${PUBKEYDIR}        ${CURDIR}/resources/keyfiles
+${PUBKEYDIR}        ${CURDIR}/testdata/keyfiles
 ${PUBKEY_USERNAME}  testkey
 ${PUBKEY_PASSWORD}  ${EMPTY}
 ${PUBKEY_FILE}      ${PUBKEYDIR}/id_rsa
