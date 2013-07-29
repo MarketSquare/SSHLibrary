@@ -9,6 +9,7 @@ Library         String
 
 *** Variables ***
 ${TMPDIR}  robot-tmpdir
+${TEST FILE PATTERN}  ${TEXTFILES}${/}test*.txt
 
 *** Test Cases ***
 Put File With Absolute Destination

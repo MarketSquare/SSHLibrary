@@ -3,7 +3,7 @@ Library         SSHLibrary  ${EMPTY}  ${EMPTY}  $
 Variables       user_information.py
 
 *** Variables ***
-${SCRIPTS}  ${CURDIR}${/}..${/}testdata${/}scripts
+${SCRIPTS}    ${CURDIR}${/}..${/}testdata${/}scripts
 ${TEXTFILES}  ${CURDIR}${/}..${/}testdata${/}textfiles
 ${TEST SCRIPT NAME}  test.sh
 ${TEST SCRIPT}  ${SCRIPTS}${/}${TEST SCRIPT NAME}
@@ -11,12 +11,10 @@ ${INTERACTIVE TEST SCRIPT NAME}  test_interactive.sh
 ${INTERACTIVE TEST SCRIPT}  ${SCRIPTS}${/}${INTERACTIVE TEST SCRIPT NAME}
 ${REPEAT TEST SCRIPT NAME}  test_repeat.sh
 ${REPEAT TEST SCRIPT}  ${SCRIPTS}${/}${REPEAT TEST SCRIPT NAME}
-${COUNTER NAME}  counter.txt
 ${TEST FILE NAME}  test_file.txt
 ${TEST FILE}  ${TEXTFILES}${/}${TEST FILE NAME}
 ${TEST FILE 2 NAME}  test_file2.txt
 ${TEST FILE 2}  ${TEXTFILES}${/}${TEST FILE 2 NAME}
-${TEST FILE PATTERN}  ${TEXTFILES}${/}test*.txt
 ${FILE WITH NEWLINES NAME}  file_with_newlines.txt
 ${FILE WITH NEWLINES}  ${TEXTFILES}${/}${FILE WITH NEWLINES NAME}
 ${FILE WITH NON-ASCII NAME}  aaääöö.txt
@@ -34,7 +32,7 @@ Login And Move Test Files
     Put File  ${FILE WITH NON-ASCII}  ${USER HOME}/
 
 Remove Test Files And Close Connections
-    Execute Command  rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${COUNTER NAME} ${FILE WITH NEWLINES NAME} ${FILE WITH NON-ASCII NAME}
+    Execute Command  rm -f ${INTERACTIVE TEST SCRIPT NAME} ${TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${FILE WITH NEWLINES NAME} ${FILE WITH NON-ASCII NAME}
     Close All Connections
 
 Login As Valid User

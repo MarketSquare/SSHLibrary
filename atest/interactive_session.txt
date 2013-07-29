@@ -4,6 +4,9 @@ Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
 Resource        resources/ssh_library_resources.txt
 
+*** Variables ***
+${COUNTER NAME}  counter.txt
+
 *** Test Cases ***
 Basic Interactive Session
     ${output} =  Write  ./${INTERACTIVE TEST SCRIPT NAME}
