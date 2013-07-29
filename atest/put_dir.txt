@@ -4,7 +4,6 @@ Suite Setup     Login As Valid User
 Suite Teardown  Run Keywords  Remove Test Files and Close Connections
 Resource        resources/ssh_library_resources.txt
 
-
 *** Test Cases ***
 Put Dir With Absolute Destination
     Put Dir And Verify  ${TEXTFILES}  ${USER HOME}/new_dir/  ${USER HOME}/new_dir/textfiles

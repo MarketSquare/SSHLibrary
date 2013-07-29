@@ -17,7 +17,6 @@ Get Dir Using Relative Source
 Get Dir Using Different Name
     Get Dir And Verify Content  ${USER HOME}/test_root  robot-tmpdir/foo
 
-
 *** Keywords ***
 Get Dir And Verify Content
     [Arguments]  ${source}  ${destination}

@@ -5,7 +5,7 @@ Suite Teardown  Remove Test Files and Close Connections
 Test Teardown   Execute Command  rm -f ${TEST FILE NAME}
 Resource        resources/ssh_library_resources.txt
 
-*** test cases ***
+*** Test Cases ***
 Start Command And Read Process Output With Defaults
     Start Command  ./${TEST SCRIPT NAME}
     ${stdout} =  Read Command Output

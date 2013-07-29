@@ -31,7 +31,6 @@ Login With Inaccessible Public Key
     Run Keyword And Expect Error  Could not read key file '${inaccessiblepubkeyfile}'  Login With Public Key  ${PUBKEY_USERNAME}  ${INACCESSIBLE PUBKEY FILE}  ${PUBKEY_PASSWORD}
     [Teardown]  Run Keywords  Grant Read Permission  Close All Connections
 
-
 *** Keywords ***
 Check Key Files
   [Documentation]  If key file directory `keyfiles` does not exist, mark these tests non-critical
