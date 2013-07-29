@@ -1,4 +1,0 @@
-This is a test file used to test non-ASCII character encoding
-
-ää
-öö
