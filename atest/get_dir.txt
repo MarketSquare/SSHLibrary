@@ -2,10 +2,9 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Teardown   Remove Directory  ${LOCAL TMPDIR}  True
+Test Teardown   Remove Directory  ${target}  True
 Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem
-Library         Collections
 
 *** Test Cases ***
 Get Dir Using Absolute Source
@@ -20,39 +19,61 @@ Get Dir Using Relative Source
     SSHLibrary.Get Dir  test_root  ${target}
     Directory Should Exist With Content  ${target}
 
-Get Dir Using Different Name
-    ${target} =  Set Variable  ${LOCAL TMPDIR}${/}foo
+Get Dir To Relative Destination
+    ${target} =  Set Variable  tmpdir
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root   ${target}
+    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}
     Directory Should Exist With Content  ${target}
 
-Get Dir With Subdirectories
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
+Get Dir To Current Destination
+    ${target} =  Set Variable  .${/}test_root
     Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}${/}test_root  .
+    Directory Should Exist With Content  .
+
+Get Dir To Different Name
+    ${target} =  Set Variable  ${LOCAL TMPDIR}${/}foo
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}${/}test_root   ${target}
+    Directory Should Exist With Content  ${target}
+
+Get Dir Including Subdirectories
+    ${target} =  Set Variable  ${LOCAL TMPDIR}
+    Directory Should Not Exist  ${target}/test_root
     SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}
+
+Get Dir Content To Absolute Destination
+    ${target} =  Set Variable  ${LOCAL TMPDIR}
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}/test_root/  ${target}
+    File Should Exist  ${target}/${TEST SCRIPT NAME}
+    File Should Exist  ${target}/${REPEAT TEST SCRIPT NAME}
+
+Get Dir Content Including Subdirectories To Relative Destination
+    ${target} =  Set Variable  tmpdir
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}/test_root/  ${target}  recursive=True
+    File Should Exist  ${target}/${TEST SCRIPT NAME}
+    File Should Exist  ${target}/${REPEAT TEST SCRIPT NAME}
+    Directory Should Exist  ${target}/subdir
+    File Should Exist  ${target}/subdir/${INTERACTIVE TEST SCRIPT NAME}
 
 *** Keywords ***
 Directory Should Exist With Content
     [Arguments]  ${destination}
-    ${target_path} =  List Directory  ${destination}
-    ${expected} =  Create List  test_root
-    Lists Should Be Equal  ${target_path}  ${expected}
-    ${test_root} =  List Directory  ${destination}/test_root
-    ${expected} =  Create List  ${TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
-    Lists Should Be Equal  ${test_root}  ${expected}
+    Directory Should Exist  ${destination}/test_root
+    File Should Exist  ${destination}/test_root/${TEST SCRIPT NAME}
+    File Should Exist  ${destination}/test_root/${REPEAT TEST SCRIPT NAME}
+    Directory Should Not Exist  ${destination}/test_root/subdir
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
-    ${target_path} =  List Directory  ${destination}
-    ${expected} =  Create List  test_root
-    Lists Should Be Equal  ${target_path}  ${expected}
-    ${test_root} =  List Directory  ${destination}/test_root
-    ${expected} =  Create List  subdir  ${TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
-    Lists Should Be Equal  ${test_root}  ${expected}
-    ${sub_dir} =  List Directory  ${destination}/test_root/subdir
-    ${expected} =  Create List  ${INTERACTIVE TEST SCRIPT NAME}
-    Lists Should Be Equal  ${sub_dir}  ${expected}
+    Directory Should Exist  ${destination}/test_root
+    File Should Exist  ${destination}/test_root/${TEST SCRIPT NAME}
+    File Should Exist  ${destination}/test_root/${REPEAT TEST SCRIPT NAME}
+    Directory Should Exist  ${destination}/test_root/subdir
+    File Should Exist  ${destination}/test_root/subdir/${INTERACTIVE TEST SCRIPT NAME}
 
 Login And Move Test Files
     Login As Valid User
@@ -61,5 +82,5 @@ Login And Move Test Files
     Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/test_root/
 
 Remove Test Files and Close Connections
-    Execute Command  rm -rf ${USER HOME}/test_root
+    #Execute Command  rm -rf ${USER HOME}/test_root
     Close All Connections

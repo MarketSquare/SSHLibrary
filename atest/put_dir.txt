@@ -6,13 +6,13 @@ Test Teardown   Execute Command  rm -rf ${target}
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
-Put Dir With Absolute Destination
+Put Dir To Absolute Destination
     ${target} =  Set Variable  ${USER HOME}/new_dir/
     Remote Directory Should Not Exist  ${target}
     Put Dir  ${TEXTFILES}  ${target}
     Remote Directory Should Exist With Content  ${target}/textfiles
 
-Put Dir With Relative Destination
+Put Dir To Relative Destination
     ${target} =  Set Variable  new_dir/
     Remote Directory Should Not Exist  ${target}
     Put Dir  ${TEXTFILES}   ${target}
@@ -24,13 +24,13 @@ Put Dir To Home Directory
     Put Dir  ${TEXTFILES}  ./
     Remote Directory Should Exist With Content  ${target}
 
-Put Dir With Different Name
+Put Dir To Different Name
     ${target} =  Set Variable  ${USER HOME}/another_dir_name
     Remote Directory Should Not Exist  ${target}
     Put Dir  ${TEXTFILES}   ${target}
     Remote Directory Should Exist With Content  ${target}
 
-Put Dir With Subdirectories
+Put Dir Including Subdirectories
     ${target} =  Set Variable  ${USER HOME}/new_dir/
     Remote Directory Should Not Exist  ${target}
     Put Dir  ${TEXTFILES}  ${target}  recursive=True
