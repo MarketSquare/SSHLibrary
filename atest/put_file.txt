@@ -69,9 +69,8 @@ Put File With Pattern Matching Directory
 Put File Should Fail When There Are No Source Files
     Run Keyword And Expect Error  There are no source files matching 'non*existing'  SSHLibrary.Put File  non*existing
 
-Put File with special characters in filename
+Put File With Special Chars In File Name
     [Documentation]    http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
-    Enable SSH Logging     ${LOCAL TMPDIR}${/}ssh_log.txt
     Put File  ${FILE WITH SPECIAL CHARS}  ${USER HOME}/robotdir/
     Verify Remote Files Exist  robotdir  foo%2Fbar.txt
     [Teardown]  Execute Command  rm -rf robotdir
