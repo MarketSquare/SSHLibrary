@@ -39,10 +39,10 @@ Get File From A Path Not Under Home Directory
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${CURDIR}${/}${LOCAL TMPDIR}${/}
-    ${contents} =  List Directory  ${CURDIR}${/}${LOCAL TMPDIR}${/}
+    SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}
+    ${contents} =  List Directory  ${LOCAL TMPDIR}${/}
     Should Contain  ${contents}  ${TEST SCRIPT NAME}
-    [Teardown]  Remove Directory  ${CURDIR}${/}${LOCAL TMPDIR}  yes
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  yes
 
 Get File Should Fail When There Are No Source Files
     Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSHLibrary.Get File  non-existing
