@@ -2,27 +2,48 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
+Test Teardown   Remove Directory  ${LOCAL TMPDIR}  True
 Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem
 Library         Collections
 
 *** Test Cases ***
 Get Dir Using Absolute Source
-    Get Dir And Verify Content  ${USER HOME}/test_root  ${LOCAL TMPDIR}
-    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  True
+    ${target} =  Set Variable  ${LOCAL TMPDIR}
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}
+    Directory Should Exist With Content  ${target}
 
 Get Dir Using Relative Source
-    Get Dir And Verify Content  test_root  ${LOCAL TMPDIR}
-    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  True
+    ${target} =  Set Variable  ${LOCAL TMPDIR}
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  test_root  ${target}
+    Directory Should Exist With Content  ${target}
 
 Get Dir Using Different Name
-    Get Dir And Verify Content  ${USER HOME}/test_root  ${LOCAL TMPDIR}${/}foo
-    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  True
+    ${target} =  Set Variable  ${LOCAL TMPDIR}${/}foo
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}/test_root   ${target}
+    Directory Should Exist With Content  ${target}
+
+Get Dir With Subdirectories
+    ${target} =  Set Variable  ${LOCAL TMPDIR}
+    Directory Should Not Exist  ${target}
+    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}  recursive=True
+    Directory Should Exist Including Subdirectories  ${target}
 
 *** Keywords ***
-Get Dir And Verify Content
-    [Arguments]  ${source}  ${destination}
-    SSHLibrary.Get Dir  ${source}  ${destination}
+Directory Should Exist With Content
+    [Arguments]  ${destination}
+    ${target_path} =  List Directory  ${destination}
+    ${expected} =  Create List  test_root
+    Lists Should Be Equal  ${target_path}  ${expected}
+    ${test_root} =  List Directory  ${destination}/test_root
+    ${expected} =  Create List  ${TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
+    Lists Should Be Equal  ${test_root}  ${expected}
+
+Directory Should Exist Including Subdirectories
+    [Arguments]  ${destination}
     ${target_path} =  List Directory  ${destination}
     ${expected} =  Create List  test_root
     Lists Should Be Equal  ${target_path}  ${expected}

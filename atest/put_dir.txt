@@ -2,38 +2,55 @@
 Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
+Test Teardown   Execute Command  rm -rf ${target}
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
 Put Dir With Absolute Destination
-    Put Dir And Verify  ${TEXTFILES}  ${USER HOME}/new_dir/  ${USER HOME}/new_dir/textfiles
-    [Teardown]  Execute Command  rm -rf ${USER HOME}/new_dir
+    ${target} =  Set Variable  ${USER HOME}/new_dir/
+    Remote Directory Should Not Exist  ${target}
+    Put Dir  ${TEXTFILES}  ${target}
+    Remote Directory Should Exist With Content  ${target}/textfiles
 
 Put Dir With Relative Destination
-    Put Dir And Verify  ${TEXTFILES}  new_dir/  ${USER HOME}/new_dir/textfiles
-    [Teardown]  Execute Command  rm -rf ${USER HOME}/new_dir
+    ${target} =  Set Variable  new_dir/
+    Remote Directory Should Not Exist  ${target}
+    Put Dir  ${TEXTFILES}   ${target}
+    Remote Directory Should Exist With Content  ${target}/textfiles
 
 Put Dir To Home Directory
-    Put Dir And Verify  ${TEXTFILES}  ./  ${USER HOME}/textfiles
-    [Teardown]  Execute Command  rm -rf ${USER HOME}/textfiles
+    ${target} =  Set Variable  ./textfiles
+    Remote Directory Should Not Exist  ${target}
+    Put Dir  ${TEXTFILES}  ./
+    Remote Directory Should Exist With Content  ${target}
 
 Put Dir With Different Name
-    Put Dir And Verify  ${TEXTFILES}  ${USER HOME}/another_dir_name  ${USER HOME}/another_dir_name
-    [Teardown]  Execute Command  rm -rf ${USER HOME}/another_dir_name
+    ${target} =  Set Variable  ${USER HOME}/another_dir_name
+    Remote Directory Should Not Exist  ${target}
+    Put Dir  ${TEXTFILES}   ${target}
+    Remote Directory Should Exist With Content  ${target}
+
+Put Dir With Subdirectories
+    ${target} =  Set Variable  ${USER HOME}/new_dir/
+    Remote Directory Should Not Exist  ${target}
+    Put Dir  ${TEXTFILES}  ${target}  recursive=True
+    Remote Directory Should Exist With Subdirectories  ${target}/textfiles
 
 *** Keywords ***
-Put Dir And Verify
-    [Arguments]  ${source}  ${destination}  ${expected}
-    Verify Remote Dir Does Not Exist  ${expected}
-    Put Dir  ${source}  ${destination}
-    Verify Remote Dir Structure Exists  ${expected}
+Remote Directory Should Not Exist
+    [Arguments]  ${expected}
+    ${rc} =  Execute Command  test -d ${expected}  return_stdout=${false}  return_rc=${true}
+    Should Be Equal As Integers  ${rc}  1
 
-Verify Remote Dir Does Not Exist
+Remote Directory Should Exist With Content
     [Arguments]  ${expected}
     ${stdout} =  Execute Command  ls ${expected}
-    Should Not Contain  ${stdout}  ${expected}
+    Should Contain  ${stdout}  ${TEST FILE NAME}
+    Should Contain  ${stdout}  ${TEST FILE 2 NAME}
+    Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
+    Should Not Contain  ${stdout}  special
 
-Verify Remote Dir Structure Exists
+Remote Directory Should Exist With Subdirectories
     [Arguments]  ${expected}
     ${stdout} =  Execute Command  ls ${expected}
     Should Contain  ${stdout}  ${TEST FILE NAME}

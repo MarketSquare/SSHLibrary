@@ -608,9 +608,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._run_sftp_command(self.ssh_client.get_file, source,
                                       destination, path_separator)
 
-    def get_dir(self, source, destination='.', path_separator='/'):
+    def get_dir(self, source, destination='.', path_separator='/',
+                recursive=False):
         return self._run_sftp_command(self.ssh_client.get_dir, source,
-                                      destination, path_separator)
+                                      destination, path_separator, recursive)
 
     def put_file(self, source, destination='.', mode='0744',
                  newline='default', path_separator='/'):
@@ -659,11 +660,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       destination, mode, newline,
                                       path_separator)
 
-    def put_dir(self, source, destination='.', mode='0744',
-                newline='default', path_separator='/'):
+    def put_dir(self, source, destination='.', mode='0744', newline='default',
+                path_separator='/', recursive=False):
         return self._run_sftp_command(self.ssh_client.put_dir, source,
                                       destination, mode, newline,
-                                      path_separator)
+                                      path_separator, recursive)
 
     def _run_sftp_command(self, command, *args):
         try:
