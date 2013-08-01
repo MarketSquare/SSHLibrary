@@ -113,8 +113,7 @@ class SFTPClient(AbstractSFTPClient):
             if e[0] == 2:
                 return False
             raise
-        else:
-            return True
+        return True
 
     def listfiles(self, path):
         return [getattr(fileinfo, 'filename', '?') for fileinfo

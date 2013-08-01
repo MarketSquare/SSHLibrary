@@ -97,8 +97,7 @@ class SFTPClient(AbstractSFTPClient):
             self._client.stat(path)
         except SFTPException:
             return False
-        else:
-            return True
+        return True
 
     def listfiles(self, path):
         return [finfo.filename for finfo in self._client.ls(path)
