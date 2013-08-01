@@ -387,7 +387,7 @@ class AbstractSFTPClient(object):
                       path_separator='/', recursive=False):
         localfiles = []
         remotefiles = []
-        os.chdir(os.path.dirname(source))
+        os.chdir(os.path.dirname(os.path.abspath(source)))
         parent = os.path.basename(source)
         if destination.endswith(path_separator):
             destination = destination[:-1]

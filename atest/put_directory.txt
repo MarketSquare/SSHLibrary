@@ -6,41 +6,41 @@ Test Teardown   Remove Remote Files  ${target}
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
-Put Directory To Existing Absolute Destination
+Put Directory To Existing Remote Path
     ${target} =  Set Variable  ${USER HOME}
     Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}
-    Remote Directory Should Exist With Content  ${target}/textfiles
+    Remote Directory Should Exist With Content  ${target}${/}textfiles
 
-Put Directory To Non-Existing Absolute Destination
-    ${target} =  Set Variable  ${USER HOME}/new_dir
+Put Directory To Non-Existing Remote Path
+    ${target} =  Set Variable  another_dir_name
     Verify Remote Directory Does Not Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}
     Remote Directory Should Exist With Content  ${target}
 
-Put Directory To Non-Existing Relative Destination
-    ${target} =  Set Variable  new_dir
-    Verify Remote Directory Does Not Exists  ${target}
-    Put Directory  ${TEXTFILES}   ${target}
-    Remote Directory Should Exist With Content  ${target}
-
-Put Directory To Current Remote Destination
-    ${target} =  Set Variable  ./
+Put Directory Including Subdirectories To Existing Remote Path
+    ${target} =  Set Variable  ${USER HOME}
     Verify Remote Directory Exists  ${target}
-    Put Directory  ${TEXTFILES}  ${target}
-    Remote Directory Should Exist With Content  ${target}/textfiles
+    Put Directory  ${TEXTFILES}  ${target}  recursive=True
+    Remote Directory Should Exist With Subdirectories  ${target}${/}textfiles
 
-Put Directory To Different Name
-    ${target} =  Set Variable  ${USER HOME}/another_dir_name
-    Verify Remote Directory Does Not Exists  ${target}
-    Put Directory  ${TEXTFILES}   ${target}
-    Remote Directory Should Exist With Content  ${target}
-
-Put Directory Including Subdirectories
-    ${target} =  Set Variable  ${USER HOME}/new_dir
+Put Directory Including Subdirectories To Non-Existing Remote Path
+    ${target} =  Set Variable  another_dir_name
     Verify Remote Directory Does Not Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}  recursive=True
     Remote Directory Should Exist With Subdirectories  ${target}
+
+Put Directory To Current Remote Path
+    ${target} =  Set Variable  .
+    Verify Remote Directory Exists  ${target}
+    Put Directory  ${TEXTFILES}  ${target}
+    Remote Directory Should Exist With Content  ${target}${/}textfiles
+
+Put Directory Using Relative Source
+    ${target} =  Set Variable  ${USER HOME}
+    Verify Remote Directory Exists  ${target}
+    Put Directory  textfiles  ${target}
+    Remote Directory Should Exist With Content  ${target}${/}textfiles
 
 *** Keywords ***
 Verify Remote Directory Exists
@@ -68,7 +68,7 @@ Remote Directory Should Exist With Subdirectories
     Should Contain  ${stdout}  ${TEST FILE 2 NAME}
     Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
     Should Contain  ${stdout}  special
-    ${stdout} =  Execute Command  ls ${destination}/special
+    ${stdout} =  Execute Command  ls ${destination}${/}special
     Should Contain  ${stdout}  ${FILE WITH SPECIAL CHARS NAME}
 
 Remove Remote Files

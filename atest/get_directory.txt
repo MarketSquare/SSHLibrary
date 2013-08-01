@@ -11,48 +11,29 @@ Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}
-    Directory Should Exist With Content  ${target}/test_root
-
-Get Directory With Ending Slash To Existing Local Path
-    [Setup]  Create Directory  ${LOCAL TMPDIR}
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Directory Should Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root/  ${target}
-    Directory Should Exist With Content  ${target}/test_root
+    SSHLibrary.Get Directory  ${USER HOME}${/}test_root  ${target}
+    Directory Should Exist With Content  ${target}${/}test_root
 
 Get Directory To Non-Existing Local Path
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
+    ${target} =  Set Variable  tmpdir
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}${/}test_root${/}  ${target}
     Directory Should Exist With Content  ${target}
 
-Get Directory With Ending Slash To Non-Existing Local Path
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Directory Should Not Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root/  ${target}
-    Directory Should Exist With Content  ${target}
-
-Get Directory Including Subdirectories To Existing Local Destination
+Get Directory Including Subdirectories To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}  recursive=True
-    Directory Should Exist Including Subdirectories  ${target}/test_root
+    SSHLibrary.Get Directory  ${USER HOME}${/}test_root  ${target}  recursive=True
+    Directory Should Exist Including Subdirectories  ${target}${/}test_root
 
-Get Directory Including Subdirectories To Non Existing Local Destination
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Directory Should Not Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}  recursive=True
-    Directory Should Exist Including Subdirectories  ${target}
-
-Get Directory To Non-Existing Relative Local Path
+Get Directory Including Subdirectories To Non-Existing Local Path
     ${target} =  Set Variable  tmpdir
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}
-    Directory Should Exist With Content  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}${/}test_root  ${target}  recursive=True
+    Directory Should Exist Including Subdirectories  ${target}
 
-Get Directory To Current Local Destination
+Get Directory To Current Local Path
     ${target} =  Set Variable  .${/}test_root
     Directory Should Not Exist  ${target}
     SSHLibrary.Get Directory  ${USER HOME}${/}test_root  .
@@ -67,23 +48,23 @@ Get Directory Using Relative Source
 *** Keywords ***
 Directory Should Exist With Content
     [Arguments]  ${destination}
-    File Should Exist  ${destination}/${TEST SCRIPT NAME}
-    File Should Exist  ${destination}/${REPEAT TEST SCRIPT NAME}
-    Directory Should Not Exist  ${destination}/subdir
+    File Should Exist  ${destination}${/}${TEST SCRIPT NAME}
+    File Should Exist  ${destination}${/}${REPEAT TEST SCRIPT NAME}
+    Directory Should Not Exist  ${destination}${/}subdir
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
-    File Should Exist  ${destination}/${TEST SCRIPT NAME}
-    File Should Exist  ${destination}/${REPEAT TEST SCRIPT NAME}
-    Directory Should Exist  ${destination}/subdir
-    File Should Exist  ${destination}/subdir/${INTERACTIVE TEST SCRIPT NAME}
+    File Should Exist  ${destination}${/}${TEST SCRIPT NAME}
+    File Should Exist  ${destination}${/}${REPEAT TEST SCRIPT NAME}
+    Directory Should Exist  ${destination}${/}subdir
+    File Should Exist  ${destination}${/}subdir/${INTERACTIVE TEST SCRIPT NAME}
 
 Login And Move Test Files
     Login As Valid User
-    Put File  ${TEST SCRIPT}  ${USER HOME}/test_root/
-    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}/test_root/subdir/
-    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/test_root/
+    Put File  ${TEST SCRIPT}  ${USER HOME}${/}test_root${/}
+    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}${/}test_root${/}subdir${/}
+    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}${/}test_root${/}
 
 Remove Test Files and Close Connections
-    Execute Command  rm -rf ${USER HOME}/test_root
+    Execute Command  rm -rf ${USER HOME}${/}test_root
     Close All Connections
