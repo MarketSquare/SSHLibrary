@@ -106,6 +106,26 @@ class PythonSSHClient(AbstractSSHClient):
 
 class SFTPClient(AbstractSFTPClient):
 
+    def exists(self, path):
+        try:
+            self._client.stat(path)
+        except IOError, e:
+            if e[0] == 2:
+                return False
+            raise
+        else:
+            return True
+
+    def listfiles(self, path):
+        return [getattr(fileinfo, 'filename', '?') for fileinfo
+                in self._client.listdir_attr(path)
+                if stat.S_ISREG(fileinfo.st_mode)]
+
+    def listdirs(self, path):
+        return [getattr(fileinfo, 'filename', '?') for fileinfo
+                in self._client.listdir_attr(path)
+                if stat.S_ISDIR(fileinfo.st_mode)]
+
     def _create_client(self, ssh_client):
         return ssh_client.open_sftp()
 
@@ -139,16 +159,6 @@ class SFTPClient(AbstractSFTPClient):
         remotfile.set_pipelined(True)
         self._client.chmod(dest, mode)
         return remotfile
-
-    def _listfiles(self, path):
-        return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self._client.listdir_attr(path)
-                if stat.S_ISREG(fileinfo.st_mode)]
-
-    def _listdirs(self, path):
-        return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self._client.listdir_attr(path)
-                if stat.S_ISDIR(fileinfo.st_mode)]
 
 
 class RemoteCommand(AbstractCommand):

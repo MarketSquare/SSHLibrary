@@ -328,7 +328,7 @@ class AbstractSFTPClient(object):
         for path in subdirs:
             if recursive:
                 [subdirs.append(path_separator.join([path, subdir_name]))
-                for subdir_name in self._listdirs(path)]
+                for subdir_name in self.listdirs(path)]
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
             if not local_target_exists:
@@ -353,7 +353,7 @@ class AbstractSFTPClient(object):
         if not path:
             path = '.'
         sourcefiles = []
-        for filename in self._listfiles(path):
+        for filename in self.listfiles(path):
             if fnmatchcase(filename, pattern):
                 if path:
                     filename = path_separator.join([path, filename])
@@ -385,24 +385,22 @@ class AbstractSFTPClient(object):
 
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
-        os.chdir(os.path.dirname(source))
-        parent = os.path.basename(source)
         localfiles = []
         remotefiles = []
+        os.chdir(os.path.dirname(source))
+        parent = os.path.basename(source)
+        if destination.endswith(path_separator):
+            destination = destination[:-1]
+        remote_target_exists = True if self.exists(destination) else False
         for dirpath, _, filenames in os.walk(parent):
             for filename in filenames:
                 local_path = os.path.join(dirpath, filename)
-                if destination.endswith('.' + os.path.sep):
+                if destination.endswith('.'):
                     remote_path = path_separator.join([dirpath, filename])
-                elif destination.endswith(os.path.sep):
-                    remote_path = path_separator.join([destination[:-1],
-                                                       dirpath,
-                                                       filename])
                 else:
-                    path_without_parent = dirpath.replace(parent, '')
-                    remote_path = path_separator.join([destination,
-                                                       path_without_parent,
-                                                       filename])
+                    remote_path = path_separator.join([destination, dirpath, filename])
+                    if not remote_target_exists:
+                        remote_path = remote_path.replace(parent + path_separator, '')
                 l, r = self.put_file(local_path, remote_path, mode, newline,
                                      path_separator)
                 localfiles.extend(l)

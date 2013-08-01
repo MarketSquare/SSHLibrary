@@ -2,60 +2,81 @@
 Force Tags      pybot   jybot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
-Test Teardown   Execute Command  rm -rf ${target}
+Test Teardown   Remove Remote Files  ${target}
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
-Put Directory To Absolute Destination
-    ${target} =  Set Variable  ${USER HOME}/new_dir/
-    Remote Directory Should Not Exist  ${target}
+Put Directory To Existing Absolute Destination
+    ${target} =  Set Variable  ${USER HOME}
+    Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}
     Remote Directory Should Exist With Content  ${target}/textfiles
 
-Put Directory To Relative Destination
-    ${target} =  Set Variable  new_dir/
-    Remote Directory Should Not Exist  ${target}
-    Put Directory  ${TEXTFILES}   ${target}
-    Remote Directory Should Exist With Content  ${target}/textfiles
-
-Put Directory To Home Directory
-    ${target} =  Set Variable  ./textfiles
-    Remote Directory Should Not Exist  ${target}
-    Put Directory  ${TEXTFILES}  ./
+Put Directory To Non-Existing Absolute Destination
+    ${target} =  Set Variable  ${USER HOME}/new_dir
+    Verify Remote Directory Does Not Exists  ${target}
+    Put Directory  ${TEXTFILES}  ${target}
     Remote Directory Should Exist With Content  ${target}
+
+Put Directory To Non-Existing Relative Destination
+    ${target} =  Set Variable  new_dir
+    Verify Remote Directory Does Not Exists  ${target}
+    Put Directory  ${TEXTFILES}   ${target}
+    Remote Directory Should Exist With Content  ${target}
+
+Put Directory To Current Remote Destination
+    ${target} =  Set Variable  ./
+    Verify Remote Directory Exists  ${target}
+    Put Directory  ${TEXTFILES}  ${target}
+    Remote Directory Should Exist With Content  ${target}/textfiles
 
 Put Directory To Different Name
     ${target} =  Set Variable  ${USER HOME}/another_dir_name
-    Remote Directory Should Not Exist  ${target}
+    Verify Remote Directory Does Not Exists  ${target}
     Put Directory  ${TEXTFILES}   ${target}
     Remote Directory Should Exist With Content  ${target}
 
 Put Directory Including Subdirectories
-    ${target} =  Set Variable  ${USER HOME}/new_dir/
-    Remote Directory Should Not Exist  ${target}
+    ${target} =  Set Variable  ${USER HOME}/new_dir
+    Verify Remote Directory Does Not Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}  recursive=True
-    Remote Directory Should Exist With Subdirectories  ${target}/textfiles
+    Remote Directory Should Exist With Subdirectories  ${target}
 
 *** Keywords ***
-Remote Directory Should Not Exist
-    [Arguments]  ${expected}
-    ${rc} =  Execute Command  test -d ${expected}  return_stdout=${false}  return_rc=${true}
+Verify Remote Directory Exists
+    [Arguments]  ${destination}
+    ${rc} =  Execute Command  test -d ${destination}  return_stdout=${false}  return_rc=${true}
+    Should Be Equal As Integers  ${rc}  0
+
+Verify Remote Directory Does Not Exists
+    [Arguments]  ${destination}
+    ${rc} =  Execute Command  test -d ${destination}  return_stdout=${false}  return_rc=${true}
     Should Be Equal As Integers  ${rc}  1
 
 Remote Directory Should Exist With Content
-    [Arguments]  ${expected}
-    ${stdout} =  Execute Command  ls ${expected}
+    [Arguments]  ${destination}
+    ${stdout} =  Execute Command  ls ${destination}
     Should Contain  ${stdout}  ${TEST FILE NAME}
     Should Contain  ${stdout}  ${TEST FILE 2 NAME}
     Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
     Should Not Contain  ${stdout}  special
 
 Remote Directory Should Exist With Subdirectories
-    [Arguments]  ${expected}
-    ${stdout} =  Execute Command  ls ${expected}
+    [Arguments]  ${destination}
+    ${stdout} =  Execute Command  ls ${destination}
     Should Contain  ${stdout}  ${TEST FILE NAME}
     Should Contain  ${stdout}  ${TEST FILE 2 NAME}
     Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
     Should Contain  ${stdout}  special
-    ${stdout} =  Execute Command  ls ${expected}/special
+    ${stdout} =  Execute Command  ls ${destination}/special
     Should Contain  ${stdout}  ${FILE WITH SPECIAL CHARS NAME}
+
+Remove Remote Files
+    [Arguments]  ${destination}
+    Execute Command  rm ${USER HOME}${/}${TEST FILE NAME}
+    Execute Command  rm ${USER HOME}${/}${TEST FILE 2 NAME}
+    Execute Command  rm ${USER HOME}${/}${FILE WITH NEWLINES NAME}
+    Execute Command  rm -rf ${USER HOME}${/}textfiles
+    Execute Command  rm -rf ${USER HOME}${/}special
+    Execute Command  rm -rf ${USER HOME}${/}another_dir_name
+    Execute Command  rm -rf ${USER HOME}${/}new_dir
