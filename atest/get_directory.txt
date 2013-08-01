@@ -7,61 +7,61 @@ Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem
 
 *** Test Cases ***
-Get Dir To Existing Local Path
+Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}
     Directory Should Exist With Content  ${target}/test_root
 
-Get Dir With Ending Slash To Existing Local Path
+Get Directory With Ending Slash To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root/  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}/test_root/  ${target}
     Directory Should Exist With Content  ${target}/test_root
 
-Get Dir To Non-Existing Local Path
+Get Directory To Non-Existing Local Path
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}
     Directory Should Exist With Content  ${target}
 
-Get Dir With Ending Slash To Non-Existing Local Path
+Get Directory With Ending Slash To Non-Existing Local Path
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root/  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}/test_root/  ${target}
     Directory Should Exist With Content  ${target}
 
-Get Dir Including Subdirectories To Existing Local Destination
+Get Directory Including Subdirectories To Existing Local Destination
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}  recursive=True
+    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}/test_root
 
-Get Dir Including Subdirectories To Non Existing Local Destination
+Get Directory Including Subdirectories To Non Existing Local Destination
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}  recursive=True
+    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}
 
-Get Dir To Non-Existing Relative Local Path
+Get Directory To Non-Existing Relative Local Path
     ${target} =  Set Variable  tmpdir
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}/test_root  ${target}
+    SSHLibrary.Get Directory  ${USER HOME}/test_root  ${target}
     Directory Should Exist With Content  ${target}
 
-Get Dir To Current Local Destination
+Get Directory To Current Local Destination
     ${target} =  Set Variable  .${/}test_root
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  ${USER HOME}${/}test_root  .
+    SSHLibrary.Get Directory  ${USER HOME}${/}test_root  .
     Directory Should Exist With Content  ${target}
 
-Get Dir Using Relative Source
+Get Directory Using Relative Source
     ${target} =  Set Variable  ${LOCAL TMPDIR}
     Directory Should Not Exist  ${target}
-    SSHLibrary.Get Dir  test_root  ${target}
+    SSHLibrary.Get Directory  test_root  ${target}
     Directory Should Exist With Content  ${target}
 
 *** Keywords ***

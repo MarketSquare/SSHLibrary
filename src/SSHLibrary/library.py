@@ -608,9 +608,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._run_sftp_command(self.ssh_client.get_file, source,
                                       destination, path_separator)
 
-    def get_dir(self, source, destination='.', path_separator='/',
-                recursive=False):
-        return self._run_sftp_command(self.ssh_client.get_dir, source,
+    def get_directory(self, source, destination='.', path_separator='/',
+                      recursive=False):
+        return self._run_sftp_command(self.ssh_client.get_directory, source,
                                       destination, path_separator, recursive)
 
     def put_file(self, source, destination='.', mode='0744',
@@ -660,9 +660,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       destination, mode, newline,
                                       path_separator)
 
-    def put_dir(self, source, destination='.', mode='0744', newline='default',
-                path_separator='/', recursive=False):
-        return self._run_sftp_command(self.ssh_client.put_dir, source,
+    def put_directory(self, source, destination='.', mode='0744',
+                      newline='default', path_separator='/', recursive=False):
+        return self._run_sftp_command(self.ssh_client.put_directory, source,
                                       destination, mode, newline,
                                       path_separator, recursive)
 

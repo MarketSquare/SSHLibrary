@@ -6,34 +6,34 @@ Test Teardown   Execute Command  rm -rf ${target}
 Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
-Put Dir To Absolute Destination
+Put Directory To Absolute Destination
     ${target} =  Set Variable  ${USER HOME}/new_dir/
     Remote Directory Should Not Exist  ${target}
-    Put Dir  ${TEXTFILES}  ${target}
+    Put Directory  ${TEXTFILES}  ${target}
     Remote Directory Should Exist With Content  ${target}/textfiles
 
-Put Dir To Relative Destination
+Put Directory To Relative Destination
     ${target} =  Set Variable  new_dir/
     Remote Directory Should Not Exist  ${target}
-    Put Dir  ${TEXTFILES}   ${target}
+    Put Directory  ${TEXTFILES}   ${target}
     Remote Directory Should Exist With Content  ${target}/textfiles
 
-Put Dir To Home Directory
+Put Directory To Home Directory
     ${target} =  Set Variable  ./textfiles
     Remote Directory Should Not Exist  ${target}
-    Put Dir  ${TEXTFILES}  ./
+    Put Directory  ${TEXTFILES}  ./
     Remote Directory Should Exist With Content  ${target}
 
-Put Dir To Different Name
+Put Directory To Different Name
     ${target} =  Set Variable  ${USER HOME}/another_dir_name
     Remote Directory Should Not Exist  ${target}
-    Put Dir  ${TEXTFILES}   ${target}
+    Put Directory  ${TEXTFILES}   ${target}
     Remote Directory Should Exist With Content  ${target}
 
-Put Dir Including Subdirectories
+Put Directory Including Subdirectories
     ${target} =  Set Variable  ${USER HOME}/new_dir/
     Remote Directory Should Not Exist  ${target}
-    Put Dir  ${TEXTFILES}  ${target}  recursive=True
+    Put Directory  ${TEXTFILES}  ${target}  recursive=True
     Remote Directory Should Exist With Subdirectories  ${target}/textfiles
 
 *** Keywords ***
