@@ -64,7 +64,8 @@ class PythonSSHClient(AbstractSSHClient):
         return client
 
     def _login(self, username, password):
-        self.client.connect(self.host, self.port, username, password)
+        self.client.connect(self.host, self.port, username, password,
+                            look_for_keys=False)
 
     def _login_with_public_key(self, username, keyfile, password):
         try:
