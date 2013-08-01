@@ -316,6 +316,7 @@ class AbstractSFTPClient(object):
     def close(self):
         self._client.close()
 
+    # TODO: Check that remote path exists
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
         remotefiles = []
@@ -383,6 +384,7 @@ class AbstractSFTPClient(object):
         if not os.path.exists(dest):
             os.makedirs(dest)
 
+    # TODO: Check that local path exists
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
         localfiles = []
