@@ -319,18 +319,18 @@ class AbstractSFTPClient(object):
         remotefiles = []
         localfiles = []
         if source.endswith(path_separator):
-            parent_dir = source.split(path_separator)[-2]
-        else:
-            parent_dir = os.path.basename(source)
+            source = source[:-1]
+        parent_dir = os.path.basename(source)
         subdirs = [parent_dir]
+        local_target_exists = True if os.path.isdir(destination) else False
         for path in subdirs:
             if recursive:
                 [subdirs.append(path_separator.join([path, subdir_name]))
                 for subdir_name in self._listdirs(path)]
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
-            if source.endswith(path_separator):
-                local_path = local_path.replace(parent_dir, '')
+            if not local_target_exists:
+                local_path = local_path.replace(parent_dir + path_separator, '')
             r, l = self.get_file(remote_path, local_path, path_separator)
             remotefiles.extend(r)
             localfiles.extend(l)
