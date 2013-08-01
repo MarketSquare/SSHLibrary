@@ -603,13 +603,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         the default value. With Windows remotes, this must be set as '\\'.
         This option was added in SSHLibrary 1.1.
 
-        1. If `destination` is an existing file, `source` file is copied
+        1. If `destination` is an existing file, `source` file is downloaded
            over it.
         2. If `destination` is an existing directory, `source` file is
-           copied into it. Possible file with the same name is overwritten.
+           downloaded into it. Possible file with the same name is overwritten.
         3. If `destination` does not exist and it ends with `path_
            separator`, it is considered a directory. The directory is then
-           created and `source` file is copied into it. Possible missing
+           created and `source` file is downloaded into it. Possible missing
            intermediate directories are also created.
         4. If `destination` does not exist and does not end with
            `path_separator`, it is considered a file. If the path to the file
@@ -620,7 +620,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Using wildcards like '*' and '?' is possible in `source`.
         When wildcards are used, `destination` MUST be a directory, and files
-        matching the pattern are copied, but subdirectories are ignored.
+        matching the pattern are downloaded, but subdirectories are ignored.
         If the contents of subdirectories are also needed, use the keyword again.
 
         Examples:
@@ -641,10 +641,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         `destination` is the target path on the local machine. Relative or
         absolute path may be used.
 
-        1. If `destination` is an existing path, `source` directory is copied
-           into it.
+        1. If `destination` is an existing path, `source` directory is
+           downloaded into it.
 
-           In this example, remote `source`, '/var/logs', is copied into
+           In this example, remote `source`, '/var/logs', is downloaded into
            an existing local `destination` '/home/robot':
            | Get Directory | /var/logs | /home/robot |
 
@@ -652,10 +652,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            found at '/home/robot/logs'. Subdirectories are not included.
 
         2. If `destination` is a non-existing path, `source` directory is
-           copied over it.
+           downloaded over it.
 
            In this example, remote `source`, directory 'logs' in the current
-           remote path, is copied to a non-existing local `destination`
+           remote path, is downloaded to a non-existing local `destination`
            'my_new_path':
            | Get Directory | logs | my_new_path |
 
@@ -666,7 +666,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            same content as the remote directory 'logs' but not the 'logs'
            directory itself. Subdirectories are not included.
 
-        3. If `destination` is not given, `source` directory is copied into
+        3. If `destination` is not given, `source` directory is downloaded into
            the current working directory on the local machine.
            This will most probably be the directory where the test execution
            was started.
@@ -675,26 +675,26 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            local working directory:
            | Get Directory | /path/to/remote/logs |
 
-           Note the missing `destination`. It would be possible also to refer
+           Note the missing `destination`. It is also possible to refer
            to the current working directory by using '.'. This works both on
            the local and remote side.
 
            In this case, `destination` always exists. As a result,
            the remote directory 'logs' can be now found at the current
-           working directory with name 'logs'. Subdirectories are not included.
+           working directory by name 'logs'. Subdirectories are not included.
 
         `path_separator` is the path separator character of the operating system
         on the remote machine. On Unix-Likes, this must be '/' which is also
         the default value. With Windows remotes, this must be set as '\\':
         This option was added in SSHLibrary 1.1.
 
-        `recursive` specifies, whether to recursively copy all subdirectories
-        in `source`. Subdirectories are downloaded if the argument value
-        evaluates to 'True'. The default value is 'False'.
+        `recursive` specifies, whether to recursively download all
+        subdirectories in `source`. Subdirectories are downloaded if
+        the argument value evaluates to 'True'. The default value is 'False'.
 
         The following example is identical to (1.), but also the subdirectories
         (and subdirectories of the subdirectories, ad infinitum) inside
-        `source`, '/var/logs', are copied:
+        `source`, '/var/logs', are downloaded:
         | Get Directory | /var/logs | /home/robot | recursive=True |
 
         As a result, the content of the remote directory '/var/logs',
@@ -721,28 +721,28 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         This option was added in SSHLibrary 1.1.
 
         `mode` argument can be used to set the target file permission.
-        Numeric values are accepted. The default value is 0744 (-rwxr--r--).
+        Numeric values are accepted. The default value is '0744' (-rwxr--r--).
 
         `newline` can be used to force newline characters that are written to
         the remote file. Valid values are `CRLF` (for Windows) and `LF`.
 
-        1. If `destination` is an existing file, `source` file is copied
+        1. If `destination` is an existing file, `source` file is uploaded
            over it.
         2. If `destination` is an existing directory, `source` file is
-           copied into it. Possible file with same name is overwritten.
+           uploaded into it. Possible file with same name is overwritten.
         3. If `destination` does not exist and it ends with `path_
            separator`, it is considered a directory. The directory is then
-           created and `source` file copied into it. Possibly missing
+           created and `source` file uploaded into it. Possibly missing
            intermediate directories are also created.
         4. If `destination` does not exist and it does not end with
            `path_separator, it is considered a file. If the path to the file
            does not exist, it is created.
         5. If `destination` is not given, the user's home directory
-           on the remote machine is used as the destination.
+           on the remote is used as the destination.
 
         Using wildcards like '*' and '?' is possible in `source`.
         When wildcards are used, `destination` MUST be a directory and only
-        files are copied from `source`, subdirectories being ignored. If the
+        files are uploaded from `source`, subdirectories being ignored. If the
         contents of subdirectories are also needed, use the keyword again.
 
         Examples:
@@ -754,8 +754,86 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       destination, mode, newline,
                                       path_separator)
 
-    def put_directory(self, source, destination='.', mode='0744',
+    def put_directory(self, source, destination='.', mode='744',
                       newline='default', path_separator='/', recursive=False):
+
+        """Uploads a directory, including it's content, from the local host
+        to the remote host.
+
+        `source` is the path on the local machine. Relative or absolute
+        path may be used.
+
+        `destination` is the target path on the remote machine. Relative or
+        absolute path may be used.
+
+        1. If `destination` is an existing path, `source` directory is uploaded
+           into it.
+
+           In this example, local `source`, '/var/logs', is uploaded into
+           an existing remote `destination` '/home/robot':
+           | Put Directory | /var/logs | /home/robot |
+
+           As a result, the content of local directory '/var/logs' is now
+           found on the remote at '/home/robot/logs'. Subdirectories are not
+           included.
+
+        2. If `destination` is a non-existing path, `source` directory is
+           uploaded over it.
+
+           In this example, local `source`, directory 'logs' in the current
+           local working directory is uploaded to a non-existing remote
+           `destination` 'my_new_path':
+           | Put Directory | logs | my_new_path |
+
+           Note the use of relative paths in both `source` and `destination`.
+
+           Because 'my_new_path' does not already exist on the remote,
+           it is created. As the result of keyword, 'my_new_path' now has the
+           same content as the local directory 'logs' but not the 'logs'
+           directory itself. Subdirectories are not included.
+
+        3. If `destination` is not given, `source` directory is uploaded into
+           the current working directory on the remote.
+
+           In this example, `source` is uploaded to the current working
+           directory on the remote:
+           | Put Directory | /path/to/remote/logs |
+
+           Note the missing `destination`. It is also possible to refer
+           to the current working directory by using '.'. This works both on
+           the local and remote side.
+
+           In this case, `destination` always exists. As a result,
+           the local directory 'logs' can be now found at the current remote
+           working directory by name 'logs'. Subdirectories are not included.
+
+        `mode` argument can be used to set the target file and directory
+        permissions. Numeric values are accepted. The default value is '744'
+        (rwxr--r--).
+
+        `newline` can be used to force newline characters that are written to
+        the remote files. Valid values are `CRLF` (for Windows) and `LF`.
+
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. On Unix-Likes, this must be '/' which is also
+        the default value. With Windows remotes, this must be set as '\\':
+        This option was added in SSHLibrary 1.1.
+
+        `recursive` specifies, whether to recursively upload all subdirectories
+        in `source`. Subdirectories are uploaded if the argument value
+        evaluates to 'True'. The default value is 'False'.
+
+        The following example is identical to (1.), but also the subdirectories
+        (and subdirectories of the subdirectories, ad infinitum) inside
+        `source`, '/var/logs', are uploaded:
+        | Put Directory | /var/logs | /home/robot | recursive=True |
+
+        As a result, the content of the local directory '/var/logs',
+        including subdirectories, is now found on the remote at
+        '/home/robot/logs'. Subdirectory paths are preserved, e.g.
+        local 'var/logs/mysql' can be found on the remote
+        at '/home/robot/logs/mysql'.
+        """
         return self._run_sftp_command(self.ssh_client.put_directory, source,
                                       destination, mode, newline,
                                       path_separator, recursive)
