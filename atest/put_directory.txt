@@ -10,7 +10,8 @@ Put Directory To Existing Remote Path
     ${target} =  Set Variable  ${USER HOME}
     Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}
-    Remote Directory Should Exist With Content  ${target}${/}textfiles
+    ${target} =  Set Variable  ${target}${/}textfiles
+    Remote Directory Should Exist With Content  ${target}
 
 Put Directory To Non-Existing Remote Path
     ${target} =  Set Variable  another_dir_name
@@ -22,7 +23,8 @@ Put Directory Including Subdirectories To Existing Remote Path
     ${target} =  Set Variable  ${USER HOME}
     Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}  recursive=True
-    Remote Directory Should Exist With Subdirectories  ${target}${/}textfiles
+    ${target} =  Set Variable  ${target}${/}textfiles
+    Remote Directory Should Exist With Subdirectories  ${target}
 
 Put Directory Including Subdirectories To Non-Existing Remote Path
     ${target} =  Set Variable  another_dir_name
@@ -34,13 +36,15 @@ Put Directory To Current Remote Path
     ${target} =  Set Variable  .
     Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}
-    Remote Directory Should Exist With Content  ${target}${/}textfiles
+    ${target} =  Set Variable  ${target}${/}textfiles
+    Remote Directory Should Exist With Content  ${target}
 
 Put Directory Using Relative Source
     ${target} =  Set Variable  ${USER HOME}
     Verify Remote Directory Exists  ${target}
     Put Directory  textfiles  ${target}
-    Remote Directory Should Exist With Content  ${target}${/}textfiles
+    ${target} =  Set Variable  ${target}${/}textfiles
+    Remote Directory Should Exist With Content  ${target}
 
 *** Keywords ***
 Verify Remote Directory Exists
@@ -73,10 +77,4 @@ Remote Directory Should Exist With Subdirectories
 
 Remove Remote Files
     [Arguments]  ${destination}
-    Execute Command  rm ${USER HOME}${/}${TEST FILE NAME}
-    Execute Command  rm ${USER HOME}${/}${TEST FILE 2 NAME}
-    Execute Command  rm ${USER HOME}${/}${FILE WITH NEWLINES NAME}
-    Execute Command  rm -rf ${USER HOME}${/}textfiles
-    Execute Command  rm -rf ${USER HOME}${/}special
-    Execute Command  rm -rf ${USER HOME}${/}another_dir_name
-    Execute Command  rm -rf ${USER HOME}${/}new_dir
+    Execute Command  rm -rf ${destination}
