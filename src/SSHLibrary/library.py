@@ -39,9 +39,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
-    Only one connection is active at a time. This means that most of the
-    keywords only affect the active connection. Active connection can be
-    switched using `Switch Connection` keyword.
+    Only one connection can be active at a time. This means that most of the
+    keywords only affect to the active connection. Active connection can be
+    changed using `Switch Connection` keyword.
 
     For executing commands on the remote host, there are two possibilities:
 
@@ -57,47 +57,57 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     Prompt, as well as the other settings can be configured as defaults for
     all the upcoming connections on `library importing` or by using keyword
-    `Set Default Configuration`. Settings overriding these defaults can be
-    given as arguments to `Open Connection`. Currently active, already open
-    connection can be configured with `Set Client Configuration`.
+    `Set Default Configuration`. Settings overriding these defaults
+    (except `loglevel`) can be given as arguments to `Open Connection`.
+
+    Currently active, already open connection can be configured with
+    `Set Client Configuration`.
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, timeout=3, newline='LF', prompt=None, loglevel='INFO',
-                 encoding='utf8'):
+    def __init__(self, timeout='3 seconds', newline='LF', prompt=None,
+                 loglevel='INFO', encoding='utf8'):
         """SSH Library allows some import time configuration.
 
-        Configuration may later be changed with `Set Default Configuration`
-        and settings of an active, already open connection with
-        `Set Client Configuration`.
+        Default settings (except `loglevel`) may later be changed with
+        `Set Default Configuration`. Settings of an active,
+        already open connection can be changed with `Set Client Configuration`.
 
-        `timeout` is used both by `Read Until` and `Write Until` variants and
-        given as a number of seconds. The default is 3 seconds.
+        `timeout` is used both by `Read Until` and `Write Until` variants.
+        The default is '3 seconds'.
 
-        `newline` is the line break used by the operating system on the remote.
-        The default is 'LF' which is the default on Unix-like operating systems.
+        `newline` is the line break sequence used by the operating system
+        on the remote. The default value is 'LF' which is also the default on
+        Unix-like operating systems.
 
-        `prompt` is a character or a character sequence that is used by
-        `Read Until Prompt`.  Prompt must be set before the keyword can be
-        can be used.
+        `prompt` is a character sequence that is used by `Read Until Prompt`.
+        Prompt must be set before `Read Until Prompt` can be can be used.
 
-        `encoding` is the character encoding of inputs and outputs.
+        `encoding` is the character encoding of input and output sequences.
         Possible `encoding` values are listed in [3]. Starting from
-        SSHLibrary 1.2, the default is UTF-8.
+        SSHLibrary 1.2, the default value is 'UTF-8'.
 
         | [3] http://docs.python.org/2/library/codecs.html#standard-encodings
 
         `timeout`, `newline`, `prompt` and `encoding` values set here may
-        later be overridden per connection by giving them as arguments
+        later be overridden per connection by defining them as arguments
         to `Open Connection`.
 
-        `loglevel` sets the default log level to log the output read by
-        `Read Until` variants.
+        `loglevel` sets the default log level used to log the output read by
+        `Read Until` variants. This cannot be configured per connection.
+        Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
+        The default value is 'INFO'.
 
-        Examples:
-        | Library | SSHLibrary | # use default values |
-        | Library | SSHLibrary | timeout=10 | prompt=> |
+        Examples that imports the library with sensible defaults:
+        | Library | SSHLibrary |
+
+        Example that takes library into use and sets prompt to '>':
+        | Library | SSHLibrary | prompt=> |
+
+        Example that takes library into use and changes timeout to 10 seconds
+        and changes line breaks to the Windows format:
+        | Library | SSHLibrary | timeout=10 seconds | newline=CRLF |
         """
         self._cache = ConnectionCache()
         self._config = DefaultConfig(timeout, newline, prompt, loglevel,
@@ -109,11 +119,12 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     def set_default_configuration(self, timeout=None, newline=None,
                                   prompt=None, loglevel=None, encoding=None):
-        """Update the default configuration values.
+        """Update the default configuration values set on `library importing`.
 
         Only parameters whose value is other than `None` are updated.
 
-        Example:
+        Example that updates newline and prompt, but leaves timeout, log level
+        and encoding settings intact:
         | Set Default Configuration | newline=CRLF | prompt=$ |
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
@@ -128,7 +139,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Only parameters whose value is other than `None` are updated.
 
-        Example:
+        Example that updates terminal type and timeout of the currently
+        active connection and leaves other connection settings and connections
+        intact:
         | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
         self.ssh_client.config.update(timeout=timeout, newline=newline,
@@ -144,12 +157,12 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         The new connection is made active. Possible existing connections
         are left open in the background.
 
-        Returns the index of this connection which can be used later to switch
-        back to it. Indices start from '1' and are reset when `Close All
-        Connections` is used.
+        This keyword returns the index of this connection which can be used
+        later to switch back to it. Indices start from '1' and are reset
+        when `Close All Connections` is used.
 
         Optional `alias` can be given as a name for the connection and can be
-        used for switching between connections similarly as the index.
+        used for switching between connections, similarly as the index.
         See `Switch Connection` for more details.
 
         If `timeout`, `newline`, `prompt` or `encoding` are not given,
@@ -157,16 +170,17 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         `Set Default Configuration` are used.
 
         Starting from SSHLibrary 1.1, a shell session is also opened
-        automatically by this keyword. `term_type` defines the terminal type
-        for this shell, and `width` and `height` can be configured to control
-        the virtual size of it.
+        automatically by this keyword.
 
-        Client configuration options, other than `host`, `port` and `alias`
+        `term_type` defines the terminal type for this shell, and `width`
+        and `height` can be configured to control the virtual size of it.
+
+        Client configuration options, other than `host`, `port` and `alias`,
         can be later updated with `Set Client Configuration`.
 
         Examples:
         | Open Connection | myhost.net      |
-        | Open Connection | yourhost.com    | alias=2nd conn | port=23 |prompt=# |
+        | Open Connection | yourhost.com    | alias=2nd conn | port=23 | prompt=# |
         | Open Connection | myhost.net      | term_type=ansi | width=40 |
         | ${index} =      | Open Connection | myhost.net |
         """
@@ -195,9 +209,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def switch_connection(self, index_or_alias):
         """Switches the active connection by index or alias.
 
-        Index is got from `Open Connection` or from `Get Connection Id`.
-        If `None` is given as argument `index_or_alias`, the currently active
-        connection is is closed.
+        `index_or_alias` is either connection index (integer) or explicitly
+        defined alias (string) that was given as an argument to
+        `Open Connection`.
+
+        Connection index is got as a return value from `Open Connection` or
+        from `Get Connection Id`. If `None` is given as argument `index_or_alias`,
+        the currently active connection is is closed.
 
         This keyword returns the index of the previously active connection,
         which can be used to reuse that connection later.
@@ -235,7 +253,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """Closes all open connections and empties the connection cache.
 
         After this keyword, the connection indices returned by `Open Connection`
-        start from 1.
+        are reset and start from 1.
 
         This keyword is ought to be used either in test or suite teardown to
         make sure all the connections are closed before the test execution
@@ -244,7 +262,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         self._cache.close_all()
 
     def get_connections(self):
-        """Return information about all open connections.
+        """Return information about all the open connections.
 
         The return value is a list of objects that describe the connection.
         These objects have attributes that correspond to the argument names
@@ -271,7 +289,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """Enables logging of SSH protocol output to given `logfile`
 
         `logfile` can be relative or absolute path to a file that is writable
-        by the current user. If the `logfile` already exists, it will be
+        by the current local user. If the `logfile` already exists, it will be
         overwritten.
 
         Note that this keyword only works with Python, i.e. when executing
@@ -284,7 +302,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def close_connection(self):
         """Closes the currently active connection.
 
-        No other connection is made active by this keyword. Use
+        No other connection is made active by this keyword. Manually use
         `Switch Connection` to switch to another connection.
         """
         self.ssh_client.close()
@@ -293,8 +311,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def login(self, username, password):
         """Logs into the SSH server using the given `username` and `password`.
 
-        Reads and returns the output from the server. If prompt is set,
-        everything until the prompt is returned.
+        This keyword also reads and returns the output from the server.
+        If prompt is set, everything until the prompt is returned.
 
         Example:
         | Login | john | secret |
@@ -305,12 +323,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """Logs into the SSH server using key-based authentication.
 
         `username` is the username on the remote system.
+
         `keyfile` is a path to a valid OpenSSH private key file on the local
         filesystem.
+
         `password` is used to unlock the `keyfile` if unlocking is required.
 
-        Reads and returns the output from the server. If prompt is set,
-        everything until the prompt is returned.
+        This keyword also reads and returns the output from the server.
+        If prompt is set, everything until the prompt is returned.
         """
         return self._login(self.ssh_client.login_with_public_key, username,
                            keyfile, password)
@@ -326,7 +346,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def execute_command(self, command, return_stdout=True,
                         return_stderr=False, return_rc=False):
         """Executes the command and returns a combination of stdout, stderr
-        and return code.
+        and return code. The command is executed in a new session.
 
         If several arguments evaluate true, a tuple containing the values
         is returned. `return_stdout`, `return_stderr` and `return_rc`
@@ -351,7 +371,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         `Write` and `Read` keywords can be used for running multiple
         commands in the same session.
 
-        This keyword also logs the executed command with log level INFO.
+        This keyword also logs the executed command with log level 'INFO'.
         """
         self._info("Executing command '%s'" % command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
@@ -371,7 +391,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Example:
         | Start Command | ./myjobscript.sh |
 
-        This keyword also logs the started command with log level INFO.
+        This keyword also logs the started command with log level 'INFO'.
         """
         self._info("Starting command '%s'" % command)
         self._last_command = command
@@ -388,7 +408,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         See `Execute Command` for examples on how the return value can
         be configured using `return_stdout`, `return_stderr` and `return_rc`.
 
-        This keyword also logs the read command with log level INFO.
+        This keyword also logs the read command with log level 'INFO'.
         """
         self._info("Reading output of command '%s'" % self._last_command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
@@ -422,19 +442,19 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def write(self, text, loglevel=None):
         """Writes the given `text` over the connection and appends a newline.
 
-        Consumes the written `text` (until the appended newline) from the server
-        output and returns it. Given `text` must not contain newlines.
+        Consumes the written `text` (until the appended newline) from the
+        server output and returns it. Given `text` must not contain newlines.
 
         Note: This keyword does not return any output of the executed
         command. To get the output, one of the `Read` keywords must be
         used.
 
-        This keyword logs the written `text with log level INFO.
+        This keyword logs the written `text` with log level 'INFO'.
 
         This keyword also logs the read output. Default log level is set
         either on `library importing` or with `Set Default Configuration`.
         `loglevel` can be used to override the default log level.
-        Possible levels are TRACE, DEBUG, INFO and WARN.
+        Possible levels are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
         """
         self._write(text, add_newline=True)
         return self._read_and_log(loglevel, self.ssh_client.read_until_newline)
@@ -450,7 +470,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         command. To get the output, one of the `Read` keywords must be
         used.
 
-        This keyword logs the written `text with log level INFO.
+        This keyword logs the written `text` with log level 'INFO'.
         """
         self._write(text)
 
@@ -471,7 +491,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         This keyword logs the read output. Default log level is set
         either on `library importing` or with `Set Default Configuration`.
         `loglevel` can be used to override the default log level.
-        Possible levels are TRACE, DEBUG, INFO and WARN.
+        Possible levels are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
         """
         return self._read_and_log(loglevel, self.ssh_client.read)
 
@@ -487,8 +507,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         as an argument to `Open Connection`. For active connection,
         `Set Client Configuration` can be used.
 
-        This keyword logs the read output.
-        See `Read` for more information on `loglevel`.
+        This keyword logs the read output. See `Read` for more information
+        on `loglevel`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until,
                                   expected)
@@ -505,8 +525,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         as an argument to `Open Connection`. For currently active connection,
         `Set Client Configuration` can be used.
 
-        This keyword logs the read output.
-        See `Read` for more information on `loglevel`.
+        This keyword logs the read output. See `Read` for more information
+        on `loglevel`.
 
         Example:
         | Read Until Regexp | (#|$) |
@@ -529,8 +549,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         output of previous command has been read and the command does not
         produce prompt characters in its output.
 
-        This keyword logs the read output.
-        See `Read` for more information on `loglevel`.
+        This keyword logs the read output. See `Read` for more information
+        on `loglevel`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until_prompt)
 
@@ -546,8 +566,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        This keyword logs the read output.
-        See `Read` for more information on `loglevel`.
+        This keyword logs the read output. See `Read` for more information
+        on `loglevel`.
 
         Example:
         | Write Until Expected Output | ps -ef| grep myprocess\\n | myprocess |
@@ -572,9 +592,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def get_file(self, source, destination='.', path_separator='/'):
         """Downloads file(s) from the remote host to the local host.
 
-        `source` is a path on the remote machine.
+        `source` is a path on the remote machine. Relative or absolute
+        path may be used.
 
-        `destination` is the target path on the local machine.
+        `destination` is the target path on the local machine. Relative or
+        absolute path may be used.
 
         `path_separator` is the path separator character of the operating system
         on the remote machine. On Unix-Likes, this is '/' which is also
@@ -610,6 +632,58 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
+        """Downloads a directory, including it's content, from the remote host
+        to the local host.
+
+        `source` is a path on the remote machine. Relative or absolute
+        path may be used.
+
+        `destination` is the target path on the local machine. Relative or
+        absolute path may be used.
+
+        1. If `destination` is an existing path, `source` directory is copied
+           into it.
+
+           In this example remote directory *logs* is downloaded into
+           an existing local path */home/robot*:
+           | Get Directory | /path/to/remote/logs | /home/robot |
+
+           As a result, the remote directory *logs* is now found at
+           /home/robot/logs.
+
+        2. If `destination` is a non-existing path, `source` directory is
+           copied over it.
+
+           In this example, `source` is downloaded over a non-existing
+           local path:
+           | Get Directory | /path/to/remote/logs | my_new_path |
+
+           Because *my_new_path* does not already exist on the local machine,
+           it is created. As a result, *my_new_path* now has the same content
+           as the remote directory *logs*.
+
+        3. If `destination` is not given, `source` directory is copied into
+           the current working directory on the local machine.
+           This will most probably be the directory where the test execution
+           was started.
+
+           In this example, `source` is downloaded into the current
+           local working directory:
+           | Get Directory | /path/to/remote/logs | . |
+
+           In this case, `destination` always already exists. As a result,
+           the remote directory *logs* can be now found at the current
+           working directory, under a directory *logs*.
+
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. On Unix-Likes, this must be '/' which is also
+        the default value. With Windows remotes, this must be set as '\\':
+        This option was added in SSHLibrary 1.1.
+
+        `recursive` specifies, whether to include subdirectories.
+        Subdirectories inside `destination` are downloaded if the
+        argument value evaluates to 'True'. The default value is 'False'.
+        """
         return self._run_sftp_command(self.ssh_client.get_directory, source,
                                       destination, path_separator, recursive)
 
@@ -617,9 +691,11 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                  newline='default', path_separator='/'):
         """Uploads file(s) from the local host to the remote host.
 
-        `source` is the path on the local machine.
+        `source` is the path on the local machine. Relative or absolute
+        path may be used.
 
-        `destination` is the target path on the remote machine.
+        `destination` is the target path on the remote machine. Relative or
+        absolute path may be used.
 
         `path_separator` is the path separator character of the operating system
         on the remote machine. On Unix-Likes, this is '/' which is also
@@ -699,7 +775,7 @@ class DefaultConfig(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, encoding):
         Configuration.__init__(self,
-                timeout=TimeEntry(timeout or 3),
+                timeout=TimeEntry(timeout or '3 seconds'),
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
                 loglevel=LogLevelEntry(loglevel or 'INFO'),
