@@ -43,12 +43,13 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _login_with_public_key(self, username, keyfile, password):
         try:
-            success = self.client.authenticateWithPublicKey(
-                            username, File(keyfile), password)
+            success = self.client.authenticateWithPublicKey(username,
+                                                            File(keyfile),
+                                                            password)
             if not success:
                 raise SSHClientException
         except IOError:
-            # IOError is raised also when key file is invalid
+            # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
     def close(self):
