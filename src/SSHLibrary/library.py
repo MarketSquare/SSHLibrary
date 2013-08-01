@@ -644,23 +644,27 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         1. If `destination` is an existing path, `source` directory is copied
            into it.
 
-           In this example remote directory *logs* is downloaded into
-           an existing local path */home/robot*:
-           | Get Directory | /path/to/remote/logs | /home/robot |
+           In this example, remote `source`, '/var/logs', is copied into
+           an existing local `destination` '/home/robot':
+           | Get Directory | /var/logs | /home/robot |
 
-           As a result, the remote directory *logs* is now found at
-           /home/robot/logs.
+           As a result, the content of remote directory '/var/logs' is now
+           found at '/home/robot/logs'. Subdirectories are not included.
 
         2. If `destination` is a non-existing path, `source` directory is
            copied over it.
 
-           In this example, `source` is downloaded over a non-existing
-           local path:
-           | Get Directory | /path/to/remote/logs | my_new_path |
+           In this example, remote `source`, directory 'logs' in the current
+           remote path, is copied to a non-existing local `destination`
+           'my_new_path':
+           | Get Directory | logs | my_new_path |
 
-           Because *my_new_path* does not already exist on the local machine,
-           it is created. As a result, *my_new_path* now has the same content
-           as the remote directory *logs*.
+           Note the use of relative paths in both `source` and `destination`.
+
+           Because 'my_new_path' does not already exist on the local machine,
+           it is created. As the result of keyword, 'my_new_path' now has the
+           same content as the remote directory 'logs' but not the 'logs'
+           directory itself. Subdirectories are not included.
 
         3. If `destination` is not given, `source` directory is copied into
            the current working directory on the local machine.
@@ -669,20 +673,34 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
            In this example, `source` is downloaded into the current
            local working directory:
-           | Get Directory | /path/to/remote/logs | . |
+           | Get Directory | /path/to/remote/logs |
 
-           In this case, `destination` always already exists. As a result,
-           the remote directory *logs* can be now found at the current
-           working directory, under a directory *logs*.
+           Note the missing `destination`. It would be possible also to refer
+           to the current working directory by using '.'. This works both on
+           the local and remote side.
+
+           In this case, `destination` always exists. As a result,
+           the remote directory 'logs' can be now found at the current
+           working directory with name 'logs'. Subdirectories are not included.
 
         `path_separator` is the path separator character of the operating system
         on the remote machine. On Unix-Likes, this must be '/' which is also
         the default value. With Windows remotes, this must be set as '\\':
         This option was added in SSHLibrary 1.1.
 
-        `recursive` specifies, whether to include subdirectories.
-        Subdirectories inside `destination` are downloaded if the
-        argument value evaluates to 'True'. The default value is 'False'.
+        `recursive` specifies, whether to recursively copy all subdirectories
+        in `source`. Subdirectories are downloaded if the argument value
+        evaluates to 'True'. The default value is 'False'.
+
+        The following example is identical to (1.), but also the subdirectories
+        (and subdirectories of the subdirectories, ad infinitum) inside
+        `source`, '/var/logs', are copied:
+        | Get Directory | /var/logs | /home/robot | recursive=True |
+
+        As a result, the content of the remote directory '/var/logs',
+        including subdirectories, is now found at '/home/robot/logs'.
+        Subdirectory paths are preserved, e.g. remote 'var/logs/mysql'
+        can be found at '/home/robot/logs/mysql'.
         """
         return self._run_sftp_command(self.ssh_client.get_directory, source,
                                       destination, path_separator, recursive)
