@@ -171,7 +171,7 @@ class RemoteCommand(AbstractCommand):
     def read_outputs(self):
         stdout = self._read_from_stream(self._session.getStdout())
         stderr = self._read_from_stream(self._session.getStderr())
-        rc = self._session.getExitStatus()
+        rc = self._session.getExitStatus() or 0
         self._session.close()
         return stdout, stderr, rc
 
