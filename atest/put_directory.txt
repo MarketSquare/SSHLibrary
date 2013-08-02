@@ -27,7 +27,7 @@ Put Directory Including Subdirectories To Existing Remote Path
     Remote Directory Should Exist With Subdirectories  ${target}
 
 Put Directory Including Subdirectories To Non-Existing Remote Path
-    ${target} =  Set Variable  another_dir_name
+    ${target} =  Set Variable  another/dir/name
     Verify Remote Directory Does Not Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}  recursive=True
     Remote Directory Should Exist With Subdirectories  ${target}
@@ -45,6 +45,11 @@ Put Directory Using Relative Source
     Put Directory  textfiles  ${target}
     ${target} =  Set Variable  ${target}${/}textfiles
     Remote Directory Should Exist With Content  ${target}
+
+Put Directory Should Fail When Source Does Not Exists
+    ${target} =  Set Variable  another_dir_name
+    Run Keyword And Expect Error  There was no source path matching 'non-existing'  Put Directory  non-existing
+    Verify Remote Directory Does Not Exists  ${target}
 
 *** Keywords ***
 Verify Remote Directory Exists

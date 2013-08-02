@@ -316,13 +316,15 @@ class AbstractSFTPClient(object):
     def close(self):
         self._client.close()
 
-    # TODO: Check that remote path exists
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
-        remotefiles = []
-        localfiles = []
         if source.endswith(path_separator):
             source = source[:-1]
+        if not self.exists(source):
+            msg = "There was no source path matching '%s'" % source
+            raise SSHClientException(msg)
+        remotefiles = []
+        localfiles = []
         parent_dir = os.path.basename(source)
         subdirs = [parent_dir]
         local_target_exists = True if os.path.isdir(destination) else False
@@ -384,9 +386,11 @@ class AbstractSFTPClient(object):
         if not os.path.exists(dest):
             os.makedirs(dest)
 
-    # TODO: Check that local path exists
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
+        if not os.path.isdir(source):
+            msg = "There was no source path matching '%s'" % source
+            raise SSHClientException(msg)
         localfiles = []
         remotefiles = []
         source = os.path.abspath(source)
