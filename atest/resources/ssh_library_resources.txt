@@ -26,16 +26,8 @@ ${FILE WITH SPECIAL CHARS}  ${SPECIAL TEXTFILES}${/}${FILE WITH SPECIAL CHARS NA
 ${LOCAL TMPDIR}  ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir
 
 *** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put File  ${TEST SCRIPT}  ${USER HOME}/
-    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}/
-    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}/
-    Put File  ${FILE WITH NEWLINES}  ${USER HOME}/
-    Put File  ${FILE WITH NON-ASCII}  ${USER HOME}/
-
 Remove Test Files And Close Connections
-    Execute Command  rm -f ${TEST SCRIPT NAME} ${INTERACTIVE TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${FILE WITH NEWLINES NAME} ${FILE WITH NON-ASCII NAME}
+    Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME} ${TEST SCRIPT NAME} ${INTERACTIVE TEST SCRIPT NAME} ${REPEAT TEST SCRIPT NAME} ${FILE WITH NEWLINES NAME} ${FILE WITH NON-ASCII NAME}
     Close All Connections
 
 Login As Valid User
@@ -48,6 +40,3 @@ Open Connection To Test Host
     [Arguments]  ${options}=${EMPTY}
     ${id} =  Open Connection  ${HOST}  ${options}
     [Return]  ${id}
-
-Connection Should Be Closed
-    Run Keyword And Expect Error  No open connection.  Write  pwd

@@ -37,3 +37,8 @@ Start Command And Read Process Output With Legacy Stdout And Stderr
     ${stdout}  ${stderr} =  Read Command Output  both
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
+
+*** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put File  ${TEST SCRIPT}  ${USER HOME}/

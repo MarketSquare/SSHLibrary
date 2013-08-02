@@ -51,25 +51,25 @@ Get Directory Should Fail When Source Does Not Exists
     Directory Should Not Exist  ${target}
 
 *** Keywords ***
-Directory Should Exist With Content
-    [Arguments]  ${destination}
-    File Should Exist  ${destination}${/}${TEST SCRIPT NAME}
-    File Should Exist  ${destination}${/}${REPEAT TEST SCRIPT NAME}
-    Directory Should Not Exist  ${destination}${/}subdir
-
-Directory Should Exist Including Subdirectories
-    [Arguments]  ${destination}
-    File Should Exist  ${destination}${/}${TEST SCRIPT NAME}
-    File Should Exist  ${destination}${/}${REPEAT TEST SCRIPT NAME}
-    Directory Should Exist  ${destination}${/}subdir
-    File Should Exist  ${destination}${/}subdir/${INTERACTIVE TEST SCRIPT NAME}
-
 Login And Move Test Files
     Login As Valid User
-    Put File  ${TEST SCRIPT}  ${USER HOME}${/}test_root${/}
-    Put File  ${INTERACTIVE TEST SCRIPT}  ${USER HOME}${/}test_root${/}subdir${/}
-    Put File  ${REPEAT TEST SCRIPT}  ${USER HOME}${/}test_root${/}
+    Put Directory  ${TEXTFILES}  ${USER HOME}${/}test_root  recursive=True
 
 Remove Test Files and Close Connections
     Execute Command  rm -rf ${USER HOME}${/}test_root
     Close All Connections
+
+Directory Should Exist With Content
+    [Arguments]  ${destination}
+    File Should Exist  ${destination}${/}${TEST FILE NAME}
+    File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
+    File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    Directory Should Not Exist  ${destination}${/}special
+
+Directory Should Exist Including Subdirectories
+    [Arguments]  ${destination}
+    File Should Exist  ${destination}${/}${TEST FILE NAME}
+    File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
+    File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    Directory Should Exist  ${destination}${/}special
+    File Should Exist  ${destination}${/}special/${FILE WITH SPECIAL CHARS NAME}

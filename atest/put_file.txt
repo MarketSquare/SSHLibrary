@@ -77,13 +77,13 @@ Put File With Special Chars In File Name
 *** Keywords ***
 Put Files And Verify
     [Arguments]  ${source}  ${destination}  @{expected}
-    Vefify Remote Files do Not Exist  @{expected}
+    Vefify Remote Files Do Not Exist  @{expected}
     Put File  ${source}  ${destination}
     Verify Remote Files Exist  ${EMPTY}  @{expected}
 
 Put File And Specify Newlines
     [Arguments]  ${source}  ${destination}  ${newlines}  @{expected}
-    Vefify Remote Files do Not Exist  @{expected}
+    Vefify Remote Files Do Not Exist  @{expected}
     Put File  ${source}  ${destination}  newline=${newlines}
     Verify Remote Files Exist  ${EMPTY}  @{expected}
 

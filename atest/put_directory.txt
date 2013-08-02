@@ -27,10 +27,11 @@ Put Directory Including Subdirectories To Existing Remote Path
     Remote Directory Should Exist With Subdirectories  ${target}
 
 Put Directory Including Subdirectories To Non-Existing Remote Path
-    ${target} =  Set Variable  another/dir/name
+    ${target} =  Set Variable  another/dir/path
     Verify Remote Directory Does Not Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}  recursive=True
     Remote Directory Should Exist With Subdirectories  ${target}
+    ${target} =  Set Variable  another
 
 Put Directory To Current Remote Path
     ${target} =  Set Variable  .

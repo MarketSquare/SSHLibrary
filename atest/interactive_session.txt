@@ -71,6 +71,11 @@ Write Bare And Read
     Should Contain  ${output2}  ${PROMPT}
 
 *** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put File  ${SCRIPTS}/*  ${USER HOME}/
+
 Remove Counter And Read All Data
     Execute Command  rm -f ${COUNTER NAME}
     Read
+

@@ -8,28 +8,28 @@ Library         OperatingSystem
 
 *** Test Cases ***
 Get File From Absolute Source
-    Get File And Verify Listing  ${USER HOME}/${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}  ${TEST SCRIPT NAME}
+    Get File And Verify Listing  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}
 
 Get File From Relative Source
-    Get File And Verify Listing  ${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}  ${TEST SCRIPT NAME}
+    Get File And Verify Listing  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}
 
 Get File With Different Name
     Get File And Verify Listing  ${USER HOME}/${FILE WITH NON-ASCII NAME}  ${LOCAL TMPDIR}${/}foo.txt  foo.txt
 
 Get File With Pattern
-    Get File And Verify Listing  ${USER HOME}/*  ${LOCAL TMPDIR}${/}  ${TEST SCRIPT NAME}  ${INTERACTIVE TEST SCRIPT NAME}  ${REPEAT TEST SCRIPT NAME}
+    Get File And Verify Listing  ${USER HOME}/*  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
 
 Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  ${USER HOME}/*.sh  ${LOCAL TMPDIR}${/}foo
+    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  ${USER HOME}/*.txt  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
-    SSHLibrary.Get File  ${USER HOME}/${TEST SCRIPT NAME}  .
+    SSHLibrary.Get File  ${USER HOME}/${TEST FILE NAME}  .
     ${listing} =  List Files In Directory  .
-    Should Contain  ${listing}  ${TEST SCRIPT NAME}
-    [Teardown]  Remove File  ${TEST SCRIPT NAME}
+    Should Contain  ${listing}  ${TEST FILE NAME}
+    [Teardown]  Remove File  ${TEST FILE NAME}
 
 Get File When Destination Directory Does Not Exist
-    SSHLibrary.Get File  ${USER HOME}/${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
+    SSHLibrary.Get File  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
     ${listing} =  List Files In Directory  ${LOCAL TMPDIR}${/}missingdir
     Should Contain  ${listing}  foo.txt
 
@@ -39,15 +39,20 @@ Get File From A Path Not Under Home Directory
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSHLibrary.Get File  ${TEST SCRIPT NAME}  ${LOCAL TMPDIR}${/}
+    SSHLibrary.Get File  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
     ${contents} =  List Directory  ${LOCAL TMPDIR}${/}
-    Should Contain  ${contents}  ${TEST SCRIPT NAME}
+    Should Contain  ${contents}  ${TEST FILE NAME}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  yes
 
 Get File Should Fail When There Are No Source Files
     Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSHLibrary.Get File  non-existing
 
 *** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put File  ${TEXT FILES}/*  ${USER HOME}/
+    Put File  ${FILE WITH NON-ASCII}  ${USER HOME}/
+
 Get File And Verify Listing
     [Arguments]  ${source}  ${destination}  @{expected}
     SSHLibrary.Get File  ${source}  ${destination}

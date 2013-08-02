@@ -34,9 +34,9 @@ Login With Inaccessible Public Key
 
 *** Keywords ***
 Check Key Files
-  [Documentation]  If key file directory `keyfiles` does not exist, mark these tests non-critical
-  ${keys}=  List Files in Directory  ${PUBKEYDIR}
-  Run Keyword If  len(${keys})!=3  Fail And Mark Noncritical
+    [Documentation]  If key file directory `keyfiles` does not exist, mark these tests non-critical
+    ${keys}=  List Files in Directory  ${PUBKEYDIR}
+    Run Keyword If  len(${keys})!=3  Fail And Mark Noncritical
 
 Fail And Mark Noncritical
     Remove Tags  regression

@@ -73,3 +73,7 @@ Get Connections
     Should Be Equal    ${conns[0].prompt}    >>
     Should Be Equal    ${conns[1].alias}    saila
     Should Be Equal    ${conns[0].term_type}    vt100
+
+*** Keywords ***
+Connection Should Be Closed
+    Run Keyword And Expect Error  No open connection.  Write  pwd

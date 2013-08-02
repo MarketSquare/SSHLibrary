@@ -50,3 +50,8 @@ Executing Command With Non-ASCII characters
     ${result}=  Execute Command  echo 'aaääöö'
     Should Contain  ${result}  aaääöö
 
+*** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put File  ${TEST SCRIPT}  ${USER HOME}/
+    Put File  ${FILE WITH NEWLINES}  ${USER HOME}/
