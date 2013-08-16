@@ -115,9 +115,6 @@ class SFTPClient(AbstractSFTPClient):
     def _create_client(self, ssh_client):
         return ssh_client.open_sftp()
 
-    def _resolve_homedir(self):
-        return self._client.normalize('.') + '/'
-
     def _get_file(self, remotepath, localpath):
         self._client.get(remotepath, localpath)
 

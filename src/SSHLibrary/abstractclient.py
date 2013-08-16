@@ -325,7 +325,7 @@ class AbstractSFTPClient(object):
 
     def __init__(self, ssh_client):
         self._client = self._create_client(ssh_client)
-        self._homedir = self._resolve_homedir()
+        self._homedir = self._normalize_path('.')
 
     def close(self):
         self._client.close()

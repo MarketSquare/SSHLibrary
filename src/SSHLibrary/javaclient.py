@@ -101,9 +101,6 @@ class SFTPClient(AbstractSFTPClient):
     def _create_client(self, ssh_client):
         return SFTPv3Client(ssh_client)
 
-    def _resolve_homedir(self):
-        return self._client.canonicalPath('.') + '/'
-
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'
