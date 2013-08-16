@@ -138,10 +138,10 @@ class SFTPClient(AbstractSFTPClient):
             self._client.chdir(dirname)
 
     def _create_remote_file(self, dest, mode):
-        remotfile = self._client.file(dest, 'wb')
-        remotfile.set_pipelined(True)
+        remote_file = self._client.file(dest, 'wb')
+        remote_file.set_pipelined(True)
         self._client.chmod(dest, mode)
-        return remotfile
+        return remote_file
 
     def _normalize_path(self, path):
         return self._client.normalize(path)

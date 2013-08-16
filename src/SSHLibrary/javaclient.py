@@ -115,14 +115,14 @@ class SFTPClient(AbstractSFTPClient):
                 self._client.mkdir(curdir, 0744)
 
     def _create_remote_file(self, dest, mode):
-        remotefile = self._client.createFile(dest)
+        remote_file = self._client.createFile(dest)
         try:
-            tempstats = self._client.fstat(remotefile)
+            tempstats = self._client.fstat(remote_file)
             tempstats.permissions = mode
-            self._client.fsetstat(remotefile, tempstats)
+            self._client.fsetstat(remote_file, tempstats)
         except SFTPException:
             pass
-        return remotefile
+        return remote_file
 
     def _write_to_remote_file(self, remotefile, data, position):
         self._client.write(remotefile, position, data, 0, len(data))
