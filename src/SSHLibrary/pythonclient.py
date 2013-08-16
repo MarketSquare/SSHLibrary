@@ -116,15 +116,13 @@ class SFTPClient(AbstractSFTPClient):
             raise
         return True
 
-    def listfiles(self, path, absolute=False):
-        prefix = self._get_full_path(path) if absolute else ''
-        return [prefix + getattr(fileinfo, 'filename', '?') for fileinfo
+    def listfiles(self, path):
+        return [getattr(fileinfo, 'filename', '?') for fileinfo
                 in self._client.listdir_attr(path)
                 if stat.S_ISREG(fileinfo.st_mode)]
 
-    def listdirs(self, path, absolute=False):
-        prefix = self._get_full_path(path) if absolute else ''
-        return [prefix + getattr(fileinfo, 'filename', '?') for fileinfo
+    def listdirs(self, path):
+        return [getattr(fileinfo, 'filename', '?') for fileinfo
                 in self._client.listdir_attr(path)
                 if stat.S_ISDIR(fileinfo.st_mode)]
 

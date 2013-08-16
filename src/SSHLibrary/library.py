@@ -838,20 +838,21 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       destination, mode, newline,
                                       path_separator, recursive)
 
-    def list_files_in_directory(self, path, absolute=False):
-        items = self.ssh_client.list_files(path, absolute)
+    def list_files_in_directory(self, path, pattern=None, absolute=False):
+        items = self.ssh_client.list_files(path, pattern, absolute)
         self._info('Files in %s: %s' % (path, ', '.join(items)))
         return items
 
-    def list_directories_in_directory(self, path, absolute=False):
-        items = self.ssh_client.list_directories(path, absolute)
+    def list_directories_in_directory(self, path, pattern=None, absolute=False):
+        items = self.ssh_client.list_directories(path, pattern, absolute)
         self._info('Directories in %s: %s' % (path, ', '.join(items)))
         return items
 
-    def list_directory(self, path, absolute=False):
+    def list_directory(self, path, pattern=None, absolute=False):
         items = []
-        items.extend(self.list_files_in_directory(path, absolute))
-        items.extend(self.list_directories_in_directory(path, absolute))
+        items.extend(self.list_files_in_directory(path, pattern, absolute))
+        items.extend(self.list_directories_in_directory(path, pattern,
+                                                        absolute))
         return items
 
     def _run_sftp_command(self, command, *args):

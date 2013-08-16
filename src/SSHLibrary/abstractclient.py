@@ -307,15 +307,15 @@ class AbstractSSHClient(object):
         sftp_client.close()
         return sources, destination
 
-    def list_files(self, path, absolute=False):
+    def list_files(self, path, pattern=None, absolute=False):
         sftp_client = self._create_sftp_client()
-        items = sftp_client.list_files(path, absolute)
+        items = sftp_client.list_files(path, pattern, absolute)
         sftp_client.close()
         return items
 
-    def list_directories(self, path, absolute=False):
+    def list_directories(self, path, pattern=None, absolute=False):
         sftp_client = self._create_sftp_client()
-        items = sftp_client.list_directories(path, absolute)
+        items = sftp_client.list_directories(path, pattern, absolute)
         sftp_client.close()
         return items
 
@@ -329,11 +329,23 @@ class AbstractSFTPClient(object):
     def close(self):
         self._client.close()
 
-    def list_files(self, path, absolute=False):
-        return self.listfiles(path, absolute)
+    def list_files(self, path, pattern=None, absolute=False):
+        items = self.listfiles(path)
+        items = self._format_items(items, path, pattern, absolute)
+        return items
 
-    def list_directories(self, path, absolute=False):
-        return self.listdirs(path, absolute)
+    def list_directories(self, path, pattern=None, absolute=False):
+        items = self.listdirs(path)
+        items = self._format_items(items, path, pattern, absolute)
+        return items
+
+    # TODO: Refactor
+    def _format_items(self, items, path, pattern, absolute):
+        if pattern:
+            items = filter(lambda name: fnmatchcase(name, pattern), items)
+        if absolute:
+            items = [self._get_full_path(path) + name for name in items]
+        return items
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
