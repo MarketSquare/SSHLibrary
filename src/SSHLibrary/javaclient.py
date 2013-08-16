@@ -99,12 +99,14 @@ class SFTPClient(AbstractSFTPClient):
             return False
         return True
 
-    def listfiles(self, path):
-        return [finfo.filename for finfo in self._client.ls(path)
+    def listfiles(self, path, absolute=False):
+        prefix = self._get_full_path(path) if absolute else ''
+        return [prefix + finfo.filename for finfo in self._client.ls(path)
                 if finfo.attributes.isRegularFile()]
 
-    def listdirs(self, path):
-        return [finfo.filename for finfo in self._client.ls(path)
+    def listdirs(self, path, absolute=False):
+        prefix = self._get_full_path(path) if absolute else ''
+        return [prefix + finfo.filename for finfo in self._client.ls(path)
                 if finfo.attributes.isDirectory() and
                 finfo.filename not in ('.', '..')]
 
@@ -164,6 +166,9 @@ class SFTPClient(AbstractSFTPClient):
         self._client.closeFile(remotefile)
         localfile.flush()
         localfile.close()
+
+    def _normalize_path(self, path):
+        return self._client.canonicalPath(path)
 
 
 class RemoteCommand(AbstractCommand):

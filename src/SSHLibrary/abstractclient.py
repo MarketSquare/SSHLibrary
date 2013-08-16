@@ -267,8 +267,8 @@ class AbstractSSHClient(object):
             Must be defined if the remote machine runs Windows.
         """
         sftp_client = self._create_sftp_client()
-        sources, destinations = sftp_client.put_file(
-                source, destination, mode, newline, path_separator)
+        sources, destinations = sftp_client.put_file(source, destination, mode,
+                                                     newline, path_separator)
         sftp_client.close()
         return sources, destinations
 
@@ -302,9 +302,22 @@ class AbstractSSHClient(object):
                       recursive=False):
         sftp_client = self._create_sftp_client()
         sources, destinations = sftp_client.get_directory(source, destination,
-                                                    path_separator, recursive)
+                                                          path_separator,
+                                                          recursive)
         sftp_client.close()
-        return sources, destinations
+        return sources, destination
+
+    def list_files(self, path, absolute=False):
+        sftp_client = self._create_sftp_client()
+        items = sftp_client.list_files(path, absolute)
+        sftp_client.close()
+        return items
+
+    def list_directories(self, path, absolute=False):
+        sftp_client = self._create_sftp_client()
+        items = sftp_client.list_directories(path, absolute)
+        sftp_client.close()
+        return items
 
 
 class AbstractSFTPClient(object):
@@ -315,6 +328,12 @@ class AbstractSFTPClient(object):
 
     def close(self):
         self._client.close()
+
+    def list_files(self, path, absolute=False):
+        return self.listfiles(path, absolute)
+
+    def list_directories(self, path, absolute=False):
+        return self.listdirs(path, absolute)
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
@@ -331,7 +350,7 @@ class AbstractSFTPClient(object):
         for path in subdirs:
             if recursive:
                 [subdirs.append(path_separator.join([path, subdir_name]))
-                for subdir_name in self.listdirs(path)]
+                for subdir_name in self.list_directories(path)]
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
             if not local_target_exists:
@@ -476,6 +495,16 @@ class AbstractSFTPClient(object):
                 self._write_to_remote_file(remotefile, data, position)
                 position += len(data)
             self._close_remote_file(remotefile)
+
+    def _get_full_path(self, path):
+        full_path = self._normalize_path(path)
+        if full_path[1:3] == ':\\':
+            return full_path + '\\'
+        else:
+            return full_path + '/'
+
+    def _normalize_path(self, path):
+        raise NotImplementedError
 
 
 class AbstractCommand(object):

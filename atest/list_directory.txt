@@ -1,0 +1,60 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Variables ***
+${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}test_root
+
+*** Test Cases ***
+List Content Using Absolute Path
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directory  ${target}
+    Should Contain  ${listing}  ${TEST FILE NAME}
+    Should Contain  ${listing}  ${TEST FILE 2 NAME}
+    Should Contain  ${listing}  ${FILE WITH NEWLINES NAME}
+    Should Contain  ${listing}  special
+
+List Content Using Relative Path
+    ${target} =  Set Variable  test_root
+    ${listing} =  List Directory  ${target}
+    Should Contain  ${listing}  ${TEST FILE NAME}
+    Should Contain  ${listing}  ${TEST FILE 2 NAME}
+    Should Contain  ${listing}  ${FILE WITH NEWLINES NAME}
+    Should Contain  ${listing}  special
+
+List Content Using Current Directory
+    ${target} =  Set Variable  .
+    ${listing} =  List Directory  ${target}
+    Should Contain  ${listing}  test_root
+
+List Content With Absolute Paths Using Absolute Path
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directory  ${target}  absolute=True
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}special
+
+List Content With Absolute Paths Using Relative Path
+    ${target} =  Set Variable  test_root
+    ${listing} =  List Directory  ${target}  absolute=True
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}${/}special
+
+List Content With Absolute Paths Using Current Directory
+    ${target} =  Set Variable  .
+    ${listing} =  List Directory  ${target}  absolute=True
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
+
+*** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put Directory  ${TEXTFILES}  ${ABSOLUTE_TEST_ROOT_PATH}  recursive=True
+
+Remove Test Files and Close Connections
+    Execute Command  rm -rf ${ABSOLUTE_TEST_ROOT_PATH}
+    Close All Connections
