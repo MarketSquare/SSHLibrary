@@ -17,10 +17,12 @@ from java.io import (File, BufferedReader, InputStreamReader, IOException,
                      FileOutputStream)
 try:
     from com.trilead.ssh2 import (StreamGobbler, Connection, SFTPv3Client,
-            SFTPException)
+                                  SFTPException)
 except ImportError:
-    raise ImportError('Importing Trilead SSH classes failed. '
-                      'Make sure you have the Trilead jar file in CLASSPATH.')
+    raise ImportError(
+        'Importing Trilead SSH classes failed. '
+        'Make sure you have the Trilead jar file in CLASSPATH.'
+    )
 
 from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
         AbstractCommand, SSHClientException)
@@ -63,14 +65,10 @@ class JavaSSHClient(AbstractSSHClient):
     def open_shell(self):
         self.shell = self.client.openSession()
         self.shell.requestPTY(self.config.term_type, self.config.width,
-                self.config.height, 0, 0, None)
+                              self.config.height, 0, 0, None)
         self.shell.startShell()
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()
-
-    def _write(self, text):
-        self._writer.write(text)
-        self._writer.flush()
 
     def _read(self):
          data = ''
@@ -86,11 +84,18 @@ class JavaSSHClient(AbstractSSHClient):
              data = chr(self._stdout.read())
          return data
 
+    def _write(self, text):
+        self._writer.write(text)
+        self._writer.flush()
+
     def _create_sftp_client(self):
         return SFTPClient(self.client)
 
 
 class SFTPClient(AbstractSFTPClient):
+
+    def _create_client(self, ssh_client):
+        return SFTPv3Client(ssh_client)
 
     def _list(self, path):
         return self._client.ls(path)
@@ -98,9 +103,7 @@ class SFTPClient(AbstractSFTPClient):
     def _get_file_permissions(self, fileinfo):
         return fileinfo.attributes.permissions
 
-    def _create_client(self, ssh_client):
-        return SFTPv3Client(ssh_client)
-
+    # TODO: Could this be in abstractclient?
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'

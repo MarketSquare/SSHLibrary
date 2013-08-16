@@ -18,22 +18,25 @@ try:
     import paramiko
 except ImportError:
     raise ImportError(
-            'Importing paramiko SSH module failed.\n'
-            'Ensure that paramiko and pycrypto modules are installed.'
-            )
+        'Importing paramiko SSH module failed.\n'
+        'Ensure that paramiko and pycrypto modules are installed.'
+    )
 
 from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
         AbstractCommand, SSHClientException)
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
-def _monkey_patched_start_client(self, event=None):
+def _custom_start_client(self, event=None):
     self.banner_timeout = 45
     self._orig_start_client(event)
 
+paramiko.transport.Transport._orig_start_client = \
+    paramiko.transport.Transport.start_client
+paramiko.transport.Transport.start_client = _custom_start_client
 
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
-def _monkey_patched_log(self, level, msg, *args):
+def _custom_log(self, level, msg, *args):
     escape = lambda s: s.replace('%', '%%')
     if isinstance(msg, basestring):
         msg = escape(msg)
@@ -41,13 +44,8 @@ def _monkey_patched_log(self, level, msg, *args):
         msg = [escape(m) for m in msg]
     return self._orig_log(level, msg, *args)
 
-
-paramiko.transport.Transport._orig_start_client = \
-        paramiko.transport.Transport.start_client
-paramiko.transport.Transport.start_client = _monkey_patched_start_client
-paramiko.sftp_client.SFTPClient._orig_log = \
-        paramiko.sftp_client.SFTPClient._log
-paramiko.sftp_client.SFTPClient._log = _monkey_patched_log
+paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
+paramiko.sftp_client.SFTPClient._log = _custom_log
 
 
 class PythonSSHClient(AbstractSSHClient):
@@ -83,10 +81,8 @@ class PythonSSHClient(AbstractSSHClient):
 
     def open_shell(self):
         self.shell = self.client.invoke_shell(self.config.term_type,
-                self.config.width, self.config.height)
-
-    def _write(self, text):
-        self.shell.sendall(text)
+                                              self.config.width,
+                                              self.config.height)
 
     def _read(self):
         data = ''
@@ -100,11 +96,17 @@ class PythonSSHClient(AbstractSSHClient):
             data = self.shell.recv(1)
          return data
 
+    def _write(self, text):
+        self.shell.sendall(text)
+
     def _create_sftp_client(self):
         return SFTPClient(self.client)
 
 
 class SFTPClient(AbstractSFTPClient):
+
+    def _create_client(self, ssh_client):
+        return ssh_client.open_sftp()
 
     def _list(self, path):
         return self._client.listdir_attr(path)
@@ -112,18 +114,7 @@ class SFTPClient(AbstractSFTPClient):
     def _get_file_permissions(self, fileinfo):
         return fileinfo.st_mode
 
-    def _create_client(self, ssh_client):
-        return ssh_client.open_sftp()
-
-    def _get_file(self, remotepath, localpath):
-        self._client.get(remotepath, localpath)
-
-    def _write_to_remote_file(self, remotefile, data, position):
-        remotefile.write(data)
-
-    def _close_remote_file(self, remotefile):
-        remotefile.close()
-
+    # TODO: Could this be in abstractclient?
     def _create_missing_remote_path(self, path):
         if path == '.':
             return
@@ -142,6 +133,15 @@ class SFTPClient(AbstractSFTPClient):
         remote_file.set_pipelined(True)
         self._client.chmod(dest, mode)
         return remote_file
+
+    def _write_to_remote_file(self, remotefile, data, position):
+        remotefile.write(data)
+
+    def _close_remote_file(self, remotefile):
+        remotefile.close()
+
+    def _get_file(self, remotepath, localpath):
+        self._client.get(remotepath, localpath)
 
     def _normalize_path(self, path):
         return self._client.normalize(path)
