@@ -92,21 +92,11 @@ class JavaSSHClient(AbstractSSHClient):
 
 class SFTPClient(AbstractSFTPClient):
 
-    def exists(self, path):
-        try:
-            self._client.stat(path)
-        except SFTPException:
-            return False
-        return True
+    def _list(self, path):
+        return self._client.ls(path)
 
-    def listfiles(self, path):
-        return [finfo.filename for finfo in self._client.ls(path)
-                if finfo.attributes.isRegularFile()]
-
-    def listdirs(self, path):
-        return [finfo.filename for finfo in self._client.ls(path)
-                if finfo.attributes.isDirectory() and
-                finfo.filename not in ('.', '..')]
+    def _get_file_permissions(self, fileinfo):
+        return fileinfo.attributes.permissions
 
     def _create_client(self, ssh_client):
         return SFTPv3Client(ssh_client)

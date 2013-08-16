@@ -17,6 +17,7 @@ from fnmatch import fnmatchcase
 
 import os
 import re
+import stat
 import time
 import glob
 
@@ -309,13 +310,13 @@ class AbstractSSHClient(object):
 
     def list_files(self, path, pattern=None, absolute=False):
         sftp_client = self._create_sftp_client()
-        items = sftp_client.list_files(path, pattern, absolute)
+        items = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
         sftp_client.close()
         return items
 
     def list_directories(self, path, pattern=None, absolute=False):
         sftp_client = self._create_sftp_client()
-        items = sftp_client.list_directories(path, pattern, absolute)
+        items = sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
         sftp_client.close()
         return items
 
@@ -329,28 +330,42 @@ class AbstractSFTPClient(object):
     def close(self):
         self._client.close()
 
-    def list_files(self, path, pattern=None, absolute=False):
-        items = self.listfiles(path)
-        items = self._format_items(items, path, pattern, absolute)
-        return items
+    def exists(self, path):
+        try:
+            self._client.stat(path)
+        except IOError:
+            return False
+        return True
 
-    def list_directories(self, path, pattern=None, absolute=False):
-        items = self.listdirs(path)
-        items = self._format_items(items, path, pattern, absolute)
-        return items
-
-    # TODO: Refactor
-    def _format_items(self, items, path, pattern, absolute):
+    def list(self, command, path, pattern=None, absolute=False):
+        items = command(path)
         if pattern:
-            items = filter(lambda name: fnmatchcase(name, pattern), items)
+            items = self._filter_by_pattern(items, pattern)
         if absolute:
-            items = [self._get_full_path(path) + name for name in items]
+            items = self._include_absolute_path(items, path)
         return items
+
+    def listfiles(self, path):
+        return self._include_files_of_type(stat.S_ISREG, path)
+
+    def listdirs(self, path):
+        return self._include_files_of_type(stat.S_ISDIR, path)
+
+    def _include_files_of_type(self, stat_type, path):
+        return [fileinfo.filename for fileinfo in self._list(path)
+                if stat_type(self._get_file_permissions(fileinfo)) and
+                (fileinfo.filename not in ('.', '..'))]
+
+    def _filter_by_pattern(self, items, pattern):
+        return [name for name in items if fnmatchcase(name, pattern)]
+
+    def _include_absolute_path(self, items, path):
+        return [self._get_full_path(path) + name for name in items]
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
         if source.endswith(path_separator):
-            source = source[:-1]
+            source = source[:-len(path_separator)]
         if not self.exists(source):
             msg = "There was no source path matching '%s'" % source
             raise SSHClientException(msg)
@@ -362,7 +377,7 @@ class AbstractSFTPClient(object):
         for path in subdirs:
             if recursive:
                 [subdirs.append(path_separator.join([path, subdir_name]))
-                for subdir_name in self.list_directories(path)]
+                for subdir_name in self.listdirs(path)]
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
             if not local_target_exists:
@@ -428,7 +443,7 @@ class AbstractSFTPClient(object):
         os.chdir(os.path.dirname(source))
         parent = os.path.basename(source)
         if destination.endswith(path_separator):
-            destination = destination[:-1]
+            destination = destination[:-len(path_separator)]
         remote_target_exists = True if self.exists(destination) else False
         for dirpath, _, filenames in os.walk(parent):
             for filename in filenames:

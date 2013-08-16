@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import stat
 import posixpath
 
 try:
@@ -107,24 +106,11 @@ class PythonSSHClient(AbstractSSHClient):
 
 class SFTPClient(AbstractSFTPClient):
 
-    def exists(self, path):
-        try:
-            self._client.stat(path)
-        except IOError, e:
-            if e[0] == 2:
-                return False
-            raise
-        return True
+    def _list(self, path):
+        return self._client.listdir_attr(path)
 
-    def listfiles(self, path):
-        return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self._client.listdir_attr(path)
-                if stat.S_ISREG(fileinfo.st_mode)]
-
-    def listdirs(self, path):
-        return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self._client.listdir_attr(path)
-                if stat.S_ISDIR(fileinfo.st_mode)]
+    def _get_file_permissions(self, fileinfo):
+        return fileinfo.st_mode
 
     def _create_client(self, ssh_client):
         return ssh_client.open_sftp()
