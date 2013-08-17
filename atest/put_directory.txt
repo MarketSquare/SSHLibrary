@@ -65,21 +65,21 @@ Verify Remote Directory Does Not Exists
 
 Remote Directory Should Exist With Content
     [Arguments]  ${destination}
-    ${stdout} =  Execute Command  ls ${destination}
-    Should Contain  ${stdout}  ${TEST FILE NAME}
-    Should Contain  ${stdout}  ${TEST FILE 2 NAME}
-    Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
-    Should Not Contain  ${stdout}  ${SPECIAL TEXTFILES NAME}
+    ${items} =  SSHLibrary.List Directory  ${destination}
+    Should Contain  ${items}  ${TEST FILE NAME}
+    Should Contain  ${items}  ${TEST FILE 2 NAME}
+    Should Contain  ${items}  ${FILE WITH NEWLINES NAME}
+    Should Not Contain  ${items}  ${SPECIAL TEXTFILES NAME}
 
 Remote Directory Should Exist With Subdirectories
     [Arguments]  ${destination}
-    ${stdout} =  Execute Command  ls ${destination}
-    Should Contain  ${stdout}  ${TEST FILE NAME}
-    Should Contain  ${stdout}  ${TEST FILE 2 NAME}
-    Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
-    Should Contain  ${stdout}  ${SPECIAL TEXTFILES NAME}
-    ${stdout} =  Execute Command  ls ${destination}${/}${SPECIAL TEXTFILES NAME}
-    Should Contain  ${stdout}  ${FILE WITH SPECIAL CHARS NAME}
+    ${items} =  SSHLibrary.List Directory  ${destination}
+    Should Contain  ${items}  ${TEST FILE NAME}
+    Should Contain  ${items}  ${TEST FILE 2 NAME}
+    Should Contain  ${items}  ${FILE WITH NEWLINES NAME}
+    Should Contain  ${items}  ${SPECIAL TEXTFILES NAME}
+    ${items} =  SSHLibrary.List Directory  ${destination}${/}${SPECIAL TEXTFILES NAME}
+    Should Contain  ${items}  ${FILE WITH SPECIAL CHARS NAME}
 
 Remove Remote Files
     [Arguments]  ${destination}

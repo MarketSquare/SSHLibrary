@@ -77,27 +77,27 @@ Put File With Special Chars In File Name
 *** Keywords ***
 Put Files And Verify
     [Arguments]  ${source}  ${destination}  @{expected}
-    Vefify Remote Files Do Not Exist  @{expected}
+    Vefify Remote Files Do Not Exist  .  @{expected}
     Put File  ${source}  ${destination}
-    Verify Remote Files Exist  ${EMPTY}  @{expected}
+    Verify Remote Files Exist  .  @{expected}
 
 Put File And Specify Newlines
     [Arguments]  ${source}  ${destination}  ${newlines}  @{expected}
-    Vefify Remote Files Do Not Exist  @{expected}
+    Vefify Remote Files Do Not Exist  ${destination}  @{expected}
     Put File  ${source}  ${destination}  newline=${newlines}
-    Verify Remote Files Exist  ${EMPTY}  @{expected}
+    Verify Remote Files Exist  ${destination}  @{expected}
 
-Vefify Remote Files do Not Exist
-    [Arguments]  @{expected}
-    ${listing} =  Execute Command  ls
+Vefify Remote Files Do Not Exist
+    [Arguments]  ${path}  @{expected}
+    ${listing} =  SSHLibrary.List Directory  ${path}
     : FOR  ${filename}  IN  @{expected}
     \  Should Not Contain  ${listing}  ${filename}
 
 Verify Remote Files Exist
-    [Arguments]  ${dirname}  @{expected}
-    ${listing} =  Execute Command  ls ${dirname}
+    [Arguments]  ${path}  @{expected}
+    ${items} =  SSHLibrary.List Directory  ${path}
     : FOR  ${filename}  IN  @{expected}
-    \  Should Contain  ${listing}  ${filename}
+    \  Should Contain  ${items}  ${filename}
 
 Remove Local Temp Dir And Remote File
     Remove Directory  ${LOCAL TMPDIR}  yes
