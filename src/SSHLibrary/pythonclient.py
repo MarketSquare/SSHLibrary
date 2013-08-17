@@ -114,7 +114,6 @@ class SFTPClient(AbstractSFTPClient):
     def _get_file_permissions(self, fileinfo):
         return fileinfo.st_mode
 
-    # TODO: Could this be in abstractclient?
     def _create_missing_remote_path(self, path):
         if path == '.':
             return
@@ -143,7 +142,7 @@ class SFTPClient(AbstractSFTPClient):
     def _get_file(self, remotepath, localpath):
         self._client.get(remotepath, localpath)
 
-    def _normalize_path(self, path):
+    def _absolute_path(self, path):
         return self._client.normalize(path)
 
 

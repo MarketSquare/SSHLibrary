@@ -103,12 +103,11 @@ class SFTPClient(AbstractSFTPClient):
     def _get_file_permissions(self, fileinfo):
         return fileinfo.attributes.permissions
 
-    # TODO: Could this be in abstractclient?
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'
         else:
-            curdir = self._client.canonicalPath('.')
+            curdir = self._client._absolute_path('.')
         for dirname in path.split('/'):
             if dirname:
                 curdir = '%s/%s' % (curdir, dirname)
@@ -155,7 +154,7 @@ class SFTPClient(AbstractSFTPClient):
         localfile.flush()
         localfile.close()
 
-    def _normalize_path(self, path):
+    def _absolute_path(self, path):
         return self._client.canonicalPath(path)
 
 

@@ -329,7 +329,7 @@ class AbstractSSHClient(object):
 class AbstractSFTPClient(object):
 
     def __enter__(self):
-        self._homedir = self._normalize_path('.')
+        self._homedir = self._absolute_path('.')
         return self
 
     def __exit__(self, type, value, traceback):
@@ -365,7 +365,12 @@ class AbstractSFTPClient(object):
         return [name for name in items if fnmatchcase(name, pattern)]
 
     def _include_absolute_path(self, items, path):
-        return [self._get_full_path(path) + name for name in items]
+        absolute_path = self._absolute_path(path)
+        if absolute_path[1:3] == ':\\':
+            absolute_path += '\\'
+        else:
+            absolute_path += '/'
+        return [absolute_path + name for name in items]
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
@@ -528,14 +533,7 @@ class AbstractSFTPClient(object):
                 position += len(data)
             self._close_remote_file(remotefile)
 
-    def _get_full_path(self, path):
-        full_path = self._normalize_path(path)
-        if full_path[1:3] == ':\\':
-            return full_path + '\\'
-        else:
-            return full_path + '/'
-
-    def _normalize_path(self, path):
+    def _absolute_path(self, path):
         raise NotImplementedError
 
 
