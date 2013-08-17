@@ -17,7 +17,7 @@ from java.io import (File, BufferedReader, InputStreamReader, IOException,
                      FileOutputStream)
 try:
     from com.trilead.ssh2 import (StreamGobbler, Connection, SFTPv3Client,
-                                  SFTPException)
+                                  SFTPv3DirectoryEntry, SFTPException)
 except ImportError:
     raise ImportError(
         'Importing Trilead SSH classes failed. '
@@ -100,8 +100,11 @@ class SFTPClient(AbstractSFTPClient):
     def _list(self, path):
         return self._client.ls(path)
 
-    def _get_file_permissions(self, fileinfo):
-        return fileinfo.attributes.permissions
+    def _get_permissions(self, fileinfo):
+        if isinstance(fileinfo, SFTPv3DirectoryEntry):
+            return fileinfo.attributes.permissions
+        else:
+            return fileinfo.permissions
 
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):

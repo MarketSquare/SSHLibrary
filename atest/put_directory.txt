@@ -55,13 +55,11 @@ Put Directory Should Fail When Source Does Not Exists
 *** Keywords ***
 Verify Remote Directory Exists
     [Arguments]  ${destination}
-    ${rc} =  Execute Command  test -d ${destination}  return_stdout=${false}  return_rc=${true}
-    Should Be Equal As Integers  ${rc}  0
+    SSHLibrary.Directory Should Exist  ${destination}
 
 Verify Remote Directory Does Not Exists
     [Arguments]  ${destination}
-    ${rc} =  Execute Command  test -d ${destination}  return_stdout=${false}  return_rc=${true}
-    Should Be Equal As Integers  ${rc}  1
+    SSHLibrary.Directory Should Not Exist  ${destination}
 
 Remote Directory Should Exist With Content
     [Arguments]  ${destination}

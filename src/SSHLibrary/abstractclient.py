@@ -325,6 +325,10 @@ class AbstractSSHClient(object):
         dirs.sort()
         return dirs
 
+    def dir_exists(self, path):
+        with self._create_sftp_client() as sftp_client:
+            exists = sftp_client.dir_exists(path)
+        return exists
 
 class AbstractSFTPClient(object):
 
@@ -335,15 +339,16 @@ class AbstractSFTPClient(object):
     def __exit__(self, type, value, traceback):
         self._client.close()
 
-    def exists(self, path):
+    def dir_exists(self, path):
+        # TODO: Support globs
         try:
-            self._client.stat(path)
+            fileinfo = self._client.stat(path)
         except IOError:
             return False
-        return True
+        return stat.S_ISDIR(self._get_permissions(fileinfo))
 
     def list(self, command, path, pattern=None, absolute=False):
-        if not self.exists(path):
+        if not self.dir_exists(path):
             msg = "There was no path matching '%s'" % path
             raise RuntimeError(msg)
         items = command(path)
@@ -361,7 +366,7 @@ class AbstractSFTPClient(object):
 
     def _include_files_of_type(self, stat_type, path):
         return [fileinfo.filename for fileinfo in self._list(path)
-                if stat_type(self._get_file_permissions(fileinfo)) and
+                if stat_type(self._get_permissions(fileinfo)) and
                 (fileinfo.filename not in ('.', '..'))]
 
     def _filter_by_pattern(self, items, pattern):
@@ -379,7 +384,7 @@ class AbstractSFTPClient(object):
                       recursive=False):
         if source.endswith(path_separator):
             source = source[:-len(path_separator)]
-        if not self.exists(source):
+        if not self.dir_exists(source):
             msg = "There was no source path matching '%s'" % source
             raise SSHClientException(msg)
         remotefiles = []
@@ -457,7 +462,7 @@ class AbstractSFTPClient(object):
         parent = os.path.basename(source)
         if destination.endswith(path_separator):
             destination = destination[:-len(path_separator)]
-        remote_target_exists = True if self.exists(destination) else False
+        remote_target_exists = True if self.dir_exists(destination) else False
         for dirpath, _, filenames in os.walk(parent):
             for filename in filenames:
                 local_path = os.path.join(dirpath, filename)

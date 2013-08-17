@@ -111,7 +111,7 @@ class SFTPClient(AbstractSFTPClient):
     def _list(self, path):
         return self._client.listdir_attr(path)
 
-    def _get_file_permissions(self, fileinfo):
+    def _get_permissions(self, fileinfo):
         return fileinfo.st_mode
 
     def _create_missing_remote_path(self, path):
