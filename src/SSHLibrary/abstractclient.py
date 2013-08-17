@@ -267,20 +267,21 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        sftp_client = self._create_sftp_client()
-        sources, destinations = sftp_client.put_file(source, destination, mode,
-                                                     newline, path_separator)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            sources, destinations = sftp_client.put_file(source, destination,
+                                                         mode, newline,
+                                                         path_separator)
         return sources, destinations
 
     def put_directory(self, source, destination='.', mode='0744',
                       newline='default', path_separator='/', recursive=False):
-        sftp_client = self._create_sftp_client()
-        sources, destinations = sftp_client.put_directory(source, destination,
-                                                          mode, newline,
-                                                          path_separator,
-                                                          recursive)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            sources, destinations = sftp_client.put_directory(source,
+                                                              destination,
+                                                              mode,
+                                                              newline,
+                                                              path_separator,
+                                                              recursive)
         return sources, destinations
 
     def get_file(self, source, destination='.', path_separator='/'):
@@ -293,40 +294,36 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        sftp_client = self._create_sftp_client()
-        sources, destinations = sftp_client.get_file(source, destination,
-                                                     path_separator)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            sources, destinations = sftp_client.get_file(source, destination,
+                                                         path_separator)
         return sources, destinations
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
-        sftp_client = self._create_sftp_client()
-        sources, destinations = sftp_client.get_directory(source, destination,
-                                                          path_separator,
-                                                          recursive)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            sources, destinations = sftp_client.get_directory(source,
+                                                              destination,
+                                                              path_separator,
+                                                              recursive)
         return sources, destination
 
     def list_dir(self, path, pattern=None, absolute=False):
-        sftp_client = self._create_sftp_client()
-        items = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
-        items += sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            items = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
+            items += sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
         items.sort()
         return items
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
-        sftp_client = self._create_sftp_client()
-        files = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            files = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
         files.sort()
         return files
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
-        sftp_client = self._create_sftp_client()
-        dirs = sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
-        sftp_client.close()
+        with self._create_sftp_client() as sftp_client:
+            dirs = sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
         dirs.sort()
         return dirs
 
@@ -337,7 +334,10 @@ class AbstractSFTPClient(object):
         self._client = self._create_client(ssh_client)
         self._homedir = self._normalize_path('.')
 
-    def close(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
         self._client.close()
 
     def exists(self, path):
