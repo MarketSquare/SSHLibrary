@@ -841,7 +841,27 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       path_separator, recursive)
 
     def list_directory(self, path, pattern=None, absolute=False):
-        # TODO: Documentation
+        """Returns and logs items in a remote directory, optionally filtered
+        with `pattern`.
+
+        File and directory names are returned in case-sensitive alphabetical
+        order, e.g. ['A Name', 'Second', 'a lower case name', 'one more'].
+        Implicit directories '.' and '..' are not returned. The returned items
+        are automatically logged.
+
+        By default, the file and directory names are returned relative to the
+        given remote path (e.g. 'file.txt'). If you want them be returned in the
+        absolute format (e.g. '/home/robot/file.txt'), set the `absolute`
+        argument to any non-empty string.
+
+        If `pattern` is given, only items matching it are returned. The pattern
+        matching syntax is explained in `introduction`, and in this case
+        matching is case-sensitive.
+
+        Examples (using also other `List Directory` variants):
+        | @{items} = | List Directory           | /home/robot |
+        | @{files} = | List Files In Directory  | /tmp | *.txt | absolute |
+        """
         items = self.ssh_client.list_dir(path, pattern, absolute)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items), '\n'.join(items)))
         return items
