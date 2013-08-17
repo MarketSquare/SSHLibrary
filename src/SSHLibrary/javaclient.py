@@ -30,14 +30,14 @@ from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
 
 class JavaSSHClient(AbstractSSHClient):
 
+    def __init__(self, *args, **kwargs):
+        super(JavaSSHClient, self).__init__(*args, **kwargs)
+        self.client = Connection(self.host, self.port)
+        self.client.connect()
+
     @staticmethod
     def enable_logging(logfile):
         return False
-
-    def _create_client(self):
-        client = Connection(self.host, self.port)
-        client.connect()
-        return client
 
     def _login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
@@ -94,8 +94,8 @@ class JavaSSHClient(AbstractSSHClient):
 
 class SFTPClient(AbstractSFTPClient):
 
-    def _create_client(self, ssh_client):
-        return SFTPv3Client(ssh_client)
+    def __init__(self, ssh_client):
+        self._client = SFTPv3Client(ssh_client)
 
     def _list(self, path):
         return self._client.ls(path)

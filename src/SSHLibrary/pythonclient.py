@@ -50,15 +50,15 @@ paramiko.sftp_client.SFTPClient._log = _custom_log
 
 class PythonSSHClient(AbstractSSHClient):
 
+    def __init__(self, *args, **kwargs):
+        super(PythonSSHClient, self).__init__(*args, **kwargs)
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
     @staticmethod
     def enable_logging(path):
         paramiko.util.log_to_file(path)
         return True
-
-    def _create_client(self):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        return client
 
     def _login(self, username, password):
         self.client.connect(self.host, self.port, username, password,
@@ -105,8 +105,8 @@ class PythonSSHClient(AbstractSSHClient):
 
 class SFTPClient(AbstractSFTPClient):
 
-    def _create_client(self, ssh_client):
-        return ssh_client.open_sftp()
+    def __init__(self, ssh_client):
+        self._client = ssh_client.open_sftp()
 
     def _list(self, path):
         return self._client.listdir_attr(path)
