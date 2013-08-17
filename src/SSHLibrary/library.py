@@ -643,9 +643,9 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            be the directory where the test execution was started.
 
         Using wildcards is possible in `source`. The pattern matching syntax
-        is explained in `introduction`. When wildcards are used, `destination`
-        MUST be a directory, and files matching the pattern are downloaded,
-        but subdirectories are ignored.
+        is explained in `pattern matching`. When wildcards are used,
+        `destination` MUST be a directory, and files matching the pattern are
+        downloaded, but subdirectories are ignored.
 
         Examples:
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
@@ -766,13 +766,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            on the remote is used as the destination.
 
         Using wildcards is possible in `source`. The pattern matching syntax
-        is explained in `introduction`. When wildcards are used, `destination`
-        MUST be a directory, and files matching the pattern are downloaded,
-        but subdirectories are ignored.
+        is explained in `pattern matching`. When wildcards are used,
+        `destination` MUST be a directory and only files are uploaded from
+        source, subdirectories being ignored.
 
         Examples:
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files by using wildcards |                    |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # all text files by using wildcards |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
         """
         return self._run_sftp_command(self.ssh_client.put_file, source,
@@ -882,7 +882,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Examples (using also other `List Directory` variants):
         | @{items} = | List Directory           | /home/robot |
-        | @{files} = | List Files In Directory  | /tmp | *.txt | absolute |
+        | @{files} = | List Files In Directory  | /tmp | *.txt | absolute=True |
         """
         items = self.ssh_client.list_dir(path, pattern, absolute)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items), '\n'.join(items)))
