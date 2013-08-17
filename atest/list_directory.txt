@@ -56,6 +56,20 @@ List Content With Absolute Paths Using Current Directory
     ${listing} =  List Directory  ${target}  absolute=True
     Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
 
+List Content Using Pattern
+    ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directory  ${target}  pattern=spec*
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Content With Absolute Paths Using Pattern
+    ${expected} =  Create List
+    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
+    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directory  ${target}  pattern=?est*  absolute=True
+    Lists Should Be Equal  ${listing}  ${expected}
+
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
