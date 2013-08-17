@@ -65,12 +65,12 @@ Directory Should Exist With Content
     File Should Exist  ${destination}${/}${TEST FILE NAME}
     File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    Directory Should Not Exist  ${destination}${/}special
+    Directory Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
     File Should Exist  ${destination}${/}${TEST FILE NAME}
     File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    Directory Should Exist  ${destination}${/}special
-    File Should Exist  ${destination}${/}special/${FILE WITH SPECIAL CHARS NAME}
+    Directory Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
+    File Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}/${FILE WITH SPECIAL CHARS NAME}

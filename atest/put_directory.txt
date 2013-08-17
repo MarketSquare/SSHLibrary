@@ -69,7 +69,7 @@ Remote Directory Should Exist With Content
     Should Contain  ${stdout}  ${TEST FILE NAME}
     Should Contain  ${stdout}  ${TEST FILE 2 NAME}
     Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
-    Should Not Contain  ${stdout}  special
+    Should Not Contain  ${stdout}  ${SPECIAL TEXTFILES NAME}
 
 Remote Directory Should Exist With Subdirectories
     [Arguments]  ${destination}
@@ -77,8 +77,8 @@ Remote Directory Should Exist With Subdirectories
     Should Contain  ${stdout}  ${TEST FILE NAME}
     Should Contain  ${stdout}  ${TEST FILE 2 NAME}
     Should Contain  ${stdout}  ${FILE WITH NEWLINES NAME}
-    Should Contain  ${stdout}  special
-    ${stdout} =  Execute Command  ls ${destination}${/}special
+    Should Contain  ${stdout}  ${SPECIAL TEXTFILES NAME}
+    ${stdout} =  Execute Command  ls ${destination}${/}${SPECIAL TEXTFILES NAME}
     Should Contain  ${stdout}  ${FILE WITH SPECIAL CHARS NAME}
 
 Remove Remote Files

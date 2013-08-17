@@ -71,7 +71,7 @@ Put File Should Fail When There Are No Source Files
 Put File With Special Chars In File Name
     [Documentation]    http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
     Put File  ${FILE WITH SPECIAL CHARS}  ${USER HOME}/robotdir/
-    Verify Remote Files Exist  robotdir  special%2Fchars.txt
+    Verify Remote Files Exist  robotdir  ${FILE WITH SPECIAL CHARS NAME}
     [Teardown]  Execute Command  rm -rf robotdir
 
 *** Keywords ***

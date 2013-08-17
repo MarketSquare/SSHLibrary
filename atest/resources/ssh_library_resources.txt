@@ -6,7 +6,8 @@ Variables       user_information.py
 ${TESTDATA}   ${CURDIR}${/}..${/}testdata
 ${SCRIPTS}    ${TESTDATA}${/}scripts
 ${TEXTFILES}  ${TESTDATA}${/}textfiles
-${SPECIAL TEXTFILES}  ${TEXTFILES}${/}special
+${SPECIAL TEXTFILES NAME}  special
+${SPECIAL TEXTFILES}  ${TEXTFILES}${/}${SPECIAL TEXTFILES NAME}
 ${TEST SCRIPT NAME}  test.sh
 ${TEST SCRIPT}  ${SCRIPTS}${/}${TEST SCRIPT NAME}
 ${INTERACTIVE TEST SCRIPT NAME}  test_interactive.sh
