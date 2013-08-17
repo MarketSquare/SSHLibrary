@@ -1,0 +1,74 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+Library         Collections
+
+*** Variables ***
+${TEST_ROOT_NAME}           test_root
+${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}${TEST_ROOT_NAME}
+
+*** Test Cases ***
+List Directories Using Absolute Path
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directories In Directory  ${target}
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Directories Using Relative Path
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${TEST_ROOT_NAME}
+    ${listing} =  List Directories In Directory  ${target}
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Directories Using Current Directory
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  .
+    ${listing} =  List Directories In Directory  ${target}
+    Should Contain  ${listing}  ${TEST_ROOT_NAME}
+
+List Directories With Absolute Paths Using Absolute Path
+    ${expected} =  Create List
+    ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
+    ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Directories With Absolute Paths Using Relative
+    ${expected} =  Create List
+    ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
+    ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${TEST_ROOT_NAME}
+    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    Lists Should Be Equal  ${listing}  ${EXPECTED}
+
+List Directories With Absolute Paths Using Current Directory
+    ${target} =  Set Variable  .
+    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
+
+List Directories Using Pattern
+    ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directories In Directory  ${target}  pattern=spec*
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Directories With Absolute Paths Using Pattern
+    ${expected} =  Create List  ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
+    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Directories In Directory  ${target}  pattern=emp*  absolute=True
+    Lists Should Be Equal  ${listing}  ${expected}
+
+*** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put Directory  ${TEXTFILES}  ${ABSOLUTE_TEST_ROOT_PATH}  recursive=True
+
+Remove Test Files and Close Connections
+    Execute Command  rm -rf ${ABSOLUTE_TEST_ROOT_PATH}
+    Close All Connections

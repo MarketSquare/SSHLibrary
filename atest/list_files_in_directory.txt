@@ -10,69 +10,60 @@ ${TEST_ROOT_NAME}           test_root
 ${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}${TEST_ROOT_NAME}
 
 *** Test Cases ***
-List Content Using Absolute Path
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
+List Files Using Absolute Path
+    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ...                         ${TEST FILE NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
-    ${listing} =  List Directory  ${target}
+    ${listing} =  List Files In Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content Using Relative Path
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
+List Files Using Relative Path
+    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ...                         ${TEST FILE NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
-    ${listing} =  List Directory  ${target}
+    ${listing} =  List Files In Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content Using Current Directory
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
+List Files Using Current Directory
     ${target} =  Set Variable  .
-    ${listing} =  List Directory  ${target}
-    Should Contain  ${listing}  ${TEST_ROOT_NAME}
+    ${listing} =  List Files In Directory  ${target}
+    Should Not Contain  ${listing}  ${TEST_ROOT_NAME}
 
-List Content With Absolute Paths Using Absolute Path
+List Files With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
-    ${listing} =  List Directory  ${target}  absolute=True
+    ${listing} =  List Files In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content With Absolute Paths Using Relative
+List Files With Absolute Paths Using Relative
     ${expected} =  Create List
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
-    ${listing} =  List Directory  ${target}  absolute=True
+    ${listing} =  List Files In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
 
-List Content With Absolute Paths Using Current Directory
+List Files With Absolute Paths Using Current Directory
     ${target} =  Set Variable  .
-    ${listing} =  List Directory  ${target}  absolute=True
-    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${listing} =  List Files In Directory  ${target}  absolute=True
+    Should Not Contain  ${listing}  ${TEST_ROOT_NAME}
 
-List Content Using Pattern
-    ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
+List Files Using Pattern
+    ${expected} =  Create List  ${FILE WITH NEWLINES NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
-    ${listing} =  List Directory  ${target}  pattern=spec*
+    ${listing} =  List Files In Directory  ${target}  pattern=*newlines.txt
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content With Absolute Paths Using Pattern
+List Files With Absolute Paths Using Pattern
     ${expected} =  Create List
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
-    ${listing} =  List Directory  ${target}  pattern=?est*  absolute=True
+    ${listing} =  List Files In Directory  ${target}  pattern=?est*  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 *** Keywords ***
