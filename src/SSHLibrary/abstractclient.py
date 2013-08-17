@@ -313,18 +313,21 @@ class AbstractSSHClient(object):
         items = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
         items += sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
         sftp_client.close()
+        items.sort()
         return items
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
         sftp_client = self._create_sftp_client()
         files = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
         sftp_client.close()
+        files.sort()
         return files
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
         sftp_client = self._create_sftp_client()
         dirs = sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
         sftp_client.close()
+        dirs.sort()
         return dirs
 
 
