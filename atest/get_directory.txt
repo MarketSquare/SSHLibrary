@@ -2,7 +2,7 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Teardown   Remove Directory  ${target}  True
+Test Teardown   Remove Directory  ${target}  recursive=True
 Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem
 
@@ -32,6 +32,7 @@ Get Directory Including Subdirectories To Non-Existing Local Path
     Directory Should Not Exist  ${target}
     Get Directory  ${USER HOME}${/}test_root  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}
+    [Teardown]  Remove Directory  my  recursive=True
 
 Get Directory To Current Local Path
     ${target} =  Set Variable  .${/}test_root

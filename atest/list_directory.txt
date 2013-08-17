@@ -11,42 +11,42 @@ ${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}${TEST_ROOT_NAME}
 
 *** Test Cases ***
 List Content Using Absolute Path
-    ${EXPECTED} =  Create List  ${FILE WITH NEWLINES NAME}  special
-    ...                         ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ...                         special  ${TEST FILE NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directory  ${target}
-    Lists Should Be Equal  ${listing}  ${EXPECTED}
+    Lists Should Be Equal  ${listing}  ${expected}
 
 List Content Using Relative Path
-    ${EXPECTED} =  Create List  ${FILE WITH NEWLINES NAME}  special
-    ...                         ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ...                         special  ${TEST FILE NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
     ${listing} =  List Directory  ${target}
-    Lists Should Be Equal  ${listing}  ${EXPECTED}
+    Lists Should Be Equal  ${listing}  ${expected}
 
 List Content Using Current Directory
-    ${EXPECTED} =  Create List  ${FILE WITH NEWLINES NAME}  special
-    ...                         ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ...                         special  ${TEST FILE NAME}
     ${target} =  Set Variable  .
     ${listing} =  List Directory  ${target}
     Should Contain  ${listing}  ${TEST_ROOT_NAME}
 
 List Content With Absolute Paths Using Absolute Path
-    ${EXPECTED} =  Create List
+    ${expected} =  Create List
+    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}special
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directory  ${target}  absolute=True
-    Lists Should Be Equal  ${listing}  ${EXPECTED}
+    Lists Should Be Equal  ${listing}  ${expected}
 
 List Content With Absolute Paths Using Relative
-    ${EXPECTED} =  Create List
+    ${expected} =  Create List
+    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}special
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
     ${listing} =  List Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
