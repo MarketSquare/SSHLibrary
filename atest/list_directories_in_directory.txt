@@ -10,28 +10,28 @@ ${TEST_ROOT_NAME}           test_root
 ${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}${TEST_ROOT_NAME}
 
 *** Test Cases ***
-List Directories Using Absolute Path
+List Subdirectories Using Absolute Path
     ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directories In Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories Using Relative Path
+List Subdirectories Using Relative Path
     ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
     ${listing} =  List Directories In Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories Using Current Directory
+List Subdirectories Using Current Directory
     ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}
     ${target} =  Set Variable  .
     ${listing} =  List Directories In Directory  ${target}
     Should Contain  ${listing}  ${TEST_ROOT_NAME}
 
-List Directories With Absolute Paths Using Absolute Path
+List Subdirectories With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
     ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
@@ -39,7 +39,7 @@ List Directories With Absolute Paths Using Absolute Path
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories With Absolute Paths Using Relative
+List Subdirectories With Absolute Paths Using Relative
     ${expected} =  Create List
     ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
     ...                  ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
@@ -47,22 +47,26 @@ List Directories With Absolute Paths Using Relative
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
 
-List Directories With Absolute Paths Using Current Directory
+List Subdirectories With Absolute Paths Using Current Directory
     ${target} =  Set Variable  .
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
 
-List Directories Using Pattern
+List Subdirectories Using Pattern
     ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directories In Directory  ${target}  pattern=spec*
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories With Absolute Paths Using Pattern
+List Subdirectories With Absolute Paths Using Pattern
     ${expected} =  Create List  ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directories In Directory  ${target}  pattern=emp*  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
+
+List Subdirectories Should Fail When Source Path Not Exists
+    ${target} =  Set Variable  not_exists
+    Run Keyword And Expect Error  There was no path matching '${target}'  List Directories In Directory  ${target}
 
 *** Keywords ***
 Login And Move Test Files

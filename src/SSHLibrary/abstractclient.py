@@ -343,6 +343,9 @@ class AbstractSFTPClient(object):
         return True
 
     def list(self, command, path, pattern=None, absolute=False):
+        if not self.exists(path):
+            msg = "There was no path matching '%s'" % path
+            raise RuntimeError(msg)
         items = command(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)

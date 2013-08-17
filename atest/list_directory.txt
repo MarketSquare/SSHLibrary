@@ -10,7 +10,7 @@ ${TEST_ROOT_NAME}           test_root
 ${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}${TEST_ROOT_NAME}
 
 *** Test Cases ***
-List Content Using Absolute Path
+List Directory Using Absolute Path
     ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
@@ -18,7 +18,7 @@ List Content Using Absolute Path
     ${listing} =  List Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content Using Relative Path
+List Directory Using Relative Path
     ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
@@ -26,7 +26,7 @@ List Content Using Relative Path
     ${listing} =  List Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content Using Current Directory
+List Directory Using Current Directory
     ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
@@ -34,7 +34,7 @@ List Content Using Current Directory
     ${listing} =  List Directory  ${target}
     Should Contain  ${listing}  ${TEST_ROOT_NAME}
 
-List Content With Absolute Paths Using Absolute Path
+List Directory With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
@@ -45,7 +45,7 @@ List Content With Absolute Paths Using Absolute Path
     ${listing} =  List Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content With Absolute Paths Using Relative
+List Directory With Absolute Paths Using Relative
     ${expected} =  Create List
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
@@ -56,24 +56,28 @@ List Content With Absolute Paths Using Relative
     ${listing} =  List Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
 
-List Content With Absolute Paths Using Current Directory
+List Directory With Absolute Paths Using Current Directory
     ${target} =  Set Variable  .
     ${listing} =  List Directory  ${target}  absolute=True
     Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
 
-List Content Using Pattern
+List Directory Using Pattern
     ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directory  ${target}  pattern=spec*
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content With Absolute Paths Using Pattern
+List Directory With Absolute Paths Using Pattern
     ${expected} =  Create List
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
     ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
     ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
     ${listing} =  List Directory  ${target}  pattern=?est*  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
+
+List Directory Should Fail When Source Path Not Exists
+    ${target} =  Set Variable  not_exists
+    Run Keyword And Expect Error  There was no path matching '${target}'  List Directory  ${target}
 
 *** Keywords ***
 Login And Move Test Files
