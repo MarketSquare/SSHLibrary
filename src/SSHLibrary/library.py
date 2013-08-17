@@ -31,6 +31,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     SSHLibrary works with both Python and Jython interpreters.
 
+    = Requirements =
+
     To use SSHLibrary with Python, you must first install Paramiko SSH
     implementation[1]. For Jython, you must have the JAR distribution of
     Trilead SSH implementation[2] in the CLASSPATH during the test execution.
@@ -38,12 +40,16 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     | [1] https://github.com/paramiko/paramiko
     | [2] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
 
+    = Connections =
+
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
     Only one connection can be active at a time. This means that most of the
     keywords only affect to the active connection. Active connection can be
     changed using `Switch Connection` keyword.
+
+    = Executing commands =
 
     For executing commands on the remote host, there are two possibilities:
 
@@ -57,6 +63,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     interactive mode, prompt must be set before using any of the
     Write-keywords.
 
+    = Configuration =
+
     Prompt, as well as the other settings can be configured as defaults for
     all the upcoming connections on `library importing` or by using keyword
     `Set Default Configuration`. Settings overriding these defaults
@@ -64,6 +72,20 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     Currently active, already open connection can be configured with
     `Set Client Configuration`.
+
+    = Pattern matching =
+
+    Some keywords allow their arguments to be specified as _glob patterns_
+    where:
+    | *        | matches anything, even an empty string |
+    | ?        | matches any single character |
+    | [chars]  | matches any character inside square brackets (e.g. '[abc]' matches either 'a', 'b' or 'c') |
+    | [!chars] | matches any character not inside square brackets |
+
+    Unless otherwise noted, matching is case-insensitive on
+    case-insensitive operating systems such as Windows. Pattern
+    matching is implemented using
+    [http://docs.python.org/library/fnmatch.html|fnmatch module].
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -620,14 +642,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            the local machine is used as the destination. This will most probably
            be the directory where the test execution was started.
 
-        Using wildcards like '*' and '?' is possible in `source`.
-        When wildcards are used, `destination` MUST be a directory, and files
-        matching the pattern are downloaded, but subdirectories are ignored.
-        If the contents of subdirectories are also needed, use the keyword again.
+        Using wildcards is possible in `source`. The pattern matching syntax
+        is explained in `introduction`. When wildcards are used, `destination`
+        MUST be a directory, and files matching the pattern are downloaded,
+        but subdirectories are ignored.
 
         Examples:
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
-        | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
+        | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # all text files by using wildcards |
         """
         return self._run_sftp_command(self.ssh_client.get_file, source,
                                       destination, path_separator)
@@ -743,14 +765,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         5. If `destination` is not given, the user's home directory
            on the remote is used as the destination.
 
-        Using wildcards like '*' and '?' is possible in `source`.
-        When wildcards are used, `destination` MUST be a directory and only
-        files are uploaded from `source`, subdirectories being ignored. If the
-        contents of subdirectories are also needed, use the keyword again.
+        Using wildcards is possible in `source`. The pattern matching syntax
+        is explained in `introduction`. When wildcards are used, `destination`
+        MUST be a directory, and files matching the pattern are downloaded,
+        but subdirectories are ignored.
 
         Examples:
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files by using wildcards |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
         """
         return self._run_sftp_command(self.ssh_client.put_file, source,
