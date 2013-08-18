@@ -634,10 +634,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            over it.
         2. If `destination` is an existing directory, `source` file is
            downloaded into it. Possible file with the same name is overwritten.
-        3. If `destination` does not exist and it ends with `path_
-           separator`, it is considered a directory. The directory is then
-           created and `source` file is downloaded into it. Possible missing
-           intermediate directories are also created.
+        3. If `destination` does not exist and it ends with `path_separator`,
+           it is considered a directory. The directory is then created and
+           `source` file is downloaded into it. Possible missing intermediate
+           directories are also created.
         4. If `destination` does not exist and does not end with
            `path_separator`, it is considered a file. If the path to the file
            does not exist, it is created.
@@ -758,10 +758,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            over it.
         2. If `destination` is an existing directory, `source` file is
            uploaded into it. Possible file with same name is overwritten.
-        3. If `destination` does not exist and it ends with `path_
-           separator`, it is considered a directory. The directory is then
-           created and `source` file uploaded into it. Possibly missing
-           intermediate directories are also created.
+        3. If `destination` does not exist and it ends with `path_separator`,
+           it is considered a directory. The directory is then created and
+           `source` file uploaded into it. Possibly missing intermediate
+           directories are also created.
         4. If `destination` does not exist and it does not end with
            `path_separator, it is considered a file. If the path to the file
            does not exist, it is created.
