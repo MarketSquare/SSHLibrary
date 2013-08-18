@@ -348,15 +348,18 @@ class AbstractSFTPClient(object):
     def __exit__(self, *args):
         self._client.close()
 
-    def file_exists(self, path):
-        return self._exists(path, stat.S_ISREG)
+    def file_exists(self, path, follow_symlinks=True):
+        return self._exists(path, stat.S_ISREG, follow_symlinks)
 
-    def dir_exists(self, path):
-        return self._exists(path, stat.S_ISDIR)
+    def dir_exists(self, path, follow_symlinks=True):
+        return self._exists(path, stat.S_ISDIR, follow_symlinks)
 
-    def _exists(self, path, file_type):
+    def _exists(self, path, file_type, follow_symlinks):
         try:
-            fileinfo = self._client.stat(path)
+            if follow_symlinks:
+                fileinfo = self._client.stat(path)
+            else:
+                fileinfo = self._client.lstat(path)
         except IOError:
             return False
         return file_type(self._get_permissions(fileinfo))
