@@ -330,22 +330,33 @@ class AbstractSSHClient(object):
             exists = sftp_client.dir_exists(path)
         return exists
 
+    def file_exists(self, path):
+        with self._create_sftp_client() as sftp_client:
+            exists = sftp_client.file_exists(path)
+        return exists
+
+
 class AbstractSFTPClient(object):
 
     def __enter__(self):
         self._homedir = self._absolute_path('.')
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, *args):
         self._client.close()
 
+    def file_exists(self, path):
+        return self._exists(path, stat.S_ISREG)
+
     def dir_exists(self, path):
-        # TODO: Support globs
+        return self._exists(path, stat.S_ISDIR)
+
+    def _exists(self, path, file_type):
         try:
             fileinfo = self._client.stat(path)
         except IOError:
             return False
-        return stat.S_ISDIR(self._get_permissions(fileinfo))
+        return file_type(self._get_permissions(fileinfo))
 
     def list(self, command, path, pattern=None, absolute=False):
         if not self.dir_exists(path):
@@ -359,14 +370,14 @@ class AbstractSFTPClient(object):
         return items
 
     def listfiles(self, path):
-        return self._include_files_of_type(stat.S_ISREG, path)
+        return self._files_of_type(stat.S_ISREG, path)
 
     def listdirs(self, path):
-        return self._include_files_of_type(stat.S_ISDIR, path)
+        return self._files_of_type(stat.S_ISDIR, path)
 
-    def _include_files_of_type(self, stat_type, path):
+    def _files_of_type(self, file_type, path):
         return [fileinfo.filename for fileinfo in self._list(path)
-                if stat_type(self._get_permissions(fileinfo)) and
+                if file_type(self._get_permissions(fileinfo)) and
                 (fileinfo.filename not in ('.', '..'))]
 
     def _filter_by_pattern(self, items, pattern):

@@ -902,19 +902,23 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     def directory_should_exist(self, path):
         """Fails if the given path does not point to an existing directory.
-
-        The path can be given as an exact path or as a glob pattern.
-        The pattern matching syntax is explained in `pattern matching`.
         """
         return self.ssh_client.dir_exists(path)
 
     def directory_should_not_exist(self, path):
         """Fails if the given path points to an existing directory.
-
-        The path can be given as an exact path or as a glob pattern.
-        The pattern matching syntax is explained in `pattern matching`.
         """
         return not self.ssh_client.dir_exists(path)
+
+    def file_should_exist(self, path):
+        """Fails if the given path does not point to an existing file.
+        """
+        return self.ssh_client.file_exists(path)
+
+    def file_should_not_exist(self, path):
+        """Fails if the given path points to an existing file.
+        """
+        return not self.ssh_client.file_exists(path)
 
     def _run_sftp_command(self, command, *args):
         try:

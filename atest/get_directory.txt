@@ -62,15 +62,15 @@ Remove Test Files and Close Connections
 
 Directory Should Exist With Content
     [Arguments]  ${destination}
-    File Should Exist  ${destination}${/}${TEST FILE NAME}
-    File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
-    File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.Directory Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
-    File Should Exist  ${destination}${/}${TEST FILE NAME}
-    File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
-    File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.Directory Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
-    File Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}/${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}/${FILE WITH SPECIAL CHARS NAME}
