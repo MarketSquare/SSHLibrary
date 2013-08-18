@@ -866,22 +866,22 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       path_separator, recursive)
 
     def directory_should_exist(self, path):
-        """Fails if the given path is NOT an existing directory.
+        """Fails if the given path does NOT point to an existing directory.
         """
         return self.ssh_client.dir_exists(path)
 
     def directory_should_not_exist(self, path):
-        """Fails if the given path is an existing directory.
+        """Fails if the given path points to an existing directory.
         """
         return not self.ssh_client.dir_exists(path)
 
     def file_should_exist(self, path):
-        """Fails if the given path is NOT an existing file.
+        """Fails if the given path does NOT point to an existing file.
         """
         return self.ssh_client.file_exists(path)
 
     def file_should_not_exist(self, path):
-        """Fails if the given path is an existing file.
+        """Fails if the given path points to an existing file.
         """
         return not self.ssh_client.file_exists(path)
 
