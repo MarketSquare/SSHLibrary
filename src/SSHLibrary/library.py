@@ -877,7 +877,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         argument to any non-empty string.
 
         If `pattern` is given, only items matching it are returned. The pattern
-        matching syntax is explained in `introduction`, and in this case
+        matching syntax is explained in `pattern matching`, and in this case
         matching is case-sensitive.
 
         Examples (using also other `List Directory` variants):
