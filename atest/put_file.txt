@@ -37,7 +37,7 @@ Put File With Non-ASCII Characters
 Put File And Specify Remote Newlines
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Put File And Specify Newlines  ${FILE WITH NEWLINES}  ${USER HOME}/  CRLF  ${FILE WITH NEWLINES NAME}
-    SSHLibrary.Get File  ${USER HOME}/${FILE WITH NEWLINES NAME}  ${LOCAL TMPDIR}${/}
+    SSH.Get File  ${USER HOME}/${FILE WITH NEWLINES NAME}  ${LOCAL TMPDIR}${/}
     ${content}=  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
     ${expected}=  OS.Get File  ${FILE WITH NEWLINES}
     ${expected}=  Replace String  ${expected}  \n  \r\n
@@ -66,7 +66,7 @@ Put File With Pattern Matching Directory
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
 
 Put File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There are no source files matching 'non*existing'  SSHLibrary.Put File  non*existing
+    Run Keyword And Expect Error  There are no source files matching 'non*existing'  SSH.Put File  non*existing
 
 Put File With Special Chars In File Name
     [Documentation]    http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
@@ -89,13 +89,13 @@ Put File And Specify Newlines
 
 Vefify Remote Files Do Not Exist
     [Arguments]  ${path}  @{expected}
-    ${listing} =  SSHLibrary.List Directory  ${path}
+    ${listing} =  SSH.List Directory  ${path}
     : FOR  ${filename}  IN  @{expected}
     \  Should Not Contain  ${listing}  ${filename}
 
 Verify Remote Files Exist
     [Arguments]  ${path}  @{expected}
-    ${items} =  SSHLibrary.List Directory  ${path}
+    ${items} =  SSH.List Directory  ${path}
     : FOR  ${filename}  IN  @{expected}
     \  Should Contain  ${items}  ${filename}
 

@@ -20,16 +20,16 @@ Get File With Pattern
     Get File And Verify Listing  ${USER HOME}/*  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
 
 Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  ${USER HOME}/*.txt  ${LOCAL TMPDIR}${/}foo
+    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSH.Get File  ${USER HOME}/*.txt  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
-    SSHLibrary.Get File  ${USER HOME}/${TEST FILE NAME}  .
+    SSH.Get File  ${USER HOME}/${TEST FILE NAME}  .
     ${listing} =  OS.List Files In Directory  .
     Should Contain  ${listing}  ${TEST FILE NAME}
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File When Destination Directory Does Not Exist
-    SSHLibrary.Get File  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
+    SSH.Get File  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
     ${listing} =  OS.List Files In Directory  ${LOCAL TMPDIR}${/}missingdir
     Should Contain  ${listing}  foo.txt
 
@@ -39,13 +39,13 @@ Get File From A Path Not Under Home Directory
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSHLibrary.Get File  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    SSH.Get File  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
     ${contents} =  OS.List Directory  ${LOCAL TMPDIR}${/}
     Should Contain  ${contents}  ${TEST FILE NAME}
     [Teardown]  OS.Remove Directory  ${LOCAL TMPDIR}  yes
 
 Get File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSHLibrary.Get File  non-existing
+    Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSH.Get File  non-existing
 
 *** Keywords ***
 Login And Move Test Files
@@ -55,7 +55,7 @@ Login And Move Test Files
 
 Get File And Verify Listing
     [Arguments]  ${source}  ${destination}  @{expected}
-    SSHLibrary.Get File  ${source}  ${destination}
+    SSH.Get File  ${source}  ${destination}
     ${listing} =  OS.List Files In Directory  ${LOCAL TMPDIR}
     : FOR  ${filename}  IN  @{expected}
     \  Should Contain  ${listing}  ${filename}

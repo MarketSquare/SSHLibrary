@@ -17,7 +17,7 @@ Get Directory To Existing Local Path
 Get Directory To Non-Existing Local Path
     ${target} =  Set Variable  tmpdir
     OS.Directory Should Not Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}${/}test_root${/}  ${target}
+    SSH.Get Directory  ${USER HOME}${/}test_root${/}  ${target}
     Directory Should Exist With Content  ${target}
 
 Get Directory Including Subdirectories To Existing Local Path
@@ -32,7 +32,7 @@ Get Directory Including Subdirectories To Non-Existing Local Path
     OS.Directory Should Not Exist  ${target}
     Get Directory  ${USER HOME}${/}test_root  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}
-    [Teardown]  Remove Directory  my  recursive=True
+    ${target} =  Set Variable  my
 
 Get Directory To Current Local Path
     ${target} =  Set Variable  .${/}test_root
@@ -48,7 +48,7 @@ Get Directory Using Relative Source
 
 Get Directory Should Fail When Source Does Not Exists
     ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Run Keyword And Expect Error  There was no source path matching 'non-existing'  SSHLibrary.Get Directory  non-existing
+    Run Keyword And Expect Error  There was no source path matching 'non-existing'  SSH.Get Directory  non-existing
     OS.Directory Should Not Exist  ${target}
 
 *** Keywords ***
