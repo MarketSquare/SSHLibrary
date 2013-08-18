@@ -5,16 +5,12 @@ Suite Teardown  Remove Test Files and Close Connections
 Resource        resources/ssh_library_resources.txt
 Library         Collections
 
-*** Variables ***
-${TEST_ROOT_NAME}           test_root
-${ABSOLUTE_TEST_ROOT_PATH}  ${USER HOME}${/}${TEST_ROOT_NAME}
-
 *** Test Cases ***
 List Directory Using Absolute Path
     ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
-    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directory  ${target}
     Lists Should Be Equal  ${listing}  ${expected}
 
@@ -36,22 +32,22 @@ List Directory Using Current Directory
 
 List Directory With Absolute Paths Using Absolute Path
     ${expected} =  Create List
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
-    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directory With Absolute Paths Using Relative
     ${expected} =  Create List
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${EMPTY TEXTFILES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${FILE WITH NEWLINES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${SPECIAL TEXTFILES NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
     ${listing} =  List Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
@@ -59,19 +55,19 @@ List Directory With Absolute Paths Using Relative
 List Directory With Absolute Paths Using Current Directory
     ${target} =  Set Variable  .
     ${listing} =  List Directory  ${target}  absolute=True
-    Should Contain  ${listing}  ${ABSOLUTE_TEST_ROOT_PATH}
+    Should Contain  ${listing}  ${REMOTE TEST ROOT}
 
 List Directory Using Pattern
     ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
-    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directory  ${target}  pattern=spec*
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directory With Absolute Paths Using Pattern
     ${expected} =  Create List
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE 2 NAME}
-    ...                 ${ABSOLUTE_TEST_ROOT_PATH}${/}${TEST FILE NAME}
-    ${target} =  Set Variable  ${ABSOLUTE_TEST_ROOT_PATH}
+    ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directory  ${target}  pattern=?est*  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
@@ -82,8 +78,4 @@ List Directory Should Fail When Source Path Not Exists
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
-    Put Directory  ${TEXTFILES}  ${ABSOLUTE_TEST_ROOT_PATH}  recursive=True
-
-Remove Test Files and Close Connections
-    Execute Command  rm -rf ${ABSOLUTE_TEST_ROOT_PATH}
-    Close All Connections
+    Put Directory  ${TEXTFILES}  ${REMOTE TEST ROOT}  recursive=True

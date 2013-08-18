@@ -9,18 +9,18 @@ Library         OperatingSystem  WITH NAME  OS
 *** Test Cases ***
 Get File From Absolute Source
     OS.File Should Not Exist  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
-    SSH.Get File  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
     OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
     [Teardown]  OS.Remove File  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
 
 Get File From Relative Source
     OS.File Should Not Exist  ${TEST FILE NAME}
-    SSH.Get File  ${TEST FILE NAME}  ${TEST FILE NAME}
+    SSH.Get File  ${TEST_ROOT_NAME}${/}${TEST FILE NAME}  ${TEST FILE NAME}
     OS.File Should Exist  ${TEST FILE NAME}
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File With Different Name
-    SSH.Get File  ${USER HOME}/${FILE WITH NON-ASCII NAME}  foo.txt
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${FILE WITH NON-ASCII NAME}  foo.txt
     OS.File Should Exist  foo.txt
     [Teardown]  OS.Remove File  foo.txt
 
@@ -29,21 +29,21 @@ Get File With Pattern
     ${destination} =  Set Variable  ${LOCAL TMPDIR}${/}
     : FOR  ${filename}  IN  @{expected}
     \  OS.File Should Not Exist  ${destination}${/}${filename}
-    SSH.Get File  ${USER HOME}/*  ${destination}
+    SSH.Get File  ${REMOTE TEST ROOT}/*  ${destination}
     : FOR  ${filename}  IN  @{expected}
     \  OS.File Should Exist  ${destination}${/}${filename}
 
 Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSH.Get File  ${USER HOME}/*.txt  ${LOCAL TMPDIR}${/}foo
+    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
-    SSH.Get File  ${USER HOME}/${TEST FILE NAME}  .
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  .
     OS.File Should Exist  ${TEST_FILE_NAME}
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File When Destination Directory Does Not Exist
     ${target} =  Set Variable  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
-    SSH.Get File  ${USER HOME}/${TEST FILE NAME}  ${target}
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${target}
     OS.File Should Exist  ${target}
     [Teardown]  OS.Remove File  ${target}
 
@@ -54,7 +54,7 @@ Get File From A Path Not Under Home Directory
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSH.Get File  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
     OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST_FILE_NAME}
     [Teardown]  OS.Remove Directory  ${LOCAL TMPDIR}  yes
 
@@ -64,8 +64,8 @@ Get File Should Fail When There Are No Source Files
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
-    Put File  ${TEXT FILES}/*  ${USER HOME}/
-    Put File  ${FILE WITH NON-ASCII}  ${USER HOME}/
+    Put File  ${TEXT FILES}/*  ${REMOTE TEST ROOT}${/}
+    Put File  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}${/}
 
 Create Tmp Dir And Move File
     Put File  ${TEST FILE}  /tmp/
