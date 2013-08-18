@@ -7,11 +7,11 @@ Library         OperatingSystem  WITH NAME  OS
 Library         String
 
 *** Variables ***
-${TEST FILE PATTERN}  ${TEXTFILES}${/}test*.txt
+${TEST FILE PATTERN}  ${TEXTFILES}${/}?est*.txt
 
 *** Test Cases ***
 Put File With Absolute Destination
-    Put Files And Verify  ${TEST FILE}  ${USER HOME}/  ${TEST FILE NAME}
+    Put Files And Verify  ${TEST FILE}  ${REMOTE TEST ROOT}${/}  ${TEST FILE NAME}
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME}
 
 Put File With Relative Destination
@@ -23,21 +23,21 @@ Put File To Home Directory
     [Teardown]  Execute Command  rm -f ${TEST FILE NAME}
 
 Put File With Different Name
-    Put Files And Verify  ${TEST FILE}  ${USER HOME}/another_name.txt  another_name.txt
+    Put Files And Verify  ${TEST FILE}  ${REMOTE TEST ROOT}/another_name.txt  another_name.txt
     [Teardown]  Execute Command  rm -f another_name.txt
 
 Put File With Newlines
-    Put Files And Verify  ${FILE WITH NEWLINES}  ${USER HOME}/  ${FILE WITH NEWLINES NAME}
+    Put Files And Verify  ${FILE WITH NEWLINES}  ${REMOTE TEST ROOT}${/}  ${FILE WITH NEWLINES NAME}
     [Teardown]  Execute Command  rm -f ${FILE WITH NEWLINES NAME}
 
 Put File With Non-ASCII Characters
-    Put Files And Verify  ${FILE WITH NON-ASCII}  ${USER HOME}/  ${FILE WITH NON-ASCII NAME}
+    Put Files And Verify  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}${/}  ${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
 
 Put File And Specify Remote Newlines
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Put File And Specify Newlines  ${FILE WITH NEWLINES}  ${USER HOME}/  CRLF  ${FILE WITH NEWLINES NAME}
-    SSHLibrary.Get File  ${USER HOME}/${FILE WITH NEWLINES NAME}  ${LOCAL TMPDIR}${/}
+    Put File And Specify Newlines  ${FILE WITH NEWLINES}  ${REMOTE TEST ROOT}${/}  CRLF  ${FILE WITH NEWLINES NAME}
+    SSH.Get File  ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}  ${LOCAL TMPDIR}${/}
     ${content}=  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
     ${expected}=  OS.Get File  ${FILE WITH NEWLINES}
     ${expected}=  Replace String  ${expected}  \n  \r\n
@@ -45,16 +45,16 @@ Put File And Specify Remote Newlines
     [Teardown]  Remove Local Temp Dir And Remote File
 
 Put File With Pattern
-    Put Files And Verify  ${TEST FILE PATTERN}  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
-    [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
+    Put Files And Verify  ${TEST FILE PATTERN}  ${REMOTE TEST ROOT}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Putting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.  Put File  ${TEST FILE PATTERN}  ${USER HOME}/invalid.txt
+    Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.  Put File  ${TEST FILE PATTERN}  ${REMOTE TEST ROOT}/invalid.txt
 
 Put File To Absolute Destination With Missing Subdirectories
-    Put File  ${TEST FILE}  ${USER HOME}/robotdir/
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}${/}robotdir${/}
     Verify Remote Files Exist  robotdir  ${TEST FILE NAME}
-    [Teardown]  Execute Command  rm -rf robotdir
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File To Relative Destination With Missing Subdirectories
     Put File  ${TEST FILE}  robotdir/anotherdir/foo.txt
@@ -62,42 +62,40 @@ Put File To Relative Destination With Missing Subdirectories
     [Teardown]  Execute Command  rm -rf robotdir
 
 Put File With Pattern Matching Directory
-    Put Files And Verify  ${TEXTFILES}${/}test_fi*  ${USER HOME}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
-    [Teardown]  Execute Command  rm -f ${TEST FILE NAME} ${TEST FILE 2 NAME}
+    Put Files And Verify  ${TEXTFILES}${/}?est_fi*  ${REMOTE TEST ROOT}/  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There are no source files matching 'non*existing'  SSHLibrary.Put File  non*existing
+    Run Keyword And Expect Error  There are no source files matching 'non*existing'  SSH.Put File  non*existing
 
 Put File With Special Chars In File Name
     [Documentation]    http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
-    Put File  ${FILE WITH SPECIAL CHARS}  ${USER HOME}/robotdir/
-    Verify Remote Files Exist  robotdir  foo%2Fbar.txt
+    Put File  ${FILE WITH SPECIAL CHARS}  robotdir${/}
+    Verify Remote Files Exist  robotdir  ${FILE WITH SPECIAL CHARS NAME}
     [Teardown]  Execute Command  rm -rf robotdir
 
 *** Keywords ***
 Put Files And Verify
     [Arguments]  ${source}  ${destination}  @{expected}
-    Vefify Remote Files Do Not Exist  @{expected}
+    Vefify Remote Files Do Not Exist  .  @{expected}
     Put File  ${source}  ${destination}
-    Verify Remote Files Exist  ${EMPTY}  @{expected}
+    Verify Remote Files Exist  .  @{expected}
 
 Put File And Specify Newlines
     [Arguments]  ${source}  ${destination}  ${newlines}  @{expected}
-    Vefify Remote Files Do Not Exist  @{expected}
+    Vefify Remote Files Do Not Exist  ${destination}  @{expected}
     Put File  ${source}  ${destination}  newline=${newlines}
-    Verify Remote Files Exist  ${EMPTY}  @{expected}
-
-Vefify Remote Files do Not Exist
-    [Arguments]  @{expected}
-    ${listing} =  Execute Command  ls
-    : FOR  ${filename}  IN  @{expected}
-    \  Should Not Contain  ${listing}  ${filename}
+    Verify Remote Files Exist  ${destination}  @{expected}
 
 Verify Remote Files Exist
-    [Arguments]  ${dirname}  @{expected}
-    ${listing} =  Execute Command  ls ${dirname}
+    [Arguments]  ${path}  @{expected}
     : FOR  ${filename}  IN  @{expected}
-    \  Should Contain  ${listing}  ${filename}
+    \  SSH.File Should Exist  ${path}${/}${filename}
+
+Vefify Remote Files Do Not Exist
+    [Arguments]  ${path}  @{expected}
+    : FOR  ${filename}  IN  @{expected}
+    \  SSH.File Should Not Exist  ${path}${/}${filename}
 
 Remove Local Temp Dir And Remote File
     Remove Directory  ${LOCAL TMPDIR}  yes

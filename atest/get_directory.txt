@@ -2,74 +2,68 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Test Teardown   Remove Directory  ${target}  True
+Test Teardown   Remove Directory  ${target}  recursive=True
 Resource        resources/ssh_library_resources.txt
-Library         OperatingSystem
+Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Directory Should Exist  ${target}
-    Get Directory  ${USER HOME}${/}test_root  ${target}
-    Directory Should Exist With Content  ${target}${/}test_root
+    OS.Directory Should Exist  ${target}
+    Get Directory  ${REMOTE_TEST_ROOT}  ${target}
+    Directory Should Exist With Content  ${target}${/}${TEST ROOT NAME}
 
 Get Directory To Non-Existing Local Path
     ${target} =  Set Variable  tmpdir
-    Directory Should Not Exist  ${target}
-    SSHLibrary.Get Directory  ${USER HOME}${/}test_root${/}  ${target}
+    OS.Directory Should Not Exist  ${target}
+    SSH.Get Directory  ${REMOTE_TEST_ROOT}${/}  ${target}
     Directory Should Exist With Content  ${target}
 
 Get Directory Including Subdirectories To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Directory Should Exist  ${target}
-    Get Directory  ${USER HOME}${/}test_root  ${target}  recursive=True
-    Directory Should Exist Including Subdirectories  ${target}${/}test_root
+    OS.Directory Should Exist  ${target}
+    Get Directory  ${REMOTE_TEST_ROOT}  ${target}  recursive=True
+    Directory Should Exist Including Subdirectories  ${target}${/}${TEST ROOT NAME}
 
 Get Directory Including Subdirectories To Non-Existing Local Path
     ${target} =  Set Variable  my/own/tmpdir
-    Directory Should Not Exist  ${target}
-    Get Directory  ${USER HOME}${/}test_root  ${target}  recursive=True
+    OS.Directory Should Not Exist  ${target}
+    Get Directory  ${REMOTE_TEST_ROOT}  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}
+    ${target} =  Set Variable  my
 
 Get Directory To Current Local Path
-    ${target} =  Set Variable  .${/}test_root
-    Directory Should Not Exist  ${target}
-    Get Directory  ${USER HOME}${/}test_root  .
+    ${target} =  Set Variable  .${/}${TEST ROOT NAME}
+    OS.Directory Should Not Exist  ${target}
+    Get Directory  ${REMOTE_TEST_ROOT}  .
     Directory Should Exist With Content  ${target}
 
 Get Directory Using Relative Source
     ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Directory Should Not Exist  ${target}
-    Get Directory  test_root  ${target}
+    OS.Directory Should Not Exist  ${target}
+    Get Directory  ${TEST ROOT NAME}  ${target}
     Directory Should Exist With Content  ${target}
 
 Get Directory Should Fail When Source Does Not Exists
     ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Run Keyword And Expect Error  There was no source path matching 'non-existing'  SSHLibrary.Get Directory  non-existing
-    Directory Should Not Exist  ${target}
+    Run Keyword And Expect Error  There was no source path matching 'non-existing'  SSH.Get Directory  non-existing
+    OS.Directory Should Not Exist  ${target}
 
 *** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put Directory  ${TEXTFILES}  ${USER HOME}${/}test_root  recursive=True
-
-Remove Test Files and Close Connections
-    Execute Command  rm -rf ${USER HOME}${/}test_root
-    Close All Connections
-
 Directory Should Exist With Content
     [Arguments]  ${destination}
-    File Should Exist  ${destination}${/}${TEST FILE NAME}
-    File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
-    File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    Directory Should Not Exist  ${destination}${/}special
+    OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
+    OS.Directory Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
-    File Should Exist  ${destination}${/}${TEST FILE NAME}
-    File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
-    File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    Directory Should Exist  ${destination}${/}special
-    File Should Exist  ${destination}${/}special/${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
+    OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.Directory Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
+    OS.File Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}/${FILE WITH SPECIAL CHARS NAME}

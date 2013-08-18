@@ -12,29 +12,31 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import stat
 import posixpath
 
 try:
     import paramiko
 except ImportError:
     raise ImportError(
-            'Importing paramiko SSH module failed.\n'
-            'Ensure that paramiko and pycrypto modules are installed.'
-            )
+        'Importing paramiko SSH module failed.\n'
+        'Ensure that paramiko and pycrypto modules are installed.'
+    )
 
 from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
         AbstractCommand, SSHClientException)
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
-def _monkey_patched_start_client(self, event=None):
+def _custom_start_client(self, event=None):
     self.banner_timeout = 45
     self._orig_start_client(event)
 
+paramiko.transport.Transport._orig_start_client = \
+    paramiko.transport.Transport.start_client
+paramiko.transport.Transport.start_client = _custom_start_client
 
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
-def _monkey_patched_log(self, level, msg, *args):
+def _custom_log(self, level, msg, *args):
     escape = lambda s: s.replace('%', '%%')
     if isinstance(msg, basestring):
         msg = escape(msg)
@@ -42,26 +44,21 @@ def _monkey_patched_log(self, level, msg, *args):
         msg = [escape(m) for m in msg]
     return self._orig_log(level, msg, *args)
 
-
-paramiko.transport.Transport._orig_start_client = \
-        paramiko.transport.Transport.start_client
-paramiko.transport.Transport.start_client = _monkey_patched_start_client
-paramiko.sftp_client.SFTPClient._orig_log = \
-        paramiko.sftp_client.SFTPClient._log
-paramiko.sftp_client.SFTPClient._log = _monkey_patched_log
+paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
+paramiko.sftp_client.SFTPClient._log = _custom_log
 
 
 class PythonSSHClient(AbstractSSHClient):
+
+    def __init__(self, *args, **kwargs):
+        super(PythonSSHClient, self).__init__(*args, **kwargs)
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     @staticmethod
     def enable_logging(path):
         paramiko.util.log_to_file(path)
         return True
-
-    def _create_client(self):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        return client
 
     def _login(self, username, password):
         self.client.connect(self.host, self.port, username, password,
@@ -84,10 +81,8 @@ class PythonSSHClient(AbstractSSHClient):
 
     def open_shell(self):
         self.shell = self.client.invoke_shell(self.config.term_type,
-                self.config.width, self.config.height)
-
-    def _write(self, text):
-        self.shell.sendall(text)
+                                              self.config.width,
+                                              self.config.height)
 
     def _read(self):
         data = ''
@@ -101,45 +96,23 @@ class PythonSSHClient(AbstractSSHClient):
             data = self.shell.recv(1)
          return data
 
+    def _write(self, text):
+        self.shell.sendall(text)
+
     def _create_sftp_client(self):
         return SFTPClient(self.client)
 
 
 class SFTPClient(AbstractSFTPClient):
 
-    def exists(self, path):
-        try:
-            self._client.stat(path)
-        except IOError, e:
-            if e[0] == 2:
-                return False
-            raise
-        return True
+    def __init__(self, ssh_client):
+        self._client = ssh_client.open_sftp()
 
-    def listfiles(self, path):
-        return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self._client.listdir_attr(path)
-                if stat.S_ISREG(fileinfo.st_mode)]
+    def _list(self, path):
+        return self._client.listdir_attr(path)
 
-    def listdirs(self, path):
-        return [getattr(fileinfo, 'filename', '?') for fileinfo
-                in self._client.listdir_attr(path)
-                if stat.S_ISDIR(fileinfo.st_mode)]
-
-    def _create_client(self, ssh_client):
-        return ssh_client.open_sftp()
-
-    def _resolve_homedir(self):
-        return self._client.normalize('.') + '/'
-
-    def _get_file(self, remotepath, localpath):
-        self._client.get(remotepath, localpath)
-
-    def _write_to_remote_file(self, remotefile, data, position):
-        remotefile.write(data)
-
-    def _close_remote_file(self, remotefile):
-        remotefile.close()
+    def _get_permissions(self, fileinfo):
+        return fileinfo.st_mode
 
     def _create_missing_remote_path(self, path):
         if path == '.':
@@ -155,10 +128,22 @@ class SFTPClient(AbstractSFTPClient):
             self._client.chdir(dirname)
 
     def _create_remote_file(self, dest, mode):
-        remotfile = self._client.file(dest, 'wb')
-        remotfile.set_pipelined(True)
+        remote_file = self._client.file(dest, 'wb')
+        remote_file.set_pipelined(True)
         self._client.chmod(dest, mode)
-        return remotfile
+        return remote_file
+
+    def _write_to_remote_file(self, remotefile, data, position):
+        remotefile.write(data)
+
+    def _close_remote_file(self, remotefile):
+        remotefile.close()
+
+    def _get_file(self, remotepath, localpath):
+        self._client.get(remotepath, localpath)
+
+    def _absolute_path(self, path):
+        return self._client.normalize(path)
 
 
 class RemoteCommand(AbstractCommand):

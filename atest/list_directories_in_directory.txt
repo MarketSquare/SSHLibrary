@@ -1,0 +1,65 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+Library         Collections
+
+*** Test Cases ***
+List Subdirectories Using Absolute Path
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    ${listing} =  List Directories In Directory  ${target}
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Subdirectories Using Relative Path
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${TEST_ROOT_NAME}
+    ${listing} =  List Directories In Directory  ${target}
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Subdirectories Using Current Directory
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  .
+    ${listing} =  List Directories In Directory  ${target}
+    Should Contain  ${listing}  ${TEST_ROOT_NAME}
+
+List Subdirectories With Absolute Paths Using Absolute Path
+    ${expected} =  Create List
+    ...                  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ...                  ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Subdirectories With Absolute Paths Using Relative
+    ${expected} =  Create List
+    ...                  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ...                  ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${TEST_ROOT_NAME}
+    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    Lists Should Be Equal  ${listing}  ${EXPECTED}
+
+List Subdirectories With Absolute Paths Using Current Directory
+    ${target} =  Set Variable  .
+    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    Should Contain  ${listing}  ${REMOTE TEST ROOT}
+
+List Subdirectories Using Pattern
+    ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    ${listing} =  List Directories In Directory  ${target}  pattern=spec*
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Subdirectories With Absolute Paths Using Pattern
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    ${listing} =  List Directories In Directory  ${target}  pattern=emp*  absolute=True
+    Lists Should Be Equal  ${listing}  ${expected}
+
+List Subdirectories Should Fail When Source Path Not Exists
+    ${target} =  Set Variable  not_exists
+    Run Keyword And Expect Error  There was no path matching '${target}'  List Directories In Directory  ${target}

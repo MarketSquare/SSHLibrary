@@ -17,10 +17,12 @@ from java.io import (File, BufferedReader, InputStreamReader, IOException,
                      FileOutputStream)
 try:
     from com.trilead.ssh2 import (StreamGobbler, Connection, SFTPv3Client,
-            SFTPException)
+                                  SFTPv3DirectoryEntry, SFTPException)
 except ImportError:
-    raise ImportError('Importing Trilead SSH classes failed. '
-                      'Make sure you have the Trilead jar file in CLASSPATH.')
+    raise ImportError(
+        'Importing Trilead SSH classes failed. '
+        'Make sure you have the Trilead jar file in CLASSPATH.'
+    )
 
 from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
         AbstractCommand, SSHClientException)
@@ -28,14 +30,14 @@ from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
 
 class JavaSSHClient(AbstractSSHClient):
 
+    def __init__(self, *args, **kwargs):
+        super(JavaSSHClient, self).__init__(*args, **kwargs)
+        self.client = Connection(self.host, self.port)
+        self.client.connect()
+
     @staticmethod
     def enable_logging(logfile):
         return False
-
-    def _create_client(self):
-        client = Connection(self.host, self.port)
-        client.connect()
-        return client
 
     def _login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
@@ -63,14 +65,10 @@ class JavaSSHClient(AbstractSSHClient):
     def open_shell(self):
         self.shell = self.client.openSession()
         self.shell.requestPTY(self.config.term_type, self.config.width,
-                self.config.height, 0, 0, None)
+                              self.config.height, 0, 0, None)
         self.shell.startShell()
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()
-
-    def _write(self, text):
-        self._writer.write(text)
-        self._writer.flush()
 
     def _read(self):
          data = ''
@@ -86,39 +84,33 @@ class JavaSSHClient(AbstractSSHClient):
              data = chr(self._stdout.read())
          return data
 
+    def _write(self, text):
+        self._writer.write(text)
+        self._writer.flush()
+
     def _create_sftp_client(self):
         return SFTPClient(self.client)
 
 
 class SFTPClient(AbstractSFTPClient):
 
-    def exists(self, path):
-        try:
-            self._client.stat(path)
-        except SFTPException:
-            return False
-        return True
+    def __init__(self, ssh_client):
+        self._client = SFTPv3Client(ssh_client)
 
-    def listfiles(self, path):
-        return [finfo.filename for finfo in self._client.ls(path)
-                if finfo.attributes.isRegularFile()]
+    def _list(self, path):
+        return self._client.ls(path)
 
-    def listdirs(self, path):
-        return [finfo.filename for finfo in self._client.ls(path)
-                if finfo.attributes.isDirectory() and
-                finfo.filename not in ('.', '..')]
-
-    def _create_client(self, ssh_client):
-        return SFTPv3Client(ssh_client)
-
-    def _resolve_homedir(self):
-        return self._client.canonicalPath('.') + '/'
+    def _get_permissions(self, fileinfo):
+        if isinstance(fileinfo, SFTPv3DirectoryEntry):
+            return fileinfo.attributes.permissions
+        else:
+            return fileinfo.permissions
 
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):
             curdir = '/'
         else:
-            curdir = self._client.canonicalPath('.')
+            curdir = self._client._absolute_path('.')
         for dirname in path.split('/'):
             if dirname:
                 curdir = '%s/%s' % (curdir, dirname)
@@ -128,14 +120,14 @@ class SFTPClient(AbstractSFTPClient):
                 self._client.mkdir(curdir, 0744)
 
     def _create_remote_file(self, dest, mode):
-        remotefile = self._client.createFile(dest)
+        remote_file = self._client.createFile(dest)
         try:
-            tempstats = self._client.fstat(remotefile)
+            tempstats = self._client.fstat(remote_file)
             tempstats.permissions = mode
-            self._client.fsetstat(remotefile, tempstats)
+            self._client.fsetstat(remote_file, tempstats)
         except SFTPException:
             pass
-        return remotefile
+        return remote_file
 
     def _write_to_remote_file(self, remotefile, data, position):
         self._client.write(remotefile, position, data, 0, len(data))
@@ -164,6 +156,9 @@ class SFTPClient(AbstractSFTPClient):
         self._client.closeFile(remotefile)
         localfile.flush()
         localfile.close()
+
+    def _absolute_path(self, path):
+        return self._client.canonicalPath(path)
 
 
 class RemoteCommand(AbstractCommand):

@@ -23,37 +23,52 @@ from .version import VERSION
 
 __version__ = VERSION
 
+plural_or_not = lambda count: '' if count == 1 else 's'
+
 
 class SSHLibrary(DeprecatedSSHLibraryKeywords):
     """Robot Framework test library for SSH and SFTP.
 
     SSHLibrary works with both Python and Jython interpreters.
 
+    = Requirements =
+
     To use SSHLibrary with Python, you must first install Paramiko SSH
-    implementation[1]. For Jython, you must have the JAR distribution of
-    Trilead SSH implementation[2] in the CLASSPATH during the test execution.
+    implementation[1]. This is probably done easiest by using easy_install
+    which also installs PyCrypto[2] as a Paramiko dependency.
 
     | [1] https://github.com/paramiko/paramiko
-    | [2] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
+    | [2] https://www.dlitz.net/software/pycrypto/
+
+    For Jython, you must have the JAR distribution of Trilead SSH
+    implementation[3] in the CLASSPATH during the test execution.
+
+    | [3] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
+
+    = Connections =
 
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
-    Only one connection can be active at a time. This means that most of the
+    Only one connection can be active at a time. This means that majority of the
     keywords only affect to the active connection. Active connection can be
     changed using `Switch Connection` keyword.
+
+    = Executing commands =
 
     For executing commands on the remote host, there are two possibilities:
 
     1. `Execute Command` or `Start Command`. These keywords open a new session
-    using the connection. Possible changes to state are not preserved.
+    on the remote. Possible changes to state are not preserved.
 
     2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
     `Read Command Output`, `Read Until`, `Read Until Prompt` and
     `Read Until Regexp` keywords operate in an interactive shell, which
     means that changes to state are visible to later keywords. Note that in
-    interactive mode, prompt must be set before using any of the
+    interactive mode, prompt must be configured before using any of the
     Write-keywords.
+
+    = Configuration =
 
     Prompt, as well as the other settings can be configured as defaults for
     all the upcoming connections on `library importing` or by using keyword
@@ -62,6 +77,19 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
     Currently active, already open connection can be configured with
     `Set Client Configuration`.
+
+    = Pattern matching =
+
+    Some keywords allow their arguments to be specified as _glob patterns_
+    where:
+    | *        | matches anything, even an empty string |
+    | ?        | matches any single character |
+    | [chars]  | matches any character inside square brackets (e.g. '[abc]' matches either 'a', 'b' or 'c') |
+    | [!chars] | matches any character not inside square brackets |
+
+    Unless otherwise noted, matching is case-insensitive on case-insensitive
+    operating systems such as Windows. Pattern matching is implemented using
+    [http://docs.python.org/library/fnmatch.html|fnmatch module].
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -85,10 +113,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Prompt must be set before `Read Until Prompt` can be can be used.
 
         `encoding` is the character encoding of input and output sequences.
-        Possible `encoding` values are listed in [3]. Starting from
+        Possible `encoding` values are listed in [4]. Starting from
         SSHLibrary 1.2, the default value is 'UTF-8'.
 
-        | [3] http://docs.python.org/2/library/codecs.html#standard-encodings
+        | [4] http://docs.python.org/2/library/codecs.html#standard-encodings
 
         `timeout`, `newline`, `prompt` and `encoding` values set here may
         later be overridden per connection by defining them as arguments
@@ -99,14 +127,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
         The default value is 'INFO'.
 
-        Examples that imports the library with sensible defaults:
+        Examples that imports the library with the sensible defaults:
         | Library | SSHLibrary |
 
-        Example that takes library into use and sets prompt to '>':
+        Example that takes the library into use and sets prompt to '>':
         | Library | SSHLibrary | prompt=> |
 
-        Example that takes library into use and changes timeout to 10 seconds
-        and changes line breaks to the Windows format:
+        Example that takes the library into use and changes timeout to 10
+        seconds and line breaks to the Windows format:
         | Library | SSHLibrary | timeout=10 seconds | newline=CRLF |
         """
         self._cache = ConnectionCache()
@@ -123,7 +151,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Only parameters whose value is other than `None` are updated.
 
-        Example that updates newline and prompt, but leaves timeout, log level
+        This example updates newline and prompt, but leaves timeout, log level
         and encoding settings intact:
         | Set Default Configuration | newline=CRLF | prompt=$ |
         """
@@ -139,9 +167,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Only parameters whose value is other than `None` are updated.
 
-        Example that updates terminal type and timeout of the currently
-        active connection and leaves other connection settings and connections
-        intact:
+        This example updates terminal type and timeout of the active connection
+        but leaves other connection settings and connections intact:
         | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
         self.ssh_client.config.update(timeout=timeout, newline=newline,
@@ -169,8 +196,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         the default values set on `library importing` or set with
         `Set Default Configuration` are used.
 
-        Starting from SSHLibrary 1.1, a shell session is also opened
-        automatically by this keyword.
+        Starting from SSHLibrary 1.1, a shell session is automatically opened
+        by this keyword.
 
         `term_type` defines the terminal type for this shell, and `width`
         and `height` can be configured to control the virtual size of it.
@@ -209,16 +236,16 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def switch_connection(self, index_or_alias):
         """Switches the active connection by index or alias.
 
-        `index_or_alias` is either connection index (integer) or explicitly
-        defined alias (string) that was given as an argument to
-        `Open Connection`.
+        `index_or_alias` is either connection index (an integer) or explicitly
+        defined alias (a string) that was passed as an argument to
+        `Open Connection` before.
 
         Connection index is got as a return value from `Open Connection` or
         from `Get Connection Id`. If `None` is given as argument `index_or_alias`,
         the currently active connection is is closed.
 
-        This keyword returns the index of the previously active connection,
-        which can be used to reuse that connection later.
+        This keyword returns the index of the last active connection,
+        before the switch, which can be used to reuse that connection later.
 
         Example:
         | Open Connection       | myhost.net   |          |
@@ -253,7 +280,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """Closes all open connections and empties the connection cache.
 
         After this keyword, the connection indices returned by `Open Connection`
-        are reset and start from 1.
+        are reset and start from '1'.
 
         This keyword is ought to be used either in test or suite teardown to
         make sure all the connections are closed before the test execution
@@ -607,10 +634,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            over it.
         2. If `destination` is an existing directory, `source` file is
            downloaded into it. Possible file with the same name is overwritten.
-        3. If `destination` does not exist and it ends with `path_
-           separator`, it is considered a directory. The directory is then
-           created and `source` file is downloaded into it. Possible missing
-           intermediate directories are also created.
+        3. If `destination` does not exist and it ends with `path_separator`,
+           it is considered a directory. The directory is then created and
+           `source` file is downloaded into it. Possible missing intermediate
+           directories are also created.
         4. If `destination` does not exist and does not end with
            `path_separator`, it is considered a file. If the path to the file
            does not exist, it is created.
@@ -618,14 +645,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            the local machine is used as the destination. This will most probably
            be the directory where the test execution was started.
 
-        Using wildcards like '*' and '?' is possible in `source`.
-        When wildcards are used, `destination` MUST be a directory, and files
-        matching the pattern are downloaded, but subdirectories are ignored.
-        If the contents of subdirectories are also needed, use the keyword again.
+        Using wildcards is possible in `source`. The pattern matching syntax
+        is explained in `pattern matching`. When wildcards are used,
+        `destination` MUST be a directory, and files matching the pattern are
+        downloaded, but subdirectories are ignored.
 
         Examples:
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # single file                    |
-        | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # multiple files with wild cards |
+        | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # all text files by using wildcards |
         """
         return self._run_sftp_command(self.ssh_client.get_file, source,
                                       destination, path_separator)
@@ -731,24 +758,24 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
            over it.
         2. If `destination` is an existing directory, `source` file is
            uploaded into it. Possible file with same name is overwritten.
-        3. If `destination` does not exist and it ends with `path_
-           separator`, it is considered a directory. The directory is then
-           created and `source` file uploaded into it. Possibly missing
-           intermediate directories are also created.
+        3. If `destination` does not exist and it ends with `path_separator`,
+           it is considered a directory. The directory is then created and
+           `source` file uploaded into it. Possibly missing intermediate
+           directories are also created.
         4. If `destination` does not exist and it does not end with
            `path_separator, it is considered a file. If the path to the file
            does not exist, it is created.
         5. If `destination` is not given, the user's home directory
            on the remote is used as the destination.
 
-        Using wildcards like '*' and '?' is possible in `source`.
-        When wildcards are used, `destination` MUST be a directory and only
-        files are uploaded from `source`, subdirectories being ignored. If the
-        contents of subdirectories are also needed, use the keyword again.
+        Using wildcards is possible in `source`. The pattern matching syntax
+        is explained in `pattern matching`. When wildcards are used,
+        `destination` MUST be a directory and only files are uploaded from
+        source, subdirectories being ignored.
 
         Examples:
         | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt | # single file                    |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # multiple files with wild cards |                    |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               | # all text files by using wildcards |                    |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/  |  0777  | CRLF | # file permissions and forcing Windows newlines |
         """
         return self._run_sftp_command(self.ssh_client.put_file, source,
@@ -837,6 +864,67 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         return self._run_sftp_command(self.ssh_client.put_directory, source,
                                       destination, mode, newline,
                                       path_separator, recursive)
+
+    def directory_should_exist(self, path):
+        """Fails if the given `path` does NOT point to an existing directory.
+        """
+        return self.ssh_client.dir_exists(path)
+
+    def directory_should_not_exist(self, path):
+        """Fails if the given `path` points to an existing directory.
+        """
+        return not self.ssh_client.dir_exists(path)
+
+    def file_should_exist(self, path):
+        """Fails if the given `path` does NOT point to an existing file.
+        """
+        return self.ssh_client.file_exists(path)
+
+    def file_should_not_exist(self, path):
+        """Fails if the given `path` points to an existing file.
+        """
+        return not self.ssh_client.file_exists(path)
+
+    def list_directory(self, path, pattern=None, absolute=False):
+        """Returns and logs items in a remote directory, optionally filtered
+        with `pattern`.
+
+        File and directory names are returned in case-sensitive alphabetical
+        order, e.g. ['A Name', 'Second', 'a lower case name', 'one more'].
+        Implicit directories '.' and '..' are not returned. The returned items
+        are automatically logged.
+
+        By default, the file and directory names are returned relative to the
+        given remote path (e.g. 'file.txt'). If you want them be returned in the
+        absolute format (e.g. '/home/robot/file.txt'), set the `absolute`
+        argument to any non-empty string.
+
+        If `pattern` is given, only items matching it are returned. The pattern
+        matching syntax is explained in `pattern matching`.
+
+        Examples (using also other `List Directory` variants):
+        | @{items} = | List Directory           | /home/robot |
+        | @{files} = | List Files In Directory  | /tmp | *.txt | absolute=True |
+        """
+        items = self.ssh_client.list_dir(path, pattern, absolute)
+        self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
+                                       '\n'.join(items)))
+        return items
+
+    def list_files_in_directory(self, path, pattern=None, absolute=False):
+        """A wrapper for `List Directory` that returns only files."""
+        files = self.ssh_client.list_files_in_dir(path, pattern, absolute)
+        self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
+                                       '\n'.join(files)))
+        return files
+
+    def list_directories_in_directory(self, path, pattern=None, absolute=False):
+        """A wrapper for `List Directory` that returns only directories."""
+        dirs = self.ssh_client.list_dirs_in_dir(path, pattern, absolute)
+        self._info('%d director%s:\n%s' % (len(dirs),
+                                          'y' if len(dirs) == 1 else 'ies',
+                                          '\n'.join(dirs)))
+        return dirs
 
     def _run_sftp_command(self, command, *args):
         try:

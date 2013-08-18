@@ -3,7 +3,7 @@ Force Tags      pybot   jybot
 Test Setup      Open Connection  ${HOST}
 Test Teardown   Close All Connections
 Resource        resources/ssh_library_resources.txt
-Library         OperatingSystem
+Library         OperatingSystem  WITH NAME  OS
 
 *** Variables ***
 ${PUBKEYDIR}        ${CURDIR}/testdata/keyfiles
@@ -35,7 +35,7 @@ Login With Inaccessible Public Key
 *** Keywords ***
 Check Key Files
     [Documentation]  If key file directory `keyfiles` does not exist, mark these tests non-critical
-    ${keys}=  List Files in Directory  ${PUBKEYDIR}
+    ${keys}=  OS.List Files in Directory  ${PUBKEYDIR}
     Run Keyword If  len(${keys})!=3  Fail And Mark Noncritical
 
 Fail And Mark Noncritical

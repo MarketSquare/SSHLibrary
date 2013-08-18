@@ -9,8 +9,8 @@ ${COUNTER NAME}  counter.txt
 
 *** Test Cases ***
 Basic Interactive Session
-    ${output} =  Write  ./${INTERACTIVE TEST SCRIPT NAME}
-    Should Contain  ${output}  ./${INTERACTIVE TEST SCRIPT NAME}
+    ${output} =  Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
+    Should Contain  ${output}  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Read Until  Give your name?
     Should Contain  ${output}  Give your name?
     ${output} =  Write  Juha
@@ -19,14 +19,14 @@ Basic Interactive Session
     Should Contain  ${output}  Hello Juha
 
 Interactive Session With Non-ASCII characters
-    Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Write  aaääöö
     Should Contain  ${output}  aaääöö
     ${output} =  Read Until Prompt
     Should Contain  ${output}  Hello aaääöö
 
 Interactive Session With Regular Expressions
-    Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Read Until Regexp  Give.*\\?
     Should Contain  ${output}  Give your name?
     Write  Juha
@@ -36,7 +36,7 @@ Interactive Session With Regular Expressions
     Should End With  ${output}  ${PROMPT}
 
 Regexp Not Matching From Beginning Of Output
-    Write  ./${TEST SCRIPT NAME}
+    Write  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     Read Until Regexp  std.*
 
 Interactive Session Timeout
@@ -46,7 +46,7 @@ Interactive Session Timeout
     Should Start With  ${error}  No match found for 'This is not found' in 1 second
 
 Interactive Session Returning Stderr
-    Write  ./${INTERACTIVE TEST SCRIPT NAME}
+    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     Read Until  Give your name?
     Write  Error
     ${output} =  Read Until  ${PROMPT}
@@ -54,15 +54,15 @@ Interactive Session Returning Stderr
     Should Contain  ${output}  This is Error
 
 Write Until Expected Output
-    Write Until Expected Output  ./${REPEAT TEST SCRIPT NAME}\n  3  15 seconds  0.5 seconds
+    Write Until Expected Output  ${REMOTE TEST ROOT}${/}${REPEAT TEST SCRIPT NAME}\n  3  15 seconds  0.5 seconds
     [Teardown]  Remove Counter and Read All Data
 
 Write Until Expected Output In Case Of Time Out
-    Run Keyword And Expect Error  No match found for '11' in 2 seconds.  Write Until Expected Output  ./${REPEAT TEST SCRIPT NAME}\n  11  2s  0.5s
+    Run Keyword And Expect Error  No match found for '11' in 2 seconds.  Write Until Expected Output  ${REMOTE TEST ROOT}${/}${REPEAT TEST SCRIPT NAME}\n  11  2s  0.5s
     [Teardown]  Remove Counter and Read All Data
 
 Write Bare And Read
-    Write Bare  ./${INTERACTIVE TEST SCRIPT NAME}\n
+    Write Bare  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}\n
     ${output} =  Read Until  name?
     Write Bare  Janne\n
     ${output2} =  Read Until Prompt
@@ -73,7 +73,7 @@ Write Bare And Read
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
-    Put File  ${SCRIPTS}/*  ${USER HOME}/
+    Put File  ${SCRIPTS}/*  ${REMOTE TEST ROOT}${/}
 
 Remove Counter And Read All Data
     Execute Command  rm -f ${COUNTER NAME}

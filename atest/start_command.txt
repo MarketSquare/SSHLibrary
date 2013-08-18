@@ -6,34 +6,34 @@ Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
 Start Command And Read Process Output With Defaults
-    Start Command  ./${TEST SCRIPT NAME}
+    Start Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     ${stdout} =  Read Command Output
     Should Be Equal  ${stdout}  This is stdout
 
 Start Command And Read Only Return Code
-    Start Command  ./${TEST SCRIPT NAME}
+    Start Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     ${rc} =  Read Command Output    return_stdout=${EMPTY}   return_rc=yes
     Should Be Equal As Integers  ${rc}  0
 
 Start Command And Execute Command
-    Start Command  ./${TEST SCRIPT NAME}
-    ${stdout} =  Execute Command  ./${TEST SCRIPT NAME} Hello
+    Start Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ${stdout} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME} Hello
     Should Be Equal  ${stdout}  Hello
     ${stdout} =  Read Command Output
     Should Be Equal  ${stdout}  This is stdout
 
 Start Command And Read Process Output With Legacy Stdout
-    Start Command  ./${TEST SCRIPT NAME}
+    Start Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     ${stdout} =  Read Command Output  STDOUT
     Should Be Equal  ${stdout}  This is stdout
 
 Start Command And Read Process Output With Legacy Stderr
-    Start Command  ./${TEST SCRIPT NAME}
+    Start Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     ${stderr} =  Read Command Output  stderr
     Should Be Equal  ${stderr}  This is stderr
 
 Start Command And Read Process Output With Legacy Stdout And Stderr
-    Start Command  ./${TEST SCRIPT NAME}
+    Start Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     ${stdout}  ${stderr} =  Read Command Output  both
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
@@ -41,4 +41,4 @@ Start Command And Read Process Output With Legacy Stdout And Stderr
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
-    Put File  ${TEST SCRIPT}  ${USER HOME}/
+    Put File  ${TEST SCRIPT}  ${REMOTE TEST ROOT}${/}

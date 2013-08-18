@@ -4,62 +4,64 @@ Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files and Close Connections
 Test Teardown   Remove Directory  ${LOCAL TMPDIR}  yes
 Resource        resources/ssh_library_resources.txt
-Library         OperatingSystem
+Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Get File From Absolute Source
-    Get File And Verify Listing  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}
+    OS.File Should Not Exist  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
+    [Teardown]  OS.Remove File  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
 
 Get File From Relative Source
-    Get File And Verify Listing  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}
+    OS.File Should Not Exist  ${TEST FILE NAME}
+    SSH.Get File  ${TEST_ROOT_NAME}${/}${TEST FILE NAME}  ${TEST FILE NAME}
+    OS.File Should Exist  ${TEST FILE NAME}
+    [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File With Different Name
-    Get File And Verify Listing  ${USER HOME}/${FILE WITH NON-ASCII NAME}  ${LOCAL TMPDIR}${/}foo.txt  foo.txt
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  foo.txt
+    OS.File Should Exist  foo.txt
+    [Teardown]  OS.Remove File  foo.txt
 
 Get File With Pattern
-    Get File And Verify Listing  ${USER HOME}/*  ${LOCAL TMPDIR}${/}  ${TEST FILE NAME}  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    @{expected} =  Create List  ${TEST FILE NAME}  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ${destination} =  Set Variable  ${LOCAL TMPDIR}${/}
+    : FOR  ${filename}  IN  @{expected}
+    \  OS.File Should Not Exist  ${destination}${/}${filename}
+    SSH.Get File  ${REMOTE TEST ROOT}/*  ${destination}
+    : FOR  ${filename}  IN  @{expected}
+    \  OS.File Should Exist  ${destination}${/}${filename}
 
 Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSHLibrary.Get File  ${USER HOME}/*.txt  ${LOCAL TMPDIR}${/}foo
+    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
-    SSHLibrary.Get File  ${USER HOME}/${TEST FILE NAME}  .
-    ${listing} =  List Files In Directory  .
-    Should Contain  ${listing}  ${TEST FILE NAME}
-    [Teardown]  Remove File  ${TEST FILE NAME}
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  .
+    OS.File Should Exist  ${TEST_FILE_NAME}
+    [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File When Destination Directory Does Not Exist
-    SSHLibrary.Get File  ${USER HOME}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
-    ${listing} =  List Files In Directory  ${LOCAL TMPDIR}${/}missingdir
-    Should Contain  ${listing}  foo.txt
+    ${target} =  Set Variable  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${target}
+    OS.File Should Exist  ${target}
+    [Teardown]  OS.Remove File  ${target}
 
 Get File From A Path Not Under Home Directory
     [Setup]  Create Tmp Dir And Move File
-    Get File And Verify Listing  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  test_file.txt
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSHLibrary.Get File  ${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
-    ${contents} =  List Directory  ${LOCAL TMPDIR}${/}
-    Should Contain  ${contents}  ${TEST FILE NAME}
-    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  yes
+    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST_FILE_NAME}
+    [Teardown]  OS.Remove Directory  ${LOCAL TMPDIR}  yes
 
 Get File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSHLibrary.Get File  non-existing
+    Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSH.Get File  non-existing
 
 *** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put File  ${TEXT FILES}/*  ${USER HOME}/
-    Put File  ${FILE WITH NON-ASCII}  ${USER HOME}/
-
-Get File And Verify Listing
-    [Arguments]  ${source}  ${destination}  @{expected}
-    SSHLibrary.Get File  ${source}  ${destination}
-    ${listing} =  List Files In Directory  ${LOCAL TMPDIR}
-    : FOR  ${filename}  IN  @{expected}
-    \  Should Contain  ${listing}  ${filename}
-
 Create Tmp Dir And Move File
     Put File  ${TEST FILE}  /tmp/
     Create Directory  ${LOCAL TMPDIR}
@@ -67,4 +69,6 @@ Create Tmp Dir And Move File
 Remove Tmp Dir And Remote File
     Execute Command  rm -f /tmp/test_file.txt
     Remove Directory  ${LOCAL TMPDIR}  yes
+
+
 

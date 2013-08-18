@@ -2,7 +2,8 @@ from robot import utils
 
 
 class ConfigurationException(Exception):
-    """Raised when creating, updating or accessing a Configuration entry fails."""
+    """Raised when creating, updating or accessing a Configuration entry fails.
+    """
     pass
 
 
@@ -22,7 +23,6 @@ class Configuration(object):
         cfg.update(name='John Doe')
         assert cfg.name == 'John Doe'
     """
-
     def __init__(self, **entries):
         self._config = entries
 
@@ -56,9 +56,8 @@ class Configuration(object):
 class Entry(object):
     """A base class for values stored in :py:class:`Configuration`.
 
-        :param:`initial` the initial value of this entry.
+    :param:`initial` the initial value of this entry.
     """
-
     def __init__(self, initial=None):
         self._value = self._create_value(initial)
 
