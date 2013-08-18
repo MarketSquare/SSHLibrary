@@ -22,7 +22,7 @@ import time
 import glob
 
 from .config import (Configuration, StringEntry, TimeEntry, IntegerEntry,
-        NewlineEntry)
+                     NewlineEntry)
 
 
 class SSHClientException(RuntimeError):
@@ -52,7 +52,6 @@ class AbstractSSHClient(object):
 
     Subclasses  provide the tool/language specific concrete implementations.
     """
-
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
                  encoding='utf8'):
@@ -308,20 +307,24 @@ class AbstractSSHClient(object):
 
     def list_dir(self, path, pattern=None, absolute=False):
         with self._create_sftp_client() as sftp_client:
-            items = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
-            items += sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
+            items = sftp_client.list(sftp_client.listfiles, path, pattern,
+                                     absolute)
+            items += sftp_client.list(sftp_client.listdirs, path, pattern,
+                                      absolute)
         items.sort()
         return items
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
         with self._create_sftp_client() as sftp_client:
-            files = sftp_client.list(sftp_client.listfiles, path, pattern, absolute)
+            files = sftp_client.list(sftp_client.listfiles, path, pattern,
+                                     absolute)
         files.sort()
         return files
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
         with self._create_sftp_client() as sftp_client:
-            dirs = sftp_client.list(sftp_client.listdirs, path, pattern, absolute)
+            dirs = sftp_client.list(sftp_client.listdirs, path, pattern,
+                                    absolute)
         dirs.sort()
         return dirs
 
@@ -480,9 +483,11 @@ class AbstractSFTPClient(object):
                 if destination.endswith('.'):
                     remote_path = path_separator.join([dirpath, filename])
                 else:
-                    remote_path = path_separator.join([destination, dirpath, filename])
+                    remote_path = path_separator.join([destination, dirpath,
+                                                       filename])
                     if not remote_target_exists:
-                        remote_path = remote_path.replace(parent + path_separator, '')
+                        remote_path = remote_path.replace(parent +
+                                                          path_separator, '')
                 l, r = self.put_file(local_path, remote_path, mode, newline,
                                      path_separator)
                 localfiles.extend(l)

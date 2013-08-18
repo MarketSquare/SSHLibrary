@@ -907,19 +907,23 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         | @{files} = | List Files In Directory  | /tmp | *.txt | absolute=True |
         """
         items = self.ssh_client.list_dir(path, pattern, absolute)
-        self._info('%d item%s:\n%s' % (len(items), plural_or_not(items), '\n'.join(items)))
+        self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
+                                       '\n'.join(items)))
         return items
 
     def list_files_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only files."""
         files = self.ssh_client.list_files_in_dir(path, pattern, absolute)
-        self._info('%d file%s:\n%s' % (len(files), plural_or_not(files), '\n'.join(files)))
+        self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
+                                       '\n'.join(files)))
         return files
 
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only directories."""
         dirs = self.ssh_client.list_dirs_in_dir(path, pattern, absolute)
-        self._info('%d director%s:\n%s' % (len(dirs), 'y' if len(dirs) == 1 else 'ies', '\n'.join(dirs)))
+        self._info('%d director%s:\n%s' % (len(dirs),
+                                          'y' if len(dirs) == 1 else 'ies',
+                                          '\n'.join(dirs)))
         return dirs
 
     def _run_sftp_command(self, command, *args):
