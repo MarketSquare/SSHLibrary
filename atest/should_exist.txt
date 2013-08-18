@@ -1,0 +1,55 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login and Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Variables ***
+${TEST ROOT NAME} =    test_root
+${REMOTE TEST ROOT} =  ${USER HOME}${/}${TEST ROOT NAME}
+
+*** Test Cases ***
+Directory Should Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    SSH.Directory Should Exist  ${target}
+
+Directory Should Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}
+    SSH.Directory Should Exist  ${target}
+
+Directory Should Exist Using Current Path
+    ${target} =  Set Variable  .
+    SSH.Directory Should Exist  ${target}
+
+Directory Should Not Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
+    SSH.Directory Should Exist  ${target}
+
+Directory Should Not Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}${/}${TEST FILE NAME}
+    SSH.Directory Should Exist  ${target}
+
+File Should Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
+    SSH.File Should Exist  ${target}
+
+File Should Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}${/}${TEST FILE NAME}
+    SSH.File Should Exist  ${target}
+
+File Should Not Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    SSH.File Should Exist  ${target}
+
+File Should Not Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}
+    SSH.File Should Exist  ${target}
+
+*** Keywords ***
+Login And Move Test Files
+    Login As Valid User
+    Put Directory  ${TEXTFILES}  ${REMOTE_TEST_ROOT}  recursive=True
+
+Remove Test Files and Close Connections
+    Execute Command  rm -rf ${REMOTE_TEST_ROOT}
+    Close All Connections
