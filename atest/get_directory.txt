@@ -52,10 +52,6 @@ Get Directory Should Fail When Source Does Not Exists
     OS.Directory Should Not Exist  ${target}
 
 *** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put Directory  ${TEXTFILES}  ${REMOTE_TEST_ROOT}  recursive=True
-
 Directory Should Exist With Content
     [Arguments]  ${destination}
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}

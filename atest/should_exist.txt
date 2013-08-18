@@ -41,7 +41,3 @@ File Should Not Exist Using Relative Path
     ${target} =  Set Variable  ${TEST ROOT NAME}
     SSH.File Should Exist  ${target}
 
-*** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put Directory  ${TEXTFILES}  ${REMOTE TEST ROOT}  recursive=True

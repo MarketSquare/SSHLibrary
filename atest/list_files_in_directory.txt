@@ -65,8 +65,3 @@ List Files With Absolute Paths Using Pattern
 List Files Should Fail When Source Path Not Exists
     ${target} =  Set Variable  not_exists
     Run Keyword And Expect Error  There was no path matching '${target}'  List Files In Directory  ${target}
-
-*** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put Directory  ${TEXTFILES}  ${REMOTE TEST ROOT}  recursive=True
