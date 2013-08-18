@@ -87,17 +87,15 @@ Put File And Specify Newlines
     Put File  ${source}  ${destination}  newline=${newlines}
     Verify Remote Files Exist  ${destination}  @{expected}
 
-Vefify Remote Files Do Not Exist
-    [Arguments]  ${path}  @{expected}
-    ${listing} =  SSH.List Directory  ${path}
-    : FOR  ${filename}  IN  @{expected}
-    \  Should Not Contain  ${listing}  ${filename}
-
 Verify Remote Files Exist
     [Arguments]  ${path}  @{expected}
-    ${items} =  SSH.List Directory  ${path}
     : FOR  ${filename}  IN  @{expected}
-    \  Should Contain  ${items}  ${filename}
+    \  SSH.File Should Exist  ${path}${/}${filename}
+
+Vefify Remote Files Do Not Exist
+    [Arguments]  ${path}  @{expected}
+    : FOR  ${filename}  IN  @{expected}
+    \  SSH.File Should Not Exist  ${path}${/}${filename}
 
 Remove Local Temp Dir And Remote File
     Remove Directory  ${LOCAL TMPDIR}  yes
