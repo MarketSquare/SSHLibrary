@@ -34,18 +34,23 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     = Requirements =
 
     To use SSHLibrary with Python, you must first install Paramiko SSH
-    implementation[1]. For Jython, you must have the JAR distribution of
-    Trilead SSH implementation[2] in the CLASSPATH during the test execution.
+    implementation[1]. This is probably done easiest by using easy_install
+    which also installs PyCrypto[2] as a Paramiko dependency.
 
     | [1] https://github.com/paramiko/paramiko
-    | [2] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
+    | [2] https://www.dlitz.net/software/pycrypto/
+
+    For Jython, you must have the JAR distribution of Trilead SSH
+    implementation[3] in the CLASSPATH during the test execution.
+
+    | [3] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
 
     = Connections =
 
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
-    Only one connection can be active at a time. This means that most of the
+    Only one connection can be active at a time. This means that majority of the
     keywords only affect to the active connection. Active connection can be
     changed using `Switch Connection` keyword.
 
@@ -54,13 +59,13 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     For executing commands on the remote host, there are two possibilities:
 
     1. `Execute Command` or `Start Command`. These keywords open a new session
-    using the connection. Possible changes to state are not preserved.
+    on the remote. Possible changes to state are not preserved.
 
     2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
     `Read Command Output`, `Read Until`, `Read Until Prompt` and
     `Read Until Regexp` keywords operate in an interactive shell, which
     means that changes to state are visible to later keywords. Note that in
-    interactive mode, prompt must be set before using any of the
+    interactive mode, prompt must be configured before using any of the
     Write-keywords.
 
     = Configuration =
@@ -82,9 +87,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     | [chars]  | matches any character inside square brackets (e.g. '[abc]' matches either 'a', 'b' or 'c') |
     | [!chars] | matches any character not inside square brackets |
 
-    Unless otherwise noted, matching is case-insensitive on
-    case-insensitive operating systems such as Windows. Pattern
-    matching is implemented using
+    Unless otherwise noted, matching is case-insensitive on case-insensitive
+    operating systems such as Windows. Pattern matching is implemented using
     [http://docs.python.org/library/fnmatch.html|fnmatch module].
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
@@ -109,10 +113,10 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Prompt must be set before `Read Until Prompt` can be can be used.
 
         `encoding` is the character encoding of input and output sequences.
-        Possible `encoding` values are listed in [3]. Starting from
+        Possible `encoding` values are listed in [4]. Starting from
         SSHLibrary 1.2, the default value is 'UTF-8'.
 
-        | [3] http://docs.python.org/2/library/codecs.html#standard-encodings
+        | [4] http://docs.python.org/2/library/codecs.html#standard-encodings
 
         `timeout`, `newline`, `prompt` and `encoding` values set here may
         later be overridden per connection by defining them as arguments
@@ -123,14 +127,14 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
         The default value is 'INFO'.
 
-        Examples that imports the library with sensible defaults:
+        Examples that imports the library with the sensible defaults:
         | Library | SSHLibrary |
 
-        Example that takes library into use and sets prompt to '>':
+        Example that takes the library into use and sets prompt to '>':
         | Library | SSHLibrary | prompt=> |
 
-        Example that takes library into use and changes timeout to 10 seconds
-        and changes line breaks to the Windows format:
+        Example that takes the library into use and changes timeout to 10
+        seconds and line breaks to the Windows format:
         | Library | SSHLibrary | timeout=10 seconds | newline=CRLF |
         """
         self._cache = ConnectionCache()
@@ -147,7 +151,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Only parameters whose value is other than `None` are updated.
 
-        Example that updates newline and prompt, but leaves timeout, log level
+        This example updates newline and prompt, but leaves timeout, log level
         and encoding settings intact:
         | Set Default Configuration | newline=CRLF | prompt=$ |
         """
@@ -163,9 +167,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
 
         Only parameters whose value is other than `None` are updated.
 
-        Example that updates terminal type and timeout of the currently
-        active connection and leaves other connection settings and connections
-        intact:
+        This example updates terminal type and timeout of the active connection
+        but leaves other connection settings and connections intact:
         | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
         self.ssh_client.config.update(timeout=timeout, newline=newline,
@@ -193,8 +196,8 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         the default values set on `library importing` or set with
         `Set Default Configuration` are used.
 
-        Starting from SSHLibrary 1.1, a shell session is also opened
-        automatically by this keyword.
+        Starting from SSHLibrary 1.1, a shell session is automatically opened
+        by this keyword.
 
         `term_type` defines the terminal type for this shell, and `width`
         and `height` can be configured to control the virtual size of it.
@@ -233,16 +236,16 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
     def switch_connection(self, index_or_alias):
         """Switches the active connection by index or alias.
 
-        `index_or_alias` is either connection index (integer) or explicitly
-        defined alias (string) that was given as an argument to
-        `Open Connection`.
+        `index_or_alias` is either connection index (an integer) or explicitly
+        defined alias (a string) that was passed as an argument to
+        `Open Connection` before.
 
         Connection index is got as a return value from `Open Connection` or
         from `Get Connection Id`. If `None` is given as argument `index_or_alias`,
         the currently active connection is is closed.
 
-        This keyword returns the index of the previously active connection,
-        which can be used to reuse that connection later.
+        This keyword returns the index of the last active connection,
+        before the switch, which can be used to reuse that connection later.
 
         Example:
         | Open Connection       | myhost.net   |          |
@@ -277,7 +280,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         """Closes all open connections and empties the connection cache.
 
         After this keyword, the connection indices returned by `Open Connection`
-        are reset and start from 1.
+        are reset and start from '1'.
 
         This keyword is ought to be used either in test or suite teardown to
         make sure all the connections are closed before the test execution
@@ -862,6 +865,26 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
                                       destination, mode, newline,
                                       path_separator, recursive)
 
+    def directory_should_exist(self, path):
+        """Fails if the given path is NOT an existing directory.
+        """
+        return self.ssh_client.dir_exists(path)
+
+    def directory_should_not_exist(self, path):
+        """Fails if the given path is an existing directory.
+        """
+        return not self.ssh_client.dir_exists(path)
+
+    def file_should_exist(self, path):
+        """Fails if the given path is NOT an existing file.
+        """
+        return self.ssh_client.file_exists(path)
+
+    def file_should_not_exist(self, path):
+        """Fails if the given path is an existing file.
+        """
+        return not self.ssh_client.file_exists(path)
+
     def list_directory(self, path, pattern=None, absolute=False):
         """Returns and logs items in a remote directory, optionally filtered
         with `pattern`.
@@ -877,8 +900,7 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         argument to any non-empty string.
 
         If `pattern` is given, only items matching it are returned. The pattern
-        matching syntax is explained in `pattern matching`, and in this case
-        matching is case-sensitive.
+        matching syntax is explained in `pattern matching`.
 
         Examples (using also other `List Directory` variants):
         | @{items} = | List Directory           | /home/robot |
@@ -899,26 +921,6 @@ class SSHLibrary(DeprecatedSSHLibraryKeywords):
         dirs = self.ssh_client.list_dirs_in_dir(path, pattern, absolute)
         self._info('%d director%s:\n%s' % (len(dirs), 'y' if len(dirs) == 1 else 'ies', '\n'.join(dirs)))
         return dirs
-
-    def directory_should_exist(self, path):
-        """Fails if the given path does not point to an existing directory.
-        """
-        return self.ssh_client.dir_exists(path)
-
-    def directory_should_not_exist(self, path):
-        """Fails if the given path points to an existing directory.
-        """
-        return not self.ssh_client.dir_exists(path)
-
-    def file_should_exist(self, path):
-        """Fails if the given path does not point to an existing file.
-        """
-        return self.ssh_client.file_exists(path)
-
-    def file_should_not_exist(self, path):
-        """Fails if the given path points to an existing file.
-        """
-        return not self.ssh_client.file_exists(path)
 
     def _run_sftp_command(self, command, *args):
         try:
