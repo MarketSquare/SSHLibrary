@@ -7,7 +7,7 @@ Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
 Put Directory To Existing Remote Path
-    ${target} =  Set Variable  ${USER HOME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}
     ${target} =  Set Variable  ${target}${/}textfiles
@@ -20,7 +20,7 @@ Put Directory To Non-Existing Remote Path
     Remote Directory Should Exist With Content  ${target}
 
 Put Directory Including Subdirectories To Existing Remote Path
-    ${target} =  Set Variable  ${USER HOME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     Verify Remote Directory Exists  ${target}
     Put Directory  ${TEXTFILES}  ${target}  recursive=True
     ${target} =  Set Variable  ${target}${/}textfiles
@@ -41,7 +41,7 @@ Put Directory To Current Remote Path
     Remote Directory Should Exist With Content  ${target}
 
 Put Directory Using Relative Source
-    ${target} =  Set Variable  ${USER HOME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     Verify Remote Directory Exists  ${target}
     Put Directory  textfiles  ${target}
     ${target} =  Set Variable  ${target}${/}textfiles
