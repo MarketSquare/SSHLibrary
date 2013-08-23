@@ -18,7 +18,6 @@ from .abstractclient import SSHClientException
 from .client import SSHClient
 from config import (Configuration, StringEntry, TimeEntry, LogLevelEntry,
         NewlineEntry)
-from .deprecated import DeprecatedSSHLibraryKeywords
 from .version import VERSION
 
 __version__ = VERSION
@@ -26,7 +25,7 @@ __version__ = VERSION
 plural_or_not = lambda count: '' if count == 1 else 's'
 
 
-class SSHLibrary(DeprecatedSSHLibraryKeywords):
+class SSHLibrary(object):
     """Robot Framework test library for SSH and SFTP.
 
     SSHLibrary works with both Python and Jython interpreters.
