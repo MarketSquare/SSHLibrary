@@ -287,16 +287,15 @@ class SSHLibrary(object):
         """
         self._cache.close_all()
 
-    def get_connections(self):
+    def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
         The return value is a list of objects that describe the connection.
         These objects have attributes that correspond to the argument names
         of `Open Connection`.
 
-        This keyword also logs the connection information. Default log level
-        is set either on `library importing` or with
-        `Set Default Configuration`.
+        This keyword logs the connection information. `loglevel` can be used to
+        override the default log level defined by `configuration`.
 
         Example:
         | Open Connection | somehost  | prompt=>> |
@@ -308,7 +307,7 @@ class SSHLibrary(object):
         # TODO: could the ConnectionCache be enhanced to be iterable?
         configs = [c.config for c in self._cache._connections]
         for c in configs:
-            self._log(str(c))
+            self._log(str(c), loglevel)
         return configs
 
     def enable_ssh_logging(self, logfile):
