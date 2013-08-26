@@ -34,7 +34,7 @@ class SSHLibrary(object):
 
     To use SSHLibrary with Python, you must first install Paramiko SSH
     implementation[1]. This is probably done easiest by using easy_install
-    which also installs PyCrypto[2] as a Paramiko dependency.
+    which also installs PyCrypto[2] as the Paramiko dependency.
 
     | [1] https://github.com/paramiko/paramiko
     | [2] https://www.dlitz.net/software/pycrypto/
@@ -44,38 +44,73 @@ class SSHLibrary(object):
 
     | [3] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
 
-    = Connections =
+    = Connections and login =
 
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
-    Only one connection can be active at a time. This means that majority of the
+    Logging into the host is done either by using username and password
+    (keyword `Login`) or by using public/private key pair
+    (keyword `Login With Public key`).
+
+    Only one connection can be active at a time. This means that most of the
     keywords only affect to the active connection. Active connection can be
     changed using `Switch Connection` keyword.
+
+    = Configuration =
+
+    Default settings, for all the upcoming connections, can be configured on
+    `library importing` or later with keyword `Set Default Configuration`.
+    All the settings are listed further below.
+
+    Using `Set Default Configuration` does not affect to the already open
+    connections. Settings of the currently active connection can be configured
+    with `Set Client Configuration`.
+
+    Most of the defaults can be overridden per connection by defining them
+    as arguments to `Open Connection`. Otherwise the defaults are used.
+
+    == Configurable per connection ==
+
+    `timeout` is used both by `Read Until` and `Write Until` variants.
+    The default timeout is '3 seconds'.
+
+    `newline` is the line break sequence used by the operating system
+    on the remote. The default value is 'LF' which is the default on
+    Unix-like operating systems.
+
+    `prompt` is a character sequence that is used by `Read Until Prompt`
+    and `Write` variants. Prompt must be set before these keywords can be used.
+
+    `encoding` is the character encoding of input and output sequences.
+    Possible `encoding` values are listed in [4]. Starting from
+    SSHLibrary 1.2, the default value is 'UTF-8'.
+
+    | [4] http://docs.python.org/2/library/codecs.html#standard-encodings
+
+    == Not configurable per connection ==
+
+    `loglevel` sets the log level used to log the output read by `Read`,
+    `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
+    `Write Until Expected` and `Get Connections`. The default level is 'INFO'.
+    `loglevel` is not configurable per connection but can be overridden per
+    keyword by passing it as an argument to the mentioned keywords.
+    Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
 
     = Executing commands =
 
     For executing commands on the remote host, there are two possibilities:
 
     1. `Execute Command` or `Start Command`. These keywords open a new session
-    on the remote. Possible changes to state are not preserved.
+    on the remote, which means that possible changes to the state are not
+    visible to the later keywords.
 
     2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
     `Read Command Output`, `Read Until`, `Read Until Prompt` and
     `Read Until Regexp` keywords operate in an interactive shell, which
-    means that changes to state are visible to later keywords. Note that in
-    interactive mode, prompt must be configured before using any of the
-    Write-keywords.
-
-    = Configuration =
-
-    Prompt, as well as the other settings can be configured as defaults for
-    all the upcoming connections on `library importing` or by using keyword
-    `Set Default Configuration`. Settings overriding these defaults
-    (except `loglevel`) can be given as arguments to `Open Connection`.
-
-    Currently active, already open connection can be configured with
-    `Set Client Configuration`.
+    means that changes to state are visible to the later keywords. Note that
+    prompt must be set before using `Read Until Prompt` or any of the `Write`
+    variants. See `configuration` for how to set the prompt.
 
     = Pattern matching =
 
@@ -95,36 +130,8 @@ class SSHLibrary(object):
 
     def __init__(self, timeout='3 seconds', newline='LF', prompt=None,
                  loglevel='INFO', encoding='utf8'):
-        """SSH Library allows some import time configuration.
-
-        Default settings (except `loglevel`) may later be changed with
-        `Set Default Configuration`. Settings of an active,
-        already open connection can be changed with `Set Client Configuration`.
-
-        `timeout` is used both by `Read Until` and `Write Until` variants.
-        The default is '3 seconds'.
-
-        `newline` is the line break sequence used by the operating system
-        on the remote. The default value is 'LF' which is also the default on
-        Unix-like operating systems.
-
-        `prompt` is a character sequence that is used by `Read Until Prompt`.
-        Prompt must be set before `Read Until Prompt` can be can be used.
-
-        `encoding` is the character encoding of input and output sequences.
-        Possible `encoding` values are listed in [4]. Starting from
-        SSHLibrary 1.2, the default value is 'UTF-8'.
-
-        | [4] http://docs.python.org/2/library/codecs.html#standard-encodings
-
-        `timeout`, `newline`, `prompt` and `encoding` values set here may
-        later be overridden per connection by defining them as arguments
-        to `Open Connection`.
-
-        `loglevel` sets the default log level used to log the output read by
-        `Read Until` variants. This cannot be configured per connection.
-        Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
-        The default value is 'INFO'.
+        """SSH Library allows some import time configuration which are
+        documented in `configuration`.
 
         Examples that imports the library with the sensible defaults:
         | Library | SSHLibrary |
@@ -146,7 +153,7 @@ class SSHLibrary(object):
 
     def set_default_configuration(self, timeout=None, newline=None,
                                   prompt=None, loglevel=None, encoding=None):
-        """Update the default configuration values set on `library importing`.
+        """Update the default `configuration` values set on `library importing`.
 
         Only parameters whose value is other than `None` are updated.
 
@@ -160,14 +167,14 @@ class SSHLibrary(object):
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type='vt100', width=80, height=24,
                                  encoding=None):
-        """Update the active connection configuration values.
+        """Update the active connection `configuration` values.
 
         At least one connection must have been opened using `Open Connection`.
 
         Only parameters whose value is other than `None` are updated.
 
         This example updates terminal type and timeout of the active connection
-        but leaves other connection settings and connections intact:
+        but leaves the other connection settings and connections intact:
         | Set Client Configuration | term_type=ansi | timeout=2 hours |
         """
         self.ssh_client.config.update(timeout=timeout, newline=newline,
@@ -191,18 +198,15 @@ class SSHLibrary(object):
         used for switching between connections, similarly as the index.
         See `Switch Connection` for more details.
 
-        If `timeout`, `newline`, `prompt` or `encoding` are not given,
-        the default values set on `library importing` or set with
-        `Set Default Configuration` are used.
-
-        Starting from SSHLibrary 1.1, a shell session is automatically opened
-        by this keyword.
+        Use of `timeout`, `newline`, `prompt` and `encoding` is documented in
+        `configuration`. These options can be later updated with
+        `Set Client Configuration`.
 
         `term_type` defines the terminal type for this shell, and `width`
         and `height` can be configured to control the virtual size of it.
 
-        Client configuration options, other than `host`, `port` and `alias`,
-        can be later updated with `Set Client Configuration`.
+        Starting from SSHLibrary 1.1, a shell session is automatically opened
+        by this keyword.
 
         Examples:
         | Open Connection | myhost.net      |
@@ -240,8 +244,8 @@ class SSHLibrary(object):
         `Open Connection` before.
 
         Connection index is got as a return value from `Open Connection` or
-        from `Get Connection Id`. If `None` is given as argument `index_or_alias`,
-        the currently active connection is is closed.
+        from `Get Connection Id`. If `None` is given as argument
+        `index_or_alias`, the currently active connection is is closed.
 
         This keyword returns the index of the last active connection,
         before the switch, which can be used to reuse that connection later.
@@ -338,6 +342,7 @@ class SSHLibrary(object):
 
         This keyword also reads and returns the output from the server.
         If prompt is set, everything until the prompt is returned.
+        See `configuration` for how to set the prompt.
 
         Example:
         | Login | john | secret |
@@ -356,6 +361,7 @@ class SSHLibrary(object):
 
         This keyword also reads and returns the output from the server.
         If prompt is set, everything until the prompt is returned.
+        See `configuration` for how to set the prompt.
         """
         return self._login(self.ssh_client.login_with_public_key, username,
                            keyfile, password)
@@ -476,10 +482,8 @@ class SSHLibrary(object):
 
         This keyword logs the written `text` with log level 'INFO'.
 
-        This keyword also logs the read output. Default log level is set
-        either on `library importing` or with `Set Default Configuration`.
-        `loglevel` can be used to override the default log level.
-        Possible levels are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
+        This keyword logs the read output. `loglevel` can be used to override
+        the default log level defined by `configuration`.
         """
         self._write(text, add_newline=True)
         return self._read_and_log(loglevel, self.ssh_client.read_until_newline)
@@ -513,10 +517,8 @@ class SSHLibrary(object):
         This keyword is most useful for reading everything from the output.
         After being read, the output buffer is cleared.
 
-        This keyword logs the read output. Default log level is set
-        either on `library importing` or with `Set Default Configuration`.
-        `loglevel` can be used to override the default log level.
-        Possible levels are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
+        This keyword logs the read output. `loglevel` can be used to override
+        the default log level defined by `configuration`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read)
 
@@ -528,12 +530,10 @@ class SSHLibrary(object):
         If no match is found, the keyword fails.
 
         The timeout is three seconds by default. Timeout can be set
-        either on `library importing', with `Set Default Configuration` or
-        as an argument to `Open Connection`. For active connection,
-        `Set Client Configuration` can be used.
+        using `configuration
 
-        This keyword logs the read output. See `Read` for more information
-        on `loglevel`.
+        This keyword logs the read output. `loglevel` can be used to override
+        the default log level defined by `configuration`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until,
                                   expected)
@@ -550,8 +550,8 @@ class SSHLibrary(object):
         as an argument to `Open Connection`. For currently active connection,
         `Set Client Configuration` can be used.
 
-        This keyword logs the read output. See `Read` for more information
-        on `loglevel`.
+        This keyword logs the read output. `loglevel` can be used to override
+        the default log level defined by `configuration`.
 
         Example:
         | Read Until Regexp | (#|$) |
@@ -574,8 +574,8 @@ class SSHLibrary(object):
         output of previous command has been read and the command does not
         produce prompt characters in its output.
 
-        This keyword logs the read output. See `Read` for more information
-        on `loglevel`.
+        This keyword logs the read output. `loglevel` can be used to override
+        the default log level defined by `configuration`.
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until_prompt)
 
@@ -591,8 +591,8 @@ class SSHLibrary(object):
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        This keyword logs the read output. See `Read` for more information
-        on `loglevel`.
+        This keyword logs the read output. `loglevel` can be used to override
+        the default log level defined by `configuration`.
 
         Example:
         | Write Until Expected Output | ps -ef| grep myprocess\\n | myprocess |
@@ -630,15 +630,19 @@ class SSHLibrary(object):
 
         1. If `destination` is an existing file, `source` file is downloaded
            over it.
+
         2. If `destination` is an existing directory, `source` file is
            downloaded into it. Possible file with the same name is overwritten.
+
         3. If `destination` does not exist and it ends with `path_separator`,
            it is considered a directory. The directory is then created and
            `source` file is downloaded into it. Possible missing intermediate
            directories are also created.
+
         4. If `destination` does not exist and does not end with
            `path_separator`, it is considered a file. If the path to the file
            does not exist, it is created.
+
         5. If `destination` is not given, the current working directory on
            the local machine is used as the destination. This will most probably
            be the directory where the test execution was started.
@@ -754,15 +758,19 @@ class SSHLibrary(object):
 
         1. If `destination` is an existing file, `source` file is uploaded
            over it.
+
         2. If `destination` is an existing directory, `source` file is
            uploaded into it. Possible file with same name is overwritten.
+
         3. If `destination` does not exist and it ends with `path_separator`,
            it is considered a directory. The directory is then created and
            `source` file uploaded into it. Possibly missing intermediate
            directories are also created.
+
         4. If `destination` does not exist and it does not end with
            `path_separator, it is considered a file. If the path to the file
            does not exist, it is created.
+
         5. If `destination` is not given, the user's home directory
            on the remote is used as the destination.
 
