@@ -1,7 +1,7 @@
 *** Settings ***
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
-Suite Teardown  Remove Test Files and Close Connections
+Suite Teardown  Remove Test Files And Close Connections
 Test Teardown   Remove Directory  ${target}  recursive=True
 Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem  WITH NAME  OS
