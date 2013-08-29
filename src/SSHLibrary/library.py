@@ -28,7 +28,7 @@ plural_or_not = lambda count: '' if count == 1 else 's'
 class SSHLibrary(object):
     """Robot Framework test library for SSH and SFTP.
 
-    SSHLibrary works with both Python and Jython interpreters.
+    SSHLibrary works both with Python and Jython interpreters.
 
     = Requirements =
 
@@ -39,8 +39,8 @@ class SSHLibrary(object):
     | [1] https://github.com/paramiko/paramiko
     | [2] https://www.dlitz.net/software/pycrypto/
 
-    For Jython, you must have the JAR distribution of Trilead SSH
-    implementation[3] in the CLASSPATH during the test execution.
+    For Jython, you must have the JAR distribution of Trilead SSH library[3]
+    in the CLASSPATH during the test execution.
 
     | [3] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
 
@@ -65,17 +65,19 @@ class SSHLibrary(object):
 
     Using `Set Default Configuration` does not affect to the already open
     connections. Settings of the current active connection can be configured
-    with `Set Client Configuration`.
+    with `Set Client Configuration`. Settings of another, non-active connection,
+    can be configured by first using `Switch Connection` and then
+    `Set Client Configuration`.
 
     Most of the defaults can be overridden per connection by defining them
     as arguments to `Open Connection`. Otherwise the defaults are used.
 
     == Configurable per connection ==
 
-    `timeout` is used both by `Read Until` and `Write Until` variants.
-    The default timeout is '3 seconds'.
+    `timeout` is used by `Read Until` variants and
+    `Write Until Expected Output`. The default timeout is '3 seconds'.
 
-    `newline` is the line break sequence used by the operating system
+    `newline` is the line break sequence known by the operating system
     on the remote. The default value is 'LF' which is the default on
     Unix-like operating systems.
 
@@ -108,9 +110,7 @@ class SSHLibrary(object):
     2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
     `Read Command Output`, `Read Until`, `Read Until Prompt` and
     `Read Until Regexp` keywords operate in an interactive shell, which
-    means that changes to state are visible to the later keywords. Note that
-    prompt must be set before using `Read Until Prompt` or any of the `Write`
-    variants. See `configuration` for how to set the prompt.
+    means that changes to state are visible to the later keywords.
 
     = Pattern matching =
 
@@ -169,7 +169,7 @@ class SSHLibrary(object):
 
         Only parameters whose value is other than `None` are updated.
 
-        This example sets the prompt to '$'. If this was already set on
+        This example sets the prompt to '$'. If prompt was already set on
         `library importing`, that value is overridden:
         | Set Default Configuration | prompt=$ |
 
@@ -241,12 +241,14 @@ class SSHLibrary(object):
         used for switching between connections, similarly as the index.
         See `Switch Connection` for more details.
 
-        Use of `timeout`, `newline`, `prompt` and `encoding` is documented in
-        `configuration`. These options can be later updated with
-        `Set Client Configuration`.
+        `timeout`, `newline`, `prompt` and `encoding` are documented in
+        `configuration`.
 
         `term_type` defines the terminal type for this shell, and `width`
         and `height` can be configured to control the virtual size of it.
+
+        All the arguments, except `host`, `alias` and `port` can be later
+        updated with `Set Client Configuration.
 
         Starting from SSHLibrary 1.1, a shell session is automatically opened
         by this keyword.
