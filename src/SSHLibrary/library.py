@@ -81,8 +81,8 @@ class SSHLibrary(object):
     on the remote. The default value is 'LF' which is the default on
     Unix-like operating systems.
 
-    `prompt` is a character sequence that is used by `Read Until Prompt`
-    and `Write` variants. Prompt must be set before these keywords can be used.
+    `prompt` is a character sequence that is used by `Read Until Prompt`.
+    Prompt must be set before the keyword can be used.
 
     `encoding` is the character encoding of input and output sequences.
     Possible `encoding` values are listed in [4]. Starting from
@@ -142,8 +142,7 @@ class SSHLibrary(object):
         | Library | SSHLibrary | 10 seconds |
 
         Prompt does not have a sensible default and must be explicitly set to
-        use e.g. `Read Until Prompt` keyword. In this example, prompt is set
-        to '$':
+        use `Read Until Prompt`. In this example, prompt is set to '$':
         | Library | SSHLibrary | prompt=$ |
 
         Multiple settings are possible. In this example, the library is brought

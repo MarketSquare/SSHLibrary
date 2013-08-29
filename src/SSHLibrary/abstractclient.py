@@ -148,7 +148,6 @@ class AbstractSSHClient(object):
         :param bool add_newline: if True, a newline will be added to `text`.
         """
         text = text.encode(self.config.encoding)
-        self._ensure_prompt_is_set()
         if add_newline:
             text += self.config.newline
         self._write(text)
@@ -190,7 +189,8 @@ class AbstractSSHClient(object):
 
         prompt and timeout are defined with :py:meth:`open_connection()`
         """
-        self._ensure_prompt_is_set()
+        if not self.config.prompt:
+            raise SSHClientException('Prompt is not set.')
         return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):
@@ -244,10 +244,6 @@ class AbstractSSHClient(object):
                 pass
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
                                  % (expected, timeout, ret))
-
-    def _ensure_prompt_is_set(self):
-        if not self.config.prompt:
-            raise SSHClientException('Prompt is not set.')
 
     def put_file(self, source, destination='.', mode='0744',
                  newline='default', path_separator='/'):
