@@ -33,7 +33,7 @@ class SSHLibrary(object):
     = Requirements =
 
     To use SSHLibrary with Python, you must first install Paramiko SSH
-    implementation[1]. This is probably done easiest by using easy_install
+    implementation[1]. This is done easiest by using easy_install
     which also installs PyCrypto[2] as the Paramiko dependency.
 
     | [1] https://github.com/paramiko/paramiko
@@ -49,8 +49,8 @@ class SSHLibrary(object):
     The library supports multiple connections to different hosts.
     New connections are opened with `Open Connection` keyword.
 
-    Logging into the host is done either by using username and password
-    (keyword `Login`) or by using public/private key pair
+    Logging into the host is done either with username and password
+    (keyword `Login`) or with public/private key pair
     (keyword `Login With Public key`).
 
     Only one connection can be active at a time. This means that most of the
@@ -59,7 +59,7 @@ class SSHLibrary(object):
 
     = Configuration =
 
-    Default settings, for all the upcoming connections, can be configured on
+    Default settings for all the upcoming connections can be configured on
     `library importing` or later with keyword `Set Default Configuration`.
     All the settings are listed further below.
 
@@ -78,10 +78,10 @@ class SSHLibrary(object):
     `Write Until Expected Output`. The default timeout is '3 seconds'.
 
     `newline` is the line break sequence known by the operating system
-    on the remote. The default value is 'LF' which is the default on
+    on the remote. The default value is 'LF' which is known by
     Unix-like operating systems.
 
-    `prompt` is a character sequence that is used by `Read Until Prompt`.
+    `prompt` is a character sequence used by `Read Until Prompt`.
     Prompt must be set before the keyword can be used.
 
     `encoding` is the character encoding of input and output sequences.
@@ -95,8 +95,8 @@ class SSHLibrary(object):
     `loglevel` sets the log level used to log the output read by `Read`,
     `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
     `Write Until Expected` and `Get Connections`. The default level is 'INFO'.
-    `loglevel` is not configurable per connection but can be overridden per
-    keyword by passing it as an argument to the mentioned keywords.
+    `loglevel` is not configurable per connection but can be overridden
+    by passing it as an argument to any of the mentioned keywords.
     Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
 
     = Executing commands =
@@ -133,21 +133,20 @@ class SSHLibrary(object):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
-        defaults are assumed:
+        defaults are used:
         | Library | SSHLibrary |
 
         Only arguments that are given are changed. In this example, timeout
-        is changed to 10 seconds but other settings will be the library
+        is changed to 10 seconds but other settings are left to the library
         defaults:
         | Library | SSHLibrary | 10 seconds |
 
-        Prompt does not have a sensible default and must be explicitly set to
+        Prompt does not have a default value and must be explicitly set to
         use `Read Until Prompt`. In this example, prompt is set to '$':
         | Library | SSHLibrary | prompt=$ |
 
-        Multiple settings are possible. In this example, the library is brought
-        into use with timeout set to 10 seconds and line breaks set to
-        the Windows format:
+        Multiple settings are possible. In this example, the library is taken
+        into use with timeout of 10 seconds and line breaks known by Windows:
         | Library | SSHLibrary | 10 seconds | CRLF |
 
         """
@@ -161,19 +160,18 @@ class SSHLibrary(object):
 
     def set_default_configuration(self, timeout=None, newline=None,
                                   prompt=None, loglevel=None, encoding=None):
-        """Update the default `configuration` values set on `library importing`.
+        """Update the default `configuration` values.
 
         Please note that using this keyword does not affect to the already
         open connections. For more details, see `configuration`.
 
         Only parameters whose value is other than `None` are updated.
 
-        This example sets the prompt to '$'. If prompt was already set on
-        `library importing`, that value is overridden:
+        This example sets the prompt to '$':
         | Set Default Configuration | prompt=$ |
 
-        This example updates newline and loglevel, but leaves timeout, prompt
-        and encoding settings intact:
+        This example sets `newline` and `loglevel, but leaves the other settings
+        intact:
         | Set Default Configuration | newline=CRLF | loglevel=WARN |
 
         Sometimes you might want to use longer timeout for all the subsequent
@@ -201,18 +199,19 @@ class SSHLibrary(object):
 
         In the following example, prompt is set for the current active
         connection. Other settings are left intact:
-        | ${myhost}= | Open Connection          | my.host.com       | timeout=5 seconds |
-        |            | Set Client Configuration | prompt=$          |
-        |            | Should Be Equal          | ${myhost.prompt}  | $                 | # Changed     |
-        |            | Should Be Equal          | ${myhost.timeout} | 5 seconds         | # Not changed |
+        |           | Open Connection          | my.server.com      |
+        |           | Set Client Configuration | prompt=$           |
+        | ${conns}= | Get Connections          |
+        |           | Should Be Equal          | ${conns[0].prompt} | $ |
 
         Also, the other connections are not affected:
-        | ${linuxhost}= | Open Connection          | linux.server.com    |    |
-        |               | Set Client Configuration | prompt=$            |    | # Only linuxhost affected |
-        | ${winhost}=   | Open Connection          | windows.server.com  |    |
-        |               | Set Client Configuration | prompt=>            |    | # Only winhost affected   |
-        |               | Should Be Equal          | ${linuxhost.prompt} | $  |
-        |               | Should Be Equal          | ${winhost.prompt}   | >  |
+        |           | Open Connection          | linux.server.com   |   |
+        |           | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
+        |           | Open Connection          | windows.server.com |   |
+        |           | Set Client Configuration | prompt=>           |   | # Only windows.server.com affected  |
+        | ${conns}= | Get Connections          |
+        |           | Should Be Equal          | ${conns[0].prompt} | $ |
+        |           | Should Be Equal          | ${conns[1].prompt} | > |
 
         Multiple settings are possible. This example updates both terminal type
         and terminal width of the current active connection:
@@ -262,13 +261,13 @@ class SSHLibrary(object):
         | Open Connection   | my.server.com | alias=myserver |
         | # Do something with my.server.com |
         | Open Connection   | 192.168.1.1   |
-        | Switch Connection | my.server     |                | # Back to my.server.com |
+        | Switch Connection | myserver      |                | # Back to my.server.com |
 
         Settings can be overridden per connection, otherwise the ones set on
         `library importing` or with `Set Default Configuration` are used:
-        | Open Connection | my.server.com | # Default timeout | # Default line breaks |
-        | # Do something with my.server.com                   |
         | Open Connection | 192.168.1.1   | timeout=1 hour    | newline=CRLF          |
+        | # Do something with the connection                  |
+        | Open Connection | my.server.com | # Default timeout | # Default line breaks |
 
         Terminal settings are configurable per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
@@ -282,7 +281,7 @@ class SSHLibrary(object):
         return self._cache.register(client, alias)
 
     def get_connection_id(self):
-        """Returns the index of the current active connection.
+        """Returns the index (an integer) of the current active connection.
 
         If no connection is currently active, `None` is returned.
 
@@ -298,27 +297,25 @@ class SSHLibrary(object):
     def switch_connection(self, index_or_alias):
         """Switches the active connection by index or alias.
 
-        `index_or_alias` is either connection index (an integer) or explicitly
+        `index_or_alias` is either an integer got as the return value of
+        keywords `Open Connection` and `Get Connection Id` or an explicitly
         defined alias (a string) that was passed as an argument to
-        `Open Connection` before.
-
-        Connection index is got as a return value from `Open Connection` or
-        from `Get Connection Id`. If `None` is given as argument
-        `index_or_alias`, the current active connection is is closed.
+        `Open Connection`.
 
         This keyword returns the index of the last active connection,
-        before the switch, which can be used to reuse that connection later.
+        which can be used to reuse that connection later.
 
         Example:
-        | Open Connection       | my.server.com        |
-        | Login                 | johndoe              | secretpasswd |
-        | Open Connection       | build.local.net      | alias=Build  |
-        | Login                 | jenkins              | jenkins      |
-        | Start Command         | make_build.sh        |              | # Executed on build.local.net |
-        | Switch Connection     | 1                    |              | # Switch using index          |
-        | Execute Command       | touch last_build.txt |              | # Executed on my.server.com   |
-        | Switch Connection     | Build                |              | # Switch using alias          |
-        | Read Command Output   |                      |              | # Executed on build.local.net |
+        |               | Open Connection   | my.server.com   |
+        |               | Login             | johndoe         | secretpasswd |
+        |               | Open Connection   | build.local.net | alias=Build  |
+        |               | Login             | jenkins         | jenkins      |
+        |               | Switch Connection | 1               |              | # Switch using index          |
+        | ${username} = | Execute Command   | whoami          |              | # Executed on my.server.com   |
+        |               | Should Be Equal   | ${username}     | johndoe      |
+        |               | Switch Connection | Build           |              | # Switch using alias          |
+        | ${username} = | Execute Command   | whoami          |              | # Executed on build.local.net |
+        |               | Should Be Equal   | ${username}     | jenkins      |
 
         Above example expects that there was no other open connections when
         opening the first one. Thus index '1' can be used to switch back to it
@@ -337,7 +334,7 @@ class SSHLibrary(object):
         return old_index
 
     def close_all_connections(self):
-        """Closes all open connections and empties the connection cache.
+        """Closes all open connections.
 
         After this keyword, the connection indices returned by `Open Connection`
         are reset and start from '1'.
@@ -349,7 +346,7 @@ class SSHLibrary(object):
         Example:
         |            | Open Connection       | myhost.com      |
         |            | Open Connection       | build.local.net |
-        |            | # Do something with both connections    |
+        |            | # Do something with the connections     |
         | [Teardown] | Close all connections |
         """
         self._cache.close_all()
@@ -365,13 +362,13 @@ class SSHLibrary(object):
         override the default log level defined by `configuration`.
 
         Example:
-        |             |             | Open Connection | near.server.com     | timeout=10 seconds |
-        |             |             | Open Connection | far.server.com      | timeout=5 minutes  |
-        | ${nearhost} | ${farhost}= | Get Connections |
-        |             |             | Should Be Equal | ${nearhost.host}    | near.server.com    |
-        |             |             | Should Be Equal | ${nearhost.timeout} | 10 seconds         |
-        |             |             | Should Be Equal | ${farhost.port}     | 22                 |
-        |             |             | Should Be Equal | ${farhost.timeout}  | 5 minutes          |
+        |             |             | Open Connection             | near.server.com     | timeout=10s     |
+        |             |             | Open Connection             | far.server.com      | timeout=5s      |
+        | ${nearhost} | ${farhost}= | Get Connections             |
+        |             |             | Should Be Equal             | ${nearhost.host}    | near.server.com |
+        |             |             | Should Be Equal As Integers | ${nearhost.timeout} | 10              |
+        |             |             | Should Be Equal As Integers | ${farhost.port}     | 22              |
+        |             |             | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
         """
         # TODO: could the ConnectionCache be enhanced to be iterable?
         configs = [c.config for c in self._cache._connections]
@@ -393,10 +390,11 @@ class SSHLibrary(object):
         tests with `pybot`.
 
         Example:
-        | Open Connection    | myhost.com      |              | # Not logged |
+        | Open Connection    | my.server.com   |              | # Not logged |
         | Enable SSH Logging | myhost.log      |
         | Login              | johndoe         | secretpasswd | # Logged     |
         | Open Connection    | build.local.net |              | # Logged     |
+        | # Do something with the connections  |
         | # Check myhost.log for detailed debug information   |
         """
         if SSHClient.enable_logging(logfile):
@@ -410,17 +408,17 @@ class SSHLibrary(object):
         `Switch Connection` to switch to another connection.
 
         Example:
-        |           | Open Connection         | myhost.com |
-        |           | Login                   | johndoe    | secretpasswd |
-        | ${files}= | List Files In Directory | logs       |
-        |           | Close Connection        |
-        |           | # Do something with ${files}...      |
+        | Open Connection         | my.server.com    |
+        | Login                   | johndoe          | secretpasswd |
+        | Get File                | results.txt      | /tmp         |
+        | Close Connection        |
+        | # Do something with /tmp/results.txt       |
         """
         self.ssh_client.close()
         self._cache.current = self._cache._no_current
 
     def login(self, username, password):
-        """Logs into the SSH server using the given `username` and `password`.
+        """Logs into the SSH server with the given `username` and `password`.
 
         Connection must be opened before using this keyword.
 
@@ -428,10 +426,15 @@ class SSHLibrary(object):
         If prompt is set, everything until the prompt is returned.
         See `configuration` for how to set the prompt.
 
-        Example:
-        |          | Open Connection | linux.host.com |
-        | ${motd}= | Login           | johndoe        | secretpasswd  |
-        |          | Should Contain  | ${motd}        | Last login at |
+        Example that logs in and returns the output:
+        |            | Open Connection | linux.server.com |
+        | ${output}= | Login           | johndoe          | secretpasswd  |
+        |            | Should Contain  | ${output}        | Last login at |
+
+        Example that logs in and returns everything until the prompt:
+        |            | Open Connection | linux.server.com | prompt=$         |
+        | ${output}= | Login           | johndoe          | secretpasswd     |
+        |            | Should Contain  | ${output}        | johndoe@linux:~$ |
         """
         return self._login(self.ssh_client.login, username, password)
 
@@ -451,15 +454,14 @@ class SSHLibrary(object):
         If prompt is set, everything until the prompt is returned.
         See `configuration` for how to set the prompt.
 
-        Example:
-        |          | Open Connection       | linux.host.com |
-        | ${motd}= | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_rsa |
-        |          | Should Contain        | ${motd}        | Last login at             |
+        Example that logs in using a private key and returns the output:
+        |            | Open Connection       | linux.host.com |
+        | ${output}= | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_rsa |
+        |            | Should Contain        | ${motd}        | Last login at             |
 
-        Example that uses a locked private key:
+        Example that logs in using a locked private key:
         | Open Connection       | linux.host.com |
         | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_dsa | keyringpasswd |
-        | # Do something with the connection     |
         """
         return self._login(self.ssh_client.login_with_public_key, username,
                            keyfile, password)
