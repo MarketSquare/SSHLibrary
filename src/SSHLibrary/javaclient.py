@@ -70,17 +70,12 @@ class JavaSSHClient(AbstractSSHClient):
         self._writer = self.shell.getStdin()
         self._stdout = self.shell.getStdout()
 
-    def _read(self):
-         data = ''
-         if self._stdout.available():
-             buf = jarray.zeros(self._stdout.available(), 'b')
-             self._stdout.read(buf)
-             data = ''.join([chr(c) for c in buf])
-         return data
+    def output_available(self):
+        return self._stdout.available()
 
     def _read_char(self):
          data = ''
-         if self._stdout.available():
+         if self.output_available():
              data = chr(self._stdout.read())
          return data
 

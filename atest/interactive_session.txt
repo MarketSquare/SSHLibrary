@@ -18,12 +18,23 @@ Basic Interactive Session
     ${output} =  Read Until Prompt
     Should Contain  ${output}  Hello Juha
 
-Interactive Session With Non-ASCII characters
+Read With Non-ASCII characters
     Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
-    ${output} =  Write  aaääöö
-    Should Contain  ${output}  aaääöö
+    Write  ääöö
+    ${output} =  Read
+    Should Contain  ${output}  Hello ääöö
+
+Read Until Prompt With Non-ASCII characters
+    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
+    Write  ääöö
     ${output} =  Read Until Prompt
-    Should Contain  ${output}  Hello aaääöö
+    Should Contain  ${output}  Hello ääöö
+
+Read Until Regexp With Non-ASCII characters
+    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
+    Write  ääöö
+    ${output} =  Read Until Regexp  \n
+    Should Contain  ${output}  Hello ääöö
 
 Interactive Session With Regular Expressions
     Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}

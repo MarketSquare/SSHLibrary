@@ -154,11 +154,27 @@ class AbstractSSHClient(object):
 
     def read(self):
         """Read and return currently available output."""
-        return self._read()
+        read_output = ''
+        decoded_string = ''
+        while self.output_available():
+            try:
+                read_output += self._read_char()
+                decoded_string = read_output.decode(self.config.encoding)
+            except UnicodeDecodeError:
+                pass
+        return decoded_string
 
     def read_char(self):
         """Read and return a single character from current session."""
-        return self._read_char()
+        read_output = ''
+        while True:
+            try:
+                read_output += self._read_char()
+                decoded_string = read_output.decode(self.config.encoding)
+                break
+            except UnicodeDecodeError:
+                pass
+        return decoded_string
 
     def read_until(self, expected):
         """Read and return from the output until expected.
