@@ -50,10 +50,15 @@ Switch Connection To None
     Switch Connection  ${NONE}
     Connection Should Be Closed
 
-Login Returns Banner Value
+Login Returns Server Output
     [Setup]  Open Connection  ${HOST}
-    ${ret}=  Login  ${USERNAME}  ${PASSWORD}
-    Should Contain  ${ret}  Last login
+    ${output}=  Login  ${USERNAME}  ${PASSWORD}
+    Should Contain  ${output}  Last login:
+
+Login Returns Server Output Until Prompt If Prompt Is Set
+    [Setup]  Open Connection  ${HOST}  prompt=$
+    ${output}=  Login  ${USERNAME}  ${PASSWORD}
+    Should Contain  ${output}  :~$
 
 Enable Logging
     [Tags]   pybot

@@ -110,7 +110,13 @@ class AbstractSSHClient(object):
 
     def _finalize_login(self):
         self.open_shell()
-        return self.read_until_prompt() if self.config.prompt else self.read()
+        if self.config.prompt:
+            return self.read_until_prompt()
+        else:
+            while True:
+                text = self.read()
+                if text:
+                    return text
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
