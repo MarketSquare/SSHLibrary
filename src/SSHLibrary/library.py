@@ -1088,6 +1088,8 @@ class SSHLibrary(object):
 
         Example:
         | Directory Should Not Exist | /nonexisting |
+
+        Note that symlinks are followed.
         """
         return not self.ssh_client.dir_exists(path)
 
@@ -1107,6 +1109,8 @@ class SSHLibrary(object):
 
         Example:
         | File Should Not Exist | /cat |
+
+        Note that symlinks are followed.
         """
         return not self.ssh_client.file_exists(path)
 
