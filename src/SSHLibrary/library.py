@@ -90,10 +90,10 @@ class SSHLibrary(object):
     == Configurable per connection ==
 
     `timeout` is used by `Read Until` variants and
-    `Write Until Expected Output`. The default timeout is '3 seconds'.
+    `Write Until Expected Output`. The default timeout is `3 seconds`.
 
     `newline` is the line break sequence known by the operating system
-    on the remote. The default value is 'LF' which is known by
+    on the remote. The default value is `LF` which is known by
     Unix-like operating systems.
 
     `prompt` is a character sequence used by `Read Until Prompt`.
@@ -102,16 +102,16 @@ class SSHLibrary(object):
     `encoding` is the
     [http://docs.python.org/2/library/codecs.html#standard-encodings|character encoding]
     of input and output sequences. Starting from SSHLibrary 1.2, the default
-    value is 'UTF-8'.
+    value is `UTF-8`.
 
     == Not configurable per connection ==
 
     `loglevel` sets the log level used to log the output read by `Read`,
     `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
-    `Write Until Expected` and `Get Connections`. The default level is 'INFO'.
-    `loglevel` is not configurable per connection but can be overridden
+    `Write Until Expected Output` and `Get Connections`. The default level is
+    `INFO`. `loglevel` is not configurable per connection but can be overridden
     by passing it as an argument to any of the mentioned keywords.
-    Possible values are 'TRACE', 'DEBUG', 'INFO' and 'WARN'.
+    Possible values are `TRACE`, `DEBUG`, `INFO` and `WARN`.
 
     = Executing commands =
 
@@ -134,7 +134,7 @@ class SSHLibrary(object):
     where:
     | *        | matches anything, even an empty string |
     | ?        | matches any single character |
-    | [chars]  | matches any character inside square brackets (e.g. '[abc]' matches either 'a', 'b' or 'c') |
+    | [chars]  | matches any character inside square brackets (e.g. `[abc]` matches either `a`, `b` or `c`) |
     | [!chars] | matches any character not inside square brackets |
 
     Unless otherwise noted, matching is case-insensitive on case-insensitive
@@ -158,7 +158,7 @@ class SSHLibrary(object):
         | Library | SSHLibrary | 10 seconds |
 
         Prompt does not have a default value and must be explicitly set to
-        use `Read Until Prompt`. In this example, prompt is set to '$':
+        use `Read Until Prompt`. In this example, prompt is set to `$`:
         | Library | SSHLibrary | prompt=$ |
 
         Multiple settings are possible. In this example, the library is taken
@@ -183,11 +183,11 @@ class SSHLibrary(object):
 
         Only parameters whose value is other than `None` are updated.
 
-        This example sets the prompt to '$':
+        This example sets the prompt to `$:
         | Set Default Configuration | prompt=$ |
 
-        This example sets `newline` and `loglevel, but leaves the other settings
-        intact:
+        This example sets `newline` and `loglevel`, but leaves the other
+        settings intact:
         | Set Default Configuration | newline=CRLF | loglevel=WARN |
 
         Sometimes you might want to use longer timeout for all the subsequent
@@ -248,7 +248,7 @@ class SSHLibrary(object):
         are left open in the background.
 
         This keyword returns the index of this connection which can be used
-        later to switch back to it. Indices start from '1' and are reset
+        later to switch back to it. Indices start from `1` and are reset
         when `Close All Connections` is used.
 
         Optional `alias` can be given as a name for the connection and can be
@@ -267,7 +267,7 @@ class SSHLibrary(object):
         Starting from SSHLibrary 1.1, a shell session is automatically opened
         by this keyword.
 
-        Port '22' is assumed by default:
+        Port `22` is assumed by default:
         | ${index}= | Open Connection | my.server.com |
 
         Non-standard port may be given as an argument:
@@ -334,7 +334,7 @@ class SSHLibrary(object):
         | Should Be Equal   | ${username}     | jenkins      |
 
         Above example expects that there was no other open connections when
-        opening the first one. Thus index '1' can be used to switch back to it
+        opening the first one. Thus index `1` can be used to switch back to it
         later. If you aren't sure about connection index you can store it
         into a variable as below:
         | ${myserver}=      | Open Connection | my.server.com |
@@ -353,7 +353,7 @@ class SSHLibrary(object):
         """Closes all open connections.
 
         After this keyword, the connection indices returned by `Open Connection`
-        are reset and start from '1'.
+        are reset and start from `1`.
 
         This keyword is ought to be used either in test or suite teardown to
         make sure all the connections are closed before the test execution
@@ -529,7 +529,7 @@ class SSHLibrary(object):
         Example that returns only the return code as a value:
         | ${rc}= | Execute Command | ${cmd} | return_stdout=${EMPTY} | return_rc=true |
 
-        This keyword also logs the executed command with log level 'INFO'.
+        This keyword also logs the executed command with log level `INFO`.
         """
         self._info("Executing command '%s'" % command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
@@ -562,7 +562,7 @@ class SSHLibrary(object):
         `Write` and `Read` keywords can be used for running multiple
         commands in the same session.
 
-        This keyword also logs the started command with log level 'INFO'.
+        This keyword also logs the started command with log level `INFO`.
         """
         self._info("Starting command '%s'" % command)
         self._last_command = command
@@ -590,7 +590,7 @@ class SSHLibrary(object):
         See `Execute Command` for examples on how the return value can
         be configured using `return_stdout`, `return_stderr` and `return_rc`.
 
-        This keyword also logs the read command with log level 'INFO'.
+        This keyword also logs the read command with log level `INFO`.
         """
         self._info("Reading output of command '%s'" % self._last_command)
         opts = self._output_options(return_stdout, return_stderr, return_rc)
@@ -629,7 +629,7 @@ class SSHLibrary(object):
         to be executed on the server, no output of the command is returned.
         To get the output, one of the `Read` keywords must be used.
 
-        This keyword logs the written `text` with log level 'INFO'.
+        This keyword logs the written `text` with log level `INFO`.
 
         This keyword logs the read output. `loglevel` can be used to override
         the default log level defined by `configuration`.
@@ -653,7 +653,7 @@ class SSHLibrary(object):
         Unlike `Write`, this keyword returns nothing. To get the output,
         one of the `Read` keywords must be used.
 
-        This keyword logs the written `text` with log level 'INFO'.
+        This keyword logs the written `text` with log level `INFO`.
 
         Example:
         | Write Bare     | su\\n            |
@@ -789,10 +789,10 @@ class SSHLibrary(object):
         This keyword logs the read output. `loglevel` can be used to override
         the default log level defined by `configuration`.
 
-        This example will write 'lsof -c python26\\n' (list all files
-        currently opened by python26), until 'myscript.py' appears in the
+        This example will write `lsof -c python26\\` (list all files
+        currently opened by python26), until `myscript.py` appears in the
         output. The command is written every 0.5 seconds. The keyword fails if
-        'myscript.py' does not appear in the output in 5 seconds:
+        `myscript.py` does not appear in the output in 5 seconds:
         | Write Until Expected Output | lsof -c python26\\n | expected=myscript.py | timeout=5s | retry_interval=0.5s |
         """
         self._read_and_log(loglevel, self.ssh_client.write_until_expected,
@@ -816,8 +816,8 @@ class SSHLibrary(object):
         absolute path may be used.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this is '/' which is also
-        the default value. With Windows remotes, this must be set as '\\'.
+        on the remote machine. On Unix-Likes, this is `/` which is also
+        the default value. With Windows remotes, this must be set as `\\`.
         This option was added in SSHLibrary 1.1.
 
         1. If `destination` is an existing file, `source` file is downloaded
@@ -865,27 +865,27 @@ class SSHLibrary(object):
         1. If `destination` is an existing path on the local machine,
            `source` directory is downloaded into it.
 
-           In this example, remote `source`, '/var/logs', is downloaded into
-           an existing local `destination` '/home/robot':
+           In this example, remote `source`, `/var/logs`, is downloaded into
+           an existing local `destination` `/home/robot`:
            | Get Directory | /var/logs | /home/robot |
 
-           As a result, the content of remote directory '/var/logs' is now
-           found at '/home/robot/logs'. Subdirectories are not included.
+           As a result, the content of remote directory `/var/logs` is now
+           found at `/home/robot/logs`. Subdirectories are not included.
 
         2. If `destination` is a non-existing path on the local machine,
            the local path is created and the content of `source` directory is
            downloaded into it.
 
            In this example, the content of the remote `source`,
-           directory 'logs', in downloaded to a non-existing local
-           `destination` 'my_new_path':
+           directory `logs`, in downloaded to a non-existing local
+           `destination` `my_new_path`:
            | Get Directory | logs | my_new_path |
 
            Note the use of relative paths in both `source` and `destination`.
 
-           Because 'my_new_path' does not already exist on the local machine,
-           it is created. As the result of keyword, 'my_new_path' now has the
-           same content as the remote directory 'logs' but not the 'logs'
+           Because `my_new_path` does not already exist on the local machine,
+           it is created. As the result of keyword, `my_new_path` now has the
+           same content as the remote directory `logs` but not the `logs`
            directory itself. Subdirectories are not included.
 
         3. If `destination` is not given, `source` directory is downloaded into
@@ -898,31 +898,31 @@ class SSHLibrary(object):
            | Get Directory | /path/to/remote/logs |
 
            Note the missing `destination`. It is also possible to refer
-           to the current working directory by using '.'. This works both on
+           to the current working directory by using `.`. This works both on
            the local and the remote side.
 
            In this case, `destination` always exists. As a result,
-           the remote directory 'logs' can be now found at the current
-           working directory by name 'logs'. Subdirectories are not included.
+           the remote directory `logs` can be now found at the current
+           working directory by name `logs`. Subdirectories are not included.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this must be '/' which is also
-        the default value. With Windows remotes, this must be set as '\\':
+        on the remote machine. On Unix-Likes, this must be `/` which is also
+        the default value. With Windows remotes, this must be set as `\\`:
         This option was added in SSHLibrary 1.1.
 
         `recursive` specifies, whether to recursively download all
         subdirectories inside `source`. Subdirectories are downloaded if
-        the argument value evaluates to 'True'. The default value is 'False'.
+        the argument value evaluates to `True`. The default value is `False`.
 
         The following example is identical to (1.), but also the subdirectories
         (and subdirectories of the subdirectories, ad infinitum) inside
-        `source`, '/var/logs', are downloaded:
+        `source`, `/var/logs`, are downloaded:
         | Get Directory | /var/logs | /home/robot | recursive=True |
 
-        As a result, the content of the remote directory '/var/logs',
-        including it's subdirectories, is now found at '/home/robot/logs'.
-        Subdirectory paths are preserved, e.g. remote 'var/logs/mysql'
-        is now found at '/home/robot/logs/mysql'.
+        As a result, the content of the remote directory `/var/logs`,
+        including it's subdirectories, is now found at `/home/robot/logs`.
+        Subdirectory paths are preserved, e.g. remote `var/logs/mysql`
+        is now found at `/home/robot/logs/mysql`.
         """
         return self._run_sftp_command(self.ssh_client.get_directory, source,
                                       destination, path_separator, recursive)
@@ -938,12 +938,12 @@ class SSHLibrary(object):
         absolute path may be used.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this is '/' which is also
-        the default value. With Windows remotes, this must be set as '\\'.
+        on the remote machine. On Unix-Likes, this is `/` which is also
+        the default value. With Windows remotes, this must be set as `\\`.
         This option was added in SSHLibrary 1.1.
 
         `mode` argument can be used to set the target file permission.
-        Numeric values are accepted. The default value is '0744' (-rwxr--r--).
+        Numeric values are accepted. The default value is `0744` (-rwxr--r--).
 
         `newline` can be used to force newline characters that are written to
         the remote file. Valid values are `CRLF` (for Windows) and `LF`.
@@ -994,27 +994,27 @@ class SSHLibrary(object):
         1. If `destination` is an existing path on the remote,
            `source` directory is uploaded into it.
 
-           In this example, local `source`, '/var/logs', is uploaded into
-           an already existing remote `destination` '/home/robot':
+           In this example, local `source`, `/var/logs`, is uploaded into
+           an already existing remote `destination` `/home/robot`:
            | Put Directory | /var/logs | /home/robot |
 
-           As a result, the content of local directory '/var/logs' is now
-           found on the remote at '/home/robot/logs'. Subdirectories are not
+           As a result, the content of local directory `/var/logs` is now
+           found on the remote at `/home/robot/logs`. Subdirectories are not
            included.
 
         2. If `destination` is a non-existing path on the remote, it is created
            and the content of `source` directory is uploaded into it.
 
-           In this example, the content of the local `source` directory 'logs',
+           In this example, the content of the local `source` directory `logs`,
            in the current working directory, is uploaded to a non-existing
-           remote `destination` 'my_new_path':
+           remote `destination` `my_new_path`:
            | Put Directory | logs | my_new_path |
 
            Note the use of relative paths in both `source` and `destination`.
 
-           Because 'my_new_path' does not already exist on the remote,
-           it is created. As the result of keyword, 'my_new_path' now has the
-           same content as the local directory 'logs' but not the 'logs'
+           Because `my_new_path` does not already exist on the remote,
+           it is created. As the result of keyword, `my_new_path` now has the
+           same content as the local directory `logs` but not the `logs`
            directory itself. Subdirectories are not included.
 
         3. If `destination` is not given, `source` directory is uploaded into
@@ -1025,38 +1025,38 @@ class SSHLibrary(object):
            | Put Directory | /path/to/remote/logs |
 
            Note the missing `destination`. It is also possible to refer
-           to the current working directory by using '.'. This works both on
+           to the current working directory by using `.`. This works both on
            the local and the remote side.
 
            In this case, `destination` always exists. As a result,
-           the local directory 'logs' is now found at the current remote
-           working directory by name 'logs'. Subdirectories are not included.
+           the local directory `logs` is now found at the current remote
+           working directory by name `logs`. Subdirectories are not included.
 
         `mode` argument can be used to set the file permissions.
-        Numeric values are accepted. The default value is '0744' (-rwxr--r--).
+        Numeric values are accepted. The default value is `0744` (-rwxr--r--).
 
         `newline` can be used to force newline characters that are written to
         the remote files. Valid values are `CRLF` (for Windows) and `LF`.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this must be '/' which is also
-        the default value. With Windows remotes, this must be set as '\\':
+        on the remote machine. On Unix-Likes, this must be `/` which is also
+        the default value. With Windows remotes, this must be set as `\\`:
         This option was added in SSHLibrary 1.1.
 
         `recursive` specifies, whether to recursively upload all
         subdirectories inside `source`. Subdirectories are uploaded if the
-        argument value evaluates to 'True'. The default value is 'False'.
+        argument value evaluates to `True`. The default value is `False`.
 
         The following example is identical to (1.), but also the subdirectories
         (and subdirectories of the subdirectories, ad infinitum) inside
-        `source`, '/var/logs', are uploaded:
+        `source`, `/var/logs`, are uploaded:
         | Put Directory | /var/logs | /home/robot | recursive=True |
 
-        As a result, the content of the local directory '/var/logs',
+        As a result, the content of the local directory `/var/logs`,
         including it's subdirectories, is now found on the remote at
-        '/home/robot/logs'. Subdirectory paths are preserved, e.g.
-        local 'var/logs/mysql' is found on the remote
-        at '/home/robot/logs/mysql'.
+        `/home/robot/logs`. Subdirectory paths are preserved, e.g.
+        local `var/logs/mysql` is found on the remote
+        at `/home/robot/logs/mysql`.
         """
         return self._run_sftp_command(self.ssh_client.put_directory, source,
                                       destination, mode, newline,
@@ -1106,12 +1106,12 @@ class SSHLibrary(object):
 
         File and directory names are returned in case-sensitive alphabetical
         order, e.g. ['A Name', 'Second', 'a lower case name', 'one more'].
-        Implicit directories '.' and '..' are not returned. The returned items
+        Implicit directories `.` and `..` are not returned. The returned items
         are automatically logged.
 
         By default, the file and directory names are returned relative to the
-        given remote path (e.g. 'file.txt'). If you want them be returned in the
-        absolute format (e.g. '/home/robot/file.txt'), set the `absolute`
+        given remote path (e.g. `file.txt`). If you want them be returned in the
+        absolute format (e.g. `/home/robot/file.txt`), set the `absolute`
         argument to any non-empty string.
 
         If `pattern` is given, only items matching it are returned. The pattern
