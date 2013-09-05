@@ -192,14 +192,14 @@ class SSHLibrary(object):
 
         Sometimes you might want to use longer timeout for all the subsequent
         connections without affecting the existing ones:
-        |           | Set Default Configuration | timeout=5 seconds  |
-        | ${local}= | Open Connection           | local.server.com   |
-        |           | Set Default Configuration | timeout=20 seconds |
-        | ${emea}=  | Open Connection           | emea.server.com    |
-        | ${apac}=  | Open Connection           | apac.server.com    |
-        |           | Should Be Equal           | ${local.timeout}   | 5 seconds  |
-        |           | Should Be Equal           | ${emea.timeout}    | 20 seconds |
-        |           | Should Be Equal           | ${apac.timeout}    | 20 seconds |
+        | Set Default Configuration | timeout=5 seconds  |
+        | ${local}=                 | Open Connection    | local.server.com |
+        | Set Default Configuration | timeout=20 seconds |
+        | ${emea}=                  | Open Connection    | emea.server.com  |
+        | ${apac}=                  | Open Connection    | apac.server.com  |
+        | Should Be Equal           | ${local.timeout}   | 5 seconds        |
+        | Should Be Equal           | ${emea.timeout}    | 20 seconds       |
+        | Should Be Equal           | ${apac.timeout}    | 20 seconds       |
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, encoding=encoding)
@@ -215,19 +215,19 @@ class SSHLibrary(object):
 
         In the following example, prompt is set for the current active
         connection. Other settings are left intact:
-        |           | Open Connection          | my.server.com      |
-        |           | Set Client Configuration | prompt=$           |
-        | ${conns}= | Get Connections          |
-        |           | Should Be Equal          | ${conns[0].prompt} | $ |
+        | Open Connection          | my.server.com      |
+        | Set Client Configuration | prompt=$           |
+        | ${conns}=                | Get Connections    |
+        | Should Be Equal          | ${conns[0].prompt} | $ |
 
         Also, the other connections are not affected:
-        |           | Open Connection          | linux.server.com   |   |
-        |           | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
-        |           | Open Connection          | windows.server.com |   |
-        |           | Set Client Configuration | prompt=>           |   | # Only windows.server.com affected  |
-        | ${conns}= | Get Connections          |
-        |           | Should Be Equal          | ${conns[0].prompt} | $ |
-        |           | Should Be Equal          | ${conns[1].prompt} | > |
+        | Open Connection          | linux.server.com   |   |
+        | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
+        | Open Connection          | windows.server.com |   |
+        | Set Client Configuration | prompt=>           |   | # Only windows.server.com affected  |
+        | ${conns}=                | Get Connections    |
+        | Should Be Equal          | ${conns[0].prompt} | $ |
+        | Should Be Equal          | ${conns[1].prompt} | > |
 
         Multiple settings are possible. This example updates both terminal type
         and terminal width of the current active connection:
@@ -303,10 +303,10 @@ class SSHLibrary(object):
 
         Example:
         | ${old_connection}= | Get Connection Id |
-        |                    | Open Connection   | anotherhost.com   |
-        |                    | # Do something with anotherhost.com   |
-        |                    | Close Connection  |                   |
-        |                    | Switch Connection | ${old_connection} |
+        | Open Connection    | anotherhost.com   |
+        | # Do something with anotherhost.com    |
+        | Close Connection   |                   |
+        | Switch Connection  | ${old_connection} |
         """
         return self._cache.current_index
 
@@ -322,25 +322,25 @@ class SSHLibrary(object):
         which can be used to reuse that connection later.
 
         Example:
-        |               | Open Connection   | my.server.com   |
-        |               | Login             | johndoe         | secretpasswd |
-        |               | Open Connection   | build.local.net | alias=Build  |
-        |               | Login             | jenkins         | jenkins      |
-        |               | Switch Connection | 1               |              | # Switch using index          |
-        | ${username} = | Execute Command   | whoami          |              | # Executed on my.server.com   |
-        |               | Should Be Equal   | ${username}     | johndoe      |
-        |               | Switch Connection | Build           |              | # Switch using alias          |
-        | ${username} = | Execute Command   | whoami          |              | # Executed on build.local.net |
-        |               | Should Be Equal   | ${username}     | jenkins      |
+        | Open Connection   | my.server.com   |
+        | Login             | johndoe         | secretpasswd |
+        | Open Connection   | build.local.net | alias=Build  |
+        | Login             | jenkins         | jenkins      |
+        | Switch Connection | 1               |              | # Switch using index          |
+        | ${username}=      | Execute Command | whoami       | # Executed on my.server.com   |
+        | Should Be Equal   | ${username}     | johndoe      |
+        | Switch Connection | Build           |              | # Switch using alias          |
+        | ${username}=      | Execute Command | whoami       | # Executed on build.local.net |
+        | Should Be Equal   | ${username}     | jenkins      |
 
         Above example expects that there was no other open connections when
         opening the first one. Thus index '1' can be used to switch back to it
         later. If you aren't sure about connection index you can store it
         into a variable as below:
-        | ${myserver}= | Open Connection   | my.server.com   |
-        |              | Open Connection   | build.local.net |
-        |              | # Do something with build.local.net |
-        |              | Switch Connection | ${myserver}     |
+        | ${myserver}=      | Open Connection | my.server.com |
+        | Open Connection   | build.local.net |
+        | # Do something with build.local.net |
+        | Switch Connection | ${myserver}     |
         """
         old_index = self.get_connection_id()
         if index_or_alias is None:
@@ -360,10 +360,10 @@ class SSHLibrary(object):
         finishes.
 
         Example:
-        |            | Open Connection       | myhost.com      |
-        |            | Open Connection       | build.local.net |
-        |            | # Do something with the connections     |
-        | [Teardown] | Close all connections |
+        | Open Connection | myhost.com            |
+        | Open Connection | build.local.net       |
+        | # Do something with the connections     |
+        | [Teardown]      | Close all connections |
         """
         self._cache.close_all()
 
@@ -378,13 +378,13 @@ class SSHLibrary(object):
         override the default log level defined by `configuration`.
 
         Example:
-        |             |             | Open Connection             | near.server.com     | timeout=10s     |
-        |             |             | Open Connection             | far.server.com      | timeout=5s      |
-        | ${nearhost} | ${farhost}= | Get Connections             |
-        |             |             | Should Be Equal             | ${nearhost.host}    | near.server.com |
-        |             |             | Should Be Equal As Integers | ${nearhost.timeout} | 10              |
-        |             |             | Should Be Equal As Integers | ${farhost.port}     | 22              |
-        |             |             | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
+        | Open Connection             | near.server.com     | timeout=10s     |
+        | Open Connection             | far.server.com      | timeout=5s      |
+        | ${nearhost}                 | ${farhost}=         | Get Connections |
+        | Should Be Equal             | ${nearhost.host}    | near.server.com |
+        | Should Be Equal As Integers | ${nearhost.timeout} | 10              |
+        | Should Be Equal As Integers | ${farhost.port}     | 22              |
+        | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
         """
         # TODO: could the ConnectionCache be enhanced to be iterable?
         configs = [c.config for c in self._cache._connections]
@@ -406,10 +406,10 @@ class SSHLibrary(object):
         tests with `pybot`.
 
         Example:
-        | Open Connection    | my.server.com   |              | # Not logged |
+        | Open Connection    | my.server.com   | # Not logged |
         | Enable SSH Logging | myhost.log      |
-        | Login              | johndoe         | secretpasswd | # Logged     |
-        | Open Connection    | build.local.net |              | # Logged     |
+        | Login              | johndoe         | secretpasswd |
+        | Open Connection    | build.local.net | # Logged     |
         | # Do something with the connections  |
         | # Check myhost.log for detailed debug information   |
         """
@@ -424,11 +424,11 @@ class SSHLibrary(object):
         `Switch Connection` to switch to another connection.
 
         Example:
-        | Open Connection         | my.server.com    |
-        | Login                   | johndoe          | secretpasswd |
-        | Get File                | results.txt      | /tmp         |
-        | Close Connection        |
-        | # Do something with /tmp/results.txt       |
+        | Open Connection  | my.server.com  |
+        | Login            | johndoe        | secretpasswd |
+        | Get File         | results.txt    | /tmp         |
+        | Close Connection |
+        | # Do something with /tmp/results.txt             |
         """
         self.ssh_client.close()
         self._cache.current = self._cache._no_current
@@ -443,14 +443,14 @@ class SSHLibrary(object):
         See `configuration` for how to set the prompt.
 
         Example that logs in and returns the output:
-        |            | Open Connection | linux.server.com |
-        | ${output}= | Login           | johndoe          | secretpasswd  |
-        |            | Should Contain  | ${output}        | Last login at |
+        | Open Connection | linux.server.com |
+        | ${output}=      | Login            | johndoe       | secretpasswd |
+        | Should Contain  | ${output}        | Last login at |
 
         Example that logs in and returns everything until the prompt:
-        |            | Open Connection | linux.server.com | prompt=$         |
-        | ${output}= | Login           | johndoe          | secretpasswd     |
-        |            | Should Contain  | ${output}        | johndoe@linux:~$ |
+        | Open Connection | linux.server.com | prompt=$         |
+        | ${output}=      | Login            | johndoe          | secretpasswd |
+        | Should Contain  | ${output}        | johndoe@linux:~$ |
         """
         return self._login(self.ssh_client.login, username, password)
 
@@ -471,9 +471,9 @@ class SSHLibrary(object):
         See `configuration` for how to set the prompt.
 
         Example that logs in using a private key and returns the output:
-        |            | Open Connection       | linux.host.com |
-        | ${output}= | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_rsa |
-        |            | Should Contain        | ${motd}        | Last login at             |
+        | Open Connection | linux.host.com        |
+        | ${output}=      | Login With Public Key | johndoe       | /home/johndoe/.ssh/id_rsa |
+        | Should Contain  | ${motd}               | Last login at |
 
         Example that logs in using a locked private key:
         | Open Connection       | linux.host.com |
@@ -498,19 +498,19 @@ class SSHLibrary(object):
         The command is always executed in a new shell. Thus possible
         changes to the environment (e.g. changing working directory)
         are not visible to the later keywords:
-        | ${pwd}= | Execute Command | pwd            |
-        |         | Should Be Equal | /home/username |
-        |         | Execute Command | cd /tmp        |
-        | ${pwd}= | Execute Command | pwd            |
-        |         | Should Be Equal | /home/username |
+        | ${pwd}=         | Execute Command | pwd            |
+        | Should Be Equal | ${pwd}          | /home/username |
+        | Execute Command | cd /tmp         |
+        | ${pwd}=         | Execute Command | pwd            |
+        | Should Be Equal | ${pwd}          | /home/username |
 
         `Write` and `Read` keywords can be used for running multiple
         commands in the same session.
 
         This keyword waits until the command execution has finished:
-        |        | Execute Command             | ./myscript.py     |   | # Ran before returning from kw |
-        | ${rc}= | Execute Command             | pgrep myscript.py |   |
-        |        | Should Be Equal As Integers | ${rc}             | 1 | # Already finished            |
+        | Execute Command             | ./myscript.py   | # Ran before this finishes |
+        | ${rc}=                      | Execute Command | pgrep myscript.py          |
+        | Should Be Equal As Integers | ${rc}           | 1 | # Script finished      |
 
         If non-blocking behavior is required, use `Start Command` instead.
 
@@ -540,9 +540,9 @@ class SSHLibrary(object):
         """Starts execution of the `command` on the remote host.
 
         This keyword returns immediately after being called:
-        |        | Start Command               | ./longscript.py     |   | # Not waiting to be finished |
-        | ${rc}= | Execute Command             | pgrep longscript.py |
-        |        | Should Be Equal As Integers | ${rc}               | 0 | # Still running               |
+        | Start Command               | ./longscript.py     |                     | # Launch and return |
+        | ${rc}=                      | Execute Command     | pgrep longscript.py |
+        | Should Be Equal As Integers | ${rc}               | 0                   | # Still running     |
 
         If blocking behavior is required, use `Execute Command` instead.
 
@@ -553,11 +553,11 @@ class SSHLibrary(object):
         The command is always executed in a new shell, similarly as with
         `Execute Command`. Thus possible changes to the environment
         (e.g. changing working directory) are not visible to the later keywords:
-        | ${pwd}= | Execute Command | pwd            |
-        |         | Should Be Equal | /home/username |
-        |         | Start Command   | cd /tmp        |
-        | ${pwd}= | Execute Command | pwd            |
-        |         | Should Be Equal | /home/username |
+        | ${pwd}=         | Execute Command | pwd |
+        | Should Be Equal | /home/username  |
+        | Start Command   | cd /tmp         |
+        | ${pwd}=         | Execute Command | pwd |
+        | Should Be Equal | /home/username  |
 
         `Write` and `Read` keywords can be used for running multiple
         commands in the same session.
@@ -575,17 +575,17 @@ class SSHLibrary(object):
 
         Command must have been started using `Start Command` before this
         keyword can be used:
-        |            | Start Command       | ./longscript.py |
-        | ${stdout}= | Read Command Output |
-        |            | # Do something with ${stdout}         |
+        | Start Command | ./longscript.py     |
+        | ${stdout}=    | Read Command Output |
+        | # Do something with ${stdout}       |
 
         Only the output from the last started command is read:
-        |            | Start Command                  | echo 'HELLO'    |
-        |            | Start Command                  | ./longscript.py |
-        | ${stdout}= | Read Command Output            |                 |       | # Returns stdout of longscript.py |
-        |            | # Do something with ${stdout}  |
-        | ${stdout}= | Read Command Output            |                 |       | # Still stdout of longscript.py   |
-        |            | Should Not Be Equal As Strings | ${stdout}       | HELLO |
+        | Start Command                  | echo 'HELLO'        |
+        | Start Command                  | ./longscript.py     |
+        | ${stdout}=                     | Read Command Output | # Returns stdout of longscript.py |
+        | # Do something with ${stdout}  |
+        | ${stdout}=                     | Read Command Output | # Still stdout of longscript.py   |
+        | Should Not Be Equal As Strings | ${stdout}           | HELLO                             |
 
         See `Execute Command` for examples on how the return value can
         be configured using `return_stdout`, `return_stderr` and `return_rc`.
@@ -635,13 +635,13 @@ class SSHLibrary(object):
         the default log level defined by `configuration`.
 
         Example:
-        | ${written}= | Write                      | su            |
-        |             | Should Be Equal As Strings | ${written}    | su                         | # Note that the output of 'su' is not returned |
-        | ${output}=  | Read                       |
-        |             | Should Contain             | ${output}     | Password:                  |
-        |             | Write                      | invalidpasswd |
-        | ${output}=  | Read                       |
-        |             | Should Contain             | ${output}     | su: Authentication failure |
+        | ${written}=                | Write         | su                         |
+        | Should Be Equal As Strings | ${written}    | su                         | # Note that the output of 'su' is not returned |
+        | ${output}=                 | Read          |
+        | Should Contain             | ${output}     | Password:                  |
+        | Write                      | invalidpasswd |
+        | ${output}=                 | Read          |
+        | Should Contain             | ${output}     | su: Authentication failure |
         """
         self._write(text, add_newline=True)
         return self._read_and_log(loglevel, self.ssh_client.read_until_newline)
@@ -656,12 +656,12 @@ class SSHLibrary(object):
         This keyword logs the written `text` with log level 'INFO'.
 
         Example:
-        |             | Write Bare     | su\\n            |
-        | ${output}=  | Read           |
-        |             | Should Contain | ${output}        | Password:                  |
-        |             | Write          | invalidpasswd\\n |
-        | ${output}=  | Read           |
-        |             | Should Contain | ${output}        | su: Authentication failure |
+        | Write Bare     | su\\n            |
+        | ${output}=     | Read             |
+        | Should Contain | ${output}        | Password:                  |
+        | Write          | invalidpasswd\\n |
+        | ${output}=     | Read             |
+        | Should Contain | ${output}        | su: Authentication failure |
         """
         self._write(text)
 
@@ -683,14 +683,14 @@ class SSHLibrary(object):
         the default log level defined by `configuration`.
 
         Example:
-        |            | Open Connection | my.server.com  |
-        |            | Login           | johndoe        | secretpasswd      |
-        | ${output}= | Read            |
-        |            | Should Contain  | ${output}      | johndoe@myserver: |
-        |            | Write           | sudo su -      |
-        |            | Write           | mysudopassword |
-        | ${output}= | Read            | loglevel=WARN  |                   | # This is printed to the test output due to loglevel |
-        |            | Should Contain  | ${output}      | root@myserver:    |
+        | Open Connection | my.server.com  |
+        | Login           | johndoe        | secretpasswd      |
+        | ${output}=      | Read           |
+        | Should Contain  | ${output}      | johndoe@myserver: |
+        | Write           | sudo su -      |
+        | Write           | mysudopassword |
+        | ${output}=      | Read           | loglevel=WARN     | # Printed to the test output due to loglevel |
+        | Should Contain  | ${output}      | root@myserver:    |
         """
         return self._read_and_log(loglevel, self.ssh_client.read)
 
@@ -706,14 +706,14 @@ class SSHLibrary(object):
         the default log level defined by `configuration`.
 
         Example:
-        |            | Open Connection   | my.server.com  |
-        |            | Login             | johndoe        | secretpasswd        |
-        | ${output}= | Read Until        | :~$            |
-        |            | Should Contain    | ${output}      | johndoe@myserver:~$ |
-        |            | Write             | sudo su -      |
-        |            | Write             | mysudopassword |
-        | ${output}= | Read Until        | :~#            | loglevel=WARN       | # This is printed to the console due to loglevel |
-        |            | Should Contain    | ${output}      | root@myserver:~#    |
+        | Open Connection | my.server.com  |
+        | Login           | johndoe        | secretpasswd        |
+        | ${output}=      | Read Until     | :~$                 |
+        | Should Contain  | ${output}      | johndoe@myserver:~$ |
+        | Write           | sudo su -      |
+        | Write           | mysudopassword |
+        | ${output}=      | Read Until     | :~#                 | loglevel=WARN | # Printed to the console due to loglevel |
+        | Should Contain  | ${output}      | root@myserver:~#    |
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until,
                                   expected)
@@ -731,14 +731,14 @@ class SSHLibrary(object):
         the default log level defined by `configuration`.
 
         Example:
-        |            | Open Connection   | my.server.com  |
-        |            | Login             | johndoe        | secretpasswd      |
-        | ${output}= | Read Until Regexp | johndoe@.*:    |
-        |            | Should Contain    | ${output}      | johndoe@myserver: |
-        |            | Write             | sudo su -      |
-        |            | Write             | mysudopassword |
-        | ${output}= | Read Until Regexp | root@.*:       | loglevel=WARN     | # This is printed to the console due to loglevel |
-        |            | Should Contain    | ${output}      | root@myserver:    |
+        | Open Connection | my.server.com     |
+        | Login           | johndoe           | secretpasswd      |
+        | ${output}=      | Read Until Regexp | johndoe@.*:       |
+        | Should Contain  | ${output}         | johndoe@myserver: |
+        | Write           | sudo su -         |
+        | Write           | mysudopassword    |
+        | ${output}=      | Read Until Regexp | root@.*:          | loglevel=WARN | # Printed to the console due to loglevel |
+        | Should Contain  | ${output}         | root@myserver:    |
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until_regexp,
                                   regexp)
@@ -760,16 +760,16 @@ class SSHLibrary(object):
         the default log level defined by `configuration`.
 
         Example:
-        |            | Open Connection          | my.server.com  |
-        |            | Login                    | johndoe        | secretpasswd       |
-        |            | Set Client Configuration | prompt=$       |
-        | ${output}= | Read Until Prompt        |
-        |            | Should Contain           | ${output}      | johndoe@myserver:~ |
-        |            | Write                    | sudo su -      |
-        |            | Write                    | mysudopassword |
-        |            | Set Client Configuration | prompt=#       |
-        | ${output}= | Read Until Prompt        | loglevel=WARN  |                    | # This is printed to the console due to loglevel |
-        |            | Should Contain           | ${output}      | root@myserver:~    |
+        | Open Connection          | my.server.com     |
+        | Login                    | johndoe           |  secretpasswd      |
+        | Set Client Configuration | prompt=$          |
+        | ${output}=               | Read Until Prompt |
+        | Should Contain           | ${output}         | johndoe@myserver:~ |
+        | Write                    | sudo su -         |
+        | Write                    | mysudopassword    |
+        | Set Client Configuration | prompt=#          |
+        | ${output}=               | Read Until Prompt | loglevel=WARN      | # Printed to the console due to loglevel |
+        | Should Contain           | ${output}         | root@myserver:~    |
         """
         return self._read_and_log(loglevel, self.ssh_client.read_until_prompt)
 
@@ -1118,8 +1118,8 @@ class SSHLibrary(object):
         matching syntax is explained in `pattern matching`.
 
         Examples (using also other `List Directory` variants):
-        | @{items}= | List Directory           | /home/robot |
-        | @{files}= | List Files In Directory  | /tmp | *.txt | absolute=True |
+        | @{items}= | List Directory          | /home/robot |
+        | @{files}= | List Files In Directory | /tmp | *.txt | absolute=True |
         """
         items = self.ssh_client.list_dir(path, pattern, absolute)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
