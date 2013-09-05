@@ -28,7 +28,25 @@ plural_or_not = lambda count: '' if count == 1 else 's'
 class SSHLibrary(object):
     """Robot Framework test library for SSH and SFTP.
 
-    SSHLibrary works both with Python and Jython interpreters.
+    The library has the following main usages:
+    - Executing commands on remote, either with blocking or non-blocking
+      behaviour (`Execute Command` and `Start Command` keywords, respectively).
+    - Writing and reading in an interactive session (e.g. `Read` and `Write`
+      keywords).
+    - Transferring files and directories over SFTP (e.g. `Get File` and
+      `Put Directory` keywords).
+    - Ensuring that files or directories exist on remote (e.g.
+      `File Should Exist` and `Directory Should Not Exist` keywords).
+
+    == Table of contents ==
+
+    - `Requirements`
+    - `Connections and login`
+    - `Configuration`
+    - `Executing commands`
+    - `Pattern matching`
+    - `Shortcuts`
+    - `Keywords`
 
     = Requirements =
 
