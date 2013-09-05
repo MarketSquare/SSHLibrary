@@ -89,24 +89,34 @@ class SSHLibrary(object):
 
     == Configurable per connection ==
 
-    `timeout` is used by `Read Until` variants and
+    === Timeout ===
+
+    Timeout is used by `Read Until` variants and
     `Write Until Expected Output`. The default timeout is `3 seconds`.
 
-    `newline` is the line break sequence known by the operating system
+    === Newline ===
+
+    Newline is the line break sequence known by the operating system
     on the remote. The default value is `LF` which is known by
     Unix-like operating systems.
 
-    `prompt` is a character sequence used by `Read Until Prompt`.
+    === Prompt ===
+
+    Prompt is a character sequence used by `Read Until Prompt`.
     Prompt must be set before the keyword can be used.
 
-    `encoding` is the
+    === Encoding ===
+
+    Encoding is the
     [http://docs.python.org/2/library/codecs.html#standard-encodings|character encoding]
     of input and output sequences. Starting from SSHLibrary 1.2, the default
     value is `UTF-8`.
 
     == Not configurable per connection ==
 
-    `loglevel` sets the log level used to log the output read by `Read`,
+    === Loglevel ===
+
+    Loglevel sets the log level used to log the output read by `Read`,
     `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
     `Write Until Expected Output` and `Get Connections`. The default level is
     `INFO`. `loglevel` is not configurable per connection but can be overridden
