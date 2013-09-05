@@ -50,17 +50,14 @@ class SSHLibrary(object):
 
     = Requirements =
 
-    To use SSHLibrary with Python, you must first install Paramiko SSH
-    implementation[1]. This is done easiest by using easy_install
-    which also installs PyCrypto[2] as the Paramiko dependency.
+    To use SSHLibrary with Python, you must first install
+    [https://github.com/paramiko/paramiko | Paramiko]. This is done easiest
+    by using easy_install which also installs
+    [https://www.dlitz.net/software/pycrypto | PyCrypto] as the Paramiko
+    dependency.
 
-    | [1] https://github.com/paramiko/paramiko
-    | [2] https://www.dlitz.net/software/pycrypto/
-
-    For Jython, you must have the JAR distribution of Trilead SSH library[3]
-    in the CLASSPATH during the test execution.
-
-    | [3] http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar
+    For Jython, you must have the [http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar |
+    Trilead SSH library JAR] in the CLASSPATH during the test execution.
 
     = Connections and login =
 
@@ -102,11 +99,10 @@ class SSHLibrary(object):
     `prompt` is a character sequence used by `Read Until Prompt`.
     Prompt must be set before the keyword can be used.
 
-    `encoding` is the character encoding of input and output sequences.
-    Possible `encoding` values are listed in [4]. Starting from
-    SSHLibrary 1.2, the default value is 'UTF-8'.
-
-    | [4] http://docs.python.org/2/library/codecs.html#standard-encodings
+    `encoding` is the
+    [http://docs.python.org/2/library/codecs.html#standard-encodings|character encoding]
+    of input and output sequences. Starting from SSHLibrary 1.2, the default
+    value is 'UTF-8'.
 
     == Not configurable per connection ==
 
