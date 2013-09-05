@@ -17,6 +17,12 @@ execfile(join(dirname(abspath(__file__)), 'src', 'SSHLibrary', 'version.py'))
 DESCRIPTION = """
 This is a Robot Framework test library for testing SSH and SFTP.
 
+The library has the following main usages:
+- Executing commands on remote, either with blocking or non-blocking behaviour.
+- Writing and reading in an interactive session.
+- Transferring files and directories over SFTP.
+- Ensuring that files or directories exist on remote.
+
 Required packages:
     paramiko
 """[1:-1]
