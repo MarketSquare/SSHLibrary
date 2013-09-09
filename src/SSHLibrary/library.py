@@ -16,8 +16,8 @@ from robot.utils import ConnectionCache
 
 from .abstractclient import SSHClientException
 from .client import SSHClient
-from config import (Configuration, StringEntry, TimeEntry, LogLevelEntry,
-        NewlineEntry)
+from config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
+                    StringEntry, TimeEntry)
 from .version import VERSION
 
 __version__ = VERSION
@@ -105,6 +105,11 @@ class SSHLibrary(object):
     Prompt is a character sequence used by `Read Until Prompt`.
     Prompt must be set before the keyword can be used.
 
+    === Terminal ===
+
+    Argument `term_type` defines the remote terminal type and arguments
+    `width` and `height` can be used to set the virtual size of it.
+
     === Encoding ===
 
     Encoding is the
@@ -155,7 +160,8 @@ class SSHLibrary(object):
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout='3 seconds', newline='LF', prompt=None,
-                 loglevel='INFO', encoding='utf8'):
+                 loglevel='INFO', term_type='vt100', width=80, height=24,
+                 encoding='utf8'):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -178,14 +184,15 @@ class SSHLibrary(object):
         """
         self._cache = ConnectionCache()
         self._config = DefaultConfig(timeout, newline, prompt, loglevel,
-                                     encoding)
+                                     term_type, width, height, encoding)
 
     @property
     def ssh_client(self):
         return self._cache.current
 
-    def set_default_configuration(self, timeout=None, newline=None,
-                                  prompt=None, loglevel=None, encoding=None):
+    def set_default_configuration(self, timeout=None, newline=None, prompt=None,
+                                  loglevel=None, term_type=None, width=None,
+                                  height=None, encoding=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect to the already
@@ -213,10 +220,11 @@ class SSHLibrary(object):
         | Should Be Equal           | ${apac.timeout}    | 20 seconds       |
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
-                            loglevel=loglevel, encoding=encoding)
+                            loglevel=loglevel, term_type=term_type,
+                            width=width, height=height, encoding=encoding)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
-                                 term_type='vt100', width=80, height=24,
+                                 term_type=None, width=None, height=None,
                                  encoding=None):
         """Update the `configuration` of the current active connection.
         At least one connection must have been opened using `Open Connection`.
@@ -250,8 +258,8 @@ class SSHLibrary(object):
                                       encoding=encoding)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
-                        newline=None, prompt=None, term_type='vt100', width=80,
-                        height=24, encoding=None):
+                        newline=None, prompt=None, term_type=None, width=None,
+                        height=None, encoding=None):
         """Opens a new SSH connection to given `host` and `port`.
 
         The new connection is made active. Possible existing connections
@@ -265,14 +273,9 @@ class SSHLibrary(object):
         used for switching between connections, similarly as the index.
         See `Switch Connection` for more details.
 
-        `timeout`, `newline`, `prompt` and `encoding` are documented in
-        `configuration`.
-
-        `term_type` defines the terminal type for this shell, and `width`
-        and `height` can be configured to control the virtual size of it.
-
-        All the arguments, except `host`, `alias` and `port` can be later
-        updated with `Set Client Configuration.
+        Connection parameters, like `timeout` and `newline` are documented in
+        `configuration`. All the arguments, except `host`, `alias` and `port`
+        can be later updated with `Set Client Configuration.
 
         Starting from SSHLibrary 1.1, a shell session is automatically opened
         by this keyword.
@@ -295,12 +298,15 @@ class SSHLibrary(object):
         | # Do something with the connection                  |
         | Open Connection | my.server.com | # Default timeout | # Default line breaks |
 
-        Terminal settings are configurable per connection:
+        Terminal settings are also configurable per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
         prompt = prompt or self._config.prompt
+        term_type = term_type or self._config.term_type
+        width = width or self._config.width
+        height = height or self._config.height
         encoding = encoding or self._config.encoding
         client = SSHClient(host, alias, port, timeout, newline, prompt,
                            term_type, width, height, encoding)
@@ -1191,10 +1197,15 @@ class SSHLibrary(object):
 
 class DefaultConfig(Configuration):
 
-    def __init__(self, timeout, newline, prompt, loglevel, encoding):
+    def __init__(self, timeout, newline, prompt, loglevel, term_type,
+                 width, height, encoding):
         Configuration.__init__(self,
                 timeout=TimeEntry(timeout or '3 seconds'),
                 newline=NewlineEntry(newline or 'LF'),
                 prompt=StringEntry(prompt),
                 loglevel=LogLevelEntry(loglevel or 'INFO'),
-                encoding=StringEntry(encoding or 'utf8'))
+                term_type=StringEntry(term_type or 'vt100'),
+                width=IntegerEntry(width or 80),
+                height=IntegerEntry(height or 24),
+                encoding=StringEntry(encoding or 'utf8')
+        )
