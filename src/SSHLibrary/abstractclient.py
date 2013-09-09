@@ -56,8 +56,8 @@ class AbstractSSHClient(object):
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
                  encoding='utf8'):
-        self.config = ClientConfig(host, alias, port, timeout, newline,
-                                   prompt, term_type, width, height, encoding)
+        self.config = ClientConfig(host, alias, port, timeout, newline, prompt,
+                                   term_type, width, height, encoding)
         self._commands = []
 
     @property
