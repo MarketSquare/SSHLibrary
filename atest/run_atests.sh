@@ -1,5 +1,13 @@
-COMMON_ARGS="-P src"
-OUTPUT_ROOT="atest/results"
+
+if [ "$(basename $PWD)" != "atest" ]; then
+    OUTPUT_ROOT="atest/"
+    COMMON_ARGS="-P src"
+else
+    OUTPUT_ROOT=""
+    COMMON_ARGS="-P ../src"
+fi
+
+OUTPUT_ROOT+="results"
 
 if [ "$1" == "jython" ]; then
     shift
