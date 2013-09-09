@@ -518,8 +518,8 @@ class SSHLibrary(object):
 
         This keyword waits until the command execution has finished:
         | Execute Command             | ./myscript.py   | # Ran before this finishes |
-        | ${rc}=                      | Execute Command | pgrep myscript.py          |
-        | Should Be Equal As Integers | ${rc}           | 1 | # Script finished      |
+        | ${rc}=                      | Execute Command | pgrep myscript.py          | return_stdout=False | return_rc=True |
+        | Should Be Equal As Integers | ${rc}           | 1                          | # Already finished  |
 
         If non-blocking behavior is required, use `Start Command` instead.
 
@@ -552,8 +552,8 @@ class SSHLibrary(object):
         """Starts execution of the `command` on the remote host.
 
         This keyword returns immediately after being called:
-        | Start Command               | ./longscript.py     |                     | # Launch and return |
-        | ${rc}=                      | Execute Command     | pgrep longscript.py |
+        | Start Command               | ./longscript.py     | # Start and return  |
+        | ${rc}=                      | Execute Command     | pgrep longscript.py | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}               | 0                   | # Still running     |
 
         If blocking behavior is required, use `Execute Command` instead.
