@@ -37,12 +37,12 @@ class TestSSHClientConfiguration(unittest.TestCase):
     def test_default_client_configuration(self):
         lib = SSHLibrary()
         lib.open_connection(HOSTNAME)
-        self._assert_config(lib.ssh_client.config)
+        self._assert_config(lib.current.config)
 
     def test_overriding_client_configuration(self):
         lib = SSHLibrary(timeout=4)
         lib.open_connection(HOSTNAME, timeout=5)
-        self._assert_config(lib.ssh_client.config, timeout=5)
+        self._assert_config(lib.current.config, timeout=5)
 
     def test_set_client_confguration(self):
         timeout, term_type = 23, 'ansi'
@@ -50,7 +50,7 @@ class TestSSHClientConfiguration(unittest.TestCase):
         lib.open_connection(HOSTNAME)
         lib.set_client_configuration(timeout=timeout,
                                      term_type=term_type)
-        self._assert_config(lib.ssh_client.config, timeout=timeout,
+        self._assert_config(lib.current.config, timeout=timeout,
                             term_type=term_type)
 
 

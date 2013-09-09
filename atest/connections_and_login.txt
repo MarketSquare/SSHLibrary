@@ -13,23 +13,6 @@ Close Connection
     Close Connection
     Connection Should Be Closed
 
-Get Connection Id
-    ${no_connection} =  Get Connection Id
-    Should Be Equal  ${no_connection}  ${NONE}
-    ${conn1_id} =  Login As Valid User
-    ${current_id} =  Get Connection Id
-    Should Be Equal  ${current_id}  ${conn1_id}
-    ${conn2_id} =  Login As Valid User
-    ${current_id} =  Get Connection Id
-    Should Be Equal  ${current_id}  ${conn2_id}
-    Close Connection
-    Switch Connection  ${conn1_id}
-    ${current_id} =  Get Connection Id
-    Should Be Equal  ${current_id}  ${conn1_id}
-    Close Connection
-    ${no_connection} =  Get Connection Id
-    Should Be Equal  ${no_connection}  ${NONE}
-
 Switch Connection
     ${conn1_id} =  Login As Valid User  one
     Write  cd /tmp
@@ -68,16 +51,29 @@ Enable Logging
     Login  ${username}  ${password}
     File Should Not Be Empty  ${OUTPUTDIR}/sshlog.txt
 
+Get Connection
+    ${conn1_index} =  Open Connection  ${HOST}  alias=one
+    ${conn2_index} =  Open Connection  ${HOST}
+    ${conn} =  Get Connection
+    Should Be Equal  ${conn.index}  ${conn2_index}
+    ${conn} =  Get Connection  one
+    Should Be Equal  ${conn.index}  ${conn1_index}
+    Close Connection
+    ${conn} =  Get Connection  2
+    Should Be Equal  ${conn.index}  ${conn2_index}
+
 Get Connections
     Open Connection   ${HOST}   prompt=>>
-    Open Connection   ${HOST}   alias=saila
+    Open Connection   ${HOST}   alias=another
     ${conns} =   Get Connections
     Length Should Be   ${conns}  2
-    Should Be Equal    ${conns[0].host}    ${HOST}
-    Should Be Equal    ${conns[1].host}    ${HOST}
-    Should Be Equal    ${conns[0].prompt}    >>
-    Should Be Equal    ${conns[1].alias}    saila
-    Should Be Equal    ${conns[0].term_type}    vt100
+    Should Be Equal As Integers   ${conns[0].index}   1
+    Should Be Equal As Integers   ${conns[1].index}   2
+    Should Be Equal    ${conns[0].host}       ${HOST}
+    Should Be Equal    ${conns[1].host}       ${HOST}
+    Should Be Equal    ${conns[0].prompt}     >>
+    Should Be Equal    ${conns[1].alias}      another
+    Should Be Equal    ${conns[0].term_type}  vt100
 
 *** Keywords ***
 Connection Should Be Closed

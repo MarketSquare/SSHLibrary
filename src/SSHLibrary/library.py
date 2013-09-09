@@ -182,13 +182,13 @@ class SSHLibrary(object):
         | Library | SSHLibrary | 10 seconds | CRLF |
 
         """
-        self._cache = ConnectionCache()
+        self._connections = ConnectionCache()
         self._config = DefaultConfig(timeout, newline, prompt, loglevel,
                                      term_type, width, height, encoding)
 
     @property
-    def ssh_client(self):
-        return self._cache.current
+    def current(self):
+        return self._connections.current
 
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
@@ -252,10 +252,10 @@ class SSHLibrary(object):
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
         """
-        self.ssh_client.config.update(timeout=timeout, newline=newline,
-                                      prompt=prompt, term_type=term_type,
-                                      width=width, height=height,
-                                      encoding=encoding)
+        self.current.config.update(timeout=timeout, newline=newline,
+                                   prompt=prompt, term_type=term_type,
+                                   width=width, height=height,
+                                   encoding=encoding)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
@@ -310,29 +310,16 @@ class SSHLibrary(object):
         encoding = encoding or self._config.encoding
         client = SSHClient(host, alias, port, timeout, newline, prompt,
                            term_type, width, height, encoding)
-        return self._cache.register(client, alias)
-
-    def get_connection_id(self):
-        """Returns the index (an integer) of the current active connection.
-
-        If no connection is currently active, `None` is returned.
-
-        Example:
-        | ${old_connection}= | Get Connection Id |
-        | Open Connection    | anotherhost.com   |
-        | # Do something with anotherhost.com    |
-        | Close Connection   |                   |
-        | Switch Connection  | ${old_connection} |
-        """
-        return self._cache.current_index
+        connection_index = self._connections.register(client, alias)
+        client.config.update(index=connection_index)
+        return connection_index
 
     def switch_connection(self, index_or_alias):
         """Switches the active connection by index or alias.
 
-        `index_or_alias` is either an integer got as the return value of
-        keywords `Open Connection` and `Get Connection Id` or an explicitly
-        defined alias (a string) that was passed as an argument to
-        `Open Connection`.
+        `index_or_alias` is either connection index (an integer) or alias
+        (a string). Both index and alias can queried as attributes of the object
+        returned by `Get Connection`.
 
         This keyword returns the index of the last active connection,
         which can be used to reuse that connection later.
@@ -358,11 +345,11 @@ class SSHLibrary(object):
         | # Do something with build.local.net |
         | Switch Connection | ${myserver}     |
         """
-        old_index = self.get_connection_id()
+        old_index = self._connections.current_index
         if index_or_alias is None:
             self.close_connection()
         else:
-            self._cache.switch(index_or_alias)
+            self._connections.switch(index_or_alias)
         return old_index
 
     def close_all_connections(self):
@@ -381,14 +368,57 @@ class SSHLibrary(object):
         | # Do something with the connections     |
         | [Teardown]      | Close all connections |
         """
-        self._cache.close_all()
+        self._connections.close_all()
+
+    def get_connection(self, index_or_alias=None, loglevel=None):
+        """Return information of the connection by index or alias.
+
+        If `index_or_alias` is not given, the information of the current
+        active connection is returned.
+
+        The return value is an object that describes the connection.
+        The object has attributes that correspond to the [#Configurable
+        per connection|connection configuration values] and has also attributes
+        attributes `host`, `port`, `index` and `alias`.
+
+        This keyword logs the connection information. `loglevel` can be used to
+        override the [#Loglevel|default log level].
+
+        Getting information of the current active connection:
+        | Open Connection | far.server.com        |
+        | Open Connection | near.server.com       | prompt=>>       | # Current connection |
+        | ${nearhost}=    | Get Connection        |                 |
+        | Should Be Equal | ${nearhost.host}      | near.server.com |
+        | Should Be Equal | ${nearhost.index}     | 2               |
+        | Should Be Equal | ${nearhost.prompt}    | >>              |
+        | Should Be Equal | ${nearhost.term_type} | vt100           | # From defaults      |
+
+        Getting connection information using an index:
+        | Open Connection | far.server.com   |
+        | Open Connection | near.server.com  | # Current connection |
+        | ${farhost}=     | Get Connection   | 1                    |
+        | Should Be Equal | ${farhost.host}  | far.server.com       |
+
+        Getting connection information using an alias:
+        | Open Connection | far.server.com   | alias=far            |
+        | Open Connection | near.server.com  | # Current connection |
+        | ${farhost}=     | Get Connection   | far                  |
+        | Should Be Equal | ${farhost.host}  | far.server.com       |
+        | Should Be Equal | ${farhost.alias} | far                  |
+        """
+        if not index_or_alias:
+            index_or_alias = self._connections.current_index
+        config = self._connections.get_connection(index_or_alias).config
+        self._log(str(config), loglevel)
+        return config
 
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
         The return value is a list of objects that describe the connection.
-        These objects have attributes that correspond to the argument names
-        of `Open Connection`.
+        These object have attributes that correspond to the [#Configurable
+        per connection|connection configuration values] and has also attributes
+        `host`, `port`, `index` and `alias`.
 
         This keyword logs the connection information. `loglevel` can be used to
         override the [#Loglevel|default log level].
@@ -402,8 +432,7 @@ class SSHLibrary(object):
         | Should Be Equal As Integers | ${farhost.port}     | 22              |
         | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
         """
-        # TODO: could the ConnectionCache be enhanced to be iterable?
-        configs = [c.config for c in self._cache._connections]
+        configs = [c.config for c in self._connections._connections]
         for c in configs:
             self._log(str(c), loglevel)
         return configs
@@ -446,8 +475,8 @@ class SSHLibrary(object):
         | Close Connection |
         | # Do something with /tmp/results.txt             |
         """
-        self.ssh_client.close()
-        self._cache.current = self._cache._no_current
+        self.current.close()
+        self._connections.current = self._connections._no_current
 
     def login(self, username, password):
         """Logs into the SSH server with the given `username` and `password`.
@@ -468,7 +497,7 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
         """
-        return self._login(self.ssh_client.login, username, password)
+        return self._login(self.current.login, username, password)
 
     def login_with_public_key(self, username, keyfile, password):
         """Logs into the SSH server using key-based authentication.
@@ -494,12 +523,12 @@ class SSHLibrary(object):
         | Open Connection       | linux.host.com |
         | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_dsa | keyringpasswd |
         """
-        return self._login(self.ssh_client.login_with_public_key, username,
+        return self._login(self.current.login_with_public_key, username,
                            keyfile, password)
 
     def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."
-                   % (self.ssh_client.host, self.ssh_client.port, username))
+                   % (self.current.host, self.current.port, username))
         try:
             return login_method(username, *args)
         except SSHClientException, e:
@@ -551,7 +580,7 @@ class SSHLibrary(object):
         self._info("Executing command '%s'" % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.ssh_client.execute_command(command)
+        stdout, stderr, rc = self.current.execute_command(command)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
@@ -584,7 +613,7 @@ class SSHLibrary(object):
         """
         self._info("Starting command '%s'" % command)
         self._last_command = command
-        self.ssh_client.start_command(command)
+        self.current.start_command(command)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
@@ -613,7 +642,7 @@ class SSHLibrary(object):
         self._info("Reading output of command '%s'" % self._last_command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.ssh_client.read_command_output()
+        stdout, stderr, rc = self.current.read_command_output()
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):
@@ -663,7 +692,7 @@ class SSHLibrary(object):
         | Should Contain             | ${output}     | su: Authentication failure |
         """
         self._write(text, add_newline=True)
-        return self._read_and_log(loglevel, self.ssh_client.read_until_newline)
+        return self._read_and_log(loglevel, self.current.read_until_newline)
 
     def write_bare(self, text):
         """Writes the given `text` over the connection without appending
@@ -685,7 +714,7 @@ class SSHLibrary(object):
 
     def _write(self, text, add_newline=False):
         try:
-            self.ssh_client.write(text, add_newline)
+            self.current.write(text, add_newline)
         except SSHClientException, e:
             raise RuntimeError(e)
 
@@ -709,7 +738,7 @@ class SSHLibrary(object):
         | ${output}=      | Read           | loglevel=WARN     | # Printed to the test output due to loglevel |
         | Should Contain  | ${output}      | root@myserver:    |
         """
-        return self._read_and_log(loglevel, self.ssh_client.read)
+        return self._read_and_log(loglevel, self.current.read)
 
     def read_until(self, expected, loglevel=None):
         """Reads the server output until the `expected` is encountered or
@@ -732,7 +761,7 @@ class SSHLibrary(object):
         | ${output}=      | Read Until     | :~#                 | loglevel=WARN | # Printed to the console due to loglevel |
         | Should Contain  | ${output}      | root@myserver:~#    |
         """
-        return self._read_and_log(loglevel, self.ssh_client.read_until,
+        return self._read_and_log(loglevel, self.current.read_until,
                                   expected)
 
     def read_until_regexp(self, regexp, loglevel=None):
@@ -757,7 +786,7 @@ class SSHLibrary(object):
         | ${output}=      | Read Until Regexp | root@.*:          | loglevel=WARN | # Printed to the console due to loglevel |
         | Should Contain  | ${output}         | root@myserver:    |
         """
-        return self._read_and_log(loglevel, self.ssh_client.read_until_regexp,
+        return self._read_and_log(loglevel, self.current.read_until_regexp,
                                   regexp)
 
     def read_until_prompt(self, loglevel=None):
@@ -788,7 +817,7 @@ class SSHLibrary(object):
         | ${output}=               | Read Until Prompt | loglevel=WARN      | # Printed to the console due to loglevel |
         | Should Contain           | ${output}         | root@myserver:~    |
         """
-        return self._read_and_log(loglevel, self.ssh_client.read_until_prompt)
+        return self._read_and_log(loglevel, self.current.read_until_prompt)
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
@@ -812,7 +841,7 @@ class SSHLibrary(object):
         `myscript.py` does not appear in the output in 5 seconds:
         | Write Until Expected Output | lsof -c python26\\n | expected=myscript.py | timeout=5s | retry_interval=0.5s |
         """
-        self._read_and_log(loglevel, self.ssh_client.write_until_expected,
+        self._read_and_log(loglevel, self.current.write_until_expected,
                            text, expected, timeout, retry_interval)
 
     def _read_and_log(self, loglevel, reader, *args):
@@ -865,7 +894,7 @@ class SSHLibrary(object):
         | Get File | /path_to_remote_file/remote_file.txt | /path_to_local_file/local_file.txt | # Single file    |
         | Get File | /path_to_remote_files/*.txt          | /path_to_local_files/              | # All text files |
         """
-        return self._run_sftp_command(self.ssh_client.get_file, source,
+        return self._run_sftp_command(self.current.get_file, source,
                                       destination, path_separator)
 
     def get_directory(self, source, destination='.', path_separator='/',
@@ -941,7 +970,7 @@ class SSHLibrary(object):
         Subdirectory paths are preserved, e.g. remote `var/logs/mysql`
         is now found at `/home/robot/logs/mysql`.
         """
-        return self._run_sftp_command(self.ssh_client.get_directory, source,
+        return self._run_sftp_command(self.current.get_directory, source,
                                       destination, path_separator, recursive)
 
     def put_file(self, source, destination='.', mode='0744',
@@ -993,7 +1022,7 @@ class SSHLibrary(object):
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |        |      | # All text files                                  |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |  0777  | CRLF | # Custom permissions and forcing Windows newlines |
         """
-        return self._run_sftp_command(self.ssh_client.put_file, source,
+        return self._run_sftp_command(self.current.put_file, source,
                                       destination, mode, newline,
                                       path_separator)
 
@@ -1075,7 +1104,7 @@ class SSHLibrary(object):
         local `var/logs/mysql` is found on the remote
         at `/home/robot/logs/mysql`.
         """
-        return self._run_sftp_command(self.ssh_client.put_directory, source,
+        return self._run_sftp_command(self.current.put_directory, source,
                                       destination, mode, newline,
                                       path_separator, recursive)
 
@@ -1088,7 +1117,7 @@ class SSHLibrary(object):
         Note that symlinks are followed:
         | Directory Should Exist | /usr/local/man | # Points to /usr/share/man/ |
         """
-        return self.ssh_client.dir_exists(path)
+        return self.current.dir_exists(path)
 
     def directory_should_not_exist(self, path):
         """Fails if the given `path` points to an existing directory.
@@ -1098,7 +1127,7 @@ class SSHLibrary(object):
 
         Note that symlinks are followed.
         """
-        return not self.ssh_client.dir_exists(path)
+        return not self.current.dir_exists(path)
 
     def file_should_exist(self, path):
         """Fails if the given `path` does NOT point to an existing file.
@@ -1109,7 +1138,7 @@ class SSHLibrary(object):
         Note that symlinks are followed:
         | File Should Exist | /initrd.img | # Points to boot/initrd.img |
         """
-        return self.ssh_client.file_exists(path)
+        return self.current.file_exists(path)
 
     def file_should_not_exist(self, path):
         """Fails if the given `path` points to an existing file.
@@ -1119,7 +1148,7 @@ class SSHLibrary(object):
 
         Note that symlinks are followed.
         """
-        return not self.ssh_client.file_exists(path)
+        return not self.current.file_exists(path)
 
     def list_directory(self, path, pattern=None, absolute=False):
         """Returns and logs items in a remote directory, optionally filtered
@@ -1142,21 +1171,21 @@ class SSHLibrary(object):
         | @{items}= | List Directory          | /home/robot |
         | @{files}= | List Files In Directory | /tmp | *.txt | absolute=True |
         """
-        items = self.ssh_client.list_dir(path, pattern, absolute)
+        items = self.current.list_dir(path, pattern, absolute)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
                                        '\n'.join(items)))
         return items
 
     def list_files_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only files."""
-        files = self.ssh_client.list_files_in_dir(path, pattern, absolute)
+        files = self.current.list_files_in_dir(path, pattern, absolute)
         self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
                                        '\n'.join(files)))
         return files
 
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only directories."""
-        dirs = self.ssh_client.list_dirs_in_dir(path, pattern, absolute)
+        dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
         self._info('%d director%s:\n%s' % (len(dirs),
                                           'y' if len(dirs) == 1 else 'ies',
                                           '\n'.join(dirs)))

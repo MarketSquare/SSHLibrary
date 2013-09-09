@@ -35,6 +35,7 @@ class ClientConfig(Configuration):
                  prompt=None, term_type='vt100', width=80, height=24,
                  encoding='utf8'):
         Configuration.__init__(self,
+                index=IntegerEntry(None),
                 host=StringEntry(host),
                 alias=StringEntry(alias),
                 port=IntegerEntry(port),
