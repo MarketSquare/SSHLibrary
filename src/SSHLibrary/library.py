@@ -981,8 +981,8 @@ class SSHLibrary(object):
         source, subdirectories being ignored.
 
         Examples:
-        | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt |        |      | # Single file                                     |                    |
-        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |        |      | # All text files                                  |                    |
+        | Put File | /path_to_local_file/local_file.txt | /path_to_remote_file/remote_file.txt |        |      | # Single file                                     |
+        | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |        |      | # All text files                                  |
         | Put File | /path_to_local_files/*.txt         | /path_to_remote_files/               |  0777  | CRLF | # Custom permissions and forcing Windows newlines |
         """
         return self._run_sftp_command(self.ssh_client.put_file, source,
