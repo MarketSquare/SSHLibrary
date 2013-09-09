@@ -499,8 +499,8 @@ class SSHLibrary(object):
         except SSHClientException, e:
             raise RuntimeError(e)
 
-    def execute_command(self, command, return_stdout=True,
-                        return_stderr=False, return_rc=False):
+    def execute_command(self, command, return_stdout=True, return_stderr=False,
+                        return_rc=False):
         """Executes the command and returns a combination of stdout, stderr
         and return code.
 
@@ -523,25 +523,28 @@ class SSHLibrary(object):
 
         If non-blocking behavior is required, use `Start Command` instead.
 
-        If several arguments evaluate true, a tuple containing the values
-        is returned. `return_stdout`, `return_stderr` and `return_rc`
-        can be used to configure whether the tuple contains all these values.
-        If only one of the arguments evaluates true, the corresponding value is
-        returned instead of a tuple.
+        If several arguments evaluate true, a tuple is returned.
+        Non-empty strings, except `false` and `False`, evaluates true.
+        `return_stdout`, `return_stderr` and `return_rc` whether the
+        returned tuple contains all these values. If only one of the arguments
+        evaluates true, the plain value is returned instead of a tuple.
 
         Example that returns only the command stdout as a value:
         | ${stdout}= | Execute Command | ${cmd} |
 
-        Example that returns both stdout and stderr as a tuple:
+        Example that returns both stdout and stderr as a tuple.
+        Non-empty argument value strings usually evaluate true:
         | ${stdout} | ${stderr}= | Execute Command | ${cmd} | return_stderr=yes |
 
-        Example that returns only the return code as a value:
-        | ${rc}= | Execute Command | ${cmd} | return_stdout=${EMPTY} | return_rc=true |
+        Example that returns only the return code as a value.
+        Strings `False` and `false` can be used to evaluate false:
+        | ${rc}= | Execute Command | ${cmd} | return_stdout=False | return_rc=True |
 
         This keyword also logs the executed command with log level `INFO`.
         """
         self._info("Executing command '%s'" % command)
-        opts = self._output_options(return_stdout, return_stderr, return_rc)
+        opts = self._legacy_output_options(return_stdout, return_stderr,
+                                           return_rc)
         stdout, stderr, rc = self.ssh_client.execute_command(command)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
@@ -602,12 +605,12 @@ class SSHLibrary(object):
         This keyword also logs the read command with log level `INFO`.
         """
         self._info("Reading output of command '%s'" % self._last_command)
-        opts = self._output_options(return_stdout, return_stderr, return_rc)
+        opts = self._legacy_output_options(return_stdout, return_stderr,
+                                           return_rc)
         stdout, stderr, rc = self.ssh_client.read_command_output()
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def _output_options(self, stdout, stderr, rc):
-        # Handle legacy options for configuring returned outputs
+    def _legacy_output_options(self, stdout, stderr, rc):
         if not isinstance(stdout, basestring):
             return stdout, stderr, rc
         stdout = stdout.lower()
@@ -620,15 +623,18 @@ class SSHLibrary(object):
     def _return_command_output(self, stdout, stderr, rc, return_stdout,
                                return_stderr, return_rc):
         ret = []
-        if return_stdout:
+        if self._output_wanted(return_stdout):
             ret.append(stdout.rstrip('\n'))
-        if return_stderr:
+        if self._output_wanted(return_stderr):
             ret.append(stderr.rstrip('\n'))
-        if return_rc:
+        if self._output_wanted(return_rc):
             ret.append(rc)
         if len(ret) == 1:
             return ret[0]
         return ret
+
+    def _output_wanted(self, value):
+        return (value and str(value).lower() != "false")
 
     def write(self, text, loglevel=None):
         """Writes the given `text` over the connection and appends a newline.
