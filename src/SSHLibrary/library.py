@@ -645,15 +645,13 @@ class SSHLibrary(object):
     def write(self, text, loglevel=None):
         """Writes the given `text` over the connection and appends a newline.
 
-        This keyword returns the written `text` (until the appended newline)
-        from the server output. Please do note, that if `text` is a command
-        to be executed on the server, no output of the command is returned.
+        This keyword consumes the written `text` (until the appended newline)
+        from the server output. The written `text is also logged and `loglevel`
+        can be used to override the [#Loglevel|default log level].
+
+        Please do note, that if `text` is a command to be executed on
+        the server, no output of the command is returned.
         To get the output, one of the `Read` keywords must be used.
-
-        This keyword logs the written `text` with log level `INFO`.
-
-        This keyword logs the read output. `loglevel` can be used to override
-        the [#Loglevel|default log level].
 
         Example:
         | ${written}=                | Write         | su                         |
@@ -671,10 +669,9 @@ class SSHLibrary(object):
         """Writes the given `text` over the connection without appending
         a newline.
 
-        Unlike `Write`, this keyword returns nothing. To get the output,
-        one of the `Read` keywords must be used.
-
-        This keyword logs the written `text` with log level `INFO`.
+        Unlike `Write`, this keyword returns nothing. If `text` is a command
+        to be executed on the server, no output of the command is returned.
+        To get the output, one of the `Read` keywords must be used.
 
         Example:
         | Write Bare     | su\\n            |
@@ -687,7 +684,6 @@ class SSHLibrary(object):
         self._write(text)
 
     def _write(self, text, add_newline=False):
-        self._info("Writing %s" % text)
         try:
             self.ssh_client.write(text, add_newline)
         except SSHClientException, e:
@@ -807,7 +803,7 @@ class SSHLibrary(object):
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        This keyword logs the read output. `loglevel` can be used to override
+        This keyword logs the written text. `loglevel` can be used to override
         the [#Loglevel|default log level].
 
         This example will write `lsof -c python26\\` (list all files
