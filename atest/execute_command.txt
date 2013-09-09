@@ -11,11 +11,11 @@ Execute Command With Defaults
     Should Be Equal  ${stdout}  This is stdout
 
 Execute Command And Return Stderr
-    ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  return_stdout=${FALSE}  return_stderr=yes
+    ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  return_stdout=false  return_stderr=yes
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command And Return Rc
-    ${rc} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  return_stdout=${FALSE}  return_rc=${true}
+    ${rc} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  return_stdout=False  return_rc=${true}
     Should Be Equal As Integers  ${rc}  0
 
 Execute Command And Return All Values
