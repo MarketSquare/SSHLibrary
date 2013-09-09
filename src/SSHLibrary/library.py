@@ -186,10 +186,11 @@ class SSHLibrary(object):
 
     def set_default_configuration(self, timeout=None, newline=None,
                                   prompt=None, loglevel=None, encoding=None):
-        """Update the default `configuration` values.
+        """Update the default `configuration`.
 
         Please note that using this keyword does not affect to the already
-        open connections. For more details, see `configuration`.
+        open connections. Use `Set Client Configuration` to configure the
+        active connection.
 
         Only parameters whose value is other than `None` are updated.
 
@@ -217,9 +218,8 @@ class SSHLibrary(object):
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type='vt100', width=80, height=24,
                                  encoding=None):
-        """Update the `configuration` values of the current active
-        connection. At least one connection must have been opened using
-        `Open Connection`.
+        """Update the `configuration` of the current active connection.
+        At least one connection must have been opened using `Open Connection`.
 
         Only parameters whose value is other than `None` are updated.
 
@@ -385,7 +385,7 @@ class SSHLibrary(object):
         of `Open Connection`.
 
         This keyword logs the connection information. `loglevel` can be used to
-        override the default log level defined by `configuration`.
+        override the [#Loglevel|default log level].
 
         Example:
         | Open Connection             | near.server.com     | timeout=10s     |
@@ -449,8 +449,8 @@ class SSHLibrary(object):
         Connection must be opened before using this keyword.
 
         This keyword also reads and returns the output from the server.
-        If prompt is set, everything until the prompt is returned.
-        See `configuration` for how to set the prompt.
+        If [#Prompt|prompt is set], everything until the prompt is
+        returned.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -477,8 +477,7 @@ class SSHLibrary(object):
         `password` is used to unlock the `keyfile` if unlocking is required.
 
         This keyword also reads and returns the output from the server.
-        If prompt is set, everything until the prompt is returned.
-        See `configuration` for how to set the prompt.
+        If [#Prompt|prompt is set], everything until the prompt is returned.
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.host.com        |
@@ -642,7 +641,7 @@ class SSHLibrary(object):
         This keyword logs the written `text` with log level `INFO`.
 
         This keyword logs the read output. `loglevel` can be used to override
-        the default log level defined by `configuration`.
+        the [#Loglevel|default log level].
 
         Example:
         | ${written}=                | Write         | su                         |
@@ -690,7 +689,7 @@ class SSHLibrary(object):
         subsequent call to `Read` does not return output that was already read.
 
         This keyword logs the read output. `loglevel` can be used to override
-        the default log level defined by `configuration`.
+        the [#Loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com  |
@@ -709,11 +708,11 @@ class SSHLibrary(object):
         timeout expires.
 
         Text up until and including the `expected` will be returned.
-        If no match is found before the timeout expires, the keyword fails.
-        Timeout can be changed in `configuration`.
+        If no match is found before [#Timeout|the timeout] expires, the keyword
+        fails.
 
         This keyword logs the read output. `loglevel` can be used to override
-        the default log level defined by `configuration`.
+        the [#Loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com  |
@@ -734,11 +733,11 @@ class SSHLibrary(object):
         `regexp` can be a pattern or a compiled regexp object.
 
         Text up until and including the `regexp` will be returned.
-        If no match is found before the timeout expires, the keyword fails.
-        Timeout can be changed in `configuration`.
+        If no match is found before [#Timeout|the timeout] expires, the keyword
+        fails.
 
         This keyword logs the read output. `loglevel` can be used to override
-        the default log level defined by `configuration`.
+        the [#Loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com     |
@@ -756,18 +755,18 @@ class SSHLibrary(object):
     def read_until_prompt(self, loglevel=None):
         """Reads and returns text from the output until the prompt is found.
 
-        Text up and until prompt is returned. Prompt must have been set before
-        this keyword. See `configuration` for how to set the prompt.
+        Text up and until prompt is returned. [#Prompt|Prompt must have
+        been set] before this keyword.
 
-        If no match is found before the timeout expires, the keyword fails.
-        Timeout can be changed in `configuration`.
+        If no match is found before [#Timeout|the timeout] expires, the keyword
+        fails.
 
         This keyword is useful for reading output of a single command when
         output of previous command has been read and that command does not
         produce prompt characters in its output.
 
         This keyword logs the read output. `loglevel` can be used to override
-        the default log level defined by `configuration`.
+        the [#Loglevel|default log level].
 
         Example:
         | Open Connection          | my.server.com     |
@@ -797,7 +796,7 @@ class SSHLibrary(object):
         fails.
 
         This keyword logs the read output. `loglevel` can be used to override
-        the default log level defined by `configuration`.
+        the [#Loglevel|default log level].
 
         This example will write `lsof -c python26\\` (list all files
         currently opened by python26), until `myscript.py` appears in the
