@@ -617,22 +617,29 @@ class SSHLibrary(object):
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
-        """Reads output of the most recent started command and returns a
-        combination of stdout, stderr and the return code of the command.
+        """Returns a combination of stdout, stderr and the return code of the
+        most recent started command.
 
-        Command must have been started using `Start Command` before this
-        keyword can be used:
+        At least one command must have been started using `Start Command`
+        before this keyword can be used:
         | Start Command | ./longscript.py     |
         | ${stdout}=    | Read Command Output |
         | # Do something with ${stdout}       |
 
-        Only the output from the last started command is read:
-        | Start Command                  | echo 'HELLO'        |
-        | Start Command                  | ./longscript.py     |
-        | ${stdout}=                     | Read Command Output | # Returns stdout of longscript.py |
-        | # Do something with ${stdout}  |
-        | ${stdout}=                     | Read Command Output | # Still stdout of longscript.py   |
-        | Should Not Be Equal As Strings | ${stdout}           | HELLO                             |
+        Using `Start Command` with `Read Command Output` follows
+        'last in, first out' (LIFO) policy, meaning that `Read Command Output`
+        operates on the most recent started command, after which that command
+        is discarded and its output cannot be read again.
+
+        If several commands have been started, the output of the last started
+        command is returned. After that, a subsequent call will return the
+        output of the new last (originally the second last) command:
+        | Start Command  | echo 'HELLO'        |
+        | Start Command  | echo 'SECOND'       |
+        | ${stdout}=     | Read Command Output |
+        | Should Contain | ${stdout}           | 'SECOND' |
+        | ${stdout}=     | Read Command Output |
+        | Should Contain | ${stdout}           | 'HELLO'  |
 
         See `Execute Command` for examples on how the return value can
         be configured using `return_stdout`, `return_stderr` and `return_rc`.
@@ -642,7 +649,10 @@ class SSHLibrary(object):
         self._info("Reading output of command '%s'" % self._last_command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.read_command_output()
+        try:
+            stdout, stderr, rc = self.current.read_command_output()
+        except SSHClientException, msg:
+            raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):

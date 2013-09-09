@@ -38,6 +38,11 @@ Start Command And Read Process Output With Legacy Stdout And Stderr
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
 
+Reading Command Output Without Command Started
+    Run Keyword And Expect Error
+    ...  No started commands to read output from
+    ...  Read Command Output
+
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User

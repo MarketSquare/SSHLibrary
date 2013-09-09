@@ -146,7 +146,10 @@ class AbstractSSHClient(object):
 
         :returns: 3-tuple (stdout, stderr, return_code)
         """
-        return self._commands.pop().read_outputs()
+        try:
+            return self._commands.pop().read_outputs()
+        except IndexError:
+            raise SSHClientException("No started commands to read output from")
 
     def write(self, text, add_newline=False):
         """Write `text` in shell session.
