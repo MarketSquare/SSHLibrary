@@ -34,7 +34,9 @@ Get File With Pattern
     \  OS.File Should Exist  ${destination}${/}${filename}
 
 Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error  Cannot copy multiple source files to one destination file.  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
+    Run Keyword And Expect Error
+    ...  Cannot copy multiple source files to one destination file.
+    ...  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
     SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  .
@@ -59,7 +61,9 @@ Get File To Absolute Destination
     [Teardown]  OS.Remove Directory  ${LOCAL TMPDIR}  yes
 
 Get File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There were no source files matching 'non-existing'  SSH.Get File  non-existing
+    Run Keyword And Expect Error
+    ...  There were no source files matching 'non-existing'
+    ...  SSH.Get File  non-existing
 
 *** Keywords ***
 Create Tmp Dir And Move File
