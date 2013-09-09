@@ -1181,13 +1181,20 @@ class SSHLibrary(object):
         | @{items}= | List Directory          | /home/robot |
         | @{files}= | List Files In Directory | /tmp | *.txt | absolute=True |
         """
-        items = self.current.list_dir(path, pattern, absolute)
+        try:
+            items = self.current.list_dir(path, pattern, absolute)
+        except SSHClientException, msg:
+            raise RuntimeError(msg)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
                                        '\n'.join(items)))
         return items
 
     def list_files_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only files."""
+        try:
+            files = self.current.list_files_in_dir(path, pattern, absolute)
+        except SSHClientException, msg:
+            raise RuntimeError(msg)
         files = self.current.list_files_in_dir(path, pattern, absolute)
         self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
                                        '\n'.join(files)))
@@ -1195,7 +1202,10 @@ class SSHLibrary(object):
 
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only directories."""
-        dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
+        try:
+            dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
+        except SSHClientException, msg:
+            raise RuntimeError(msg)
         self._info('%d director%s:\n%s' % (len(dirs),
                                           'y' if len(dirs) == 1 else 'ies',
                                           '\n'.join(dirs)))

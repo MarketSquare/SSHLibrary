@@ -389,7 +389,7 @@ class AbstractSFTPClient(object):
     def list(self, command, path, pattern=None, absolute=False):
         if not self.dir_exists(path):
             msg = "There was no path matching '%s'" % path
-            raise RuntimeError(msg)
+            raise SSHClientException(msg)
         items = command(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)
