@@ -539,41 +539,42 @@ class SSHLibrary(object):
         """Executes the command and returns a combination of stdout, stderr
         and return code.
 
-        The command is always executed in a new shell. Thus possible
-        changes to the environment (e.g. changing working directory)
-        are not visible to the later keywords:
-        | ${pwd}=         | Execute Command | pwd            |
-        | Should Be Equal | ${pwd}          | /home/username |
-        | Execute Command | cd /tmp         |
-        | ${pwd}=         | Execute Command | pwd            |
-        | Should Be Equal | ${pwd}          | /home/username |
-
-        `Write` and `Read` keywords can be used for running multiple
-        commands in the same session.
-
-        This keyword waits until the command execution has finished:
-        | Execute Command             | ./myscript.py   | # Ran before this finishes |
-        | ${rc}=                      | Execute Command | pgrep myscript.py          | return_stdout=False | return_rc=True |
-        | Should Be Equal As Integers | ${rc}           | 1                          | # Already finished  |
-
-        If non-blocking behavior is required, use `Start Command` instead.
-
         If several arguments evaluate true, a tuple is returned.
-        Non-empty strings, except `false` and `False`, evaluates true.
+        Non-empty strings, except `false` and `False`, evaluate true.
         `return_stdout`, `return_stderr` and `return_rc` whether the
         returned tuple contains all these values. If only one of the arguments
         evaluates true, the plain value is returned instead of a tuple.
 
-        Example that returns only the command stdout as a value:
-        | ${stdout}= | Execute Command | ${cmd} |
+        By default, only standard output is returned:
+        | ${stdout}=     | Execute Command | echo 'Hello John!' |
+        | Should Contain | ${stdout}       | Hello John!        |
 
-        Example that returns both stdout and stderr as a tuple.
-        Non-empty argument value strings usually evaluate true:
-        | ${stdout} | ${stderr}= | Execute Command | ${cmd} | return_stderr=yes |
+        If errors are needed as well, set the argument value to true:
+        | ${stdout}       | ${stderr}= | Execute Command | echo 'Hello John!' | return_stderr=True |
+        | Should Be Empty | ${stderr}  |
 
-        Example that returns only the return code as a value.
-        Strings `False` and `false` can be used to evaluate false:
-        | ${rc}= | Execute Command | ${cmd} | return_stdout=False | return_rc=True |
+        Sometimes getting the return value is enough:
+        | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
+        | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
+
+        This keyword waits until the command execution has finished:
+        | Execute Command             | ./myscript.py   | # Wait until finished |
+        | ${rc}=                      | Execute Command | pgrep myscript.py     | return_stdout=False | return_rc=True |
+        | Should Be Equal As Integers | ${rc}           | 1                     | # Already finished  |
+
+        If non-blocking behavior is required, use `Start Command` instead.
+
+        The command is always executed in a new shell. Thus possible changes
+        to the environment (e.g. changing working directory) are not visible
+        to the later keywords:
+        | ${pwd}=         | Execute Command | pwd           |
+        | Should Be Equal | ${pwd}          | /home/johndoe |
+        | Execute Command | cd /tmp         |
+        | ${pwd}=         | Execute Command | pwd           |
+        | Should Be Equal | ${pwd}          | /home/johndoe |
+
+        `Write` and `Read` keywords can be used for running multiple
+        commands in the same session.
 
         This keyword also logs the executed command with log level `INFO`.
         """
@@ -584,27 +585,33 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
-        """Starts execution of the `command` on the remote host.
+        """Starts execution of the `command` on the remote host and
+        return immediately.
 
         This keyword returns immediately after being called:
-        | Start Command               | ./longscript.py     | # Start and return  |
-        | ${rc}=                      | Execute Command     | pgrep longscript.py | return_stdout=False | return_rc=True |
-        | Should Be Equal As Integers | ${rc}               | 0                   | # Still running     |
+        | Start Command               | ./longscript.py     | # Return immediately |
+        | ${rc}=                      | Execute Command     | pgrep longscript.py  | return_stdout=False | return_rc=True |
+        | Should Be Equal As Integers | ${rc}               | 0                    | # Still running     |
 
         If blocking behavior is required, use `Execute Command` instead.
 
         This keyword does not return any output of the started command.
         Use `Read Command Output` to read the output generated by
-        the command execution.
+        the command execution:
+        | Start Command   | echo 'Hello John!'  |
+        | ${stdout}=      | Read Command Output |
+        | Should Contain  | ${stdout}           | Hello John! |
 
         The command is always executed in a new shell, similarly as with
         `Execute Command`. Thus possible changes to the environment
         (e.g. changing working directory) are not visible to the later keywords:
-        | ${pwd}=         | Execute Command | pwd |
-        | Should Be Equal | /home/username  |
-        | Start Command   | cd /tmp         |
-        | ${pwd}=         | Execute Command | pwd |
-        | Should Be Equal | /home/username  |
+        | Start Command   | pwd                 |
+        | ${pwd}=         | Read Command Output |
+        | Should Be Equal | ${pwd}              | /home/johndoe |
+        | Start Command   | cd /tmp             |
+        | Start Command   | pwd                 |
+        | ${pwd}=         | Read Command Output |
+        | Should Be Equal | ${pwd}              | /home/johndoe |
 
         `Write` and `Read` keywords can be used for running multiple
         commands in the same session.
@@ -621,12 +628,30 @@ class SSHLibrary(object):
         most recent started command.
 
         At least one command must have been started using `Start Command`
-        before this keyword can be used:
-        | Start Command | ./longscript.py     |
-        | ${stdout}=    | Read Command Output |
-        | # Do something with ${stdout}       |
+        before this keyword can be used.
 
-        Using `Start Command` with `Read Command Output` follows
+        If several arguments evaluate true, a tuple is returned.
+        Non-empty strings, except `false` and `False`, evaluate true.
+        `return_stdout`, `return_stderr` and `return_rc` whether the
+        returned tuple contains all these values. If only one of the arguments
+        evaluates true, the plain value is returned instead of a tuple.
+
+        By default, only standard output is returned:
+        | Start Command  | echo 'Hello John!'  |
+        | ${stdout}=     | Read Command Output |
+        | Should Contain | ${stdout}           | Hello John! |
+
+        If errors are needed as well, set the argument value to true:
+        | Start Command   | echo 'Hello John!' |
+        | ${stdout}       | ${stderr}=         | Read Command Output | return_stderr=True |
+        | Should Be Empty | ${stderr}          |
+
+        Sometimes getting the return value is enough:
+        | Start Command               | echo 'Hello John!'  |
+        | ${rc}=                      | Read Command Output | return_stdout=False | return_rc=True |
+        | Should Be Equal As Integers | ${rc}               | 0                   | # succeeded         |
+
+        Using `Start Command` and `Read Command Output` follows
         'last in, first out' (LIFO) policy, meaning that `Read Command Output`
         operates on the most recent started command, after which that command
         is discarded and its output cannot be read again.
@@ -640,9 +665,6 @@ class SSHLibrary(object):
         | Should Contain | ${stdout}           | 'SECOND' |
         | ${stdout}=     | Read Command Output |
         | Should Contain | ${stdout}           | 'HELLO'  |
-
-        See `Execute Command` for examples on how the return value can
-        be configured using `return_stdout`, `return_stderr` and `return_rc`.
 
         This keyword also logs the read command with log level `INFO`.
         """
