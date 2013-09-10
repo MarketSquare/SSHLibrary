@@ -83,12 +83,16 @@ class PythonSSHClient(AbstractSSHClient):
         self.shell = self.client.invoke_shell(self.config.term_type,
                                               self.config.width,
                                               self.config.height)
-    def output_available(self):
-        return self.shell.recv_ready()
 
-    def _read_char(self):
+    def _read(self):
+        data = ''
+        while self.shell.recv_ready():
+            data += self.shell.recv(4096)
+        return data
+
+    def _read_byte(self):
          data = ''
-         if self.output_available():
+         if self.shell.recv_ready():
             data = self.shell.recv(1)
          return data
 

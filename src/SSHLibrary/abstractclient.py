@@ -164,27 +164,18 @@ class AbstractSSHClient(object):
 
     def read(self):
         """Read and return currently available output."""
-        read_output = ''
-        decoded_string = ''
-        while self.output_available():
-            try:
-                read_output += self._read_char()
-                decoded_string = read_output.decode(self.config.encoding)
-            except UnicodeDecodeError:
-                pass
-        return decoded_string
+        server_output = self._read()
+        return server_output.decode(self.config.encoding)
 
     def read_char(self):
-        """Read and return a single character from current session."""
-        read_output = ''
+        """Read and return a single char from the current session."""
+        server_output = ''
         while True:
             try:
-                read_output += self._read_char()
-                decoded_string = read_output.decode(self.config.encoding)
-                break
+                server_output += self._read_byte()
+                return server_output.decode(self.config.encoding)
             except UnicodeDecodeError:
                 pass
-        return decoded_string
 
     def read_until(self, expected):
         """Read and return from the output until expected.
@@ -249,27 +240,27 @@ class AbstractSSHClient(object):
         while time.time() - starttime < timeout.value:
             self.write(text)
             try:
-                return self._read_until(lambda s: expected in s,
-                                        expected, timeout=interval.value)
+                return self._read_until(lambda s: expected in s, expected,
+                                        timeout=interval.value)
             except SSHClientException:
                 pass
         raise SSHClientException("No match found for '%s' in %s."
                                  % (expected, timeout))
 
     def _read_until(self, matcher, expected, timeout=None):
-        ret = ''
+        server_output = ''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         start_time = time.time()
         while time.time() < float(timeout.value) + start_time:
             try:
-                ret += self._read_char()
-                decoded_string = ret.decode(self.config.encoding)
-                if matcher(decoded_string):
-                    return decoded_string
+                server_output += self._read_byte()
+                decoded_output = server_output.decode(self.config.encoding)
+                if matcher(decoded_output):
+                    return decoded_output
             except UnicodeDecodeError:
                 pass
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
-                                 % (expected, timeout, ret))
+                                 % (expected, timeout, decoded_output))
 
     def put_file(self, source, destination='.', mode='0744',
                  newline='default', path_separator='/'):
