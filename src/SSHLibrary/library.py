@@ -138,10 +138,40 @@ class SSHLibrary(object):
     are not visible to the subsequent keywords.
 
     2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
-    `Read Command Output`, `Read Until`, `Read Until Prompt` and
-    `Read Until Regexp` keywords operate in an interactive shell, which
-    means that changes to the environment are visible to the subsequent
-    keywords.
+    `Read Until`, `Read Until Prompt` and `Read Until Regexp` keywords operate
+    in an interactive session, which means that changes to the environment
+    are visible to the subsequent keywords.
+
+    = Interactive sessions =
+
+    Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
+    `Read Until`, `Read Until Prompt` and `Read Until Regexp` can be used
+    to interact with the server within the same session.
+
+    All of these keywords, except `Write Bare`, consume the read or the written
+    text from the server output before returning. This practically means that
+    the text is removed from the server output, i.e. subsequent calls to
+    `Read` keywords do not return text that was already read.
+
+    The consumed text is logged by the keywords and argument `loglevel`
+    can be used to override [#Loglevel|the default log level].
+
+    == Reading ==
+
+    Keywords `Read`, `Read Until`, `Read Until Prompt` and `Read Until
+    Regexp` can be used to read from the server. The read text is also
+    consumed from the server output.
+
+    `Read Until` variants read output up until and *including* `expected` text.
+    These keywords will fail if timeout expires before `expected` is found.
+
+    == Writing ==
+
+    Keywords `Write`, `Write Until Expected Output` consume the written text
+    while `Write Bare` does not.
+
+    Any of these keywords does not return output triggered by the written text.
+    To get the output, one of the `Read` keywords must be explicitly used.
 
     = Pattern matching =
 
@@ -483,9 +513,9 @@ class SSHLibrary(object):
 
         Connection must be opened before using this keyword.
 
-        This keyword also reads and returns the output from the server.
-        If [#Prompt|prompt is set], everything until the prompt is
-        returned.
+        This keyword returns and consumes everything on the server output
+        (usually the server MOTD). If prompt is set, everything until the prompt
+        is taken. Practically after this keyword the server output is empty.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -511,8 +541,9 @@ class SSHLibrary(object):
 
         `password` is used to unlock the `keyfile` if unlocking is required.
 
-        This keyword also reads and returns the output from the server.
-        If [#Prompt|prompt is set], everything until the prompt is returned.
+        This keyword returns and consumes everything on the server output
+        (usually the server MOTD). If prompt is set, everything until the prompt
+        is taken.  Practically after this keyword the server output is empty.
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.host.com        |
@@ -704,15 +735,13 @@ class SSHLibrary(object):
         return (value and str(value).lower() != "false")
 
     def write(self, text, loglevel=None):
-        """Writes the given `text` over the connection and appends a newline.
+        """Writes the given `text` on the remote and appends a newline.
 
-        This keyword consumes the written `text` (until the appended newline)
-        from the server output. The written `text is also logged and `loglevel`
-        can be used to override the [#Loglevel|default log level].
+        This keyword returns and [#Interactive sessions|consumes] the written
+        `text` (until the appended newline) from the server output.
 
-        Please do note, that if `text` is a command to be executed on
-        the server, no output of the command is returned.
-        To get the output, one of the `Read` keywords must be used.
+        See `interactive sessions` for more information on writing and
+        `loglevel`.
 
         Example:
         | ${written}=                | Write         | su                         |
@@ -727,12 +756,10 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read_until_newline)
 
     def write_bare(self, text):
-        """Writes the given `text` over the connection without appending
-        a newline.
+        """Writes the given `text` on the remote without appending a newline.
 
-        Unlike `Write`, this keyword returns nothing. If `text` is a command
-        to be executed on the server, no output of the command is returned.
-        To get the output, one of the `Read` keywords must be used.
+        Unlike `Write`, this keyword returns and
+        [#Interactive sessions|consumes] nothing.
 
         Example:
         | Write Bare     | su\\n            |
@@ -751,14 +778,14 @@ class SSHLibrary(object):
             raise RuntimeError(e)
 
     def read(self, loglevel=None):
-        """Reads and returns everything available on the server output.
+        """[#Interactive sessions|Consumes] and returns everything currently
+        available on the server output.
 
-        This keyword is most useful for reading everything from the output.
-        After being read, the server output buffer is cleared, meaning that
-        subsequent call to `Read` does not return output that was already read.
+        This keyword is most useful for reading everything from
+        the server output, thus clearing it.
 
-        This keyword logs the read output. `loglevel` can be used to override
-        the [#Loglevel|default log level].
+        See `interactive sessions` for more information on reading and
+        `loglevel`.
 
         Example:
         | Open Connection | my.server.com  |
@@ -773,15 +800,13 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read)
 
     def read_until(self, expected, loglevel=None):
-        """Reads the server output until the `expected` is encountered or
-        timeout expires.
+        """[#Interactive sessions|Consumes] and returns the server output until
+        `expected` is encountered or timeout expires.
 
         Text up until and including the `expected` will be returned.
-        If no match is found before [#Timeout|the timeout] expires, the keyword
-        fails.
 
-        This keyword logs the read output. `loglevel` can be used to override
-        the [#Loglevel|default log level].
+        See `interactive sessions` for more information on reading and
+        `loglevel`.
 
         Example:
         | Open Connection | my.server.com  |
@@ -797,16 +822,15 @@ class SSHLibrary(object):
                                   expected)
 
     def read_until_regexp(self, regexp, loglevel=None):
-        """Reads output until a match to `regexp` is found or timeout expires.
+        """[#Interactive sessions|Consumes] and returns the server output until
+        a match to `regexp` is found or timeout expires.
 
         `regexp` can be a pattern or a compiled regexp object.
 
         Text up until and including the `regexp` will be returned.
-        If no match is found before [#Timeout|the timeout] expires, the keyword
-        fails.
 
-        This keyword logs the read output. `loglevel` can be used to override
-        the [#Loglevel|default log level].
+        See `interactive sessions` for more information on reading and
+        `loglevel`.
 
         Example:
         | Open Connection | my.server.com     |
@@ -822,20 +846,18 @@ class SSHLibrary(object):
                                   regexp)
 
     def read_until_prompt(self, loglevel=None):
-        """Reads and returns text from the output until the prompt is found.
+        """[#Interactive sessions|Consumes] and returns the server output until
+        the prompt is found.
 
-        Text up and until prompt is returned. [#Prompt|Prompt must have
-        been set] before this keyword.
+        Text up and until prompt is returned. [#Prompt|Prompt must be set]
+        before this keyword is used.
 
-        If no match is found before [#Timeout|the timeout] expires, the keyword
-        fails.
+        See `interactive sessions` for more information on reading and
+        `loglevel`.
 
         This keyword is useful for reading output of a single command when
         output of previous command has been read and that command does not
         produce prompt characters in its output.
-
-        This keyword logs the read output. `loglevel` can be used to override
-        the [#Loglevel|default log level].
 
         Example:
         | Open Connection          | my.server.com     |
@@ -854,18 +876,19 @@ class SSHLibrary(object):
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
         """Writes given `text` repeatedly until `expected` appears in
-        the output.
+        the server output.
 
-        `text` is written without appending a newline.
+        `text` is written without appending a newline and is
+        [#Interactive sessions|consumed] from the server output before
+        `expected` is read.
 
         `retry_interval` defines the time before writing `text` again.
-        `text` will be consumed from the output before `expected` is read.
 
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        This keyword logs the written text. `loglevel` can be used to override
-        the [#Loglevel|default log level].
+        See `interactive sessions` for more information on writing and
+        `loglevel`.
 
         This example will write `lsof -c python26\\` (list all files
         currently opened by python26), until `myscript.py` appears in the
