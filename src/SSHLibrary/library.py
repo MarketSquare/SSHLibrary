@@ -740,8 +740,9 @@ class SSHLibrary(object):
         This keyword returns and [#Interactive sessions|consumes] the written
         `text` (until the appended newline) from the server output.
 
-        See `interactive sessions` for more information on writing and
-        `loglevel`.
+        The written `text` is logged with the defined `loglevel`.
+
+        See `interactive sessions` for more information on writing.
 
         Example:
         | ${written}=                | Write         | su                         |
@@ -784,8 +785,9 @@ class SSHLibrary(object):
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
 
-        See `interactive sessions` for more information on reading and
-        `loglevel`.
+        The read `text` is logged with the defined `loglevel`.
+
+        See `interactive sessions` for more information on reading.
 
         Example:
         | Open Connection | my.server.com  |
@@ -805,8 +807,9 @@ class SSHLibrary(object):
 
         Text up until and including the `expected` will be returned.
 
-        See `interactive sessions` for more information on reading and
-        `loglevel`.
+        The read `text` is logged with the defined `loglevel`.
+
+        See `interactive sessions` for more information on reading.
 
         Example:
         | Open Connection | my.server.com  |
@@ -829,8 +832,9 @@ class SSHLibrary(object):
 
         Text up until and including the `regexp` will be returned.
 
-        See `interactive sessions` for more information on reading and
-        `loglevel`.
+        The read `text` is logged with the defined `loglevel`.
+
+        See `interactive sessions` for more information on reading.
 
         Example:
         | Open Connection | my.server.com     |
@@ -852,8 +856,9 @@ class SSHLibrary(object):
         Text up and until prompt is returned. [#Prompt|Prompt must be set]
         before this keyword is used.
 
-        See `interactive sessions` for more information on reading and
-        `loglevel`.
+        The read `text` is logged with the defined `loglevel`.
+
+        See `interactive sessions` for more information on reading.
 
         This keyword is useful for reading output of a single command when
         output of previous command has been read and that command does not
@@ -884,11 +889,12 @@ class SSHLibrary(object):
 
         `retry_interval` defines the time before writing `text` again.
 
+        The written `text` is logged with the defined `loglevel`.
+
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        See `interactive sessions` for more information on writing and
-        `loglevel`.
+        See `interactive sessions` for more information on writing.
 
         This example will write `lsof -c python26\\` (list all files
         currently opened by python26), until `myscript.py` appears in the
