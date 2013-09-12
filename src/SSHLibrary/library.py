@@ -903,11 +903,11 @@ class SSHLibrary(object):
 
         See `interactive sessions` for more information on writing.
 
-        This example will write `lsof -c python26` (list all files
+        This example will write `lsof -c python26\\n` (list all files
         currently opened by python 2.6), until `myscript.py` appears in the
         output. The command is written every 0.5 seconds. The keyword fails if
         `myscript.py` does not appear in the server output in 5 seconds:
-        | Write Until Expected Output | lsof -c python26 | expected=myscript.py | timeout=5s | retry_interval=0.5s |
+        | Write Until Expected Output | lsof -c python26\\n | expected=myscript.py | timeout=5s | retry_interval=0.5s |
         """
         self._read_and_log(loglevel, self.current.write_until_expected,
                            text, expected, timeout, retry_interval)
