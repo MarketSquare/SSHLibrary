@@ -34,7 +34,7 @@ class ClientConfig(Configuration):
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
                  encoding='utf8'):
-        Configuration.__init__(self,
+        super(ClientConfig, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
             alias=StringEntry(alias),

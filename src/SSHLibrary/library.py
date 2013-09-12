@@ -1297,7 +1297,7 @@ class DefaultConfig(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
                  height, encoding):
-        Configuration.__init__(self,
+        super(DefaultConfig, self).__init__(
             timeout=TimeEntry(timeout or '3 seconds'),
             newline=NewlineEntry(newline or 'LF'),
             prompt=StringEntry(prompt),
