@@ -258,8 +258,8 @@ class SSHLibrary(object):
         | Should Be Equal           | ${apac.timeout}    | 20 seconds       |
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
-                            loglevel=loglevel, term_type=term_type,
-                            width=width, height=height, encoding=encoding)
+                            loglevel=loglevel, term_type=term_type, width=width,
+                            height=height, encoding=encoding)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
@@ -831,8 +831,7 @@ class SSHLibrary(object):
         | ${output}=      | Read Until    | @                            |
         | Should Contain  | ${output}     | root@                        |
         """
-        return self._read_and_log(loglevel, self.current.read_until,
-                                  expected)
+        return self._read_and_log(loglevel, self.current.read_until, expected)
 
     def read_until_regexp(self, regexp, loglevel=None):
         """[#Interactive sessions|Consumes] and returns the server output until
@@ -909,8 +908,8 @@ class SSHLibrary(object):
         `myscript.py` does not appear in the server output in 5 seconds:
         | Write Until Expected Output | lsof -c python26\\n | expected=myscript.py | timeout=5s | retry_interval=0.5s |
         """
-        self._read_and_log(loglevel, self.current.write_until_expected,
-                           text, expected, timeout, retry_interval)
+        self._read_and_log(loglevel, self.current.write_until_expected, text,
+                           expected, timeout, retry_interval)
 
     def _read_and_log(self, loglevel, reader, *args):
         try:
