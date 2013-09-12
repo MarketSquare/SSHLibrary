@@ -21,8 +21,8 @@ import stat
 import time
 import glob
 
-from .config import (Configuration, StringEntry, TimeEntry, IntegerEntry,
-                     NewlineEntry)
+from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
+                     TimeEntry)
 
 
 class SSHClientException(RuntimeError):

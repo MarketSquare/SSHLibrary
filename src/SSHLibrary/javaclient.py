@@ -12,20 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import jarray
-from java.io import (File, BufferedReader, InputStreamReader, IOException,
-                     FileOutputStream)
 try:
-    from com.trilead.ssh2 import (StreamGobbler, Connection, SFTPv3Client,
-                                  SFTPv3DirectoryEntry, SFTPException)
+    from com.trilead.ssh2 import (Connection, SFTPException, SFTPv3Client,
+                                  SFTPv3DirectoryEntry, StreamGobbler)
 except ImportError:
     raise ImportError(
         'Importing Trilead SSH classes failed. '
         'Make sure you have the Trilead jar file in CLASSPATH.'
     )
+import jarray
+from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
+                     IOException)
 
-from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
-        AbstractCommand, SSHClientException)
+from .abstractclient import (AbstractCommand, AbstractSFTPClient,
+                             AbstractSSHClient, SSHClientException)
 
 
 class JavaSSHClient(AbstractSSHClient):
