@@ -558,7 +558,7 @@ class SSHLibrary(object):
         | ${output}=      | Login With Public Key | johndoe       | /home/johndoe/.ssh/id_rsa |
         | Should Contain  | ${motd}               | Last login at |
 
-        Example that logs in using a locked private key:
+        Example that requires unlocking the private key:
         | Open Connection       | linux.host.com |
         | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_dsa | keyringpasswd |
         """
