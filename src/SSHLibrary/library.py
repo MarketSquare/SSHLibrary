@@ -197,9 +197,24 @@ class SSHLibrary(object):
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, timeout='3 seconds', newline='LF', prompt=None,
-                 loglevel='INFO', term_type='vt100', width=80, height=24,
-                 encoding='utf8'):
+    DEFAULT_TIMEOUT = '3 seconds'
+    DEFAULT_NEWLINE = 'LF'
+    DEFAULT_PROMPT = None
+    DEFAULT_LOGLEVEL = 'INFO'
+    DEFAULT_TERM_TYPE = 'vt100'
+    DEFAULT_TERM_WIDTH = 80
+    DEFAULT_TERM_HEIGHT = 24
+    DEFAULT_ENCODING = 'utf-8'
+
+    def __init__(self,
+                 timeout=DEFAULT_TIMEOUT,
+                 newline=DEFAULT_NEWLINE,
+                 prompt=DEFAULT_PROMPT,
+                 loglevel=DEFAULT_LOGLEVEL,
+                 term_type=DEFAULT_TERM_TYPE,
+                 width=DEFAULT_TERM_WIDTH,
+                 height=DEFAULT_TERM_HEIGHT,
+                 encoding=DEFAULT_ENCODING):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -220,8 +235,14 @@ class SSHLibrary(object):
         | Library | SSHLibrary | 10 seconds | CRLF |
         """
         self._connections = ConnectionCache()
-        self._config = DefaultConfig(timeout, newline, prompt, loglevel,
-                                     term_type, width, height, encoding)
+        self._config = _DefaultConfiguration(timeout or self.DEFAULT_TIMEOUT,
+                                             newline or self.DEFAULT_NEWLINE,
+                                             prompt or self.DEFAULT_PROMPT,
+                                             loglevel or self.DEFAULT_LOGLEVEL,
+                                             term_type or self.DEFAULT_TERM_TYPE,
+                                             width or self.DEFAULT_TERM_WIDTH,
+                                             height or self.DEFAULT_TERM_HEIGHT,
+                                             encoding or self.DEFAULT_ENCODING)
 
     @property
     def current(self):
@@ -1293,17 +1314,17 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'" % level)
 
 
-class DefaultConfig(Configuration):
+class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
                  height, encoding):
-        super(DefaultConfig, self).__init__(
-            timeout=TimeEntry(timeout or '3 seconds'),
-            newline=NewlineEntry(newline or 'LF'),
+        super(_DefaultConfiguration, self).__init__(
+            timeout=TimeEntry(timeout),
+            newline=NewlineEntry(newline),
             prompt=StringEntry(prompt),
-            loglevel=LogLevelEntry(loglevel or 'INFO'),
-            term_type=StringEntry(term_type or 'vt100'),
-            width=IntegerEntry(width or 80),
-            height=IntegerEntry(height or 24),
-            encoding=StringEntry(encoding or 'utf8')
+            loglevel=LogLevelEntry(loglevel),
+            term_type=StringEntry(term_type),
+            width=IntegerEntry(width),
+            height=IntegerEntry(height),
+            encoding=StringEntry(encoding)
         )

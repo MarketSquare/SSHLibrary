@@ -29,12 +29,11 @@ class SSHClientException(RuntimeError):
     pass
 
 
-class ClientConfig(Configuration):
+class _ClientConfiguration(Configuration):
 
-    def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
-                 prompt=None, term_type='vt100', width=80, height=24,
-                 encoding='utf8'):
-        super(ClientConfig, self).__init__(
+    def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
+                 width, height, encoding):
+        super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
             alias=StringEntry(alias),
@@ -57,8 +56,9 @@ class AbstractSSHClient(object):
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
                  encoding='utf8'):
-        self.config = ClientConfig(host, alias, port, timeout, newline, prompt,
-                                   term_type, width, height, encoding)
+        self.config = _ClientConfiguration(host, alias, port, timeout, newline,
+                                           prompt, term_type, width, height,
+                                           encoding)
         self._commands = []
 
     @property
