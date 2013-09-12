@@ -295,6 +295,31 @@ class SSHLibrary(object):
                                    width=width, height=height,
                                    encoding=encoding)
 
+    def enable_ssh_logging(self, logfile):
+        """Enables logging of SSH protocol output to given `logfile`.
+
+        All the existing and upcoming connections are logged onwards from
+        the moment the keyword was called.
+
+        `logfile` can be relative or absolute path to a file that is writable
+        by the current local user. If the `logfile` already exists, it will be
+        overwritten.
+
+        Note that this keyword only works with Python, i.e. when executing
+        tests with `pybot`.
+
+        Example:
+        | Open Connection    | my.server.com   | # Not logged |
+        | Enable SSH Logging | myhost.log      |
+        | Login              | johndoe         | secretpasswd |
+        | Open Connection    | build.local.net | # Logged     |
+        | # Do something with the connections  |
+        | # Check myhost.log for detailed debug information   |
+        """
+        if SSHClient.enable_logging(logfile):
+            self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
+                      'HTML')
+
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
                         height=None, encoding=None):
@@ -390,6 +415,22 @@ class SSHLibrary(object):
             self._connections.switch(index_or_alias)
         return old_index
 
+    def close_connection(self):
+        """Closes the current active connection.
+
+        No other connection is made active by this keyword. Manually use
+        `Switch Connection` to switch to another connection.
+
+        Example:
+        | Open Connection  | my.server.com  |
+        | Login            | johndoe        | secretpasswd |
+        | Get File         | results.txt    | /tmp         |
+        | Close Connection |
+        | # Do something with /tmp/results.txt             |
+        """
+        self.current.close()
+        self._connections.current = self._connections._no_current
+
     def close_all_connections(self):
         """Closes all open connections.
 
@@ -474,47 +515,6 @@ class SSHLibrary(object):
         for c in configs:
             self._log(str(c), loglevel)
         return configs
-
-    def enable_ssh_logging(self, logfile):
-        """Enables logging of SSH protocol output to given `logfile`.
-
-        All the existing and upcoming connections are logged onwards from
-        the moment the keyword was called.
-
-        `logfile` can be relative or absolute path to a file that is writable
-        by the current local user. If the `logfile` already exists, it will be
-        overwritten.
-
-        Note that this keyword only works with Python, i.e. when executing
-        tests with `pybot`.
-
-        Example:
-        | Open Connection    | my.server.com   | # Not logged |
-        | Enable SSH Logging | myhost.log      |
-        | Login              | johndoe         | secretpasswd |
-        | Open Connection    | build.local.net | # Logged     |
-        | # Do something with the connections  |
-        | # Check myhost.log for detailed debug information   |
-        """
-        if SSHClient.enable_logging(logfile):
-            self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
-                      'HTML')
-
-    def close_connection(self):
-        """Closes the current active connection.
-
-        No other connection is made active by this keyword. Manually use
-        `Switch Connection` to switch to another connection.
-
-        Example:
-        | Open Connection  | my.server.com  |
-        | Login            | johndoe        | secretpasswd |
-        | Get File         | results.txt    | /tmp         |
-        | Close Connection |
-        | # Do something with /tmp/results.txt             |
-        """
-        self.current.close()
-        self._connections.current = self._connections._no_current
 
     def login(self, username, password):
         """Logs into the SSH server with the given `username` and `password`.
@@ -788,6 +788,33 @@ class SSHLibrary(object):
         except SSHClientException, e:
             raise RuntimeError(e)
 
+    def write_until_expected_output(self, text, expected, timeout,
+                                    retry_interval, loglevel=None):
+        """Writes given `text` repeatedly until `expected` appears in
+        the server output.
+
+        `text` is written without appending a newline and is
+        [#Interactive sessions|consumed] from the server output before
+        `expected` is read.
+
+        `retry_interval` defines the time before writing `text` again.
+
+        The written `text` is logged with the defined `loglevel`.
+
+        If `expected` does not appear in output within `timeout`, this keyword
+        fails.
+
+        See `interactive sessions` for more information on writing.
+
+        This example will write `lsof -c python26\\n` (list all files
+        currently opened by python 2.6), until `myscript.py` appears in the
+        output. The command is written every 0.5 seconds. The keyword fails if
+        `myscript.py` does not appear in the server output in 5 seconds:
+        | Write Until Expected Output | lsof -c python26\\n | expected=myscript.py | timeout=5s | retry_interval=0.5s |
+        """
+        self._read_and_log(loglevel, self.current.write_until_expected, text,
+                           expected, timeout, retry_interval)
+
     def read(self, loglevel=None):
         """[#Interactive sessions|Consumes] and returns everything currently
         available on the server output.
@@ -883,33 +910,6 @@ class SSHLibrary(object):
         | Should Contain           | ${output}         | root@myserver:~#                           |
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt)
-
-    def write_until_expected_output(self, text, expected, timeout,
-                                    retry_interval, loglevel=None):
-        """Writes given `text` repeatedly until `expected` appears in
-        the server output.
-
-        `text` is written without appending a newline and is
-        [#Interactive sessions|consumed] from the server output before
-        `expected` is read.
-
-        `retry_interval` defines the time before writing `text` again.
-
-        The written `text` is logged with the defined `loglevel`.
-
-        If `expected` does not appear in output within `timeout`, this keyword
-        fails.
-
-        See `interactive sessions` for more information on writing.
-
-        This example will write `lsof -c python26\\n` (list all files
-        currently opened by python 2.6), until `myscript.py` appears in the
-        output. The command is written every 0.5 seconds. The keyword fails if
-        `myscript.py` does not appear in the server output in 5 seconds:
-        | Write Until Expected Output | lsof -c python26\\n | expected=myscript.py | timeout=5s | retry_interval=0.5s |
-        """
-        self._read_and_log(loglevel, self.current.write_until_expected, text,
-                           expected, timeout, retry_interval)
 
     def _read_and_log(self, loglevel, reader, *args):
         try:
@@ -1175,26 +1175,13 @@ class SSHLibrary(object):
                                       destination, mode, newline,
                                       path_separator, recursive)
 
-    def directory_should_exist(self, path):
-        """Fails if the given `path` does not point to an existing directory.
-
-        Example:
-        | Directory Should Exist | /usr/share/man |
-
-        Note that symlinks are followed:
-        | Directory Should Exist | /usr/local/man | # Points to /usr/share/man/ |
-        """
-        return self.current.dir_exists(path)
-
-    def directory_should_not_exist(self, path):
-        """Fails if the given `path` points to an existing directory.
-
-        Example:
-        | Directory Should Not Exist | /nonexisting |
-
-        Note that symlinks are followed.
-        """
-        return not self.current.dir_exists(path)
+    def _run_sftp_command(self, command, *args):
+        try:
+            sources, destinations = command(*args)
+        except SSHClientException, e:
+            raise RuntimeError(e)
+        for src, dst in zip(sources, destinations):
+            self._info("'%s' -> '%s'" % (src, dst))
 
     def file_should_exist(self, path):
         """Fails if the given `path` does NOT point to an existing file.
@@ -1216,6 +1203,27 @@ class SSHLibrary(object):
         Note that symlinks are followed.
         """
         return not self.current.file_exists(path)
+
+    def directory_should_exist(self, path):
+        """Fails if the given `path` does not point to an existing directory.
+
+        Example:
+        | Directory Should Exist | /usr/share/man |
+
+        Note that symlinks are followed:
+        | Directory Should Exist | /usr/local/man | # Points to /usr/share/man/ |
+        """
+        return self.current.dir_exists(path)
+
+    def directory_should_not_exist(self, path):
+        """Fails if the given `path` points to an existing directory.
+
+        Example:
+        | Directory Should Not Exist | /nonexisting |
+
+        Note that symlinks are followed.
+        """
+        return not self.current.dir_exists(path)
 
     def list_directory(self, path, pattern=None, absolute=False):
         """Returns and logs items in a remote directory, optionally filtered
@@ -1268,19 +1276,8 @@ class SSHLibrary(object):
                                           '\n'.join(dirs)))
         return dirs
 
-    def _run_sftp_command(self, command, *args):
-        try:
-            sources, destinations = command(*args)
-        except SSHClientException, e:
-            raise RuntimeError(e)
-        for src, dst in zip(sources, destinations):
-            self._info("'%s' -> '%s'" % (src, dst))
-
     def _info(self, msg):
         self._log(msg, 'INFO')
-
-    def _debug(self, msg):
-        self._log(msg, 'DEBUG')
 
     def _log(self, msg, level=None):
         level = self._active_loglevel(level)
