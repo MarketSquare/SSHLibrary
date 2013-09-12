@@ -800,14 +800,14 @@ class SSHLibrary(object):
         See `interactive sessions` for more information on reading.
 
         Example:
-        | Open Connection | my.server.com  |
-        | Login           | johndoe        | secretpasswd      |
-        | ${output}=      | Read           |
-        | Should Contain  | ${output}      | johndoe@myserver: |
-        | Write           | sudo su -      |
-        | Write           | mysudopassword |
-        | ${output}=      | Read           | loglevel=WARN     | # Printed to the test output due to loglevel |
-        | Should Contain  | ${output}      | root@myserver:    |
+        | Open Connection | my.server.com |
+        | Login           | johndoe       | secretpasswd                 |
+        | Write           | sudo su -     |
+        | ${output}=      | Read          |
+        | Should Contain  | ${output}     | [sudo] password for johndoe: |
+        | Write           | secretpasswd  |
+        | ${output}=      | Read          | loglevel=WARN                | # Shown in the console due to loglevel |
+        | Should Contain  | ${output}     | root@                        |
         """
         return self._read_and_log(loglevel, self.current.read)
 
@@ -822,14 +822,14 @@ class SSHLibrary(object):
         See `interactive sessions` for more information on reading.
 
         Example:
-        | Open Connection | my.server.com  |
-        | Login           | johndoe        | secretpasswd        |
-        | ${output}=      | Read Until     | :~$                 |
-        | Should Contain  | ${output}      | johndoe@myserver:~$ |
-        | Write           | sudo su -      |
-        | Write           | mysudopassword |
-        | ${output}=      | Read Until     | :~#                 | loglevel=WARN | # Printed to the console due to loglevel |
-        | Should Contain  | ${output}      | root@myserver:~#    |
+        | Open Connection | my.server.com |
+        | Login           | johndoe       | ${PASSWORD}                  |
+        | Write           | sudo su -     |
+        | ${output}=      | Read Until    | :                            |
+        | Should Contain  | ${output}     | [sudo] password for johndoe: |
+        | Write           | ${PASSWORD}   |
+        | ${output}=      | Read Until    | @                            |
+        | Should Contain  | ${output}     | root@                        |
         """
         return self._read_and_log(loglevel, self.current.read_until,
                                   expected)
@@ -848,13 +848,13 @@ class SSHLibrary(object):
 
         Example:
         | Open Connection | my.server.com     |
-        | Login           | johndoe           | secretpasswd      |
-        | ${output}=      | Read Until Regexp | johndoe@.*:       |
-        | Should Contain  | ${output}         | johndoe@myserver: |
+        | Login           | johndoe           | ${PASSWORD}                  |
         | Write           | sudo su -         |
-        | Write           | mysudopassword    |
-        | ${output}=      | Read Until Regexp | root@.*:          | loglevel=WARN | # Printed to the console due to loglevel |
-        | Should Contain  | ${output}         | root@myserver:    |
+        | ${output}=      | Read Until Regexp | \\[.*\\].*:                  |
+        | Should Contain  | ${output}         | [sudo] password for johndoe: |
+        | Write           | ${PASSWORD}       |
+        | ${output}=      | Read Until Regexp | .*@                          |
+        | Should Contain  | ${output}         | root@                        |
         """
         return self._read_and_log(loglevel, self.current.read_until_regexp,
                                   regexp)
@@ -876,15 +876,12 @@ class SSHLibrary(object):
 
         Example:
         | Open Connection          | my.server.com     |
-        | Login                    | johndoe           |  secretpasswd      |
-        | Set Client Configuration | prompt=$          |
-        | ${output}=               | Read Until Prompt |
-        | Should Contain           | ${output}         | johndoe@myserver:~ |
+        | Login                    | johndoe           | ${PASSWORD}                                |
         | Write                    | sudo su -         |
-        | Write                    | mysudopassword    |
-        | Set Client Configuration | prompt=#          |
-        | ${output}=               | Read Until Prompt | loglevel=WARN      | # Printed to the console due to loglevel |
-        | Should Contain           | ${output}         | root@myserver:~    |
+        | Write                    | ${PASSWORD}       |
+        | Set Client Configuration | prompt=#          | # Prompt must be set for Read Until Prompt |
+        | ${output}=               | Read Until Prompt |                                            |
+        | Should Contain           | ${output}         | root@myserver:~#                           |
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt)
 
