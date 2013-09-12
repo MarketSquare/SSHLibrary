@@ -218,7 +218,6 @@ class SSHLibrary(object):
         Multiple settings are possible. In this example, the library is taken
         into use with timeout of 10 seconds and line breaks known by Windows:
         | Library | SSHLibrary | 10 seconds | CRLF |
-
         """
         self._connections = ConnectionCache()
         self._config = DefaultConfig(timeout, newline, prompt, loglevel,
