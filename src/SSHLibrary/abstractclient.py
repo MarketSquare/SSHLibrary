@@ -150,7 +150,7 @@ class AbstractSSHClient(object):
         try:
             return self._commands.pop().read_outputs()
         except IndexError:
-            raise SSHClientException("No started commands to read output from")
+            raise SSHClientException('No started commands to read output from')
 
     def write(self, text, add_newline=False):
         """Write `text` in shell session.

@@ -740,7 +740,7 @@ class SSHLibrary(object):
         return ret
 
     def _output_wanted(self, value):
-        return (value and str(value).lower() != "false")
+        return (value and str(value).lower() != 'false')
 
     def write(self, text, loglevel=None):
         """Writes the given `text` on the remote and appends a newline.
