@@ -151,10 +151,18 @@ class SSHLibrary(object):
     All of these keywords, except `Write Bare`, consume the read or the written
     text from the server output before returning. This practically means that
     the text is removed from the server output, i.e. subsequent calls to
-    `Read` keywords do not return text that was already read.
+    `Read` keywords do not return text that was already read:
+    | Write              | echo 'hello' |       | # consumed: echo 'hello'               |
+    | ${stdout}=         | Read Until   | hello | # consumed: everything until 'hello'   |
+    | Should Contain     | ${stdout}    | hello |
+    | ${stdout}=         | Read         |       | # consumed: everything available       |
+    | Should Not Contain | ${stdout}    | hello | # because 'hello' was already consumed |
 
     The consumed text is logged by the keywords and argument `loglevel`
     can be used to override [#Loglevel|the default log level].
+
+    Keywords `Login` and `Login With Public Key` also consume the server output.
+    Practically the server output is empty after executing these keywords.
 
     == Reading ==
 
@@ -738,20 +746,21 @@ class SSHLibrary(object):
         """Writes the given `text` on the remote and appends a newline.
 
         This keyword returns and [#Interactive sessions|consumes] the written
-        `text` (until the appended newline) from the server output.
+        `text` (including the appended newline) from the server output.
 
         The written `text` is logged with the defined `loglevel`.
 
         See `interactive sessions` for more information on writing.
 
         Example:
-        | ${written}=                | Write         | su                         |
-        | Should Be Equal As Strings | ${written}    | su                         | # Note that the output of 'su' is not returned |
-        | ${output}=                 | Read          |
-        | Should Contain             | ${output}     | Password:                  |
-        | Write                      | invalidpasswd |
-        | ${output}=                 | Read          |
-        | Should Contain             | ${output}     | su: Authentication failure |
+        | ${written}=        | Write         | su                         |
+        | Should Contain     | ${written}    | su                         | # Returns the consumed output  |
+        | ${output}=         | Read          |
+        | Should Not Contain | ${output}     | ${written}                 | # Was consumed from the output |
+        | Should Contain     | ${output}     | Password:                  |
+        | Write              | invalidpasswd |
+        | ${output}=         | Read          |
+        | Should Contain     | ${output}     | su: Authentication failure |
         """
         self._write(text, add_newline=True)
         return self._read_and_log(loglevel, self.current.read_until_newline)
@@ -765,8 +774,9 @@ class SSHLibrary(object):
         Example:
         | Write Bare     | su\\n            |
         | ${output}=     | Read             |
+        | Should Contain | ${output}        | su                         | # Was not consumed from output |
         | Should Contain | ${output}        | Password:                  |
-        | Write          | invalidpasswd\\n |
+        | Write Bare     | invalidpasswd\\n |
         | ${output}=     | Read             |
         | Should Contain | ${output}        | su: Authentication failure |
         """
