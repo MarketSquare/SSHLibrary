@@ -1300,15 +1300,15 @@ class SSHLibrary(object):
 
 class DefaultConfig(Configuration):
 
-    def __init__(self, timeout, newline, prompt, loglevel, term_type,
-                 width, height, encoding):
+    def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
+                 height, encoding):
         Configuration.__init__(self,
-                timeout=TimeEntry(timeout or '3 seconds'),
-                newline=NewlineEntry(newline or 'LF'),
-                prompt=StringEntry(prompt),
-                loglevel=LogLevelEntry(loglevel or 'INFO'),
-                term_type=StringEntry(term_type or 'vt100'),
-                width=IntegerEntry(width or 80),
-                height=IntegerEntry(height or 24),
-                encoding=StringEntry(encoding or 'utf8')
+            timeout=TimeEntry(timeout or '3 seconds'),
+            newline=NewlineEntry(newline or 'LF'),
+            prompt=StringEntry(prompt),
+            loglevel=LogLevelEntry(loglevel or 'INFO'),
+            term_type=StringEntry(term_type or 'vt100'),
+            width=IntegerEntry(width or 80),
+            height=IntegerEntry(height or 24),
+            encoding=StringEntry(encoding or 'utf8')
         )

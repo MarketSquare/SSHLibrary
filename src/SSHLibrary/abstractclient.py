@@ -35,17 +35,18 @@ class ClientConfig(Configuration):
                  prompt=None, term_type='vt100', width=80, height=24,
                  encoding='utf8'):
         Configuration.__init__(self,
-                index=IntegerEntry(None),
-                host=StringEntry(host),
-                alias=StringEntry(alias),
-                port=IntegerEntry(port),
-                timeout=TimeEntry(timeout),
-                newline=NewlineEntry(newline),
-                prompt=StringEntry(prompt),
-                term_type=StringEntry(term_type),
-                width=IntegerEntry(width),
-                height=IntegerEntry(height),
-                encoding=StringEntry(encoding))
+            index=IntegerEntry(None),
+            host=StringEntry(host),
+            alias=StringEntry(alias),
+            port=IntegerEntry(port),
+            timeout=TimeEntry(timeout),
+            newline=NewlineEntry(newline),
+            prompt=StringEntry(prompt),
+            term_type=StringEntry(term_type),
+            width=IntegerEntry(width),
+            height=IntegerEntry(height),
+            encoding=StringEntry(encoding)
+        )
 
 
 class AbstractSSHClient(object):
