@@ -1,15 +1,61 @@
 SSHLibrary for Robot Framework
-===============================
+==============================
 
-SSHLibrary is a test library for `Robot Framework`__ that enables execution of
-commands through SSH connection. It also enables file transfer to and from a
-remote machine using SFTP protocol.
+Introduction
+------------
 
-For instructions about using test libraries with Robot Framework, see
-`using test libraries`__
+SSHLibrary is a Robot Framework (http://robotframework.org) test library for testing SSH and SFTP.
 
-Installation instructions are available at `wiki page`__.
+The library has the following main usages:
+- Executing commands on remote, either with blocking or non-blocking behaviour.
+- Writing and reading in an interactive session.
+- Transferring files and directories over SFTP.
+- Ensuring that files or directories exist on remote.
 
-__ http://robotframework.org
-__ http://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.html#using-test-libraries
-__ http://code.google.com/p/robotframework-sshlibrary/wiki/InstallationInstructions
+
+License
+-------
+
+SSHLibrary is licensed under Apache License 2.0.
+
+See LICENSE.txt for more details.
+
+
+Installation
+------------
+
+The installation instructions are available at
+http://code.google.com/p/robotframework-sshlibrary/wiki/InstallationInstructions.
+
+For general information about using test libraries with Robot Framework, see
+http://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.html#using-test-libraries.
+
+
+Documentation
+-------------
+
+The library documentation, including keyword examples, can be found at
+'doc/SSHLibrary.html' or at https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation
+
+
+Directory Layout
+----------------
+
+atest/
+	Acceptance tests. Naturally using Robot Framework.
+
+doc/
+	SSHLibrary documentation.
+
+examples/
+	Simple examples on using SSHlibrary.
+
+lib/
+	Has Trilead SSH library JAR distribution which must be in CLASSPATH
+	when executing tests with Jython.
+
+src/
+	SSHLibrary source code.
+
+utests/
+	Unit tests.
