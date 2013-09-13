@@ -4,7 +4,7 @@ dist
 .idea
 *.pyc
 *.class
-atest/results
+results
 atest/testdata/keyfiles/id_rsa
 examples/output.xml
 examples/log.html
