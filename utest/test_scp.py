@@ -3,8 +3,7 @@ import os
 
 from SSHLibrary import abstractclient
 
-abstractclient.AbstractSFTPClient._create_client = lambda s, x: None
-abstractclient.AbstractSFTPClient._resolve_homedir = lambda s: '/home'
+abstractclient.AbstractSFTPClient._homedir = "/home"
 
 class TestRemoteAndLocalPathResolution(unittest.TestCase):
 
@@ -17,7 +16,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
                      '/opt/Files/BAZ.my']),
                 (['myfile'], '\\tmp\\', ['/tmp/myfile'])]
         for src, dest, exp in data:
-            client = abstractclient.AbstractSFTPClient(None)
+            client = abstractclient.AbstractSFTPClient()
             remote = client._get_put_file_destinations(src, dest, '/')[0]
             self.assertEquals(remote, exp)
 
@@ -29,7 +28,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
                 (['/home/baz.file'], '.',
                     [os.path.join(os.path.abspath(os.curdir), 'baz.file')])]
         for src, dest, exp in data:
-            client = abstractclient.AbstractSFTPClient(None)
+            client = abstractclient.AbstractSFTPClient()
             local = client._get_get_file_destinations(src, dest)
             self.assertEquals(local, exp)
 
