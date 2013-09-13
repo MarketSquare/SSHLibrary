@@ -1,9 +1,11 @@
-This directory contains simple example test cases using SSHLibrary for
-Robot Framework.
+This directory contains a simple example test case for Robot Framework SSHLibrary.
 
-To run these tests, install SSHLibrary and execute `pybot executing_commands.txt`
+To run it, install SSHLibrary and issue:
 
-By default the connection is made using parameters read from the resource
-file. They can be changed by using command line options, for example:
+    pybot executing_commands.txt
 
-pybot -v host:somehost -v user:somebody -v password:secret executing_commands.txt
+The host, username and password can be set from the commandline as following:
+
+    pybot -v host:somehost -v user:somebody -v password:secret executing_commands.txt
+
+For more examples, please take look at the library documentation at '../doc/SSHlibrary.html'

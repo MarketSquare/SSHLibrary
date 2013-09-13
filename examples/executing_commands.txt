@@ -1,32 +1,21 @@
 *** Settings ***
-Suite Setup       Open connection and login
-Resource          resources/example_resource.txt
+Library           SSHLibrary
+Suite Setup       Open Connection And Log In
+Suite Teardown    Close All Connections
+
+*** Variables ***
+${HOST}           localhost
+${USERNAME}       test
+${PASSWORD}       test
 
 *** Test Cases ***
-Execute single commmand
-    [Documentation]    `Execute Command` is the easiest keyword for running\na single command. It returns the output by default.
-    ${output}=    Execute Command    ${LS}
+Execute Command On Remote
+    [Documentation]  `Execute Command` can be used to ran commands on the remote.
+    ...              The keyword returns the standard output by default.
+    ${output}=       Execute Command    echo hello
+    Should Be Equal  ${output}          hello
 
-Execute command return values
-    [Documentation]    To return stderr or RC with `Execute Command`, give\ncorresponding named arguments any non-empty value.
-    ${stdout}    ${stderr}    ${rc}=    Execute Command    ${LS}    include    return_stderr=yes
-    ...    return_rc=sure
-    Should Be Equal    ${stderr}    ${EMPTY}
-    Should Be Equal As Integers    ${rc}    0
-
-Executing multiple commands
-    [Documentation]    Because each `Execute Command` is executed in a separate\nsession, using `cd` between `ls` calls has no effect on results.
-    ${result1}=    Execute Command    ${LS}
-    Execute Command    cd /
-    ${result2}=    Execute Command    ${LS}
-    Should be equal    ${result1}    ${result2}
-
-Command in session
-    [Documentation]    Write and Read keywords operate on same session, so\nstate between keyword calls is preserved.
-    Write    ${LS}
-    ${result1}=    Read Until Prompt
-    Write    cd /
-    Read Until Prompt
-    Write    ${LS}
-    ${result2}=    Read Until Prompt
-    Should Not Be Equal    ${result1}    ${result2}
+*** Keywords ***
+Open Connection And Log In
+    Open Connection   ${HOST}
+    Login             ${USERNAME}   ${PASSWORD}
