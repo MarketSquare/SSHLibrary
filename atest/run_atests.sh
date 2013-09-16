@@ -27,5 +27,17 @@ elif [ "$1" == "jython" ]; then
     jybot $COMMON_ARGS -P $JAR_PATH -d $OUTPUT_DIR -i jybot $*
 else
     echo "usage: $0 (python|jython) <test_suite_path>"
+    echo ""
+    echo "Examples:"
+    echo "  Running all the tests with Pybot:"
+    echo "    $0 python ."
+    echo ""
+    echo "  Pybot results are found in path 'atest/results/python/'"
+    echo ""
+    echo "  Running all the tests with Jybot:"
+    echo "    $0 jython ."
+    echo
+    echo "  Jybot results are found in path 'atest/results/jython/'"
+    echo ""
     exit 1
 fi
