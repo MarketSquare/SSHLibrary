@@ -59,3 +59,9 @@ src/
 
 utests/
 	Unit tests.
+
+
+Running the Acceptance Tests
+----------------------------
+
+Running the acceptance tests requires some configuration which is explained in https://code.google.com/p/robotframework-sshlibrary/wiki/RunningLibraryAcceptanceTests
