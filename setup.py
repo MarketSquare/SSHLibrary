@@ -46,7 +46,7 @@ setup(
     author_email='robotframework-devel@groups.google.com',
     url='http://code.google.com/p/robotframework-sshlibrary/',
     license='Apache License 2.0',
-    keywords='robotframework testing testautomation ssh',
+    keywords='robotframework testing testautomation ssh sftp',
     platforms='any',
     classifiers=CLASSIFIERS.splitlines(),
     package_dir={'': 'src'},
