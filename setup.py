@@ -2,12 +2,12 @@
 
 try:
     from setuptools import setup
-    kw = {
-        'install_requires': 'paramiko >= 1.8.0',
+    requires = {
+        'install_requires': ['robotframework', 'paramiko >= 1.8.0'],
     }
 except ImportError:
     from distutils.core import setup
-    kw = {}
+    requires = {}
 
 from os.path import abspath, dirname, join
 
@@ -18,12 +18,14 @@ DESCRIPTION = """
 This is a Robot Framework test library for testing SSH and SFTP.
 
 The library has the following main usages:
-- Executing commands on remote, either with blocking or non-blocking behaviour.
+- Executing commands on remote, either with blocking or non-blocking
+  behaviour.
 - Writing and reading in an interactive session.
 - Transferring files and directories over SFTP.
 - Ensuring that files or directories exist on remote.
 
 Required packages:
+    robotframework
     paramiko
 """[1:-1]
 
@@ -45,9 +47,9 @@ setup(
     url='http://code.google.com/p/robotframework-sshlibrary/',
     license='Apache License 2.0',
     keywords='robotframework testing testautomation ssh',
-    platforms='Posix, MacOS X, Windows',
+    platforms='any',
     classifiers=CLASSIFIERS.splitlines(),
     package_dir={'': 'src'},
     packages=['SSHLibrary'],
-    **kw
+    **requires
 )
