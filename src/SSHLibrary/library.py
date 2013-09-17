@@ -587,7 +587,8 @@ class SSHLibrary(object):
 
     def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."
-                   % (self.current.host, self.current.port, username))
+                   % (self.current.config.host, self.current.config.port,
+                      username))
         try:
             return login_method(username, *args)
         except SSHClientException, e:

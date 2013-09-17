@@ -12,8 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import posixpath
-
 try:
     import paramiko
 except ImportError:
@@ -22,8 +20,10 @@ except ImportError:
         'Ensure that paramiko and pycrypto modules are installed.'
     )
 
-from .abstractclient import (AbstractSSHClient, AbstractSFTPClient,
-        AbstractCommand, SSHClientException)
+from .abstractclient import (AbstractShell, AbstractSSHClient,
+                             AbstractSFTPClient, AbstractCommand,
+                             SSHClientException)
+from .utils import lazy_property
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -60,14 +60,23 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
+    @lazy_property
+    def sftp_client(self):
+        return SFTPClient(self.client)
+
+    @lazy_property
+    def shell(self):
+        return Shell(self.client, self.config.term_type,
+                     self.config.width, self.config.height)
+
     def _login(self, username, password):
-        self.client.connect(self.host, self.port, username, password,
-                            look_for_keys=False)
+        self.client.connect(self.config.host, self.config.port, username,
+                            password, look_for_keys=False)
 
     def _login_with_public_key(self, username, keyfile, password):
         try:
-            self.client.connect(self.host, self.port, username, password,
-                                key_filename=keyfile)
+            self.client.connect(self.config.host, self.config.port, username,
+                                password, key_filename=keyfile)
         except paramiko.AuthenticationException:
             raise SSHClientException
 
@@ -79,53 +88,42 @@ class PythonSSHClient(AbstractSSHClient):
         cmd.run_in(self.client.get_transport().open_session())
         return cmd
 
-    def open_shell(self):
-        self.shell = self.client.invoke_shell(self.config.term_type,
-                                              self.config.width,
-                                              self.config.height)
 
-    def _read(self):
+class Shell(AbstractShell):
+
+    def __init__(self, client, term_type, term_width, term_height):
+        self._shell = client.invoke_shell(term_type, term_width, term_height)
+
+    def read(self):
         data = ''
-        while self.shell.recv_ready():
-            data += self.shell.recv(4096)
+        while self._output_available():
+            data += self._shell.recv(4096)
         return data
 
-    def _read_byte(self):
+    def read_byte(self):
          data = ''
-         if self.shell.recv_ready():
-            data = self.shell.recv(1)
+         if self._output_available():
+            data = self._shell.recv(1)
          return data
 
-    def _write(self, text):
-        self.shell.sendall(text)
+    def _output_available(self):
+        return self._shell.recv_ready()
 
-    def _create_sftp_client(self):
-        return SFTPClient(self.client)
+    def write(self, text):
+        self._shell.sendall(text)
 
 
 class SFTPClient(AbstractSFTPClient):
 
     def __init__(self, ssh_client):
         self._client = ssh_client.open_sftp()
+        super(SFTPClient, self).__init__()
 
     def _list(self, path):
         return self._client.listdir_attr(path)
 
     def _get_permissions(self, fileinfo):
         return fileinfo.st_mode
-
-    def _create_missing_remote_path(self, path):
-        if path == '.':
-            return
-        if posixpath.isabs(path):
-            self._client.chdir('/')
-        else:
-            self._client.chdir('.')
-        for dirname in path.split('/'):
-            cwd = self._client.getcwd()
-            if dirname and dirname not in self._client.listdir(cwd):
-                self._client.mkdir(dirname)
-            self._client.chdir(dirname)
 
     def _create_remote_file(self, dest, mode):
         remote_file = self._client.file(dest, 'wb')

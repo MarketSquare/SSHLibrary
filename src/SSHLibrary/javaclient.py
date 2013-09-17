@@ -24,15 +24,17 @@ import jarray
 from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
                      IOException)
 
-from .abstractclient import (AbstractCommand, AbstractSFTPClient,
-                             AbstractSSHClient, SSHClientException)
+from .abstractclient import (AbstractShell, AbstractSSHClient,
+                             AbstractSFTPClient, AbstractCommand,
+                             SSHClientException)
+from .utils import lazy_property
 
 
 class JavaSSHClient(AbstractSSHClient):
 
     def __init__(self, *args):
         super(JavaSSHClient, self).__init__(*args)
-        self.client = Connection(self.host, self.port)
+        self.client = Connection(self.config.host, self.config.port)
         self.client.connect()
 
     @staticmethod
@@ -54,48 +56,60 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def close(self):
-        self.client.close()
-
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
         cmd.run_in(self.client.openSession())
         return cmd
 
-    def open_shell(self):
-        self.shell = self.client.openSession()
-        self.shell.requestPTY(self.config.term_type, self.config.width,
-                              self.config.height, 0, 0, None)
-        self.shell.startShell()
-        self._writer = self.shell.getStdin()
-        self._stdout = self.shell.getStdout()
+    @lazy_property
+    def sftp_client(self):
+        return SFTPClient(self.client)
 
-    def _read(self):
-         data = ''
-         if self._stdout.available():
-             read_bytes = jarray.zeros(self._stdout.available(), 'b')
-             self._stdout.read(read_bytes)
-             data = ''.join([chr(b & 0xFF) for b in read_bytes])
-         return data
+    @lazy_property
+    def shell(self):
+        return Shell(self.client, self.config.term_type,
+                     self.config.width, self.config.height)
 
-    def _read_byte(self):
+
+class Shell(AbstractShell):
+
+    def __init__(self, client, term_type, term_width, term_height):
+        shell = client.openSession()
+        shell.requestPTY(term_type,
+                               term_width,
+                               term_height,
+                               0, 0, None)
+        shell.startShell()
+        self._stdout = shell.getStdout()
+        self._stdin = shell.getStdin()
+
+    def read(self):
+        data = ''
+        if self._output_available():
+            read_bytes = jarray.zeros(self._output_available(), 'b')
+            self._stdout.read(read_bytes)
+            data = ''.join([chr(b & 0xFF) for b in read_bytes])
+        return data
+
+    def read_byte(self):
          data = ''
-         if self._stdout.available():
+         if self._output_available():
              data = chr(self._stdout.read())
          return data
 
-    def _write(self, text):
-        self._writer.write(text)
-        self._writer.flush()
+    def _output_available(self):
+        return self._stdout.available()
 
-    def _create_sftp_client(self):
-        return SFTPClient(self.client)
+    def write(self, text):
+        self._stdin.write(text)
+        self._stdin.flush()
 
 
 class SFTPClient(AbstractSFTPClient):
 
     def __init__(self, ssh_client):
         self._client = SFTPv3Client(ssh_client)
+        super(SFTPClient, self).__init__()
 
     def _list(self, path):
         return self._client.ls(path)
@@ -105,19 +119,6 @@ class SFTPClient(AbstractSFTPClient):
             return fileinfo.attributes.permissions
         else:
             return fileinfo.permissions
-
-    def _create_missing_remote_path(self, path):
-        if path.startswith('/'):
-            curdir = '/'
-        else:
-            curdir = self._client._absolute_path('.')
-        for dirname in path.split('/'):
-            if dirname:
-                curdir = '%s/%s' % (curdir, dirname)
-            try:
-                self._client.stat(curdir)
-            except IOException:
-                self._client.mkdir(curdir, 0744)
 
     def _create_remote_file(self, dest, mode):
         remote_file = self._client.createFile(dest)

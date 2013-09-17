@@ -61,14 +61,6 @@ class AbstractSSHClient(object):
                                            encoding)
         self._commands = []
 
-    @property
-    def host(self):
-        return self.config.host
-
-    @property
-    def port(self):
-        return self.config.port
-
     @staticmethod
     def enable_logging(path):
         """Log SSH events to file.
@@ -77,6 +69,9 @@ class AbstractSSHClient(object):
         :returns: Whether logging was successfully enabled.
         """
         raise NotImplementedError
+
+    def close(self):
+        self.client.close()
 
     def login(self, username, password):
         """Login using given credentials.
@@ -91,7 +86,7 @@ class AbstractSSHClient(object):
         except SSHClientException:
             msg = 'Authentication failed for user: %s' % username
             raise SSHClientException(msg)
-        return self._finalize_login()
+        return self._read_server_output()
 
     def login_with_public_key(self, username, keyfile, password):
         """Login using given credentials.
@@ -108,10 +103,9 @@ class AbstractSSHClient(object):
         except SSHClientException:
             msg = 'Login with public key failed for user: %s' % username
             raise SSHClientException(msg)
-        return self._finalize_login()
+        return self._read_server_output()
 
-    def _finalize_login(self):
-        self.open_shell()
+    def _read_server_output(self):
         if self.config.prompt:
             return self.read_until_prompt()
         else:
@@ -161,11 +155,11 @@ class AbstractSSHClient(object):
         text = text.encode(self.config.encoding)
         if add_newline:
             text += self.config.newline
-        self._write(text)
+        self.shell.write(text)
 
     def read(self):
         """Read and return currently available output."""
-        server_output = self._read()
+        server_output = self.shell.read()
         return server_output.decode(self.config.encoding)
 
     def read_char(self):
@@ -173,7 +167,7 @@ class AbstractSSHClient(object):
         server_output = ''
         while True:
             try:
-                server_output += self._read_byte()
+                server_output += self.shell.read_byte()
                 return server_output.decode(self.config.encoding)
             except UnicodeDecodeError:
                 pass
@@ -254,7 +248,7 @@ class AbstractSSHClient(object):
         start_time = time.time()
         while time.time() < float(timeout.value) + start_time:
             try:
-                server_output += self._read_byte()
+                server_output += self.shell.read_byte()
                 decoded_output = server_output.decode(self.config.encoding)
                 if matcher(decoded_output):
                     return decoded_output
@@ -278,21 +272,19 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        with self._create_sftp_client() as sftp_client:
-            sources, destinations = sftp_client.put_file(source, destination,
-                                                         mode, newline,
-                                                         path_separator)
+        sources, destinations = self.sftp_client.put_file(source, destination,
+                                                          mode, newline,
+                                                          path_separator)
         return sources, destinations
 
     def put_directory(self, source, destination='.', mode='0744',
                       newline='default', path_separator='/', recursive=False):
-        with self._create_sftp_client() as sftp_client:
-            sources, destinations = sftp_client.put_directory(source,
-                                                              destination,
-                                                              mode,
-                                                              newline,
-                                                              path_separator,
-                                                              recursive)
+        sources, destinations = self.sftp_client.put_directory(source,
+                                                               destination,
+                                                               mode,
+                                                               newline,
+                                                               path_separator,
+                                                               recursive)
         return sources, destinations
 
     def get_file(self, source, destination='.', path_separator='/'):
@@ -305,61 +297,63 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        with self._create_sftp_client() as sftp_client:
-            sources, destinations = sftp_client.get_file(source, destination,
-                                                         path_separator)
+        sources, destinations = self.sftp_client.get_file(source, destination,
+                                                          path_separator)
         return sources, destinations
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
-        with self._create_sftp_client() as sftp_client:
-            sources, destinations = sftp_client.get_directory(source,
-                                                              destination,
-                                                              path_separator,
-                                                              recursive)
+        sources, destinations = self.sftp_client.get_directory(source,
+                                                               destination,
+                                                               path_separator,
+                                                               recursive)
         return sources, destination
 
     def list_dir(self, path, pattern=None, absolute=False):
-        with self._create_sftp_client() as sftp_client:
-            items = sftp_client.list(sftp_client.listfiles, path, pattern,
-                                     absolute)
-            items += sftp_client.list(sftp_client.listdirs, path, pattern,
+        items = self.sftp_client.list(self.sftp_client.listfiles, path, pattern,
                                       absolute)
+        items += self.sftp_client.list(self.sftp_client.listdirs, path, pattern,
+                                       absolute)
         items.sort()
         return items
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
-        with self._create_sftp_client() as sftp_client:
-            files = sftp_client.list(sftp_client.listfiles, path, pattern,
-                                     absolute)
+        files = self.sftp_client.list(self.sftp_client.listfiles, path, pattern,
+                                      absolute)
         files.sort()
         return files
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
-        with self._create_sftp_client() as sftp_client:
-            dirs = sftp_client.list(sftp_client.listdirs, path, pattern,
-                                    absolute)
+        dirs = self.sftp_client.list(self.sftp_client.listdirs, path, pattern,
+                                     absolute)
         dirs.sort()
         return dirs
 
     def dir_exists(self, path):
-        with self._create_sftp_client() as sftp_client:
-            exists = sftp_client.dir_exists(path)
-        return exists
+        return self.sftp_client.dir_exists(path)
 
     def file_exists(self, path):
-        with self._create_sftp_client() as sftp_client:
-            exists = sftp_client.file_exists(path)
-        return exists
+        return self.sftp_client.file_exists(path)
+
+
+class AbstractShell(object):
+
+    def read(self):
+        raise NotImplementedError
+
+    def read_byte(self):
+        raise NotImplementedError
+
+    def write(self):
+        raise NotImplementedError
 
 
 class AbstractSFTPClient(object):
 
-    def __enter__(self):
-        self._homedir = self._absolute_path('.')
-        return self
+    def __init__(self):
+       self._homedir = self._absolute_path('.')
 
-    def __exit__(self, *args):
+    def close(self):
         self._client.close()
 
     def file_exists(self, path, follow_symlinks=True):
@@ -377,6 +371,19 @@ class AbstractSFTPClient(object):
         except IOError:
             return False
         return file_type(self._get_permissions(fileinfo))
+
+    def _create_missing_remote_path(self, path):
+        if path.startswith('/'):
+            curdir = '/'
+        else:
+            curdir = self._client._absolute_path('.')
+        for dirname in path.split('/'):
+            if dirname:
+                curdir = '%s/%s' % (curdir, dirname)
+            try:
+                self._client.stat(curdir)
+            except:
+                self._client.mkdir(curdir, 0744)
 
     def list(self, command, path, pattern=None, absolute=False):
         if not self.dir_exists(path):
