@@ -59,6 +59,8 @@ class AbstractSSHClient(object):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
                                            encoding)
+        self._sftp_client = None
+        self._shell = None
         self._started_commands = []
 
     @staticmethod
@@ -68,6 +70,24 @@ class AbstractSSHClient(object):
         :param path: A filename where the log events are written
         :returns: Whether logging was successfully enabled.
         """
+        raise NotImplementedError
+
+    @property
+    def sftp_client(self):
+        if not self._sftp_client:
+            self._sftp_client = self._create_sftp_client()
+        return self._sftp_client
+
+    @property
+    def shell(self):
+        if not self._shell:
+            self._shell = self._create_shell()
+        return self._shell
+
+    def _create_sftp_client(self):
+        raise NotImplementedError
+
+    def _create_shell(self):
         raise NotImplementedError
 
     def close(self):

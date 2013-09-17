@@ -60,15 +60,6 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
-    @lazy_property
-    def sftp_client(self):
-        return SFTPClient(self.client)
-
-    @lazy_property
-    def shell(self):
-        return Shell(self.client, self.config.term_type,
-                     self.config.width, self.config.height)
-
     def _login(self, username, password):
         self.client.connect(self.config.host, self.config.port, username,
                             password, look_for_keys=False)
@@ -84,6 +75,13 @@ class PythonSSHClient(AbstractSSHClient):
         cmd = RemoteCommand(command, self.config.encoding)
         cmd.run_in(self.client.get_transport().open_session())
         return cmd
+
+    def _create_sftp_client(self):
+        return SFTPClient(self.client)
+
+    def _create_shell(self):
+        return Shell(self.client, self.config.term_type,
+                     self.config.width, self.config.height)
 
 
 class Shell(AbstractShell):

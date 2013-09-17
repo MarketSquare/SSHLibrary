@@ -27,7 +27,6 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException)
-from .utils import lazy_property
 
 
 class JavaSSHClient(AbstractSSHClient):
@@ -40,15 +39,6 @@ class JavaSSHClient(AbstractSSHClient):
     @staticmethod
     def enable_logging(logfile):
         return False
-
-    @lazy_property
-    def sftp_client(self):
-        return SFTPClient(self.client)
-
-    @lazy_property
-    def shell(self):
-        return Shell(self.client, self.config.term_type,
-                     self.config.width, self.config.height)
 
     def _login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
@@ -69,6 +59,13 @@ class JavaSSHClient(AbstractSSHClient):
         cmd = RemoteCommand(command, self.config.encoding)
         cmd.run_in(self.client.openSession())
         return cmd
+
+    def _create_sftp_client(self):
+        return SFTPClient(self.client)
+
+    def _create_shell(self):
+        return Shell(self.client, self.config.term_type,
+                     self.config.width, self.config.height)
 
 
 class Shell(AbstractShell):
