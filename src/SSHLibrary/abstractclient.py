@@ -59,7 +59,7 @@ class AbstractSSHClient(object):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
                                            encoding)
-        self._commands = []
+        self._started_commands = []
 
     @staticmethod
     def enable_logging(path):
@@ -71,6 +71,8 @@ class AbstractSSHClient(object):
         raise NotImplementedError
 
     def close(self):
+        """Closes the connection.
+        """
         self.client.close()
 
     def login(self, username, password):
@@ -88,6 +90,9 @@ class AbstractSSHClient(object):
             raise SSHClientException(msg)
         return self._read_server_output()
 
+    def _login(self, username, password):
+        raise NotImplementedError
+
     def login_with_public_key(self, username, keyfile, password):
         """Login using given credentials.
 
@@ -104,6 +109,9 @@ class AbstractSSHClient(object):
             msg = 'Login with public key failed for user: %s' % username
             raise SSHClientException(msg)
         return self._read_server_output()
+
+    def _login_with_public_key(self, username, keyfile, password):
+        raise NotImplementedError
 
     def _read_server_output(self):
         if self.config.prompt:
@@ -134,7 +142,10 @@ class AbstractSSHClient(object):
     def start_command(self, command):
         """Execute given command over existing connection."""
         command = command.encode(self.config.encoding)
-        self._commands.append(self._start_command(command))
+        self._started_commands.append(self._start_command(command))
+
+    def _start_command(self, command):
+        raise NotImplementedError
 
     def read_command_output(self):
         """Read output of a previously started command.
@@ -142,7 +153,7 @@ class AbstractSSHClient(object):
         :returns: 3-tuple (stdout, stderr, return_code)
         """
         try:
-            return self._commands.pop().read_outputs()
+            return self._started_commands.pop().read_outputs()
         except IndexError:
             raise SSHClientException('No started commands to read output from')
 
@@ -353,8 +364,8 @@ class AbstractSFTPClient(object):
     def __init__(self):
        self._homedir = self._absolute_path('.')
 
-    def close(self):
-        self._client.close()
+    def _absolute_path(self, path):
+        raise NotImplementedError
 
     def file_exists(self, path, follow_symlinks=True):
         return self._exists(path, stat.S_ISREG, follow_symlinks)
@@ -371,6 +382,9 @@ class AbstractSFTPClient(object):
         except IOError:
             return False
         return file_type(self._get_permissions(fileinfo))
+
+    def _get_permissions(self, fileinfo):
+        raise NotImplementedError
 
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):
@@ -406,6 +420,9 @@ class AbstractSFTPClient(object):
         return [fileinfo.filename for fileinfo in self._list(path)
                 if file_type(self._get_permissions(fileinfo)) and
                 (fileinfo.filename not in ('.', '..'))]
+
+    def _list(self, path):
+        raise NotImplementedError
 
     def _filter_by_pattern(self, items, pattern):
         return [name for name in items if fnmatchcase(name, pattern)]
@@ -449,6 +466,9 @@ class AbstractSFTPClient(object):
         for src, dst in zip(remotefiles, localfiles):
             self._get_file(src, dst)
         return remotefiles, localfiles
+
+    def _get_file(self, src, dst):
+        raise NotImplementedError
 
     def _get_get_file_sources(self, source, path_separator):
         if path_separator in source:
@@ -581,6 +601,15 @@ class AbstractSFTPClient(object):
                 position += len(data)
             self._close_remote_file(remotefile)
 
+    def _create_remote_file(self, destination, mode):
+        raise NotImplementedError
+
+    def _write_to_remote_file(self, remotefile, data, position):
+        raise NotImplementedError
+
+    def _close_remote_file(self, remotefile):
+        raise NotImplementedError
+
     def _absolute_path(self, path):
         raise NotImplementedError
 
@@ -600,6 +629,9 @@ class AbstractCommand(object):
         """
         self._session = session
         self._execute()
+
+    def _execute(self):
+        raise NotImplementedError
 
     def read_outputs(self):
         """Return outputs of this command.
