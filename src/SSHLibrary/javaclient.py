@@ -30,8 +30,8 @@ from .abstractclient import (AbstractCommand, AbstractSFTPClient,
 
 class JavaSSHClient(AbstractSSHClient):
 
-    def __init__(self, *args, **kwargs):
-        super(JavaSSHClient, self).__init__(*args, **kwargs)
+    def __init__(self, *args):
+        super(JavaSSHClient, self).__init__(*args)
         self.client = Connection(self.host, self.port)
         self.client.connect()
 
