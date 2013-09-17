@@ -41,6 +41,15 @@ class JavaSSHClient(AbstractSSHClient):
     def enable_logging(logfile):
         return False
 
+    @lazy_property
+    def sftp_client(self):
+        return SFTPClient(self.client)
+
+    @lazy_property
+    def shell(self):
+        return Shell(self.client, self.config.term_type,
+                     self.config.width, self.config.height)
+
     def _login(self, username, password):
         if not self.client.authenticateWithPassword(username, password):
             raise SSHClientException
@@ -60,15 +69,6 @@ class JavaSSHClient(AbstractSSHClient):
         cmd = RemoteCommand(command, self.config.encoding)
         cmd.run_in(self.client.openSession())
         return cmd
-
-    @lazy_property
-    def sftp_client(self):
-        return SFTPClient(self.client)
-
-    @lazy_property
-    def shell(self):
-        return Shell(self.client, self.config.term_type,
-                     self.config.width, self.config.height)
 
 
 class Shell(AbstractShell):

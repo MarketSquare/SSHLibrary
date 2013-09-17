@@ -80,9 +80,6 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def close(self):
-        self.client.close()
-
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
         cmd.run_in(self.client.get_transport().open_session())
