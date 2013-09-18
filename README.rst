@@ -47,9 +47,6 @@ atest/
 doc/
 	SSHLibrary documentation.
 
-examples/
-	Simple examples on using SSHlibrary.
-
 lib/
 	Includes Trilead SSH library JAR distribution which must be in CLASSPATH
 	when executing tests with Jython.
