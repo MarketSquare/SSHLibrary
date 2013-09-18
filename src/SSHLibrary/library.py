@@ -45,6 +45,8 @@ class SSHLibrary(object):
     - `Configuration`
     - `Executing commands`
     - `Pattern matching`
+    - `Example`
+    - `Importing`
     - `Shortcuts`
     - `Keywords`
 
