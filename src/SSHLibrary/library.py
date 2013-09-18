@@ -195,11 +195,13 @@ class SSHLibrary(object):
     [http://docs.python.org/library/fnmatch.html|fnmatch module].
 
     = Example =
-
-    This example demonstrates running a command on remote and getting
-    output of that command.
-
     | ***** Settings *****
+    | Documentation          This example demonstrates executing commands on a remote host
+    | ...                    and getting their output and exit status.
+    | ...
+    | ...                    Notice how connections are handled as part of the suite setup and
+    | ...                    teardown. This saves some time when executing several test cases.
+    |
     | Library                SSHLibrary
     | Suite Setup            Open Connection And Log In
     | Suite Teardown         `Close All Connections`
@@ -213,21 +215,27 @@ class SSHLibrary(object):
     | Execute Command And Get Output
     |     [Documentation]    `Execute Command` can be used to ran commands on the remote.
     |     ...                The keyword returns the standard output by default.
-    |     ${output}=         `Execute Command`   echo hello
-    |     Should Be Equal    ${output}         hello
+    |     ${output}=         `Execute Command`   echo Hello SSHLibrary!
+    |     Should Be Equal    ${output}         Hello SSHLibrary!
+    |
+    | Execute Command And Get Exit Status
+    |     [Documentation]    Usually getting the return value of the command is enough.
+    |     ...                This behaviour can be adjusted as `Execute Command` arguments.
+    |     ${rc}=             `Execute Command`   echo Success quaranteed.    return_stdout=False    return_rc=True
+    |     Should Be Equal    ${rc}             ${0}
     |
     | ***** Keywords *****
     | Open Connection And Log In
     |    `Open Connection`     ${HOST}
     |    `Login`               ${USERNAME}       ${PASSWORD}
 
-    Save this file as `executing_command.txt`, install SSHLibrary and run:
+    Save the content as file `executing_command.txt` and run:
 
     | pybot executing_commands.txt
 
-    The host, username and password can be set from commandline as following:
+    The host, username and password can be overridden from commandline:
 
-    | pybot -v host:my.server.com -v user:johndoe -v password:secretpasswd executing_commands.txt
+    | pybot -v HOST:my.server.com -v USERNAME:johndoe -v PASSWORD:secretpasswd executing_commands.txt
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
