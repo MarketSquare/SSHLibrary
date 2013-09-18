@@ -193,6 +193,41 @@ class SSHLibrary(object):
     Unless otherwise noted, matching is case-insensitive on case-insensitive
     operating systems such as Windows. Pattern matching is implemented using
     [http://docs.python.org/library/fnmatch.html|fnmatch module].
+
+    = Example =
+
+    This example demonstrates running a command on remote and getting
+    output of that command.
+
+    | ***** Settings *****
+    | Library                SSHLibrary
+    | Suite Setup            Open Connection And Log In
+    | Suite Teardown         `Close All Connections`
+    |
+    | ***** Variables *****
+    | ${HOST}                localhost
+    | ${USERNAME}            test
+    | ${PASSWORD}            test
+    |
+    | ***** Test Cases *****
+    | Execute Command And Get Output
+    |     [Documentation]    `Execute Command` can be used to ran commands on the remote.
+    |     ...                The keyword returns the standard output by default.
+    |     ${output}=         `Execute Command`   echo hello
+    |     Should Be Equal    ${output}         hello
+    |
+    | ***** Keywords *****
+    | Open Connection And Log In
+    |    `Open Connection`     ${HOST}
+    |    `Login`               ${USERNAME}       ${PASSWORD}
+
+    Save this file as `executing_command.txt`, install SSHLibrary and run:
+
+    | pybot executing_commands.txt
+
+    The host, username and password can be set from commandline as following:
+
+    | pybot -v host:my.server.com -v user:johndoe -v password:secretpasswd executing_commands.txt
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
