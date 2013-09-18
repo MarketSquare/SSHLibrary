@@ -21,7 +21,7 @@ if [ "$1" == "python" ]; then
     pybot $COMMON_ARGS -d $OUTPUT_DIR -i pybot $*
 elif [ "$1" == "jython" ]; then
     shift
-    JAR_PATH+="trilead-ssh2-build213.jar"
+    JAR_PATH+="trilead-ssh2-1.0.0-build217.jar"
     OUTPUT_DIR="$OUTPUT_ROOT/jython"
     silent_remove_dir $OUTPUT_DIR
     jybot $COMMON_ARGS -P $JAR_PATH -d $OUTPUT_DIR -i jybot $*

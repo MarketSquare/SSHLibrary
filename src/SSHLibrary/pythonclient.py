@@ -16,8 +16,8 @@ try:
     import paramiko
 except ImportError:
     raise ImportError(
-        'Importing paramiko SSH module failed.\n'
-        'Ensure that paramiko and pycrypto modules are installed.'
+        'Importing Paramiko library failed.'
+        'Make sure you have Paramiko installed.'
     )
 
 from .abstractclient import (AbstractShell, AbstractSSHClient,

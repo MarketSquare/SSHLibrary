@@ -17,8 +17,8 @@ try:
                                   SFTPv3DirectoryEntry, StreamGobbler)
 except ImportError:
     raise ImportError(
-        'Importing Trilead SSH classes failed. '
-        'Make sure you have the Trilead jar file in CLASSPATH.'
+        'Importing Trilead SSH library failed.'
+        'Make sure you have the Trilead JAR in your CLASSPATH.'
     )
 import jarray
 from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,

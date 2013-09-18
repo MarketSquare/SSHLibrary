@@ -51,7 +51,7 @@ examples/
 	Simple examples on using SSHlibrary.
 
 lib/
-	Has Trilead SSH library JAR distribution which must be in CLASSPATH
+	Includes Trilead SSH library JAR distribution which must be in CLASSPATH
 	when executing tests with Jython.
 
 src/
