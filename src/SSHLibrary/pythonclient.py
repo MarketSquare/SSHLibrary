@@ -23,7 +23,6 @@ except ImportError:
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException)
-from .utils import lazy_property
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
