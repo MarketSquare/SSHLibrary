@@ -50,10 +50,11 @@ Regexp Not Matching From Beginning Of Output
     Write  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
     Read Until Regexp  std.*
 
-Interactive Session Timeout
+Interactive Session In Case Of Timeout
     Write  Foo Bar And Some Other
     Set Client Configuration   timeout=1
-    ${status}  ${error} =  Run Keyword And Ignore Error  Read Until  This is not found
+    ${status}  ${error} =  Run Keyword And Ignore Error
+    ...                    Read Until  This is not found
     Should Start With  ${error}  No match found for 'This is not found' in 1 second
 
 Interactive Session Returning Stderr
@@ -65,11 +66,14 @@ Interactive Session Returning Stderr
     Should Contain  ${output}  This is Error
 
 Write Until Expected Output
-    Write Until Expected Output  ${REMOTE TEST ROOT}${/}${REPEAT TEST SCRIPT NAME}\n  3  15 seconds  0.5 seconds
+    Write Until Expected Output  ${REMOTE TEST ROOT}${/}${REPEAT TEST SCRIPT NAME}\n
+    ...                          3  15 seconds  0.5 seconds
     [Teardown]  Remove Counter and Read All Data
 
-Write Until Expected Output In Case Of Time Out
-    Run Keyword And Expect Error  No match found for '11' in 2 seconds.  Write Until Expected Output  ${REMOTE TEST ROOT}${/}${REPEAT TEST SCRIPT NAME}\n  11  2s  0.5s
+Write Until Expected Output In Case Of Timeout
+    Run Keyword And Expect Error  No match found for '11' in 2 seconds.
+    ...                           Write Until Expected Output  ${REMOTE TEST ROOT}${/}${REPEAT TEST SCRIPT NAME}\n
+    ...                           11  2s  0.5s
     [Teardown]  Remove Counter and Read All Data
 
 Write Bare And Read

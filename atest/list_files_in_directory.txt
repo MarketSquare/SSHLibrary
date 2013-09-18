@@ -59,9 +59,11 @@ List Files With Absolute Paths Using Pattern
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
     ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Files In Directory  ${target}  pattern=?est*  absolute=True
+    ${listing} =  List Files In Directory  ${target}  pattern=?est*
+    ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Files Should Fail When Source Path Not Exists
     ${target} =  Set Variable  not_exists
-    Run Keyword And Expect Error  There was no path matching '${target}'  List Files In Directory  ${target}
+    Run Keyword And Expect Error  There was no path matching '${target}'
+    ...                           List Files In Directory  ${target}

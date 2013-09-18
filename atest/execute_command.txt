@@ -11,29 +11,35 @@ Execute Command With Defaults
     Should Be Equal  ${stdout}  This is stdout
 
 Execute Command And Return Stderr
-    ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  return_stdout=false  return_stderr=yes
+    ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ...          return_stdout=false  return_stderr=yes
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command And Return Rc
-    ${rc} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  return_stdout=False  return_rc=${true}
+    ${rc} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ...           return_stdout=False  return_rc=${true}
     Should Be Equal As Integers  ${rc}  0
 
 Execute Command And Return All Values
-    ${stdout}  ${stderr}  ${rc} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  foo  bar  baz
+    ${stdout}  ${stderr}  ${rc} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ...                            foo  bar  baz
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
     Should Be Equal As Integers  ${rc}  0
 
 Execute Command With Legacy Stdout Config
-    ${stdout} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  STDout
+    ${stdout} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ...                           STDout
     Should Be Equal  ${stdout}  This is stdout
 
 Execute Command With Legacy Stderr Config
-    ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  stderr
+    ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ...                           stderr
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command With Legacy Stdout And Stderr Config
-    ${stdout}  ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}  Both
+    ${stdout}  ${stderr} =  Execute Command  ${REMOTE TEST ROOT}${/}${TEST SCRIPT NAME}
+    ...                     Both
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
 

@@ -16,11 +16,15 @@ ${INVALID PUBKEY FILE}      ${PUBKEYDIR}/id_rsa_invalid
 *** Test Cases ***
 Login With Public Key
     Open Connection  ${HOST}
-    Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}  ${PUBKEY_PASSWORD}
+    Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}
+    ...                    ${PUBKEY_PASSWORD}
 
 Login With Non Existing Public Key
-    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist  Login With Public Key  ${PUBKEY_USERNAME}  /invalid/path  ${PUBKEY_PASSWORD}
+    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist
+    ...                           Login With Public Key  ${PUBKEY_USERNAME}
+    ...                           /invalid/path  ${PUBKEY_PASSWORD}
 
 Login With Invalid Public Key
     Run Keyword And Expect Error  Login with public key failed for user: testkey
-    ...    Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}  ${PUBKEY_PASSWORD}
+    ...    Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}
+    ...                           ${PUBKEY_PASSWORD}

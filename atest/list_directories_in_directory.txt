@@ -57,9 +57,11 @@ List Subdirectories Using Pattern
 List Subdirectories With Absolute Paths Using Pattern
     ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
     ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Directories In Directory  ${target}  pattern=emp*  absolute=True
+    ${listing} =  List Directories In Directory  ${target}  pattern=emp*
+    ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Subdirectories Should Fail When Source Path Not Exists
     ${target} =  Set Variable  not_exists
-    Run Keyword And Expect Error  There was no path matching '${target}'  List Directories In Directory  ${target}
+    Run Keyword And Expect Error  There was no path matching '${target}'
+    ...                           List Directories In Directory  ${target}

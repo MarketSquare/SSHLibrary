@@ -25,7 +25,8 @@ Get File With Different Name
     [Teardown]  OS.Remove File  foo.txt
 
 Get File With Pattern
-    @{expected} =  Create List  ${TEST FILE NAME}  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    @{expected} =  Create List  ${TEST FILE NAME}  ${TEST FILE 2 NAME}
+    ...                         ${FILE WITH NEWLINES NAME}
     ${destination} =  Set Variable  ${LOCAL TMPDIR}${/}
     : FOR  ${filename}  IN  @{expected}
     \  OS.File Should Not Exist  ${destination}${/}${filename}

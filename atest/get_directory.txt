@@ -48,7 +48,8 @@ Get Directory Using Relative Source
 
 Get Directory Should Fail When Source Does Not Exists
     ${target} =  Set Variable  ${LOCAL TMPDIR}
-    Run Keyword And Expect Error  There was no source path matching 'non-existing'  SSH.Get Directory  non-existing
+    Run Keyword And Expect Error  There was no source path matching 'non-existing'
+    ...                           SSH.Get Directory  non-existing
     OS.Directory Should Not Exist  ${target}
 
 *** Keywords ***
