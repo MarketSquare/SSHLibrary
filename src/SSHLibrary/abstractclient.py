@@ -14,7 +14,6 @@
 
 from __future__ import with_statement
 from fnmatch import fnmatchcase
-
 import os
 import re
 import stat

@@ -20,8 +20,8 @@ except ImportError:
         'Make sure you have Paramiko installed.'
     )
 
-from .abstractclient import (AbstractShell, AbstractSSHClient,
-                             AbstractSFTPClient, AbstractCommand,
+from .abstractclient import (AbstractShell, AbstractSFTPClient,
+                             AbstractSSHClient, AbstractCommand,
                              SSHClientException)
 
 
