@@ -16,7 +16,7 @@ try:
     import paramiko
 except ImportError:
     raise ImportError(
-        'Importing Paramiko library failed.'
+        'Importing Paramiko library failed. '
         'Make sure you have Paramiko installed.'
     )
 
