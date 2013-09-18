@@ -1,9 +1,10 @@
-import unittest
 import os
+import unittest
 
 from SSHLibrary import abstractclient
 
 abstractclient.AbstractSFTPClient._homedir = "/home"
+
 
 class TestRemoteAndLocalPathResolution(unittest.TestCase):
 

@@ -53,7 +53,6 @@ class TestSSHClientConfiguration(unittest.TestCase):
         self._assert_config(lib.current.config, timeout=timeout,
                             term_type=term_type)
 
-
     def _assert_config(self, cfg, host=HOSTNAME, timeout=3, newline='\n',
                        prompt=None, port=22, term_type='vt100'):
         self.assertEquals(cfg.host, host)

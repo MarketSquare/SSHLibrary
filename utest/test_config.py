@@ -1,7 +1,8 @@
 import unittest
-from SSHLibrary.config import (Configuration, StringEntry, TimeEntry,
-    IntegerEntry, LogLevelEntry, NewlineEntry, ConfigurationException)
 
+from SSHLibrary.config import (Configuration, ConfigurationException,
+                               IntegerEntry, LogLevelEntry, NewlineEntry,
+                               StringEntry, TimeEntry)
 
 STRING_VALUE = 'some value'
 INTEGER_STRING = '42'
