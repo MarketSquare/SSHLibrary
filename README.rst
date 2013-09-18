@@ -4,7 +4,8 @@ SSHLibrary for Robot Framework
 Introduction
 ------------
 
-SSHLibrary is a Robot Framework (http://robotframework.org) test library for testing SSH and SFTP.
+SSHLibrary is a Robot Framework (http://robotframework.org) test library for
+testing SSH and SFTP.
 
 The library has the following main usages:
 - Executing commands on remote, either with blocking or non-blocking behaviour.
@@ -18,13 +19,13 @@ License
 
 SSHLibrary is licensed under Apache License 2.0.
 
-See LICENSE.txt for more details.
+See LICENSE.txt for details.
 
 
 Installation
 ------------
 
-The installation instructions are available at
+The installation is documented at
 http://code.google.com/p/robotframework-sshlibrary/wiki/InstallationInstructions.
 
 For general information about using test libraries with Robot Framework, see
@@ -34,8 +35,8 @@ http://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.ht
 Documentation
 -------------
 
-The library documentation and examples can be found at 'doc/SSHLibrary.html'
-or at https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation.
+The documentation and examples can be found at 'doc/SSHLibrary.html' or at
+https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation.
 
 
 Directory Layout
@@ -48,7 +49,7 @@ doc/
 	SSHLibrary documentation.
 
 lib/
-	Includes Trilead SSH library JAR distribution which must be in CLASSPATH
+	Contains Trilead SSH library JAR distribution which must be in CLASSPATH
 	when executing tests with Jython.
 
 src/
@@ -61,4 +62,5 @@ utests/
 Running the Acceptance Tests
 ----------------------------
 
-Running the acceptance tests requires some configuration which is explained at https://code.google.com/p/robotframework-sshlibrary/wiki/RunningLibraryAcceptanceTests
+Running the acceptance tests requires some configuration which is explained at
+https://code.google.com/p/robotframework-sshlibrary/wiki/RunningLibraryAcceptanceTests
