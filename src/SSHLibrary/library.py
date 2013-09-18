@@ -199,7 +199,7 @@ class SSHLibrary(object):
     = Example =
     | ***** Settings *****
     | Documentation          This example demonstrates executing commands on a remote host
-    | ...                    and getting their output and exit status.
+    | ...                    and getting their output and return code.
     | ...
     | ...                    Notice how connections are handled as part of the suite setup and
     | ...                    teardown. This saves some time when executing several test cases.
@@ -214,14 +214,14 @@ class SSHLibrary(object):
     | ${PASSWORD}            test
     |
     | ***** Test Cases *****
-    | Execute Command And Get Output
+    | Execute Command And Verify Output
     |     [Documentation]    `Execute Command` can be used to ran commands on the remote.
     |     ...                The keyword returns the standard output by default.
     |     ${output}=         `Execute Command`   echo Hello SSHLibrary!
     |     Should Be Equal    ${output}         Hello SSHLibrary!
     |
-    | Execute Command And Get Exit Status
-    |     [Documentation]    Usually getting the return value of the command is enough.
+    | Execute Command And Verify Return Code
+    |     [Documentation]    Usually getting the return code of the command is enough.
     |     ...                This behaviour can be adjusted as `Execute Command` arguments.
     |     ${rc}=             `Execute Command`   echo Success quaranteed.    return_stdout=False    return_rc=True
     |     Should Be Equal    ${rc}             ${0}
@@ -235,7 +235,7 @@ class SSHLibrary(object):
 
     | pybot executing_commands.txt
 
-    The host, username and password can be overridden from commandline:
+    You may want to override the variables from commandline to try this out on your remote host:
 
     | pybot -v HOST:my.server.com -v USERNAME:johndoe -v PASSWORD:secretpasswd executing_commands.txt
     """
@@ -520,7 +520,7 @@ class SSHLibrary(object):
         If `index_or_alias` is not given, the information of the current
         active connection is returned.
 
-        The return value is an object that describes the connection.
+        This keyword returns an object that describes the connection.
         The object has attributes that correspond to the [#Configurable
         per connection|connection configuration values] and has also attributes
         attributes `host`, `port`, `index` and `alias`.
@@ -559,8 +559,8 @@ class SSHLibrary(object):
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
-        The return value is a list of objects that describe the connection.
-        These object have attributes that correspond to the [#Configurable
+        This keyword returns a list of objects that describe the connections.
+        These objects have attributes that correspond to the [#Configurable
         per connection|connection configuration values] and has also attributes
         `host`, `port`, `index` and `alias`.
 
@@ -658,7 +658,7 @@ class SSHLibrary(object):
         | ${stdout}       | ${stderr}= | Execute Command | echo 'Hello John!' | return_stderr=True |
         | Should Be Empty | ${stderr}  |
 
-        Sometimes getting the return value is enough:
+        Most of the time, checking the return code is enough:
         | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
 
@@ -751,7 +751,7 @@ class SSHLibrary(object):
         | ${stdout}       | ${stderr}=         | Read Command Output | return_stderr=True |
         | Should Be Empty | ${stderr}          |
 
-        Sometimes getting the return value is enough:
+        Most of the time, checking the return code is enough:
         | Start Command               | echo 'Hello John!'  |
         | ${rc}=                      | Read Command Output | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}               | 0                   | # succeeded         |
