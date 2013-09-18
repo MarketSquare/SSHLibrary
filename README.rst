@@ -34,8 +34,8 @@ http://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.ht
 Documentation
 -------------
 
-The library documentation, including keyword examples, can be found at
-'doc/SSHLibrary.html' or at https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation
+The library documentation and examples can be found at 'doc/SSHLibrary.html'
+or at https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation.
 
 
 Directory Layout
