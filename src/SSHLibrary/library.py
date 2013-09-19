@@ -1354,7 +1354,9 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
 
-        See also `List Files In Directory` and `List Directories In Directory`.
+        If you are only interested in directories or files,
+        use `List Files In Directory` or `List Directories In Directory`,
+        respectively.
         """
         try:
             items = self.current.list_dir(path, pattern, absolute)
