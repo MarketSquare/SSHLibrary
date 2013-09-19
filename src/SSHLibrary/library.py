@@ -29,18 +29,17 @@ class SSHLibrary(object):
     """Robot Framework test library for SSH and SFTP.
 
     The library has the following main usages:
-    - Executing commands on remote, either with blocking or non-blocking
-      behaviour (`Execute Command` and `Start Command` keywords, respectively).
-    - Writing and reading in an interactive session (e.g. `Read` and `Write`
-      keywords).
+    - Executing commands on the remote machine, either with blocking or
+      non-blocking behaviour (`Execute Command` and `Start Command`,
+      respectively).
+    - Writing and reading in an interactive shell (e.g. `Read` and `Write`)
     - Transferring files and directories over SFTP (e.g. `Get File` and
-      `Put Directory` keywords).
-    - Ensuring that files or directories exist on remote (e.g.
-      `File Should Exist` and `Directory Should Not Exist` keywords).
+      `Put Directory`).
+    - Ensuring that files or directories exist on the remote machine
+      (e.g. `File Should Exist` and `Directory Should Not Exist`).
 
     == Table of contents ==
 
-    - `Requirements`
     - `Connections and login`
     - `Configuration`
     - `Executing commands`
@@ -50,37 +49,25 @@ class SSHLibrary(object):
     - `Shortcuts`
     - `Keywords`
 
-    = Requirements =
-
-    To use SSHLibrary with Python, you must first install
-    [https://github.com/paramiko/paramiko | Paramiko]. This is done easiest
-    by using easy_install which also installs
-    [https://www.dlitz.net/software/pycrypto | PyCrypto] as the Paramiko
-    dependency.
-
-    For Jython, you must have the [http://robotframework-sshlibrary.googlecode.com/files/trilead-ssh2-build213.jar |
-    Trilead SSH library JAR] in the CLASSPATH during the test execution.
-
     = Connections and login =
 
     The library supports multiple connections to different hosts.
-    New connections are opened with `Open Connection` keyword.
+    New connections are opened with `Open Connection`.
 
     Logging into the host is done either with username and password
-    (keyword `Login`) or with public/private key pair
-    (keyword `Login With Public key`).
+    (`Login`) or with public/private key pair (`Login With Public key`).
 
     Only one connection can be active at a time. This means that most of the
-    keywords only affect to the active connection. Active connection can be
-    changed using `Switch Connection` keyword.
+    keywords only affect the active connection. Active connection can be
+    changed with `Switch Connection`.
 
     = Configuration =
 
     Default settings for all the upcoming connections can be configured on
-    `library importing` or later with keyword `Set Default Configuration`.
+    `library importing` or later with `Set Default Configuration`.
     All the settings are listed further below.
 
-    Using `Set Default Configuration` does not affect to the already open
+    Using `Set Default Configuration` does not affect the already open
     connections. Settings of the current active connection can be configured
     with `Set Client Configuration`. Settings of another, non-active connection,
     can be configured by first using `Switch Connection` and then
@@ -93,24 +80,27 @@ class SSHLibrary(object):
 
     === Timeout ===
 
-    Timeout is used by `Read Until` variants and
-    `Write Until Expected Output`. The default timeout is `3 seconds`.
+    Timeout is used by `Read Until` variants. The default value is `3 seconds`.
+
+    Value must be in Robot Framework's time format, e.g. `3`, `4.5`, `1 minute`
+    and `2 min 3 s` are all accepted. See section 'Time Format' in
+    Robot Framework User Guide for details.
 
     === Newline ===
 
     Newline is the line break sequence known by the operating system
-    on the remote. The default value is `LF` which is known by
+    on the remote machine. The default value is `LF` which is used by
     Unix-like operating systems.
 
     === Prompt ===
 
-    Prompt is a character sequence used by `Read Until Prompt`.
-    Prompt must be set before the keyword can be used.
+    Prompt is a character sequence used by `Read Until Prompt`
+    and must be set before the keyword can be used.
 
-    === Terminal ===
+    === Terminal settings ===
 
-    Argument `term_type` defines the remote terminal type and arguments
-    `width` and `height` can be used to set the virtual size of it.
+    Argument `term_type` defines the terminal type on the remote machine and
+    arguments `width` and `height` can be used to set the virtual size of it.
 
     === Encoding ===
 
@@ -132,52 +122,54 @@ class SSHLibrary(object):
 
     = Executing commands =
 
-    For executing commands on the remote host, there are two possibilities:
+    For executing commands on the remote machine, there are two possibilities:
 
     1. `Execute Command` or `Start Command`. The command is executed in a new
-    shell on the remote, which means that possible changes to the environment
-    (e.g. setting environment variables, changing working directory, etc.)
-    are not visible to the subsequent keywords.
+    shell on the remote machine, which means that possible changes to
+    the environment (e.g. setting environment variables, changing
+    working directory, etc.) are not visible to the subsequent keywords.
 
-    2. Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
-    `Read Until`, `Read Until Prompt` and `Read Until Regexp` keywords operate
-    in an interactive session, which means that changes to the environment
+    2. `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
+    `Read Until`, `Read Until Prompt` and `Read Until Regexp` operate
+    in an interactive shell, which means that changes to the environment
     are visible to the subsequent keywords.
 
-    = Interactive sessions =
+    = Interactive shells =
 
-    Keywords `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
+    `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
     `Read Until`, `Read Until Prompt` and `Read Until Regexp` can be used
-    to interact with the server within the same session.
+    to interact with the server within the same shell.
 
     All of these keywords, except `Write Bare`, consume the read or the written
-    text from the server output before returning. This practically means that
+    text from the server output before returning. In practice, this means that
     the text is removed from the server output, i.e. subsequent calls to
     `Read` keywords do not return text that was already read:
-    | Write              | echo 'hello' |       | # consumed: echo 'hello'               |
-    | ${stdout}=         | Read Until   | hello | # consumed: everything until 'hello'   |
+    | Write              | echo 'hello' |       | # consumed: echo 'hello'                           |
+    | ${stdout}=         | Read Until   | hello | # consumed: the printed 'hello'                    |
     | Should Contain     | ${stdout}    | hello |
-    | ${stdout}=         | Read         |       | # consumed: everything available       |
-    | Should Not Contain | ${stdout}    | hello | # because 'hello' was already consumed |
+    | ${stdout}=         | Read         |       | # consumed: everything available                   |
+    | Should Not Contain | ${stdout}    | hello | # because the printed 'hello' was already consumed |
 
     The consumed text is logged by the keywords and argument `loglevel`
     can be used to override [#Loglevel|the default log level].
 
-    Keywords `Login` and `Login With Public Key` also consume the server output.
-    Practically the server output is empty after executing these keywords.
+    `Login` and `Login With Public Key` consume everything on
+    the server output or if [#Prompt|prompt is set], everything until
+    the prompt.
 
     == Reading ==
 
-    Keywords `Read`, `Read Until`, `Read Until Prompt` and `Read Until
+    `Read`, `Read Until`, `Read Until Prompt` and `Read Until
     Regexp` can be used to read from the server. The read text is also
     consumed from the server output.
 
     `Read Until` variants read output up until and *including* `expected` text.
-    These keywords will fail if timeout expires before `expected` is found.
+    These keywords will fail if [#Timeout|the timeout] expires before `expected`
+    is found.
 
     == Writing ==
 
-    Keywords `Write`, `Write Until Expected Output` consume the written text
+    `Write`, `Write Until Expected Output` consume the written text
     while `Write Bare` does not.
 
     Any of these keywords does not return output triggered by the written text.
@@ -198,7 +190,7 @@ class SSHLibrary(object):
 
     = Example =
     | ***** Settings *****
-    | Documentation          This example demonstrates executing commands on a remote host
+    | Documentation          This example demonstrates executing commands on a remote machine
     | ...                    and getting their output and return code.
     | ...
     | ...                    Notice how connections are handled as part of the suite setup and
@@ -215,7 +207,7 @@ class SSHLibrary(object):
     |
     | ***** Test Cases *****
     | Execute Command And Verify Output
-    |     [Documentation]    `Execute Command` can be used to ran commands on the remote.
+    |     [Documentation]    `Execute Command` can be used to ran commands on the remote machine.
     |     ...                The keyword returns the standard output by default.
     |     ${output}=         `Execute Command`   echo Hello SSHLibrary!
     |     Should Be Equal    ${output}         Hello SSHLibrary!
@@ -235,7 +227,7 @@ class SSHLibrary(object):
 
     | pybot executing_commands.txt
 
-    You may want to override the variables from commandline to try this out on your remote host:
+    You may want to override the variables from commandline to try this out on your remote machine:
 
     | pybot -v HOST:my.server.com -v USERNAME:johndoe -v PASSWORD:secretpasswd executing_commands.txt
     """
@@ -266,7 +258,7 @@ class SSHLibrary(object):
         defaults are used:
         | Library | SSHLibrary |
 
-        Only arguments that are given are changed. In this example, timeout
+        Only arguments that are given are changed. In this example, the timeout
         is changed to 10 seconds but other settings are left to the library
         defaults:
         | Library | SSHLibrary | 10 seconds |
@@ -275,9 +267,13 @@ class SSHLibrary(object):
         use `Read Until Prompt`. In this example, prompt is set to `$`:
         | Library | SSHLibrary | prompt=$ |
 
-        Multiple settings are possible. In this example, the library is taken
-        into use with timeout of 10 seconds and line breaks known by Windows:
+        Multiple settings are possible. In this example, the library is brought
+        into use with the timeout of 10 seconds and line breaks known by
+        Windows:
         | Library | SSHLibrary | 10 seconds | CRLF |
+
+        Arguments `term_type`, `width`, `height` and `encoding` were added
+        in SSHLibrary 1.2.
         """
         self._connections = ConnectionCache()
         self._config = _DefaultConfiguration(timeout or self.DEFAULT_TIMEOUT,
@@ -298,7 +294,7 @@ class SSHLibrary(object):
                                   height=None, encoding=None):
         """Update the default `configuration`.
 
-        Please note that using this keyword does not affect to the already
+        Please note that using this keyword does not affect the already
         open connections. Use `Set Client Configuration` to configure the
         active connection.
 
@@ -321,6 +317,9 @@ class SSHLibrary(object):
         | Should Be Equal           | ${local.timeout}   | 5 seconds        |
         | Should Be Equal           | ${emea.timeout}    | 20 seconds       |
         | Should Be Equal           | ${apac.timeout}    | 20 seconds       |
+
+        Arguments `term_type`, `width`, `height` and `encoding` were added
+        in SSHLibrary 1.2.
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
@@ -354,6 +353,8 @@ class SSHLibrary(object):
         and terminal width of the current active connection:
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
+
+        Argument `encoding` was added in SSHLibrary 1.2.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
@@ -375,11 +376,11 @@ class SSHLibrary(object):
 
         Example:
         | Open Connection    | my.server.com   | # Not logged |
-        | Enable SSH Logging | myhost.log      |
+        | Enable SSH Logging | myserver.log    |
         | Login              | johndoe         | secretpasswd |
         | Open Connection    | build.local.net | # Logged     |
         | # Do something with the connections  |
-        | # Check myhost.log for detailed debug information   |
+        | # Check myserver.log for detailed debug information |
         """
         if SSHClient.enable_logging(logfile):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
@@ -405,7 +406,7 @@ class SSHLibrary(object):
         `configuration`. All the arguments, except `host`, `alias` and `port`
         can be later updated with `Set Client Configuration.
 
-        Starting from SSHLibrary 1.1, a shell session is automatically opened
+        Starting from SSHLibrary 1.1, a shell is automatically opened
         by this keyword.
 
         Port `22` is assumed by default:
@@ -428,6 +429,8 @@ class SSHLibrary(object):
 
         Terminal settings are also configurable per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
+
+        Argument `encoding` was added in SSHLibrary 1.2.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -507,7 +510,7 @@ class SSHLibrary(object):
         finishes.
 
         Example:
-        | Open Connection | myhost.com            |
+        | Open Connection | my.server.com         |
         | Open Connection | build.local.net       |
         | # Do something with the connections     |
         | [Teardown]      | Close all connections |
@@ -549,6 +552,10 @@ class SSHLibrary(object):
         | ${farhost}=     | Get Connection   | far                  |
         | Should Be Equal | ${farhost.host}  | far.server.com       |
         | Should Be Equal | ${farhost.alias} | far                  |
+
+        New in SSHLibrary 1.2.
+
+        See also `Get Connections`.
         """
         if not index_or_alias:
             index_or_alias = self._connections.current_index
@@ -575,6 +582,10 @@ class SSHLibrary(object):
         | Should Be Equal As Integers | ${nearhost.timeout} | 10              |
         | Should Be Equal As Integers | ${farhost.port}     | 22              |
         | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
+
+        Argument `loglevel` was added in SSHLibrary 1.2.
+
+        See also `Get Connection`.
         """
         configs = [c.config for c in self._connections._connections]
         for c in configs:
@@ -587,8 +598,8 @@ class SSHLibrary(object):
         Connection must be opened before using this keyword.
 
         This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If prompt is set, everything until the prompt
-        is taken. Practically after this keyword the server output is empty.
+        (usually the server MOTD). If [#Prompt|prompt is set], everything
+        until the prompt is returned and consumed.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -607,7 +618,7 @@ class SSHLibrary(object):
 
         Connection must be opened before using this keyword.
 
-        `username` is the username on the remote system.
+        `username` is the username on the remote machine.
 
         `keyfile` is a path to a valid OpenSSH private key file on the local
         filesystem.
@@ -615,17 +626,17 @@ class SSHLibrary(object):
         `password` is used to unlock the `keyfile` if unlocking is required.
 
         This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If prompt is set, everything until the prompt
-        is taken.  Practically after this keyword the server output is empty.
+        (usually the server MOTD). If [#Prompt|prompt is set], everything
+        until the prompt is returned and consumed.
 
         Example that logs in using a private key and returns the output:
-        | Open Connection | linux.host.com        |
+        | Open Connection | linux.server.com      |
         | ${output}=      | Login With Public Key | johndoe       | /home/johndoe/.ssh/id_rsa |
         | Should Contain  | ${motd}               | Last login at |
 
         Example that requires unlocking the private key:
-        | Open Connection       | linux.host.com |
-        | Login With Public Key | johndoe        | /home/johndoe/.ssh/id_dsa | keyringpasswd |
+        | Open Connection       | linux.server.com |
+        | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password)
@@ -644,11 +655,11 @@ class SSHLibrary(object):
         """Executes the command and returns a combination of stdout, stderr
         and return code.
 
-        If several arguments evaluate true, a tuple is returned.
-        Non-empty strings, except `false` and `False`, evaluate true.
+        If several arguments evaluate to true, a tuple is returned.
+        Non-empty strings, except `false` and `False`, evaluate to true.
         `return_stdout`, `return_stderr` and `return_rc` whether the
         returned tuple contains all these values. If only one of the arguments
-        evaluates true, the plain value is returned instead of a tuple.
+        evaluates to true, the plain value is returned instead of a tuple.
 
         By default, only standard output is returned:
         | ${stdout}=     | Execute Command | echo 'Hello John!' |
@@ -678,8 +689,8 @@ class SSHLibrary(object):
         | ${pwd}=         | Execute Command | pwd           |
         | Should Be Equal | ${pwd}          | /home/johndoe |
 
-        `Write` and `Read` keywords can be used for running multiple
-        commands in the same session.
+        `Write` and `Read` can be used for running multiple
+        commands in the same shell.
 
         This keyword also logs the executed command with log level `INFO`.
         """
@@ -690,7 +701,7 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
-        """Starts execution of the `command` on the remote host and
+        """Starts execution of the `command` on the remote machine and
         return immediately.
 
         This keyword returns immediately after being called:
@@ -718,8 +729,8 @@ class SSHLibrary(object):
         | ${pwd}=         | Read Command Output |
         | Should Be Equal | ${pwd}              | /home/johndoe |
 
-        `Write` and `Read` keywords can be used for running multiple
-        commands in the same session.
+        `Write` and `Read` can be used for running multiple
+        commands in the same shell.
 
         This keyword also logs the started command with log level `INFO`.
         """
@@ -735,11 +746,11 @@ class SSHLibrary(object):
         At least one command must have been started using `Start Command`
         before this keyword can be used.
 
-        If several arguments evaluate true, a tuple is returned.
-        Non-empty strings, except `false` and `False`, evaluate true.
+        If several arguments evaluate to true, a tuple is returned.
+        Non-empty strings, except `false` and `False`, evaluate to true.
         `return_stdout`, `return_stderr` and `return_rc` whether the
         returned tuple contains all these values. If only one of the arguments
-        evaluates true, the plain value is returned instead of a tuple.
+        evaluates to true, the plain value is returned instead of a tuple.
 
         By default, only standard output is returned:
         | Start Command  | echo 'Hello John!'  |
@@ -809,14 +820,14 @@ class SSHLibrary(object):
         return (value and str(value).lower() != 'false')
 
     def write(self, text, loglevel=None):
-        """Writes the given `text` on the remote and appends a newline.
+        """Writes the given `text` on the remote machine and appends a newline.
 
-        This keyword returns and [#Interactive sessions|consumes] the written
+        This keyword returns and [#Interactive shells|consumes] the written
         `text` (including the appended newline) from the server output.
 
         The written `text` is logged with the defined `loglevel`.
 
-        See `interactive sessions` for more information on writing.
+        See `interactive shells` for more information on writing.
 
         Example:
         | ${written}=        | Write         | su                         |
@@ -827,15 +838,18 @@ class SSHLibrary(object):
         | Write              | invalidpasswd |
         | ${output}=         | Read          |
         | Should Contain     | ${output}     | su: Authentication failure |
+
+        See also `Write Bare`.
         """
         self._write(text, add_newline=True)
         return self._read_and_log(loglevel, self.current.read_until_newline)
 
     def write_bare(self, text):
-        """Writes the given `text` on the remote without appending a newline.
+        """Writes the given `text` on the remote machine without appending
+        a newline.
 
-        Unlike `Write`, this keyword returns and
-        [#Interactive sessions|consumes] nothing.
+        Unlike `Write`, this keyword returns and [#Interactive shells|consumes]
+        nothing.
 
         Example:
         | Write Bare     | su\\n            |
@@ -845,6 +859,8 @@ class SSHLibrary(object):
         | Write Bare     | invalidpasswd\\n |
         | ${output}=     | Read             |
         | Should Contain | ${output}        | su: Authentication failure |
+
+        See also `Write`.
         """
         self._write(text)
 
@@ -860,7 +876,7 @@ class SSHLibrary(object):
         the server output.
 
         `text` is written without appending a newline and is
-        [#Interactive sessions|consumed] from the server output before
+        [#Interactive shells|consumed] from the server output before
         `expected` is read.
 
         `retry_interval` defines the time before writing `text` again.
@@ -870,7 +886,10 @@ class SSHLibrary(object):
         If `expected` does not appear in output within `timeout`, this keyword
         fails.
 
-        See `interactive sessions` for more information on writing.
+        Both `timeout` and `retry_interval` must be given in Robot Framework's
+        time format (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
+
+        See `interactive shells` for more information on writing.
 
         This example will write `lsof -c python26\\n` (list all files
         currently opened by python 2.6), until `myscript.py` appears in the
@@ -882,7 +901,7 @@ class SSHLibrary(object):
                            expected, timeout, retry_interval)
 
     def read(self, loglevel=None):
-        """[#Interactive sessions|Consumes] and returns everything currently
+        """[#Interactive shells|Consumes] and returns everything currently
         available on the server output.
 
         This keyword is most useful for reading everything from
@@ -890,7 +909,7 @@ class SSHLibrary(object):
 
         The read `text` is logged with the defined `loglevel`.
 
-        See `interactive sessions` for more information on reading.
+        See `interactive shells` for more information on reading.
 
         Example:
         | Open Connection | my.server.com |
@@ -905,14 +924,14 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read)
 
     def read_until(self, expected, loglevel=None):
-        """[#Interactive sessions|Consumes] and returns the server output until
-        `expected` is encountered or timeout expires.
+        """[#Interactive shells|Consumes] and returns the server output until
+        `expected` is encountered or [#Timeout|the timeout] expires.
 
         Text up until and including the `expected` will be returned.
 
         The read `text` is logged with the defined `loglevel`.
 
-        See `interactive sessions` for more information on reading.
+        See `interactive shells` for more information on reading.
 
         Example:
         | Open Connection | my.server.com |
@@ -923,36 +942,13 @@ class SSHLibrary(object):
         | Write           | ${PASSWORD}   |
         | ${output}=      | Read Until    | @                            |
         | Should Contain  | ${output}     | root@                        |
+
+        See also `Read Until Prompt` and `Read Until Regexp`.
         """
         return self._read_and_log(loglevel, self.current.read_until, expected)
 
-    def read_until_regexp(self, regexp, loglevel=None):
-        """[#Interactive sessions|Consumes] and returns the server output until
-        a match to `regexp` is found or timeout expires.
-
-        `regexp` can be a pattern or a compiled regexp object.
-
-        Text up until and including the `regexp` will be returned.
-
-        The read `text` is logged with the defined `loglevel`.
-
-        See `interactive sessions` for more information on reading.
-
-        Example:
-        | Open Connection | my.server.com     |
-        | Login           | johndoe           | ${PASSWORD}                  |
-        | Write           | sudo su -         |
-        | ${output}=      | Read Until Regexp | \\[.*\\].*:                  |
-        | Should Contain  | ${output}         | [sudo] password for johndoe: |
-        | Write           | ${PASSWORD}       |
-        | ${output}=      | Read Until Regexp | .*@                          |
-        | Should Contain  | ${output}         | root@                        |
-        """
-        return self._read_and_log(loglevel, self.current.read_until_regexp,
-                                  regexp)
-
     def read_until_prompt(self, loglevel=None):
-        """[#Interactive sessions|Consumes] and returns the server output until
+        """[#Interactive shells|Consumes] and returns the server output until
         the prompt is found.
 
         Text up and until prompt is returned. [#Prompt|Prompt must be set]
@@ -960,7 +956,7 @@ class SSHLibrary(object):
 
         The read `text` is logged with the defined `loglevel`.
 
-        See `interactive sessions` for more information on reading.
+        See `interactive shells` for more information on reading.
 
         This keyword is useful for reading output of a single command when
         output of previous command has been read and that command does not
@@ -974,8 +970,37 @@ class SSHLibrary(object):
         | Set Client Configuration | prompt=#          | # Prompt must be set for Read Until Prompt |
         | ${output}=               | Read Until Prompt |                                            |
         | Should Contain           | ${output}         | root@myserver:~#                           |
+
+        See also `Read Until` and `Read Until Regexp`.
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt)
+
+    def read_until_regexp(self, regexp, loglevel=None):
+        """[#Interactive shells|Consumes] and returns the server output until
+        a match to `regexp` is found or [#Timeout|the timeout] expires.
+
+        `regexp` can be a pattern or a compiled regexp object.
+
+        Text up until and including the `regexp` will be returned.
+
+        The read `text` is logged with the defined `loglevel`.
+
+        See `interactive shells` for more information on reading.
+
+        Example:
+        | Open Connection | my.server.com     |
+        | Login           | johndoe           | ${PASSWORD}                  |
+        | Write           | sudo su -         |
+        | ${output}=      | Read Until Regexp | \\[.*\\].*:                  |
+        | Should Contain  | ${output}         | [sudo] password for johndoe: |
+        | Write           | ${PASSWORD}       |
+        | ${output}=      | Read Until Regexp | .*@                          |
+        | Should Contain  | ${output}         | root@                        |
+
+        See also `Read Until` and `Read Until Prompt`.
+        """
+        return self._read_and_log(loglevel, self.current.read_until_regexp,
+                                  regexp)
 
     def _read_and_log(self, loglevel, reader, *args):
         try:
@@ -986,7 +1011,7 @@ class SSHLibrary(object):
         return output
 
     def get_file(self, source, destination='.', path_separator='/'):
-        """Downloads file(s) from the remote host to the local host.
+        """Downloads file(s) from the remote machine to the local machine.
 
         `source` is a path on the remote machine. Relative or absolute
         path may be used.
@@ -995,9 +1020,9 @@ class SSHLibrary(object):
         absolute path may be used.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this is `/` which is also
-        the default value. With Windows remotes, this must be set as `\\`.
-        This option was added in SSHLibrary 1.1.
+        on the remote machine. On Unix-like operating systems,
+        this is `/` which is also the default value. With Windows remotes,
+        this must be set as `\\`. This option was added in SSHLibrary 1.1.
 
         1. If `destination` is an existing file, `source` file is downloaded
            over it.
@@ -1032,8 +1057,8 @@ class SSHLibrary(object):
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
-        """Downloads a directory, including it's content, from the remote host
-        to the local host.
+        """Downloads a directory, including its content, from the remote
+        machine to the local machine.
 
         `source` is a path on the remote machine. Relative or absolute
         path may be used.
@@ -1085,9 +1110,9 @@ class SSHLibrary(object):
            working directory by name `logs`. Subdirectories are not included.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this must be `/` which is also
-        the default value. With Windows remotes, this must be set as `\\`:
-        This option was added in SSHLibrary 1.1.
+        on the remote machine. On Unix-like operating systems,
+        this must be `/` which is also the default value. With Windows remotes,
+        this must be set as `\\`.
 
         `recursive` specifies, whether to recursively download all
         subdirectories inside `source`. Subdirectories are downloaded if
@@ -1099,16 +1124,18 @@ class SSHLibrary(object):
         | Get Directory | /var/logs | /home/robot | recursive=True |
 
         As a result, the content of the remote directory `/var/logs`,
-        including it's subdirectories, is now found at `/home/robot/logs`.
+        including its subdirectories, is now found at `/home/robot/logs`.
         Subdirectory paths are preserved, e.g. remote `var/logs/mysql`
         is now found at `/home/robot/logs/mysql`.
+
+        New in SSHLibrary 1.2.
         """
         return self._run_sftp_command(self.current.get_directory, source,
                                       destination, path_separator, recursive)
 
     def put_file(self, source, destination='.', mode='0744',
                  newline='default', path_separator='/'):
-        """Uploads file(s) from the local host to the remote host.
+        """Uploads file(s) from the local machine to the remote machine.
 
         `source` is the path on the local machine. Relative or absolute
         path may be used.
@@ -1117,9 +1144,9 @@ class SSHLibrary(object):
         absolute path may be used.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this is `/` which is also
-        the default value. With Windows remotes, this must be set as `\\`.
-        This option was added in SSHLibrary 1.1.
+        on the remote machine. On Unix-like operating systems,
+        this is `/` which is also the default value. With Windows remotes,
+        this must be set as `\\`. This option was added in SSHLibrary 1.1.
 
         `mode` argument can be used to set the target file permission.
         Numeric values are accepted. The default value is `0744` (-rwxr--r--).
@@ -1161,8 +1188,8 @@ class SSHLibrary(object):
 
     def put_directory(self, source, destination='.', mode='0744',
                       newline='default', path_separator='/', recursive=False):
-        """Uploads a directory, including it's content, from the local host
-        to the remote host.
+        """Uploads a directory, including its content, from the local machine
+        to the remote machine.
 
         `source` is the path on the local machine. Relative or absolute
         path may be used.
@@ -1170,7 +1197,7 @@ class SSHLibrary(object):
         `destination` is the target path on the remote machine. Relative or
         absolute path may be used.
 
-        1. If `destination` is an existing path on the remote,
+        1. If `destination` is an existing path on the remote machine,
            `source` directory is uploaded into it.
 
            In this example, local `source`, `/var/logs`, is uploaded into
@@ -1178,11 +1205,12 @@ class SSHLibrary(object):
            | Put Directory | /var/logs | /home/robot |
 
            As a result, the content of local directory `/var/logs` is now
-           found on the remote at `/home/robot/logs`. Subdirectories are not
-           included.
+           found on the remote machine at `/home/robot/logs`.
+           Subdirectories are not included.
 
-        2. If `destination` is a non-existing path on the remote, it is created
-           and the content of `source` directory is uploaded into it.
+        2. If `destination` is a non-existing path on the remote machine,
+           it is created and the content of `source` directory is uploaded
+           into it.
 
            In this example, the content of the local `source` directory `logs`,
            in the current working directory, is uploaded to a non-existing
@@ -1197,10 +1225,10 @@ class SSHLibrary(object):
            directory itself. Subdirectories are not included.
 
         3. If `destination` is not given, `source` directory is uploaded into
-           the current working directory on the remote.
+           the current working directory on the remote machine.
 
            In this example, `source` is uploaded into the current working
-           directory on the remote:
+           directory on the remote machine:
            | Put Directory | /path/to/remote/logs |
 
            Note the missing `destination`. It is also possible to refer
@@ -1218,9 +1246,9 @@ class SSHLibrary(object):
         the remote files. Valid values are `CRLF` (for Windows) and `LF`.
 
         `path_separator` is the path separator character of the operating system
-        on the remote machine. On Unix-Likes, this must be `/` which is also
-        the default value. With Windows remotes, this must be set as `\\`:
-        This option was added in SSHLibrary 1.1.
+        on the remote machine. On Unix-like operating systems,
+        this must be `/` which is also the default value. With Windows remotes,
+        this must be set as `\\`.
 
         `recursive` specifies, whether to recursively upload all
         subdirectories inside `source`. Subdirectories are uploaded if the
@@ -1232,10 +1260,12 @@ class SSHLibrary(object):
         | Put Directory | /var/logs | /home/robot | recursive=True |
 
         As a result, the content of the local directory `/var/logs`,
-        including it's subdirectories, is now found on the remote at
+        including its subdirectories, is now found on the remote at
         `/home/robot/logs`. Subdirectory paths are preserved, e.g.
-        local `var/logs/mysql` is found on the remote
+        local `var/logs/mysql` is found on the remote machine
         at `/home/robot/logs/mysql`.
+
+        New in SSHLibrary 1.2.
         """
         return self._run_sftp_command(self.current.put_directory, source,
                                       destination, mode, newline,
@@ -1257,6 +1287,8 @@ class SSHLibrary(object):
 
         Note that symlinks are followed:
         | File Should Exist | /initrd.img | # Points to boot/initrd.img |
+
+        New in SSHLibrary 1.2.
         """
         return self.current.file_exists(path)
 
@@ -1266,7 +1298,10 @@ class SSHLibrary(object):
         Example:
         | File Should Not Exist | /cat |
 
-        Note that symlinks are followed.
+        Note that this keyword follows symlinks. Thus the example would fail
+        if `/cat` pointed to an existing file.
+
+        New in SSHLibrary 1.2.
         """
         return not self.current.file_exists(path)
 
@@ -1278,6 +1313,8 @@ class SSHLibrary(object):
 
         Note that symlinks are followed:
         | Directory Should Exist | /usr/local/man | # Points to /usr/share/man/ |
+
+        New in SSHLibrary 1.2.
         """
         return self.current.dir_exists(path)
 
@@ -1287,7 +1324,10 @@ class SSHLibrary(object):
         Example:
         | Directory Should Not Exist | /nonexisting |
 
-        Note that symlinks are followed.
+        Note that this keyword follows symlinks. Thus the example would fail
+        if `/nonexisting` pointed to an existing directory.
+
+        New in SSHLibrary 1.2.
         """
         return not self.current.dir_exists(path)
 
@@ -1311,6 +1351,10 @@ class SSHLibrary(object):
         Examples (using also other `List Directory` variants):
         | @{items}= | List Directory          | /home/robot |
         | @{files}= | List Files In Directory | /tmp | *.txt | absolute=True |
+
+        New in SSHLibrary 1.2.
+
+        See also `List Files In Directory` and `List Directories In Directory`.
         """
         try:
             items = self.current.list_dir(path, pattern, absolute)
@@ -1321,7 +1365,10 @@ class SSHLibrary(object):
         return items
 
     def list_files_in_directory(self, path, pattern=None, absolute=False):
-        """A wrapper for `List Directory` that returns only files."""
+        """A wrapper for `List Directory` that returns only files.
+
+        New in SSHLibrary 1.2.
+        """
         try:
             files = self.current.list_files_in_dir(path, pattern, absolute)
         except SSHClientException, msg:
@@ -1332,7 +1379,10 @@ class SSHLibrary(object):
         return files
 
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
-        """A wrapper for `List Directory` that returns only directories."""
+        """A wrapper for `List Directory` that returns only directories.
+
+        New in SSHLibrary 1.2.
+        """
         try:
             dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
         except SSHClientException, msg:
