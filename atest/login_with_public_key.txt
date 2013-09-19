@@ -8,7 +8,6 @@ Library         OperatingSystem  WITH NAME  OS
 *** Variables ***
 ${PUBKEYDIR}                ${CURDIR}/testdata/keyfiles
 ${PUBKEY USERNAME}          testkey
-${PUBKEY PASSWORD}          ${EMPTY}
 ${PUBKEY FILE}              ${PUBKEYDIR}/id_rsa
 ${INVALID PUBKEY USERNAME}  invalid_key_username
 ${INVALID PUBKEY FILE}      ${PUBKEYDIR}/id_rsa_invalid
@@ -16,15 +15,13 @@ ${INVALID PUBKEY FILE}      ${PUBKEYDIR}/id_rsa_invalid
 *** Test Cases ***
 Login With Public Key
     Open Connection  ${HOST}
-    Login With Public Key  ${PUBKEY_USERNAME}  ${PUBKEY_FILE}
-    ...                    ${PUBKEY_PASSWORD}
+    Login With Public Key  ${PUBKEY USERNAME}  ${PUBKEY FILE}
 
 Login With Non Existing Public Key
     Run Keyword And Expect Error  Given key file '/invalid/path' does not exist
-    ...                           Login With Public Key  ${PUBKEY_USERNAME}
-    ...                           /invalid/path  ${PUBKEY_PASSWORD}
+    ...                           Login With Public Key  ${PUBKEY USERNAME}
+    ...                           /invalid/path
 
 Login With Invalid Public Key
     Run Keyword And Expect Error  Login with public key failed for user: testkey
-    ...    Login With Public Key  ${PUBKEY_USERNAME}  ${INVALID PUBKEY FILE}
-    ...                           ${PUBKEY_PASSWORD}
+    ...    Login With Public Key  ${PUBKEY USERNAME}  ${INVALID PUBKEY FILE}

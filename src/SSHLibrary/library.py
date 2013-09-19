@@ -613,7 +613,7 @@ class SSHLibrary(object):
         """
         return self._login(self.current.login, username, password)
 
-    def login_with_public_key(self, username, keyfile, password):
+    def login_with_public_key(self, username, keyfile, password=''):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
