@@ -13,6 +13,9 @@ Close Connection
     Close Connection
     Connection Should Be Closed
 
+Close Connection Fails No Connection
+    Run Keyword And Expect Error  No open connection.  Close Connection
+
 Switch Connection
     ${conn1_id} =  Login As Valid User  one
     Write  cd /tmp
@@ -36,7 +39,7 @@ Switch Connection To None
 Login Returns Server Output
     [Setup]  Open Connection  ${HOST}
     ${output}=  Login  ${USERNAME}  ${PASSWORD}
-    Should Contain  ${output}  Last login:
+    Should Contain  ${output}  :~$
 
 Login Returns Server Output Until Prompt If Prompt Is Set
     [Setup]  Open Connection  ${HOST}  prompt=$
@@ -62,6 +65,9 @@ Get Connection
     ${conn} =  Get Connection  2
     Should Be Equal  ${conn.index}  ${conn2_index}
 
+Get Connection Fails When No Connections
+    Run Keyword And Expect Error  No open connection.  Get Connection
+
 Get Connections
     Open Connection   ${HOST}   prompt=>>
     Open Connection   ${HOST}   alias=another
@@ -74,6 +80,11 @@ Get Connections
     Should Be Equal    ${conns[0].prompt}     >>
     Should Be Equal    ${conns[1].alias}      another
     Should Be Equal    ${conns[0].term_type}  vt100
+
+Get Connections Returns Empty List When No Connections
+    ${conns} =  Get Connections
+    ${empty_list} =  Create List
+    Should Be Equal  ${conns}  ${empty_list}
 
 *** Keywords ***
 Connection Should Be Closed
