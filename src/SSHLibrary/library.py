@@ -520,13 +520,17 @@ class SSHLibrary(object):
     def get_connection(self, index_or_alias=None, loglevel=None):
         """Return information of the connection by index or alias.
 
+        Connection is not changed by this keyword, use `Switch Connection` to
+        change the active connection.
+
         If `index_or_alias` is not given, the information of the current
         active connection is returned.
 
         This keyword returns an object that describes the connection.
         The object has attributes that correspond to the [#Configurable
-        per connection|connection configuration values] and has also attributes
-        attributes `host`, `port`, `index` and `alias`.
+        per connection|connection configuration values] including
+        attributes `host`, `port`, `index` and `alias`. If you want
+        the objects for all the open connections, use `Get Connections`.
 
         This keyword logs the connection information. `loglevel` can be used to
         override the [#Loglevel|default log level].
@@ -554,8 +558,6 @@ class SSHLibrary(object):
         | Should Be Equal | ${farhost.alias} | far                  |
 
         New in SSHLibrary 1.2.
-
-        See also `Get Connections`.
         """
         if not index_or_alias:
             index_or_alias = self._connections.current_index
@@ -566,10 +568,10 @@ class SSHLibrary(object):
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
-        This keyword returns a list of objects that describe the connections.
-        These objects have attributes that correspond to the [#Configurable
-        per connection|connection configuration values] and has also attributes
-        `host`, `port`, `index` and `alias`.
+        This keyword returns a list of objects similar to what is returned
+        by `Get Connection`. These objects have attributes that correspond
+        to the [#Configurable per connection|connection configuration values]
+        including attributes `host`, `port`, `index` and `alias`.
 
         This keyword logs the connection information. `loglevel` can be used to
         override the [#Loglevel|default log level].
@@ -584,8 +586,6 @@ class SSHLibrary(object):
         | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
 
         Argument `loglevel` was added in SSHLibrary 1.2.
-
-        See also `Get Connection`.
         """
         configs = [c.config for c in self._connections._connections]
         for c in configs:
