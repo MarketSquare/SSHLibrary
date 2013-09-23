@@ -13,7 +13,7 @@ Close Connection
     Close Connection
     Connection Should Be Closed
 
-Close Connection Fails No Connection
+Close Connection Fails If No Connection
     Run Keyword And Expect Error  No open connection.  Close Connection
 
 Switch Connection
