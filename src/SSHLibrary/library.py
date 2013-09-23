@@ -68,7 +68,7 @@ class SSHLibrary(object):
     All the settings are listed further below.
 
     Using `Set Default Configuration` does not affect the already open
-    connections. Settings of the current active connection can be configured
+    connections. Settings of the current connection can be configured
     with `Set Client Configuration`. Settings of another, non-active connection,
     can be configured by first using `Switch Connection` and then
     `Set Client Configuration`.
@@ -78,7 +78,7 @@ class SSHLibrary(object):
 
     == Configurable per connection ==
 
-    === Timeout ===
+    === Default timeout ===
 
     Timeout is used by `Read Until` variants. The default value is `3 seconds`.
 
@@ -86,23 +86,23 @@ class SSHLibrary(object):
     and `2 min 3 s` are all accepted. See section 'Time Format' in
     Robot Framework User Guide for details.
 
-    === Newline ===
+    === Default newline ===
 
     Newline is the line break sequence known by the operating system
     on the remote machine. The default value is `LF` which is used by
     Unix-like operating systems.
 
-    === Prompt ===
+    === Default prompt ===
 
     Prompt is a character sequence used by `Read Until Prompt`
     and must be set before the keyword can be used.
 
-    === Terminal settings ===
+    === Default terminal settings ===
 
     Argument `term_type` defines the terminal type on the remote machine and
     arguments `width` and `height` can be used to set the virtual size of it.
 
-    === Encoding ===
+    === Default encoding ===
 
     Encoding is the
     [http://docs.python.org/2/library/codecs.html#standard-encodings|character encoding]
@@ -111,7 +111,7 @@ class SSHLibrary(object):
 
     == Not configurable per connection ==
 
-    === Loglevel ===
+    === Default loglevel ===
 
     Loglevel sets the log level used to log the output read by `Read`,
     `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
@@ -151,10 +151,10 @@ class SSHLibrary(object):
     | Should Not Contain | ${stdout}    | hello | # because the printed 'hello' was already consumed |
 
     The consumed text is logged by the keywords and argument `loglevel`
-    can be used to override [#Loglevel|the default log level].
+    can be used to override [#Default loglevel|the default log level].
 
     `Login` and `Login With Public Key` consume everything on
-    the server output or if [#Prompt|prompt is set], everything until
+    the server output or if [#Default prompt|prompt is set], everything until
     the prompt.
 
     == Reading ==
@@ -164,8 +164,8 @@ class SSHLibrary(object):
     consumed from the server output.
 
     `Read Until` variants read output up until and *including* `expected` text.
-    These keywords will fail if [#Timeout|the timeout] expires before `expected`
-    is found.
+    These keywords will fail if [#Default timeout|the timeout] expires before
+    `expected` is found.
 
     == Writing ==
 
@@ -300,7 +300,7 @@ class SSHLibrary(object):
 
         Only parameters whose value is other than `None` are updated.
 
-        This example sets the prompt to `$:
+        This example sets the prompt to `$`:
         | Set Default Configuration | prompt=$ |
 
         This example sets `newline` and `loglevel`, but leaves the other
@@ -309,14 +309,15 @@ class SSHLibrary(object):
 
         Sometimes you might want to use longer timeout for all the subsequent
         connections without affecting the existing ones:
-        | Set Default Configuration | timeout=5 seconds  |
-        | ${local}=                 | Open Connection    | local.server.com |
-        | Set Default Configuration | timeout=20 seconds |
-        | ${emea}=                  | Open Connection    | emea.server.com  |
-        | ${apac}=                  | Open Connection    | apac.server.com  |
-        | Should Be Equal           | ${local.timeout}   | 5 seconds        |
-        | Should Be Equal           | ${emea.timeout}    | 20 seconds       |
-        | Should Be Equal           | ${apac.timeout}    | 20 seconds       |
+        | Set Default Configuration   | timeout=5 seconds  |
+        | Open Connection             | local.server.com   |
+        | Set Default Configuration   | timeout=20 seconds |
+        | Open Connection             | emea.server.com    |
+        | Open Connection             | apac.server.com    |
+        | ${local}  ${emea}  ${apac}= | Get Connections    |
+        | Should Be Equal As Integers | ${local.timeout}   | 5  |
+        | Should Be Equal As Integers | ${emea.timeout}    | 20 |
+        | Should Be Equal As Integers | ${apac.timeout}    | 20 |
 
         Arguments `term_type`, `width`, `height` and `encoding` were added
         in SSHLibrary 1.2.
@@ -328,29 +329,29 @@ class SSHLibrary(object):
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
                                  encoding=None):
-        """Update the `configuration` of the current active connection.
+        """Update the `configuration` of the current connection.
         At least one connection must have been opened using `Open Connection`.
 
         Only parameters whose value is other than `None` are updated.
 
-        In the following example, prompt is set for the current active
-        connection. Other settings are left intact:
+        In the following example, `prompt` is set for the current connection.
+        Other settings are left intact:
         | Open Connection          | my.server.com      |
         | Set Client Configuration | prompt=$           |
-        | ${conns}=                | Get Connections    |
-        | Should Be Equal          | ${conns[0].prompt} | $ |
+        | ${myserver}=             | Get Connection     |
+        | Should Be Equal          | ${myserver.prompt} | $ |
 
-        Also, the other connections are not affected:
+        Using keyword does not affect to the other connections:
         | Open Connection          | linux.server.com   |   |
         | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
         | Open Connection          | windows.server.com |   |
         | Set Client Configuration | prompt=>           |   | # Only windows.server.com affected  |
-        | ${conns}=                | Get Connections    |
-        | Should Be Equal          | ${conns[0].prompt} | $ |
-        | Should Be Equal          | ${conns[1].prompt} | > |
+        | ${linux}  ${windows}=    | Get Connections    |
+        | Should Be Equal          | ${linux.prompt}    | $ |
+        | Should Be Equal          | ${windows.prompt}  | > |
 
         Multiple settings are possible. This example updates both terminal type
-        and terminal width of the current active connection:
+        and terminal width of the current connection:
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
 
@@ -404,7 +405,7 @@ class SSHLibrary(object):
 
         Connection parameters, like `timeout` and `newline` are documented in
         `configuration`. All the arguments, except `host`, `alias` and `port`
-        can be later updated with `Set Client Configuration.
+        can be later updated with `Set Client Configuration`.
 
         Starting from SSHLibrary 1.1, a shell is automatically opened
         by this keyword.
@@ -449,32 +450,24 @@ class SSHLibrary(object):
         """Switches the active connection by index or alias.
 
         `index_or_alias` is either connection index (an integer) or alias
-        (a string). Both index and alias can queried as attributes of the object
-        returned by `Get Connection`.
+        (a string). Index is got as the return value of `Open Connection`.
+        Alternatively, both index and alias can queried as attributes
+        of the object returned by `Get Connection`.
 
-        This keyword returns the index of the last active connection,
-        which can be used to reuse that connection later.
+        This keyword returns the index of the previous active connection,
+        which can be used to switch back to that connection later.
 
         Example:
-        | Open Connection   | my.server.com   |
-        | Login             | johndoe         | secretpasswd |
-        | Open Connection   | build.local.net | alias=Build  |
-        | Login             | jenkins         | jenkins      |
-        | Switch Connection | 1               |              | # Switch using index          |
-        | ${username}=      | Execute Command | whoami       | # Executed on my.server.com   |
-        | Should Be Equal   | ${username}     | johndoe      |
-        | Switch Connection | Build           |              | # Switch using alias          |
-        | ${username}=      | Execute Command | whoami       | # Executed on build.local.net |
-        | Should Be Equal   | ${username}     | jenkins      |
-
-        Above example expects that there was no other open connections when
-        opening the first one. Thus index `1` can be used to switch back to it
-        later. If you aren't sure about connection index you can store it
-        into a variable as below:
         | ${myserver}=      | Open Connection | my.server.com |
-        | Open Connection   | build.local.net |
-        | # Do something with build.local.net |
-        | Switch Connection | ${myserver}     |
+        | Login             | johndoe         | secretpasswd  |
+        | Open Connection   | build.local.net | alias=Build   |
+        | Login             | jenkins         | jenkins       |
+        | Switch Connection | ${myserver}     |               | # Switch using index          |
+        | ${username}=      | Execute Command | whoami        | # Executed on my.server.com   |
+        | Should Be Equal   | ${username}     | johndoe       |
+        | Switch Connection | Build           |               | # Switch using alias          |
+        | ${username}=      | Execute Command | whoami        | # Executed on build.local.net |
+        | Should Be Equal   | ${username}     | jenkins       |
         """
         old_index = self._connections.current_index
         if index_or_alias is None:
@@ -484,7 +477,7 @@ class SSHLibrary(object):
         return old_index
 
     def close_connection(self):
-        """Closes the current active connection.
+        """Closes the current connection.
 
         No other connection is made active by this keyword. Manually use
         `Switch Connection` to switch to another connection.
@@ -533,9 +526,9 @@ class SSHLibrary(object):
         the objects for all the open connections, use `Get Connections`.
 
         This keyword logs the connection information. `loglevel` can be used to
-        override the [#Loglevel|default log level].
+        override the [#Default loglevel|default log level].
 
-        Getting information of the current active connection:
+        Getting information of the current connection:
         | Open Connection | far.server.com        |
         | Open Connection | near.server.com       | prompt=>>       | # Current connection |
         | ${nearhost}=    | Get Connection        |                 |
@@ -574,7 +567,7 @@ class SSHLibrary(object):
         including attributes `host`, `port`, `index` and `alias`.
 
         This keyword logs the connection information. `loglevel` can be used to
-        override the [#Loglevel|default log level].
+        override the [#Default loglevel|default log level].
 
         Example:
         | Open Connection             | near.server.com     | timeout=10s     |
@@ -598,7 +591,7 @@ class SSHLibrary(object):
         Connection must be opened before using this keyword.
 
         This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If [#Prompt|prompt is set], everything
+        (usually the server MOTD). If [#Default prompt|prompt is set], everything
         until the prompt is returned and consumed.
 
         Example that logs in and returns the output:
@@ -626,8 +619,8 @@ class SSHLibrary(object):
         `password` is used to unlock the `keyfile` if unlocking is required.
 
         This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If [#Prompt|prompt is set], everything
-        until the prompt is returned and consumed.
+        (usually the server MOTD). If [#Default prompt|prompt is set],
+        everything until the prompt is returned and consumed.
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.server.com      |
@@ -652,21 +645,20 @@ class SSHLibrary(object):
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
                         return_rc=False):
-        """Executes the command and returns a combination of stdout, stderr
-        and return code.
+        """Executes `command` on the remote machine and return its outputs.
 
-        This keyword returns after the command execution has been finished.
-        If returning immediately is required, use `Start Command` instead.
+        This keyword executes the `command` and returns after the execution
+        has been finished. If returning immediately is required,
+        use `Start Command` instead.
 
-        If several arguments evaluate to true, a tuple is returned.
-        Non-empty strings, except `false` and `False`, evaluate to true.
-        `return_stdout`, `return_stderr` and `return_rc` whether the
-        returned tuple contains all these values. If only one of the arguments
-        evaluates to true, the plain value is returned instead of a tuple.
-
-        By default, only standard output is returned:
+        By default, only the standard output is returned:
         | ${stdout}=     | Execute Command | echo 'Hello John!' |
         | Should Contain | ${stdout}       | Hello John!        |
+
+        Arguments `return_stdout`, `return_stderr` and `return_rc` are used
+        to specify, what is returned by this keyword.
+        If several arguments evaluate to true, multiple values are returned.
+        Non-empty strings, except `false` and `False`, evaluate to true.
 
         If errors are needed as well, set the argument value to true:
         | ${stdout}       | ${stderr}= | Execute Command | echo 'Hello John!' | return_stderr=True |
@@ -685,8 +677,8 @@ class SSHLibrary(object):
         | ${pwd}=         | Execute Command | pwd           |
         | Should Be Equal | ${pwd}          | /home/johndoe |
 
-        `Write` and `Read` can be used for running multiple
-        commands in the same shell.
+        `Write` and `Read` can be used for
+        [#Interactive shells|running subsequent commands in the same shell].
 
         This keyword also logs the executed command and the exit
         status with log level `INFO`.
@@ -702,8 +694,8 @@ class SSHLibrary(object):
         """Starts execution of the `command` on the remote machine and
         returns immediately.
 
-        This keyword returns immediately and does not wait for the command
-        execution to be finished. If blocking behaviour is needed,
+        This keyword returns nothing and does not wait for the command
+        execution to be finished. If waiting for the output is required,
         use `Execute Command` instead.
 
         This keyword does not return output generated by the started command.
@@ -723,8 +715,8 @@ class SSHLibrary(object):
         | ${pwd}=         | Read Command Output |
         | Should Be Equal | ${pwd}              | /home/johndoe |
 
-        `Write` and `Read` can be used for running multiple
-        commands in the same shell.
+        `Write` and `Read` can be used for
+        [#Interactive shells|running subsequent commands in the same shell].
 
         This keyword also logs the started command with log level `INFO`.
         """
@@ -734,22 +726,20 @@ class SSHLibrary(object):
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
-        """Returns a combination of stdout, stderr and the return code of the
-        most recent started command.
+        """Returns outputs of the most recent started command.
 
         At least one command must have been started using `Start Command`
         before this keyword can be used.
 
-        If several arguments evaluate to true, a tuple is returned.
-        Non-empty strings, except `false` and `False`, evaluate to true.
-        `return_stdout`, `return_stderr` and `return_rc` whether the
-        returned tuple contains all these values. If only one of the arguments
-        evaluates to true, the plain value is returned instead of a tuple.
-
-        By default, only standard output is returned:
+        By default, only the standard output of the started command is returned:
         | Start Command  | echo 'Hello John!'  |
         | ${stdout}=     | Read Command Output |
         | Should Contain | ${stdout}           | Hello John! |
+
+        Arguments `return_stdout`, `return_stderr` and `return_rc` are used
+        to specify, what is returned by this keyword.
+        If several arguments evaluate to true, multiple values are returned.
+        Non-empty strings, except `false` and `False`, evaluate to true.
 
         If errors are needed as well, set the argument value to true:
         | Start Command   | echo 'Hello John!' |
@@ -814,7 +804,8 @@ class SSHLibrary(object):
         return (value and str(value).lower() != 'false')
 
     def write(self, text, loglevel=None):
-        """Writes the given `text` on the remote machine and appends a newline.
+        """Writes the given `text` on the remote machine and appends
+        [#Default newline|a newline].
 
         This keyword returns and [#Interactive shells|consumes] the written
         `text` (including the appended newline) from the server output.
@@ -895,13 +886,13 @@ class SSHLibrary(object):
                            expected, timeout, retry_interval)
 
     def read(self, loglevel=None):
-        """[#Interactive shells|Consumes] and returns everything currently
-        available on the server output.
+        """[#Interactive shells|Consumes] and returns everything available
+        on the server output.
 
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
 
-        The read `text` is logged with the defined `loglevel`.
+        The read output is logged with the defined `loglevel`.
 
         See `interactive shells` for more information on reading.
 
@@ -919,11 +910,14 @@ class SSHLibrary(object):
 
     def read_until(self, expected, loglevel=None):
         """[#Interactive shells|Consumes] and returns the server output until
-        `expected` is encountered or [#Timeout|the timeout] expires.
+        `expected` is encountered.
 
         Text up until and including the `expected` will be returned.
 
-        The read `text` is logged with the defined `loglevel`.
+        If [#Default timeout|the timeout] expires before the match is found,
+        this keyword fails.
+
+        The read output is logged with the defined `loglevel`.
 
         See `interactive shells` for more information on reading.
 
@@ -945,10 +939,13 @@ class SSHLibrary(object):
         """[#Interactive shells|Consumes] and returns the server output until
         the prompt is found.
 
-        Text up and until prompt is returned. [#Prompt|Prompt must be set]
-        before this keyword is used.
+        Text up and until prompt is returned.
+        [#Default prompt|Prompt must be set] before this keyword is used.
 
-        The read `text` is logged with the defined `loglevel`.
+        If [#Default timeout|the timeout] expires before the match is found,
+        this keyword fails.
+
+        The read output is logged with the defined `loglevel`.
 
         See `interactive shells` for more information on reading.
 
@@ -957,13 +954,13 @@ class SSHLibrary(object):
         produce prompt characters in its output.
 
         Example:
-        | Open Connection          | my.server.com     |
-        | Login                    | johndoe           | ${PASSWORD}                                |
+        | Open Connection          | my.server.com     | prompt=$                    |
+        | Login                    | johndoe           | ${PASSWORD}                 |
         | Write                    | sudo su -         |
         | Write                    | ${PASSWORD}       |
-        | Set Client Configuration | prompt=#          | # Prompt must be set for Read Until Prompt |
-        | ${output}=               | Read Until Prompt |                                            |
-        | Should Contain           | ${output}         | root@myserver:~#                           |
+        | Set Client Configuration | prompt=#          | # For root, the prompt is # |
+        | ${output}=               | Read Until Prompt |                             |
+        | Should Contain           | ${output}         | root@myserver:~#            |
 
         See also `Read Until` and `Read Until Regexp`.
         """
@@ -971,13 +968,36 @@ class SSHLibrary(object):
 
     def read_until_regexp(self, regexp, loglevel=None):
         """[#Interactive shells|Consumes] and returns the server output until
-        a match to `regexp` is found or [#Timeout|the timeout] expires.
+        a match to `regexp` is found.
 
         `regexp` can be a pattern or a compiled regexp object.
 
         Text up until and including the `regexp` will be returned.
 
-        The read `text` is logged with the defined `loglevel`.
+        Regular expression check is done using the Python 're' module, which
+        has a pattern syntax derived from Perl, and thus also very similar to
+        the one in Java. See the following documents for more details about
+        regular expressions in general and Python implementation in particular.
+
+        | http://docs.python.org/lib/module-re.html
+        | http://www.amk.ca/python/howto/regex/
+
+        Things to note about the `regexp` syntax:
+
+        - Backslash is an escape character in the test data, and possible
+          backslashes in the pattern must thus be escaped with another backslash
+          (e.g. '\\\\d\\\\w+').
+
+        - Possible flags altering how the expression is parsed (e.g.
+          re.IGNORECASE, re.MULTILINE) can be set by prefixing the pattern with
+          the '(?iLmsux)' group (e.g. '(?im)pattern'). The available flags are
+          'IGNORECASE': 'i', 'MULTILINE': 'm', 'DOTALL': 's', 'VERBOSE': 'x',
+          'UNICODE': 'u', and 'LOCALE': 'L'.
+
+        If [#Default timeout|the timeout] expires before the match is found,
+        this keyword fails.
+
+        The read output is logged with the defined `loglevel`.
 
         See `interactive shells` for more information on reading.
 
@@ -985,7 +1005,7 @@ class SSHLibrary(object):
         | Open Connection | my.server.com     |
         | Login           | johndoe           | ${PASSWORD}                  |
         | Write           | sudo su -         |
-        | ${output}=      | Read Until Regexp | \\[.*\\].*:                  |
+        | ${output}=      | Read Until Regexp | \\\\[.*\\\\].*:              |
         | Should Contain  | ${output}         | [sudo] password for johndoe: |
         | Write           | ${PASSWORD}       |
         | ${output}=      | Read Until Regexp | .*@                          |
@@ -1344,13 +1364,13 @@ class SSHLibrary(object):
 
         Examples (using also other `List Directory` variants):
         | @{items}= | List Directory          | /home/robot |
-        | @{files}= | List Files In Directory | /tmp | *.txt | absolute=True |
-
-        New in SSHLibrary 1.2.
+        | @{files}= | List Files In Directory | /tmp        | *.txt | absolute=True |
 
         If you are only interested in directories or files,
         use `List Files In Directory` or `List Directories In Directory`,
         respectively.
+
+        New in SSHLibrary 1.2.
         """
         try:
             items = self.current.list_dir(path, pattern, absolute)
