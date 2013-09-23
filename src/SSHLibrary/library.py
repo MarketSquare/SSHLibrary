@@ -1147,8 +1147,8 @@ class SSHLibrary(object):
         return self._run_sftp_command(self.current.get_directory, source,
                                       destination, path_separator, recursive)
 
-    def put_file(self, source, destination='.', mode='0744',
-                 newline='default', path_separator='/'):
+    def put_file(self, source, destination='.', mode='0744', newline="",
+                 path_separator='/'):
         """Uploads file(s) from the local machine to the remote machine.
 
         `source` is the path on the local machine. Relative or absolute
@@ -1201,7 +1201,7 @@ class SSHLibrary(object):
                                       path_separator)
 
     def put_directory(self, source, destination='.', mode='0744',
-                      newline='default', path_separator='/', recursive=False):
+                      newline="", path_separator='/', recursive=False):
         """Uploads a directory, including its content, from the local machine
         to the remote machine.
 

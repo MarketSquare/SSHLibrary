@@ -287,8 +287,8 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
                                  % (expected, timeout, decoded_output))
 
-    def put_file(self, source, destination='.', mode='0744',
-                 newline='default', path_separator='/'):
+    def put_file(self, source, destination='.', mode='0744', newline='',
+                 path_separator='/'):
         """Put file(s) from localhost to remote host.
 
         :param source: Local file path. May be a simple pattern containing
@@ -307,8 +307,8 @@ class AbstractSSHClient(object):
                                                           path_separator)
         return sources, destinations
 
-    def put_directory(self, source, destination='.', mode='0744',
-                      newline='default', path_separator='/', recursive=False):
+    def put_directory(self, source, destination='.', mode='0744', newline='',
+                      path_separator='/', recursive=False):
         sources, destinations = self.sftp_client.put_directory(source,
                                                                destination,
                                                                mode,
@@ -559,8 +559,7 @@ class AbstractSFTPClient(object):
                 break
         return localfiles, remotefiles
 
-    def put_file(self, sources, destination, mode, newline,
-                  path_separator='/'):
+    def put_file(self, sources, destination, mode, newline, path_separator='/'):
         mode = int(mode, 8)
         newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
         localfiles = self._get_put_file_sources(sources)
