@@ -218,6 +218,16 @@ class SSHLibrary(object):
     |     ${rc}=             `Execute Command`   echo Success quaranteed.    return_stdout=False    return_rc=True
     |     Should Be Equal    ${rc}             ${0}
     |
+    | Executing Commands In An Interactive Session
+    |     [Documentation]    Execute Command always executes the command in a new shell.
+    |     ...                This means that changes to the environment are not persisted
+    |     ...                between subsequent Execute Command keyword calls.
+    |     ...                Write and Read keyword variants can be used to operate in the same shell.
+    |                        Write  cd ..
+    |                        Write  echo Hello from the parent directory!
+    |     ${output}=         Read Until  directory!
+    |     Should Contain     ${output}  Hello from the parent directory!
+    |
     | ***** Keywords *****
     | Open Connection And Log In
     |    `Open Connection`     ${HOST}
