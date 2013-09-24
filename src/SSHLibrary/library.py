@@ -80,60 +80,64 @@ class SSHLibrary(object):
 
     === Default timeout ===
 
-    Timeout is used by `Read Until` variants. The default value is `3 seconds`.
+    Argument `timeout` is used by `Read Until` variants. The default value is
+    `3 seconds`.
 
     Value must be in Robot Framework's time format, e.g. `3`, `4.5`, `1 minute`
-    and `2 min 3 s` are all accepted. See section 'Time Format' in
+    and `2 min 3 s` are all accepted. See section 'Time Format' in the
     Robot Framework User Guide for details.
 
     === Default newline ===
 
-    Newline is the line break sequence used by `Write` keyword and must be set
-    to the one known by the operating system. The default value is `LF` which is
-    used by Unix-like operating systems. On Windows, you need to set this
-    to `CRLF`.
+    Argument `newline` is the line break sequence used by `Write` keyword and
+    must be set according to the operating system on the remote machine.
+    The default value is `LF` which is used by Unix-like operating systems.
+    With Windows remote machines, you need to set this to `CRLF`.
 
     === Default prompt ===
 
-    Prompt is a character sequence used by `Read Until Prompt`
+    Argument `prompt` defines the character sequence used by `Read Until Prompt`
     and must be set before the keyword can be used.
 
     === Default terminal settings ===
 
-    Argument `term_type` defines the terminal type on the remote machine and
-    arguments `width` and `height` can be used to set the virtual size of it.
+    Argument `term_type` defines the virtual terminal type and arguments
+    `width` and `height` can be used to control the virtual size of it.
 
     === Default encoding ===
 
-    Encoding is the
-    [http://docs.python.org/2/library/codecs.html#standard-encodings|character encoding]
-    of input and output sequences. Starting from SSHLibrary 1.2, the default
-    value is `UTF-8`.
+    Argument `encoding` defines the
+    [http://docs.python.org/2/library/codecs.html#standard-encodings|
+    character encoding] of input and output sequences.
+    Starting fro SSHLibrary 1.2, the default value is `UTF-8`.
 
     == Not configurable per connection ==
 
     === Default loglevel ===
 
-    Loglevel sets the log level used to log the output read by `Read`,
-    `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
-    `Write Until Expected Output` and `Get Connections`. The default level is
-    `INFO`. `loglevel` is not configurable per connection but can be overridden
-    by passing it as an argument to any of the mentioned keywords.
-    Possible values are `TRACE`, `DEBUG`, `INFO` and `WARN`.
+    Argument `loglevel` sets the log level used to log the output read by
+    `Read`, `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
+    `Write Until Expected Output`, `Get Connection` and `Get Connections`.
+    The default level is `INFO`.
+
+    `loglevel` is not configurable per connection but can be overridden by
+    passing it as an argument to any of the mentioned keywords.
+    Possible argument values are `TRACE`, `DEBUG`, `INFO` and `WARN`.
 
     = Executing commands =
 
     For executing commands on the remote machine, there are two possibilities:
 
-    1. `Execute Command` and `Start Command`. The command is executed in a new
-    shell on the remote machine, which means that possible changes to
-    the environment (e.g. setting environment variables, changing
-    working directory, etc.) are not visible to the subsequent keywords.
+    1. `Execute Command` and `Start Command`.
+        The command is executed in a new shell on the remote machine,
+        which means that possible changes to the environment
+        (e.g. changing working directory, setting environment variables, etc.)
+        are not visible to the subsequent keywords.
 
     2. `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
-    `Read Until`, `Read Until Prompt` and `Read Until Regexp` operate
-    in an interactive shell, which means that changes to the environment
-    are visible to the subsequent keywords.
+       `Read Until`, `Read Until Prompt` and `Read Until Regexp`.
+        These keywords operate in an interactive shell, which means that changes
+        to the environment are visible to the subsequent keywords.
 
     = Interactive shells =
 
@@ -142,7 +146,7 @@ class SSHLibrary(object):
     to interact with the server within the same shell.
 
     All of these keywords, except `Write Bare`, consume the read or the written
-    text from the server output before returning. In practice, this means that
+    text from the server output before returning. In practice this means that
     the text is removed from the server output, i.e. subsequent calls to
     `Read` keywords do not return text that was already read:
     | Write              | echo 'hello' |       | # consumed: echo 'hello'                           |
@@ -154,15 +158,16 @@ class SSHLibrary(object):
     The consumed text is logged by the keywords and argument `loglevel`
     can be used to override [#Default loglevel|the default log level].
 
-    `Login` and `Login With Public Key` consume everything on
-    the server output or if [#Default prompt|prompt is set], everything until
-    the prompt.
+    `Login` and `Login With Public Key` consume everything on the server output
+    or if [#Default prompt|the prompt is set], everything until the prompt.
 
     == Reading ==
 
-    `Read`, `Read Until`, `Read Until Prompt` and `Read Until
-    Regexp` can be used to read from the server. The read text is also
-    consumed from the server output.
+    `Read`, `Read Until`, `Read Until Prompt` and `Read Until Regexp` can be
+    used to read from the server. The read text is also consumed from
+    the server output.
+
+    `Read` reads everything available on the server output, thus clearing it.
 
     `Read Until` variants read output up until and *including* `expected` text.
     These keywords will fail if [#Default timeout|the timeout] expires before
@@ -170,10 +175,10 @@ class SSHLibrary(object):
 
     == Writing ==
 
-    `Write`, `Write Until Expected Output` consume the written text
-    while `Write Bare` does not.
+    `Write` and `Write Until Expected Output` consume the written text
+    from the server output while `Write Bare` does not.
 
-    Any of these keywords does not return output triggered by the written text.
+    These keywords do not return any output triggered by the written text.
     To get the output, one of the `Read` keywords must be explicitly used.
 
     = Pattern matching =
@@ -192,7 +197,7 @@ class SSHLibrary(object):
     = Example =
     | ***** Settings *****
     | Documentation          This example demonstrates executing commands on a remote machine
-    | ...                    and getting their output and return code.
+    | ...                    and getting their output and the return code.
     | ...
     | ...                    Notice how connections are handled as part of the suite setup and
     | ...                    teardown. This saves some time when executing several test cases.
@@ -220,14 +225,14 @@ class SSHLibrary(object):
     |     Should Be Equal    ${rc}             ${0}
     |
     | Executing Commands In An Interactive Session
-    |     [Documentation]    Execute Command always executes the command in a new shell.
+    |     [Documentation]    `Execute Command` always executes the command in a new shell.
     |     ...                This means that changes to the environment are not persisted
-    |     ...                between subsequent Execute Command keyword calls.
-    |     ...                Write and Read keyword variants can be used to operate in the same shell.
-    |                        Write  cd ..
-    |                        Write  echo Hello from the parent directory!
-    |     ${output}=         Read Until  directory!
-    |     Should Contain     ${output}  Hello from the parent directory!
+    |     ...                between subsequent `Execute Command` keyword calls.
+    |     ...                `Write` and `Read Until` variants can be used to operate in the same shell.
+    |                        Write             cd ..
+    |                        Write             echo Hello from the parent directory!
+    |     ${output}=         Read Until        directory!
+    |     Should Contain     ${output}         Hello from the parent directory!
     |
     | ***** Keywords *****
     | Open Connection And Log In
@@ -269,22 +274,26 @@ class SSHLibrary(object):
         defaults are used:
         | Library | SSHLibrary |
 
-        Only arguments that are given are changed. In this example, the timeout
-        is changed to 10 seconds but other settings are left to the library
-        defaults:
+        Only arguments that are given are changed. In this example,
+        [#Default timeout|the timeout] is changed to `10 seconds` but
+        other settings are left to the library defaults:
         | Library | SSHLibrary | 10 seconds |
 
-        Prompt does not have a default value and must be explicitly set to
-        use `Read Until Prompt`. In this example, prompt is set to `$`:
+        [#Default prompt|Prompt] does not have a default value and
+        must be explicitly set to use `Read Until Prompt`.
+        In this example, the prompt is set to `$`:
         | Library | SSHLibrary | prompt=$ |
 
         Multiple settings are possible. In this example, the library is brought
-        into use with the timeout of 10 seconds and line breaks known by
-        Windows:
+        into use with [#Default timeout|the timeout] of 10 seconds and
+        [#Default newline|newlines] used by Windows:
         | Library | SSHLibrary | 10 seconds | CRLF |
 
-        Arguments `term_type`, `width`, `height` and `encoding` were added
-        in SSHLibrary 1.2.
+        Arguments [#Default terminal settings|`term_type`],
+        [#Default terminal settings|`width`],
+        [#Default terminal settings|`height`] and
+        [#Default encoding|`encoding`]
+        were added in SSHLibrary 1.2.
         """
         self._connections = ConnectionCache()
         self._config = _DefaultConfiguration(timeout or self.DEFAULT_TIMEOUT,
@@ -311,15 +320,15 @@ class SSHLibrary(object):
 
         Only parameters whose value is other than `None` are updated.
 
-        This example sets the prompt to `$`:
+        This example sets [#Default prompt|`prompt`] to `$`:
         | Set Default Configuration | prompt=$ |
 
-        This example sets `newline` and `loglevel`, but leaves the other
-        settings intact:
+        This example sets [#Default newline|`newline`] and [#Default loglevel|
+        `loglevel`], but leaves the other settings intact:
         | Set Default Configuration | newline=CRLF | loglevel=WARN |
 
-        Sometimes you might want to use longer timeout for all the subsequent
-        connections without affecting the existing ones:
+        Sometimes you might want to use longer [#Default timeout|`timeout`]
+        for all the subsequent connections without affecting the existing ones:
         | Set Default Configuration   | timeout=5 seconds  |
         | Open Connection             | local.server.com   |
         | Set Default Configuration   | timeout=20 seconds |
@@ -330,8 +339,11 @@ class SSHLibrary(object):
         | Should Be Equal As Integers | ${emea.timeout}    | 20 |
         | Should Be Equal As Integers | ${apac.timeout}    | 20 |
 
-        Arguments `term_type`, `width`, `height` and `encoding` were added
-        in SSHLibrary 1.2.
+        Arguments [#Default terminal settings|`term_type`],
+        [#Default terminal settings|`width`],
+        [#Default terminal settings|`height`] and
+        [#Default encoding|`encoding`]
+        were added in SSHLibrary 1.2.
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
@@ -345,14 +357,14 @@ class SSHLibrary(object):
 
         Only parameters whose value is other than `None` are updated.
 
-        In the following example, `prompt` is set for the current connection.
-        Other settings are left intact:
+        In the following example, [#Default prompt|`prompt`] is set for
+        the current connection. Other settings are left intact:
         | Open Connection          | my.server.com      |
         | Set Client Configuration | prompt=$           |
         | ${myserver}=             | Get Connection     |
         | Should Be Equal          | ${myserver.prompt} | $ |
 
-        Using keyword does not affect to the other connections:
+        Using keyword does not affect the other connections:
         | Open Connection          | linux.server.com   |   |
         | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
         | Open Connection          | windows.server.com |   |
@@ -361,12 +373,12 @@ class SSHLibrary(object):
         | Should Be Equal          | ${linux.prompt}    | $ |
         | Should Be Equal          | ${windows.prompt}  | > |
 
-        Multiple settings are possible. This example updates both terminal type
-        and terminal width of the current connection:
+        Multiple settings are possible. This example updates [#Default terminal
+        settings|the terminal settings] of the current connection:
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
 
-        Argument `encoding` was added in SSHLibrary 1.2.
+        Argument [#Default encoding|`encoding`] was added in SSHLibrary 1.2.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
@@ -380,7 +392,7 @@ class SSHLibrary(object):
         the moment the keyword was called.
 
         `logfile` is path to a file that is writable by the current local user.
-        If the `logfile` already exists, it will be overwritten.
+        If the file already exists, it will be overwritten.
 
         Note that this keyword only works with Python, i.e. when executing
         tests with `pybot`.
@@ -400,21 +412,25 @@ class SSHLibrary(object):
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
                         height=None, encoding=None):
-        """Opens a new SSH connection to given `host` and `port`.
+        """Opens a new SSH connection to the given `host` and `port`.
 
         The new connection is made active. Possible existing connections
         are left open in the background.
 
-        This keyword returns the index of this connection which can be used
+        This keyword returns the index of the new connection which can be used
         later to switch back to it. Indices start from `1` and are reset
         when `Close All Connections` is used.
 
-        Optional `alias` can be given as a name for the connection and can be
-        used for switching between connections, similarly as the index.
+        Optional `alias` can be given for the connection and can be used for
+        switching between connections, similarly as the index.
         See `Switch Connection` for more details.
 
-        Connection parameters, like `timeout` and `newline` are documented in
-        `configuration`. All the arguments, except `host`, `alias` and `port`
+        Connection parameters, like [#Default timeout|`timeout`] and
+        [#Default newline|`newline`] are documented in `configuration`.
+        If they are not defined as arguments, [#Configuration|the library
+        defaults] are used for the connection.
+
+        All the arguments, except `host`, `alias` and `port`
         can be later updated with `Set Client Configuration`.
 
         Starting from SSHLibrary 1.1, a shell is automatically opened
@@ -438,10 +454,11 @@ class SSHLibrary(object):
         | # Do something with the connection                  |
         | Open Connection | my.server.com | # Default timeout | # Default line breaks |
 
-        Terminal settings are also configurable per connection:
+        [#Default terminal settings|The terminal settings] are also configurable
+        per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
 
-        Argument `encoding` was added in SSHLibrary 1.2.
+        Argument [#Default encoding|`encoding`] was added in SSHLibrary 1.2.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -521,24 +538,24 @@ class SSHLibrary(object):
         self._connections.close_all()
 
     def get_connection(self, index_or_alias=None, loglevel=None):
-        """Return information of the connection by index or alias.
+        """Return information of the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
         change the active connection.
 
         If `index_or_alias` is not given, the information of the current
-        active connection is returned.
+        connection is returned.
 
         This keyword returns an object that describes the connection.
-        The object has attributes that correspond to the [#Configurable
-        per connection|connection configuration values] including
-        attributes `host`, `port`, `index` and `alias`. If you want
-        the objects for all the open connections, use `Get Connections`.
+        The object has attributes that correspond to the [#Configurable per
+        connection|connection configuration values] and attributes `host`,
+        `port`, `index` and `alias`. If you want the information for all
+        the open connections, use `Get Connections`.
 
         This keyword logs the connection information. `loglevel` can be used to
-        override the [#Default loglevel|default log level].
+        override [#Default loglevel|the default log level].
 
-        Getting information of the current connection:
+        Getting connection information of the current connection:
         | Open Connection | far.server.com        |
         | Open Connection | near.server.com       | prompt=>>       | # Current connection |
         | ${nearhost}=    | Get Connection        |                 |
@@ -571,13 +588,13 @@ class SSHLibrary(object):
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
-        This keyword returns a list of objects similar to what is returned
-        by `Get Connection`. These objects have attributes that correspond
-        to the [#Configurable per connection|connection configuration values]
-        including attributes `host`, `port`, `index` and `alias`.
+        This keyword returns a list of objects that are similar to what is
+        returned by `Get Connection`. These objects have attributes that
+        correspond to the [#Configurable per connection|connection configuration
+        values] and attributes `host`, `port`, `index` and `alias`.
 
         This keyword logs the connection information. `loglevel` can be used to
-        override the [#Default loglevel|default log level].
+        override [#Default loglevel|the default log level].
 
         Example:
         | Open Connection             | near.server.com     | timeout=10s     |
@@ -601,8 +618,8 @@ class SSHLibrary(object):
         Connection must be opened before using this keyword.
 
         This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If [#Default prompt|prompt is set], everything
-        until the prompt is returned and consumed.
+        (usually the server MOTD). If [#Default prompt|the prompt is set],
+        everything until the prompt is returned and consumed.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -629,7 +646,7 @@ class SSHLibrary(object):
         `password` is used to unlock the `keyfile` if unlocking is required.
 
         This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If [#Default prompt|prompt is set],
+        (usually the server MOTD). If [#Default prompt|the prompt is set],
         everything until the prompt is returned and consumed.
 
         Example that logs in using a private key and returns the output:
@@ -637,7 +654,7 @@ class SSHLibrary(object):
         | ${output}=      | Login With Public Key | johndoe       | /home/johndoe/.ssh/id_rsa |
         | Should Contain  | ${motd}               | Last login at |
 
-        Example that requires unlocking the private key:
+        With locked private keys, the keyring `password` is required:
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
         """
@@ -670,7 +687,7 @@ class SSHLibrary(object):
         If several arguments evaluate to true, multiple values are returned.
         Non-empty strings, except `false` and `False`, evaluate to true.
 
-        If errors are needed as well, set the argument value to true:
+        If errors are needed as well, set the respective argument value to true:
         | ${stdout}       | ${stderr}= | Execute Command | echo 'Hello John!' | return_stderr=True |
         | Should Be Empty | ${stderr}  |
 
@@ -678,7 +695,7 @@ class SSHLibrary(object):
         | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
 
-        The command is always executed in a new shell. Thus possible changes
+        The `command` is always executed in a new shell. Thus possible changes
         to the environment (e.g. changing working directory) are not visible
         to the later keywords:
         | ${pwd}=         | Execute Command | pwd           |
@@ -688,10 +705,10 @@ class SSHLibrary(object):
         | Should Be Equal | ${pwd}          | /home/johndoe |
 
         `Write` and `Read` can be used for
-        [#Interactive shells|running subsequent commands in the same shell].
+        [#Interactive shells|running multiple commands in the same shell].
 
-        This keyword also logs the executed command and the exit
-        status with log level `INFO`.
+        This keyword also logs the executed command and its exit status
+        with log level `INFO`.
         """
         self._info("Executing command '%s'" % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
@@ -704,17 +721,17 @@ class SSHLibrary(object):
         """Starts execution of the `command` on the remote machine and
         returns immediately.
 
-        This keyword returns nothing and does not wait for the command
+        This keyword returns nothing and does not wait for the `command`
         execution to be finished. If waiting for the output is required,
         use `Execute Command` instead.
 
-        This keyword does not return output generated by the started command.
-        Use `Read Command Output` to read the output:
+        This keyword does not return any output generated by the started
+        `command`. Use `Read Command Output` to read the output:
         | Start Command   | echo 'Hello John!'  |
         | ${stdout}=      | Read Command Output |
         | Should Contain  | ${stdout}           | Hello John! |
 
-        The command is always executed in a new shell, similarly as with
+        The `command` is always executed in a new shell, similarly as with
         `Execute Command`. Thus possible changes to the environment
         (e.g. changing working directory) are not visible to the later keywords:
         | Start Command   | pwd                 |
@@ -726,7 +743,7 @@ class SSHLibrary(object):
         | Should Be Equal | ${pwd}              | /home/johndoe |
 
         `Write` and `Read` can be used for
-        [#Interactive shells|running subsequent commands in the same shell].
+        [#Interactive shells|running multiple commands in the same shell].
 
         This keyword also logs the started command with log level `INFO`.
         """
@@ -820,9 +837,8 @@ class SSHLibrary(object):
         This keyword returns and [#Interactive shells|consumes] the written
         `text` (including the appended newline) from the server output.
 
-        The written `text` is logged with the defined `loglevel`.
-
-        See `interactive shells` for more information on writing.
+        The written `text` is logged. `loglevel` can be used to override
+        the [#Default loglevel|default log level].
 
         Example:
         | ${written}=        | Write         | su                         |
@@ -867,24 +883,22 @@ class SSHLibrary(object):
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
-        """Writes given `text` repeatedly until `expected` appears in
+        """Writes the given `text` repeatedly until `expected` appears in
         the server output.
+
+        This keyword returns nothing.
 
         `text` is written without appending a newline and is
         [#Interactive shells|consumed] from the server output before
         `expected` is read.
 
-        `retry_interval` defines the time before writing `text` again.
-
-        The written `text` is logged with the defined `loglevel`.
-
         If `expected` does not appear in output within `timeout`, this keyword
-        fails.
-
+        fails. `retry_interval` defines the time before writing `text` again.
         Both `timeout` and `retry_interval` must be given in Robot Framework's
         time format (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
 
-        See `interactive shells` for more information on writing.
+        The written `text` is logged. `loglevel` can be used to override
+        the [#Default loglevel|default log level].
 
         This example will write `lsof -c python26\\n` (list all files
         currently opened by python 2.6), until `myscript.py` appears in the
@@ -902,9 +916,8 @@ class SSHLibrary(object):
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
 
-        The read output is logged with the defined `loglevel`.
-
-        See `interactive shells` for more information on reading.
+        The read output is logged. `loglevel` can be used to override
+        the [#Default loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com |
@@ -927,9 +940,8 @@ class SSHLibrary(object):
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
 
-        The read output is logged with the defined `loglevel`.
-
-        See `interactive shells` for more information on reading.
+        The read output is logged. `loglevel` can be used to override
+        the [#Default loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com |
@@ -947,21 +959,20 @@ class SSHLibrary(object):
 
     def read_until_prompt(self, loglevel=None):
         """[#Interactive shells|Consumes] and returns the server output until
-        the prompt is found.
+        [#Default prompt|the prompt] is found.
 
-        Text up and until prompt is returned.
-        [#Default prompt|Prompt must be set] before this keyword is used.
+        Text up and until prompt is returned. [#Default prompt|The prompt must
+        be set] before this keyword is used.
 
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
 
-        The read output is logged with the defined `loglevel`.
-
-        See `interactive shells` for more information on reading.
-
         This keyword is useful for reading output of a single command when
         output of previous command has been read and that command does not
         produce prompt characters in its output.
+
+        The read output is logged. `loglevel` can be used to override
+        the [#Default loglevel|default log level].
 
         Example:
         | Open Connection          | my.server.com     | prompt=$                    |
@@ -1007,9 +1018,8 @@ class SSHLibrary(object):
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
 
-        The read output is logged with the defined `loglevel`.
-
-        See `interactive shells` for more information on reading.
+        The read output is logged. `loglevel` can be used to override
+        the [#Default loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com     |
@@ -1045,6 +1055,8 @@ class SSHLibrary(object):
         `destination`. Relative path is relative to the current working
         directory.
 
+        ---
+
         The local file and possibly missing local paths are created as
         following:
 
@@ -1071,6 +1083,8 @@ class SSHLibrary(object):
            the local machine is used as the destination. This will most probably
            be the directory where the test execution was started.
 
+        ---
+
         `path_separator` is the path separator character of the operating system
         on the remote machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
@@ -1080,7 +1094,7 @@ class SSHLibrary(object):
 
         Using wildcards is possible in `source`. The pattern matching syntax
         is explained in `pattern matching`. When wildcards are used,
-        `destination` MUST be a directory and only files matching the pattern
+        `destination` must be a directory and only files matching the pattern
         are downloaded, subdirectories being ignored.
 
         This example downloads all the text files to the current local working
@@ -1102,6 +1116,8 @@ class SSHLibrary(object):
         Both absolute and relative paths are accepted as `source` and
         `destination`. Relative path is relative to the current working
         directory.
+
+        ---
 
         The local destination is created as following:
 
@@ -1140,6 +1156,8 @@ class SSHLibrary(object):
            the remote directory `/var/logs` is now found at the current
            working directory with name `logs`. Subdirectories are not included.
 
+        ---
+
         `path_separator` is the path separator character of the operating system
         on the remote machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
@@ -1176,6 +1194,8 @@ class SSHLibrary(object):
         `destination`. Relative path is relative to the current working
         directory.
 
+        ---
+
         The remote file and possibly missing paths are created as following:
 
         1. If `destination` is an existing file, `source` file is uploaded
@@ -1190,7 +1210,7 @@ class SSHLibrary(object):
            directories are also created.
 
         4. If `destination` does not exist and it does not end with
-           `path_separator, it is considered a file. If the path to the file
+           `path_separator`, it is considered a file. If the path to the file
            does not exist, it is created:
 
            In this example, the missing remote path `not/existing` is
@@ -1200,30 +1220,32 @@ class SSHLibrary(object):
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
+        ---
+
         `path_separator` is the path separator character of the operating system
         on the remote machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
         | Put File | /path/to/local_file.txt | remote_file.txt | path_separator=\\\\ |
 
-        This option was added in SSHLibrary 1.1.
+        Argument `path_separator` was added in SSHLibrary 1.1.
 
         Using wildcards is possible in `source`. The pattern matching syntax
         is explained in `pattern matching`. When wildcards are used,
-        `destination` MUST be a directory and only files are uploaded,
+        `destination` must be a directory and only files are uploaded,
         subdirectories being ignored.
 
         This example uploads all the text files to the user's home on the
         remote machine:
         | Put File | /path/to/*.txt |
 
-        `mode` argument can be used to set the target file permission.
+        `mode` can be used to set the target file permission.
         Numeric values are accepted. The default value is `0744` (-rwxr--r--).
         This example gives the group all permissions to the uploaded files on
         the remote machine (-rwxrwx---):
         | Put File | /path/to/*.txt | /home/groups/robot | mode=0770 |
 
-        `newline` can be used to force newline characters that are written to
-        the remote files. Valid values are `LF` and `CRLF`.
+        `newline` can be used to force the line break characters that are
+        written to the remote files. Valid values are `LF` and `CRLF`.
         This example converts the line breaks of the uploaded files
         on the remote to the Windows format:
         | Put File | /path/to/*.txt | newline=CRLF |
@@ -1244,6 +1266,8 @@ class SSHLibrary(object):
         Both absolute and relative paths are accepted as `source` and
         `destination`. Relative path is relative to the current working
         directory.
+
+        ---
 
         The remote destination is created as following:
 
@@ -1280,21 +1304,23 @@ class SSHLibrary(object):
            the remote machine at the user's home with name `logs`.
            Subdirectories are not included.
 
+        ---
+
         `path_separator` is the path separator character of the operating system
         on the remote machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
         | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
 
-        This option was added in SSHLibrary 1.1.
+        Argument `path_separator` was added in SSHLibrary 1.1.
 
-        `mode` argument can be used to set the target file permission.
+        `mode` can be used to set the target file permission.
         Numeric values are accepted. The default value is `0744` (-rwxr--r--).
         This example gives the group all permissions to the uploaded files on
         the remote machine (-rwxrwx---):
         | Put Directory | /var/logs | /home/groups/robot | mode=0770 |
 
-        `newline` can be used to force newline characters that are written to
-        the remote files. Valid values are `LF` and `CRLF`.
+        `newline` can be used to force the line break characters that are
+        written to the remote files. Valid values are `LF` and `CRLF`.
         This example converts the line breaks of the uploaded files
         on the remote to the Windows format:
         | Put Directory | /var/logs | newline=CRLF |
@@ -1311,7 +1337,7 @@ class SSHLibrary(object):
 
         As a result, the content of the local directory `/var/logs`,
         including its subdirectories, is now found at the user's home on
-        the remote machine`. Subdirectory paths are preserved, e.g.
+        the remote machine. Subdirectory paths are preserved, e.g.
         content of local `var/logs/mysql` is on the remote machine
         at `logs/mysql`.
 
