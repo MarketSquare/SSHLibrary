@@ -43,20 +43,20 @@ Directory Layout
 ----------------
 
 atest/
-	Acceptance tests. Naturally using Robot Framework.
+    Acceptance tests. Naturally using Robot Framework.
 
 doc/
-	SSHLibrary documentation.
+    SSHLibrary documentation.
 
 lib/
-	Contains Trilead SSH library JAR distribution which must be in CLASSPATH
-	when executing tests with Jython.
+    Contains Trilead SSH library JAR distribution which must be in CLASSPATH
+    when executing tests with Jython.
 
 src/
-	SSHLibrary source code.
+    SSHLibrary source code.
 
 utests/
-	Unit tests.
+    Unit tests.
 
 
 Running the Acceptance Tests
