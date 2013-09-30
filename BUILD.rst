@@ -32,24 +32,6 @@ Releasing a new version
 
     python setup.py sdist upload
 
-6. Create the Windows installers (both win32 and win-amd64)
-
-    python setup.py bdist_wininst
-
-    Installers should be created and verified on Windows.
-
-7. Upload the Windows installers PyPi
-
-    python setup.py bdist_wininst upload
-
-8. Update the 'News' section at https://code.google.com/p/robotframework-sshlibrary
+6. Update the 'News' section at https://code.google.com/p/robotframework-sshlibrary
 
     Done via https://code.google.com/p/robotframework-sshlibrary/admin.
-
-9. Write and send the release announcement to the mailing lists
-
-    Include the following lists: devel, users, announce.
-
-10. Tweet about the new version
-
-    Preferably tweet directly as @robotframework or at least retweet as it.
