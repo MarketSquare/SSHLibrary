@@ -30,9 +30,9 @@ class SSHLibrary(object):
 
     The library has the following main usages:
     - Executing commands on the remote machine, either with blocking or
-      non-blocking behaviour (`Execute Command` and `Start Command`,
+      non-blocking behaviour (see `Execute Command` and `Start Command`,
       respectively).
-    - Writing and reading in an interactive shell (e.g. `Read` and `Write`)
+    - Writing and reading in an interactive shell (e.g. `Read` and `Write`).
     - Transferring files and directories over SFTP (e.g. `Get File` and
       `Put Directory`).
     - Ensuring that files or directories exist on the remote machine
@@ -83,26 +83,27 @@ class SSHLibrary(object):
     Argument `timeout` is used by `Read Until` variants. The default value is
     `3 seconds`.
 
-    Value must be in Robot Framework's time format, e.g. `3`, `4.5`, `1 minute`
-    and `2 min 3 s` are all accepted. See section 'Time Format' in the
+    Value must be in Robot Framework's time format, e.g. `3`, `4.5s`, `1 minute`
+    and `2 min 3 s` are all accepted. See section `Time Format` in the
     Robot Framework User Guide for details.
 
     === Default newline ===
 
     Argument `newline` is the line break sequence used by `Write` keyword and
     must be set according to the operating system on the remote machine.
-    The default value is `LF` which is used by Unix-like operating systems.
-    With Windows remote machines, you need to set this to `CRLF`.
+    The default value is `LF` (same as `\\n`) which is used on Unix-like
+    operating systems. With Windows remote machines, you need to set this to
+    `CRLF` (`\\r\\n`).
 
     === Default prompt ===
 
     Argument `prompt` defines the character sequence used by `Read Until Prompt`
-    and must be set before the keyword can be used.
+    and must be set before that keyword can be used.
 
     === Default terminal settings ===
 
-    Argument `term_type` defines the virtual terminal type and arguments
-    `width` and `height` can be used to control the virtual size of it.
+    Argument `term_type` defines the virtual terminal type, and arguments
+    `width` and `height` can be used to control its  virtual size.
 
     === Default encoding ===
 
@@ -128,16 +129,16 @@ class SSHLibrary(object):
 
     For executing commands on the remote machine, there are two possibilities:
 
-    1. `Execute Command` and `Start Command`.
-        The command is executed in a new shell on the remote machine,
-        which means that possible changes to the environment
-        (e.g. changing working directory, setting environment variables, etc.)
-        are not visible to the subsequent keywords.
+    - `Execute Command` and `Start Command`.
+       The command is executed in a new shell on the remote machine,
+       which means that possible changes to the environment
+       (e.g. changing working directory, setting environment variables, etc.)
+       are not visible to the subsequent keywords.
 
-    2. `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
-       `Read Until`, `Read Until Prompt` and `Read Until Regexp`.
-        These keywords operate in an interactive shell, which means that changes
-        to the environment are visible to the subsequent keywords.
+    - `Write`, `Write Bare`, `Write Until Expected Output`, `Read`,
+      `Read Until`, `Read Until Prompt` and `Read Until Regexp`.
+       These keywords operate in an interactive shell, which means that changes
+       to the environment are visible to the subsequent keywords.
 
     = Interactive shells =
 
@@ -145,17 +146,21 @@ class SSHLibrary(object):
     `Read Until`, `Read Until Prompt` and `Read Until Regexp` can be used
     to interact with the server within the same shell.
 
+    == Consumed output ==
+
     All of these keywords, except `Write Bare`, consume the read or the written
     text from the server output before returning. In practice this means that
     the text is removed from the server output, i.e. subsequent calls to
-    `Read` keywords do not return text that was already read:
-    | Write              | echo 'hello' |       | # consumed: echo 'hello'                           |
-    | ${stdout}=         | Read Until   | hello | # consumed: the printed 'hello'                    |
-    | Should Contain     | ${stdout}    | hello |
-    | ${stdout}=         | Read         |       | # consumed: everything available                   |
-    | Should Not Contain | ${stdout}    | hello | # because the printed 'hello' was already consumed |
+    `Read` keywords do not return text that was already read. This is
+    illustrated by the example below.
 
-    The consumed text is logged by the keywords and argument `loglevel`
+    | `Write`              | echo hello   |       | # consumes written `echo hello`                  |
+    | ${stdout}=           | `Read Until` | hello | # consumes read `hello` and everything before it |
+    | `Should Contain`     | ${stdout}    | hello |
+    | ${stdout}=           | `Read`       |       | # consumes everything available                  |
+    | `Should Not Contain` | ${stdout}    | hello | # `hello` was already consumed earlier           |
+
+    The consumed text is logged by the keywords and their argument `loglevel`
     can be used to override [#Default loglevel|the default log level].
 
     `Login` and `Login With Public Key` consume everything on the server output
@@ -215,35 +220,36 @@ class SSHLibrary(object):
     | Execute Command And Verify Output
     |     [Documentation]    `Execute Command` can be used to ran commands on the remote machine.
     |     ...                The keyword returns the standard output by default.
-    |     ${output}=         `Execute Command`   echo Hello SSHLibrary!
-    |     Should Be Equal    ${output}         Hello SSHLibrary!
+    |     ${output}=    `Execute Command`    echo Hello SSHLibrary!
+    |     `Should Be Equal`    ${output}    Hello SSHLibrary!
     |
     | Execute Command And Verify Return Code
-    |     [Documentation]    Usually getting the return code of the command is enough.
+    |     [Documentation]    Often getting the return code of the command is enough.
     |     ...                This behaviour can be adjusted as `Execute Command` arguments.
-    |     ${rc}=             `Execute Command`   echo Success quaranteed.    return_stdout=False    return_rc=True
-    |     Should Be Equal    ${rc}             ${0}
+    |     ${rc}=    `Execute Command`    echo Success guaranteed.    return_stdout=False    return_rc=True
+    |     `Should Be Equal`    ${rc}    ${0}
     |
     | Executing Commands In An Interactive Session
     |     [Documentation]    `Execute Command` always executes the command in a new shell.
     |     ...                This means that changes to the environment are not persisted
     |     ...                between subsequent `Execute Command` keyword calls.
     |     ...                `Write` and `Read Until` variants can be used to operate in the same shell.
-    |                        Write             cd ..
-    |                        Write             echo Hello from the parent directory!
-    |     ${output}=         Read Until        directory!
-    |     Should Contain     ${output}         Hello from the parent directory!
+    |     `Write`    cd ..
+    |     `Write`    echo Hello from the parent directory!
+    |     ${output}=    `Read Until`    directory!
+    |     `Should End With`     ${output}    Hello from the parent directory!
     |
     | ***** Keywords *****
     | Open Connection And Log In
-    |    `Open Connection`     ${HOST}
-    |    `Login`               ${USERNAME}       ${PASSWORD}
+    |    `Open Connection`    ${HOST}
+    |    `Login`    ${USERNAME}    ${PASSWORD}
 
     Save the content as file `executing_command.txt` and run:
 
     | pybot executing_commands.txt
 
-    You may want to override the variables from commandline to try this out on your remote machine:
+    You may want to override the variables from commandline to try this out on
+    your remote machine:
 
     | pybot -v HOST:my.server.com -v USERNAME:johndoe -v PASSWORD:secretpasswd executing_commands.txt
     """
