@@ -263,7 +263,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_TYPE = 'vt100'
     DEFAULT_TERM_WIDTH = 80
     DEFAULT_TERM_HEIGHT = 24
-    DEFAULT_ENCODING = 'utf-8'
+    DEFAULT_ENCODING = 'UTF-8'
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -400,8 +400,8 @@ class SSHLibrary(object):
         `logfile` is path to a file that is writable by the current local user.
         If the file already exists, it will be overwritten.
 
-        Note that this keyword only works with Python, i.e. when executing
-        tests with `pybot`.
+        *Note:* This keyword only works with Python, i.e. when executing tests
+        with `pybot`.
 
         Example:
         | Open Connection    | my.server.com   | # Not logged |
@@ -528,12 +528,12 @@ class SSHLibrary(object):
     def close_all_connections(self):
         """Closes all open connections.
 
-        After this keyword, the connection indices returned by `Open Connection`
-        are reset and start from `1`.
-
         This keyword is ought to be used either in test or suite teardown to
         make sure all the connections are closed before the test execution
         finishes.
+
+        After this keyword, the connection indices returned by `Open Connection`
+        are reset and start from `1`.
 
         Example:
         | Open Connection | my.server.com         |
@@ -681,8 +681,8 @@ class SSHLibrary(object):
         """Executes `command` on the remote machine and return its outputs.
 
         This keyword executes the `command` and returns after the execution
-        has been finished. If returning immediately is required,
-        use `Start Command` instead.
+        has been finished. Use `Start Command` if the command should be
+        started on the background.
 
         By default, only the standard output is returned:
         | ${stdout}=     | Execute Command | echo 'Hello John!' |
@@ -697,7 +697,7 @@ class SSHLibrary(object):
         | ${stdout}       | ${stderr}= | Execute Command | echo 'Hello John!' | return_stderr=True |
         | Should Be Empty | ${stderr}  |
 
-        Most of the time, checking the return code is enough:
+        Often checking the return code is enough:
         | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
 
@@ -1058,8 +1058,11 @@ class SSHLibrary(object):
         `destination` is the target path on the local machine.
 
         Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative path is relative to the current working
-        directory.
+        `destination`. Relative paths are relative to the current working
+        directory. On the local machine the cwd typically is
+        the directory where test execution was started from, and thus
+        accessible using the built-in `${EXECDIR}` variable. On the remote
+        machine the cwd is typically users home directory.
 
         ---
 
@@ -1096,8 +1099,6 @@ class SSHLibrary(object):
         must be set as `\\\\` (an escaped backslash in the test data):
         | Get File | /path/to/remote_file.txt | local_file.txt | path_separator=\\\\ |
 
-        Argument `path_separator` was added in SSHLibrary 1.1.
-
         Using wildcards is possible in `source`. The pattern matching syntax
         is explained in `pattern matching`. When wildcards are used,
         `destination` must be a directory and only files matching the pattern
@@ -1106,6 +1107,8 @@ class SSHLibrary(object):
         This example downloads all the text files to the current local working
         directory:
         | Get File | /path/to/*.txt |
+
+        Argument `path_separator` was added in SSHLibrary 1.1.
         """
         return self._run_sftp_command(self.current.get_file, source,
                                       destination, path_separator)
@@ -1121,7 +1124,10 @@ class SSHLibrary(object):
 
         Both absolute and relative paths are accepted as `source` and
         `destination`. Relative path is relative to the current working
-        directory.
+        directory. On the local machine the cwd typically is
+        the directory where test execution was started from, and thus
+        accessible using the built-in `${EXECDIR}` variable. On the remote
+        machine the cwd is typically users home directory.
 
         ---
 
@@ -1135,24 +1141,22 @@ class SSHLibrary(object):
            | Get Directory | /var/logs | /tmp |
 
            As the result, the content of remote directory `/var/logs` is now
-           found at `/tmp/logs`. Subdirectories are not included.
+           found at `/tmp/logs`.
 
         2. If `destination` does not exist on the local machine, it is created
            and the content of `source` directory is downloaded into it.
 
            In this example, the content of the remote `/var/logs`,
            is downloaded to a non-existing local path `not/existing`:
-           | Get Directory | /var/logs | not/existing |
+           | Get Directory | /var/logs | /tmp/non/existing |
 
-           Because `not/existing` does not already exist on the local machine,
-           it is created. As the result of keyword, `not/existing` now has
-           the same content as the remote `/var/logs` but not the `logs`
-           directory itself. Subdirectories are not included.
+           Because `/tmp/non/existing` does not already exist on the local
+           machine, it is created. As the result of keyword, `/tmp/non/existing`
+           now has the same content as the remote `/var/logs` but not the `logs`
+           directory itself.
 
         3. If `destination` is not given, `source` directory is downloaded into
            the current working directory on the local machine.
-           This will most probably be the directory where the test execution
-           was started.
 
            In this example, `/var/logs` is downloaded into the current
            working directory:
@@ -1160,7 +1164,7 @@ class SSHLibrary(object):
 
            In this case, `destination` always exists. As the result,
            the remote directory `/var/logs` is now found at the current
-           working directory with name `logs`. Subdirectories are not included.
+           working directory with name `logs`.
 
         ---
 
@@ -1197,8 +1201,11 @@ class SSHLibrary(object):
         `destination` is the target path on the remote machine.
 
         Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative path is relative to the current working
-        directory.
+        `destination`. Relative paths are relative to the current working
+        directory. On the local machine the cwd typically is
+        the directory where test execution was started from, and thus
+        accessible using the built-in `${EXECDIR}` variable. On the remote
+        machine the cwd is typically users home directory.
 
         ---
 
@@ -1219,9 +1226,9 @@ class SSHLibrary(object):
            `path_separator`, it is considered a file. If the path to the file
            does not exist, it is created:
 
-           In this example, the missing remote path `not/existing` is
+           In this example, the missing remote path `non/existing` is
            first created:
-           | Put File | local_file.txt | not/existing/remote_file.txt |
+           | Put File | local_file.txt | non/existing/remote_file.txt |
 
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
@@ -1232,8 +1239,6 @@ class SSHLibrary(object):
         on the remote machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
         | Put File | /path/to/local_file.txt | remote_file.txt | path_separator=\\\\ |
-
-        Argument `path_separator` was added in SSHLibrary 1.1.
 
         Using wildcards is possible in `source`. The pattern matching syntax
         is explained in `pattern matching`. When wildcards are used,
@@ -1255,6 +1260,8 @@ class SSHLibrary(object):
         This example converts the line breaks of the uploaded files
         on the remote to the Windows format:
         | Put File | /path/to/*.txt | newline=CRLF |
+
+        Argument `path_separator` was added in SSHLibrary 1.1.
         """
         return self._run_sftp_command(self.current.put_file, source,
                                       destination, mode, newline,
@@ -1270,8 +1277,11 @@ class SSHLibrary(object):
         `destination` is the target path on the remote machine.
 
         Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative path is relative to the current working
-        directory.
+        `destination`. Relative paths are relative to the current working
+        directory (cwd). On the local machine the cwd typically is
+        the directory where test execution was started from, and thus
+        accessible using the built-in `${EXECDIR}` variable. On the remote
+        machine the cwd is typically users home directory.
 
         ---
 
@@ -1286,29 +1296,26 @@ class SSHLibrary(object):
 
            As the result, the content of local directory `/var/logs` is
            found on the remote machine at `/tmp/logs`.
-           Subdirectories are not included.
 
         2. If `destination` does not exist on the remote machine, it is
            created and the content of `source` directory is uploaded into it.
 
            In this example, the content of the local working directory,
-           is uploaded to remote `not/existing`:
-           | Put Directory | . | not/existing |
+           is uploaded to remote `/tmp/non/existing`:
+           | Put Directory | . | /tmp/non/existing |
 
-           Because `not/existing` does not already exist on the remote machine,
-           it is created. As the result of keyword, `not/existing` now has the
-           same content as the local working directory.
-           Subdirectories are not included.
+           Because `/tmp/non/existing` does not already exist on the remote
+           machine, it is created. As the result of keyword, `/tmp/non/existing`
+           now has the same content as the local working directory.
 
-        3. If `destination` is not given, `source` directory is uploaded into
-           the user's home directory on the remote machine.
+        3. If `destination` is not given, `source` directory is typically
+           uploaded to user's home directory on the remote machine.
 
            In this example, `source` is uploaded to the user's home:
            | Put Directory | /var/logs |
 
            As the result, the local directory `/var/logs` is now found on
            the remote machine at the user's home with name `logs`.
-           Subdirectories are not included.
 
         ---
 
@@ -1316,8 +1323,6 @@ class SSHLibrary(object):
         on the remote machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
         | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
-
-        Argument `path_separator` was added in SSHLibrary 1.1.
 
         `mode` can be used to set the target file permission.
         Numeric values are accepted. The default value is `0744` (-rwxr--r--).
@@ -1378,10 +1383,10 @@ class SSHLibrary(object):
         """Fails if the given `path` points to an existing file.
 
         Example:
-        | File Should Not Exist | /cat |
+        | File Should Not Exist | /non/existing |
 
-        Note that this keyword follows symlinks. Thus the example would fail
-        if `/cat` pointed to an existing file.
+        Note that this keyword follows symlinks. Thus the example fails if
+        `/non/existing` is a link that points an existing file.
 
         New in SSHLibrary 1.2.
         """
@@ -1404,10 +1409,10 @@ class SSHLibrary(object):
         """Fails if the given `path` points to an existing directory.
 
         Example:
-        | Directory Should Not Exist | /nonexisting |
+        | Directory Should Not Exist | /non/existing |
 
-        Note that this keyword follows symlinks. Thus the example would fail
-        if `/nonexisting` pointed to an existing directory.
+        Note that this keyword follows symlinks. Thus the example fails if
+        `/non/existing` is a link that points to an existing directory.
 
         New in SSHLibrary 1.2.
         """
