@@ -16,8 +16,8 @@ from robot.utils import ConnectionCache
 
 from .abstractclient import SSHClientException
 from .client import SSHClient
-from config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
-                    StringEntry, TimeEntry)
+from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
+                     StringEntry, TimeEntry)
 from .version import VERSION
 
 __version__ = VERSION
@@ -38,11 +38,18 @@ class SSHLibrary(object):
     - Ensuring that files or directories exist on the remote machine
       (e.g. `File Should Exist` and `Directory Should Not Exist`).
 
+    This library works both with Python and Jython, but uses different
+    tools internally depending on the interpreter. See
+    [http://code.google.com/p/robotframework-sshlibrary/wiki/InstallationInstructions|installation instructions]
+    for more details about the dependencies. IronPython is unfortunately not
+    supported.
+
     == Table of contents ==
 
     - `Connections and login`
     - `Configuration`
     - `Executing commands`
+    - `Interactive shells`
     - `Pattern matching`
     - `Example`
     - `Importing`
@@ -207,8 +214,8 @@ class SSHLibrary(object):
     | ...                    Notice how connections are handled as part of the suite setup and
     | ...                    teardown. This saves some time when executing several test cases.
     |
-    | Library                SSHLibrary
-    | Suite Setup            Open Connection And Log In
+    | Library                `SSHLibrary`
+    | Suite Setup            `Open Connection And Log In`
     | Suite Teardown         `Close All Connections`
     |
     | ***** Variables *****
@@ -359,7 +366,6 @@ class SSHLibrary(object):
                                  term_type=None, width=None, height=None,
                                  encoding=None):
         """Update the `configuration` of the current connection.
-        At least one connection must have been opened using `Open Connection`.
 
         Only parameters whose value is other than `None` are updated.
 
@@ -779,10 +785,10 @@ class SSHLibrary(object):
         | ${stdout}       | ${stderr}=         | Read Command Output | return_stderr=True |
         | Should Be Empty | ${stderr}          |
 
-        Most of the time, checking the return code is enough:
+        Often checking the return code is enough:
         | Start Command               | echo 'Hello John!'  |
         | ${rc}=                      | Read Command Output | return_stdout=False | return_rc=True |
-        | Should Be Equal As Integers | ${rc}               | 0                   | # succeeded         |
+        | Should Be Equal As Integers | ${rc}               | 0                   | # succeeded    |
 
         Using `Start Command` and `Read Command Output` follows
         'last in, first out' (LIFO) policy, meaning that `Read Command Output`
@@ -957,7 +963,7 @@ class SSHLibrary(object):
         | Should Contain  | ${output}     | [sudo] password for johndoe: |
         | Write           | ${PASSWORD}   |
         | ${output}=      | Read Until    | @                            |
-        | Should Contain  | ${output}     | root@                        |
+        | Should End With | ${output}     | root@                        |
 
         See also `Read Until Prompt` and `Read Until Regexp`.
         """
@@ -987,7 +993,7 @@ class SSHLibrary(object):
         | Write                    | ${PASSWORD}       |
         | Set Client Configuration | prompt=#          | # For root, the prompt is # |
         | ${output}=               | Read Until Prompt |                             |
-        | Should Contain           | ${output}         | root@myserver:~#            |
+        | Should End With          | ${output}         | root@myserver:~#            |
 
         See also `Read Until` and `Read Until Regexp`.
         """
@@ -1001,13 +1007,10 @@ class SSHLibrary(object):
 
         Text up until and including the `regexp` will be returned.
 
-        Regular expression check is done using the Python 're' module, which
-        has a pattern syntax derived from Perl, and thus also very similar to
-        the one in Java. See the following documents for more details about
-        regular expressions in general and Python implementation in particular.
-
-        | http://docs.python.org/lib/module-re.html
-        | http://www.amk.ca/python/howto/regex/
+        Regular expression check is implemented using the Python
+        [http://docs.python.org/2/library/re.html|re module]. Python's regular
+        expression syntax is derived from Perl, and it is thus also very
+        similar to the syntax used, for example, in Java, Ruby and .NET.
 
         Things to note about the `regexp` syntax:
 
