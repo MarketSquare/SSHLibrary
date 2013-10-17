@@ -18,10 +18,10 @@ Login With Public Key
     Login With Public Key  ${PUBKEY USERNAME}  ${PUBKEY FILE}
 
 Login With Non Existing Public Key
-    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist
+    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist.
     ...                           Login With Public Key  ${PUBKEY USERNAME}
     ...                           /invalid/path
 
 Login With Invalid Public Key
-    Run Keyword And Expect Error  Login with public key failed for user: testkey
+    Run Keyword And Expect Error  Login with public key failed for user 'testkey'.
     ...    Login With Public Key  ${PUBKEY USERNAME}  ${INVALID PUBKEY FILE}

@@ -49,7 +49,7 @@ Put Directory Using Relative Source
 
 Put Directory Should Fail When Source Does Not Exists
     ${target} =  Set Variable  another_dir_name
-    Run Keyword And Expect Error  There was no source path matching 'non-existing'
+    Run Keyword And Expect Error  There was no source path matching 'non-existing'.
     ...                           Put Directory  non-existing
     Verify Remote Directory Does Not Exists  ${target}
 

@@ -49,7 +49,7 @@ class Configuration(object):
     def __getattr__(self, name):
         if name in self._config:
             return self._config[name].value
-        msg = "Configuration parameter '%s' is not defined" % name
+        msg = "Configuration parameter '%s' is not defined." % name
         raise ConfigurationException(msg)
 
 
@@ -116,7 +116,7 @@ class LogLevelEntry(Entry):
     def _parse_value(self, value):
         value = value.upper()
         if value not in self.LEVELS:
-            raise ConfigurationException('Invalid log level: %s' % value)
+            raise ConfigurationException("Invalid log level '%s'." % value)
         return value
 
 

@@ -40,7 +40,7 @@ Start Command And Read Process Output With Legacy Stdout And Stderr
 
 Reading Command Output Without Command Started
     Run Keyword And Expect Error
-    ...  No started commands to read output from
+    ...  No started commands to read output from.
     ...  Read Command Output
 
 *** Keywords ***

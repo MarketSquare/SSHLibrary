@@ -63,7 +63,7 @@ Get File To Absolute Destination
 
 Get File Should Fail When There Are No Source Files
     Run Keyword And Expect Error
-    ...  There were no source files matching 'non-existing'
+    ...  There were no source files matching 'non-existing'.
     ...  SSH.Get File  non-existing
 
 *** Keywords ***

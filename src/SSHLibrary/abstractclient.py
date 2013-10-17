@@ -105,7 +105,7 @@ class AbstractSSHClient(object):
         try:
             self._login(username, password)
         except SSHClientException:
-            msg = 'Authentication failed for user: %s' % username
+            msg = "Authentication failed for user '%s'." % username
             raise SSHClientException(msg)
         return self._read_server_output()
 
@@ -125,7 +125,7 @@ class AbstractSSHClient(object):
         try:
             self._login_with_public_key(username, keyfile, password)
         except SSHClientException:
-            msg = 'Login with public key failed for user: %s' % username
+            msg = "Login with public key failed for user '%s'." % username
             raise SSHClientException(msg)
         return self._read_server_output()
 
@@ -143,12 +143,12 @@ class AbstractSSHClient(object):
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
-            raise SSHClientException("Given key file '%s' does not exist" %
+            raise SSHClientException("Given key file '%s' does not exist." %
                                      keyfile)
         try:
             open(keyfile).close()
         except IOError:
-            raise SSHClientException("Could not read key file '%s'" % keyfile)
+            raise SSHClientException("Could not read key file '%s'." % keyfile)
 
     def execute_command(self, command):
         """Execute given command over existing connection.
@@ -174,7 +174,7 @@ class AbstractSSHClient(object):
         try:
             return self._started_commands.pop().read_outputs()
         except IndexError:
-            raise SSHClientException('No started commands to read output from')
+            raise SSHClientException('No started commands to read output from.')
 
     def write(self, text, add_newline=False):
         """Write `text` in shell session.
@@ -284,7 +284,7 @@ class AbstractSSHClient(object):
                     return decoded_output
             except UnicodeDecodeError:
                 pass
-        raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s"
+        raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
                                  % (expected, timeout, decoded_output))
 
     def put_file(self, source, destination='.', mode='0744', newline='',
@@ -420,7 +420,7 @@ class AbstractSFTPClient(object):
 
     def list(self, command, path, pattern=None, absolute=False):
         if not self.dir_exists(path):
-            msg = "There was no path matching '%s'" % path
+            msg = "There was no path matching '%s'." % path
             raise SSHClientException(msg)
         items = command(path)
         if pattern:
@@ -459,7 +459,7 @@ class AbstractSFTPClient(object):
         if source.endswith(path_separator):
             source = source[:-len(path_separator)]
         if not self.dir_exists(source):
-            msg = "There was no source path matching '%s'" % source
+            msg = "There was no source path matching '%s'." % source
             raise SSHClientException(msg)
         remotefiles = []
         localfiles = []
@@ -503,7 +503,7 @@ class AbstractSFTPClient(object):
                     filename = path_separator.join([path, filename])
                 sourcefiles.append(filename)
         if not sourcefiles:
-            msg = "There were no source files matching '%s'" % source
+            msg = "There were no source files matching '%s'." % source
             raise SSHClientException(msg)
         return sourcefiles
 
@@ -530,7 +530,7 @@ class AbstractSFTPClient(object):
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
         if not os.path.isdir(source):
-            msg = "There was no source path matching '%s'" % source
+            msg = "There was no source path matching '%s'." % source
             raise SSHClientException(msg)
         localfiles = []
         remotefiles = []
@@ -575,7 +575,7 @@ class AbstractSFTPClient(object):
         sources = [f for f in glob.glob(source.replace('/', os.sep))
                    if os.path.isfile(f)]
         if not sources:
-            msg = "There are no source files matching '%s'" % source
+            msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)
         return sources
 

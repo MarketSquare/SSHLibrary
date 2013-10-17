@@ -77,7 +77,7 @@ Put File With Pattern Matching Directory
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File Should Fail When There Are No Source Files
-    Run Keyword And Expect Error  There are no source files matching 'non*existing'
+    Run Keyword And Expect Error  There are no source files matching 'non*existing'.
     ...                           SSH.Put File  non*existing
 
 Put File With Special Chars In Filename

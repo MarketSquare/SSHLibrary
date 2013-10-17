@@ -723,7 +723,7 @@ class SSHLibrary(object):
         This keyword also logs the executed command and its exit status
         with log level `INFO`.
         """
-        self._info("Executing command '%s'" % command)
+        self._info("Executing command '%s'." % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         stdout, stderr, rc = self.current.execute_command(command)
@@ -758,7 +758,7 @@ class SSHLibrary(object):
 
         This keyword also logs the started command with log level `INFO`.
         """
-        self._info("Starting command '%s'" % command)
+        self._info("Starting command '%s'." % command)
         self._last_command = command
         self.current.start_command(command)
 
@@ -806,7 +806,7 @@ class SSHLibrary(object):
 
         This keyword also logs the read command with log level `INFO`.
         """
-        self._info("Reading output of command '%s'" % self._last_command)
+        self._info("Reading output of command '%s'." % self._last_command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         try:
@@ -1480,7 +1480,7 @@ class SSHLibrary(object):
         if isinstance(level, basestring) and \
                 level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
             return level.upper()
-        raise AssertionError("Invalid log level '%s'" % level)
+        raise AssertionError("Invalid log level '%s'." % level)
 
 
 class _DefaultConfiguration(Configuration):
