@@ -727,7 +727,6 @@ class SSHLibrary(object):
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         stdout, stderr, rc = self.current.execute_command(command)
-        self._info("Command exited with status '%i'" % rc)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
@@ -829,6 +828,7 @@ class SSHLibrary(object):
 
     def _return_command_output(self, stdout, stderr, rc, return_stdout,
                                return_stderr, return_rc):
+        self._info("Command exited with return code %d." % rc)
         ret = []
         if self._output_wanted(return_stdout):
             ret.append(stdout.rstrip('\n'))
@@ -841,7 +841,7 @@ class SSHLibrary(object):
         return ret
 
     def _output_wanted(self, value):
-        return (value and str(value).lower() != 'false')
+        return value and str(value).lower() != 'false'
 
     def write(self, text, loglevel=None):
         """Writes the given `text` on the remote machine and appends
