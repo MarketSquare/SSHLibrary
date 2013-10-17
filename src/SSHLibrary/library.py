@@ -202,9 +202,8 @@ class SSHLibrary(object):
     | [chars]  | matches any character inside square brackets (e.g. `[abc]` matches either `a`, `b` or `c`) |
     | [!chars] | matches any character not inside square brackets |
 
-    Unless otherwise noted, matching is case-insensitive on case-insensitive
-    operating systems such as Windows. Pattern matching is implemented using
-    [http://docs.python.org/library/fnmatch.html|fnmatch module].
+    Pattern matching is always case-sensitive. Pattern matching is implemented
+    using [http://docs.python.org/library/fnmatch.html|fnmatch module].
 
     = Example =
     | ***** Settings *****
