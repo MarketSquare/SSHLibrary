@@ -1066,12 +1066,22 @@ class SSHLibrary(object):
         directory. On the local machine the cwd typically is
         the directory where test execution was started from, and thus
         accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically users home directory.
+        machine the cwd is typically the user's home directory.
 
-        ---
+        Using wildcards is possible in `source`. The pattern matching syntax
+        is explained in `pattern matching`. When wildcards are used,
+        `destination` must be a directory and only files matching the pattern
+        are downloaded, subdirectories being ignored.
 
-        The local file and possibly missing local paths are created as
-        following:
+        This example downloads all the text files to the cwd:
+        | Get File | /path/to/*.txt |
+
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data):
+        | Get File | /path/to/remote_file.txt | local_file.txt | path_separator=\\\\ |
+
+        The local `destination` is created as following:
 
         1. If `destination` is an existing file, `source` file is downloaded
            over it.
@@ -1096,22 +1106,6 @@ class SSHLibrary(object):
            the local machine is used as the destination. This will most probably
            be the directory where the test execution was started.
 
-        ---
-
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Get File | /path/to/remote_file.txt | local_file.txt | path_separator=\\\\ |
-
-        Using wildcards is possible in `source`. The pattern matching syntax
-        is explained in `pattern matching`. When wildcards are used,
-        `destination` must be a directory and only files matching the pattern
-        are downloaded, subdirectories being ignored.
-
-        This example downloads all the text files to the current local working
-        directory:
-        | Get File | /path/to/*.txt |
-
         Argument `path_separator` was added in SSHLibrary 1.1.
         """
         return self._run_sftp_command(self.current.get_file, source,
@@ -1131,11 +1125,28 @@ class SSHLibrary(object):
         directory. On the local machine the cwd typically is
         the directory where test execution was started from, and thus
         accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically users home directory.
+        machine the cwd is typically the user's home directory.
 
-        ---
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data):
+        | Get Directory | /path/to/files | path_separator=\\\\ |
 
-        The local destination is created as following:
+        `recursive` specifies, whether to recursively download all
+        subdirectories inside `source`. Subdirectories are downloaded if
+        the argument value evaluates to true.
+
+        The following example downloads the content of `var/logs`, including
+        its subdirectories (and subdirectories of the subdirectories,
+        ad infinitum), to the cwd:
+        | Get Directory | /var/logs | recursive=True |
+
+        As the result, the content of the remote directory `/var/logs`,
+        including its subdirectories, is now found at the current working
+        directory with name `logs`. Subdirectory paths are preserved, e.g.
+        remote `/var/logs/mysql` is now found locally at `logs/mysql`.
+
+        The local `destination` is created as following:
 
         1. If `destination` is an existing path on the local machine,
            `source` directory is downloaded into it.
@@ -1170,27 +1181,6 @@ class SSHLibrary(object):
            the remote directory `/var/logs` is now found at the current
            working directory with name `logs`.
 
-        ---
-
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Get Directory | /path/to/files | path_separator=\\\\ |
-
-        `recursive` specifies, whether to recursively download all
-        subdirectories inside `source`. Subdirectories are downloaded if
-        the argument value evaluates to true.
-
-        The following example is identical to (3.), but also the subdirectories
-        (and subdirectories of the subdirectories, ad infinitum) inside
-        `/var/logs`, are downloaded:
-        | Get Directory | /var/logs | recursive=True |
-
-        As the result, the content of the remote directory `/var/logs`,
-        including its subdirectories, is now found at the current working
-        directory with name `logs`. Subdirectory paths are preserved, e.g.
-        remote `/var/logs/mysql` is now found locally at `logs/mysql`.
-
         New in SSHLibrary 1.2.
         """
         return self._run_sftp_command(self.current.get_directory, source,
@@ -1209,11 +1199,35 @@ class SSHLibrary(object):
         directory. On the local machine the cwd typically is
         the directory where test execution was started from, and thus
         accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically users home directory.
+        machine the cwd is typically the user's home directory.
 
-        ---
+        Using wildcards is possible in `source`. The pattern matching syntax
+        is explained in `pattern matching`. When wildcards are used,
+        `destination` must be a directory and only files are uploaded,
+        subdirectories being ignored.
 
-        The remote file and possibly missing paths are created as following:
+        This example uploads all the text files to the remote cwd
+        (typically the user's home directory):
+        | Put File | /path/to/*.txt |
+
+        `mode` can be used to set the target file permission.
+        Numeric values are accepted. The default value is `0744` (-rwxr--r--).
+        This example gives the group all permissions to the uploaded files on
+        the remote machine (-rwxrwx---):
+        | Put File | /path/to/*.txt | /home/groups/robot | mode=0770 |
+
+        `newline` can be used to force the line break characters that are
+        written to the remote files. Valid values are `LF` and `CRLF`.
+        This example converts the line breaks of the uploaded files
+        on the remote to the Windows format:
+        | Put File | /path/to/*.txt | newline=CRLF |
+
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data):
+        | Put File | /path/to/local_file.txt | remote_file.txt | path_separator=\\\\ |
+
+        The remote `destination` is created as following:
 
         1. If `destination` is an existing file, `source` file is uploaded
            over it.
@@ -1237,34 +1251,6 @@ class SSHLibrary(object):
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
-        ---
-
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Put File | /path/to/local_file.txt | remote_file.txt | path_separator=\\\\ |
-
-        Using wildcards is possible in `source`. The pattern matching syntax
-        is explained in `pattern matching`. When wildcards are used,
-        `destination` must be a directory and only files are uploaded,
-        subdirectories being ignored.
-
-        This example uploads all the text files to the user's home on the
-        remote machine:
-        | Put File | /path/to/*.txt |
-
-        `mode` can be used to set the target file permission.
-        Numeric values are accepted. The default value is `0744` (-rwxr--r--).
-        This example gives the group all permissions to the uploaded files on
-        the remote machine (-rwxrwx---):
-        | Put File | /path/to/*.txt | /home/groups/robot | mode=0770 |
-
-        `newline` can be used to force the line break characters that are
-        written to the remote files. Valid values are `LF` and `CRLF`.
-        This example converts the line breaks of the uploaded files
-        on the remote to the Windows format:
-        | Put File | /path/to/*.txt | newline=CRLF |
-
         Argument `path_separator` was added in SSHLibrary 1.1.
         """
         return self._run_sftp_command(self.current.put_file, source,
@@ -1285,11 +1271,41 @@ class SSHLibrary(object):
         directory (cwd). On the local machine the cwd typically is
         the directory where test execution was started from, and thus
         accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically users home directory.
+        machine the cwd is typically the user's home directory.
 
-        ---
+        `mode` can be used to set the target file permission.
+        Numeric values are accepted. The default value is `0744` (-rwxr--r--).
+        This example gives the group all permissions to the uploaded files on
+        the remote machine (-rwxrwx---):
+        | Put Directory | /var/logs | /home/groups/robot | mode=0770 |
 
-        The remote destination is created as following:
+        `newline` can be used to force the line break characters that are
+        written to the remote files. Valid values are `LF` and `CRLF`.
+        This example converts the line breaks of the uploaded files
+        on the remote to the Windows format:
+        | Put Directory | /var/logs | newline=CRLF |
+
+        `path_separator` is the path separator character of the operating system
+        on the remote machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data):
+        | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
+
+        `recursive` specifies, whether to recursively upload all
+        subdirectories inside `source`. Subdirectories are uploaded if the
+        argument value evaluates to true.
+
+        The following example uploads the content of `/var/logs`, including
+        its subdirectories (and subdirectories of the subdirectories,
+        ad infinitum), to the remote cwd (typically the user's home directory):
+        | Put Directory | /var/logs | recursive=True |
+
+        As a result, the content of the local directory `/var/logs`,
+        including its subdirectories, is now found at the user's home on
+        the remote machine. Subdirectory paths are preserved, e.g.
+        content of local `var/logs/mysql` is on the remote machine
+        at `logs/mysql`.
+
+        The remote `destination` is created as following:
 
         1. If `destination` is an existing path on the remote machine,
            `source` directory is uploaded into it.
@@ -1320,41 +1336,6 @@ class SSHLibrary(object):
 
            As the result, the local directory `/var/logs` is now found on
            the remote machine at the user's home with name `logs`.
-
-        ---
-
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
-
-        `mode` can be used to set the target file permission.
-        Numeric values are accepted. The default value is `0744` (-rwxr--r--).
-        This example gives the group all permissions to the uploaded files on
-        the remote machine (-rwxrwx---):
-        | Put Directory | /var/logs | /home/groups/robot | mode=0770 |
-
-        `newline` can be used to force the line break characters that are
-        written to the remote files. Valid values are `LF` and `CRLF`.
-        This example converts the line breaks of the uploaded files
-        on the remote to the Windows format:
-        | Put Directory | /var/logs | newline=CRLF |
-
-        `recursive` specifies, whether to recursively upload all
-        subdirectories inside `source`. Subdirectories are uploaded if the
-        argument value evaluates to true.
-
-        The following example is identical to (3.), but also the subdirectories
-        (and subdirectories of the subdirectories, ad infinitum) inside
-        `source`, `/var/logs`, are uploaded to the user's home on the
-        remote machine:
-        | Put Directory | /var/logs | recursive=True |
-
-        As a result, the content of the local directory `/var/logs`,
-        including its subdirectories, is now found at the user's home on
-        the remote machine. Subdirectory paths are preserved, e.g.
-        content of local `var/logs/mysql` is on the remote machine
-        at `logs/mysql`.
 
         New in SSHLibrary 1.2.
         """
