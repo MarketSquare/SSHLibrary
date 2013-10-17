@@ -72,27 +72,22 @@ class Shell(AbstractShell):
 
     def __init__(self, client, term_type, term_width, term_height):
         shell = client.openSession()
-        shell.requestPTY(term_type,
-                               term_width,
-                               term_height,
-                               0, 0, None)
+        shell.requestPTY(term_type, term_width, term_height, 0, 0, None)
         shell.startShell()
         self._stdout = shell.getStdout()
         self._stdin = shell.getStdin()
 
     def read(self):
-        data = ''
         if self._output_available():
             read_bytes = jarray.zeros(self._output_available(), 'b')
             self._stdout.read(read_bytes)
-            data = ''.join([chr(b & 0xFF) for b in read_bytes])
-        return data
+            return ''.join(chr(b & 0xFF) for b in read_bytes)
+        return ''
 
     def read_byte(self):
-         data = ''
          if self._output_available():
-             data = chr(self._stdout.read())
-         return data
+             return chr(self._stdout.read())
+         return ''
 
     def _output_available(self):
         return self._stdout.available()

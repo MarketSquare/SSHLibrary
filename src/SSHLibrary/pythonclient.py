@@ -95,10 +95,9 @@ class Shell(AbstractShell):
         return data
 
     def read_byte(self):
-         data = ''
          if self._output_available():
-            data = self._shell.recv(1)
-         return data
+            return self._shell.recv(1)
+         return ''
 
     def _output_available(self):
         return self._shell.recv_ready()

@@ -259,10 +259,10 @@ class AbstractSSHClient(object):
         :param int interval: Time to wait between repeated writings. Can be
             defined similarly as `timeout`.
         """
-        timeout = TimeEntry(timeout)
         interval = TimeEntry(interval)
-        starttime = time.time()
-        while time.time() - starttime < timeout.value:
+        timeout = TimeEntry(timeout)
+        max_time = time.time() + timeout.value
+        while time.time() < max_time:
             self.write(text)
             try:
                 return self._read_until(lambda s: expected in s, expected,
@@ -275,8 +275,8 @@ class AbstractSSHClient(object):
     def _read_until(self, matcher, expected, timeout=None):
         server_output = ''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
-        start_time = time.time()
-        while time.time() < float(timeout.value) + start_time:
+        max_time = time.time() + timeout.value
+        while time.time() < max_time:
             try:
                 server_output += self.shell.read_byte()
                 decoded_output = server_output.decode(self.config.encoding)
