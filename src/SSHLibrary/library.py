@@ -551,7 +551,7 @@ class SSHLibrary(object):
         self._connections.close_all()
 
     def get_connection(self, index_or_alias=None, loglevel=None):
-        """Return information of the connection.
+        """Return information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
         change the active connection.
@@ -685,7 +685,7 @@ class SSHLibrary(object):
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
                         return_rc=False):
-        """Executes `command` on the remote machine and return its outputs.
+        """Executes `command` on the remote machine and returns its outputs.
 
         This keyword executes the `command` and returns after the execution
         has been finished. Use `Start Command` if the command should be
@@ -730,8 +730,7 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command):
-        """Starts execution of the `command` on the remote machine and
-        returns immediately.
+        """Starts execution of the `command` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the `command`
         execution to be finished. If waiting for the output is required,
@@ -844,8 +843,9 @@ class SSHLibrary(object):
         return value and str(value).lower() != 'false'
 
     def write(self, text, loglevel=None):
-        """Writes the given `text` on the remote machine and appends
-        [#Default newline|a newline].
+        """Writes the given `text` on the remote machine and appends a newline.
+
+        Appended [#Default newline|newline] can be configured.
 
         This keyword returns and [#Interactive shells|consumes] the written
         `text` (including the appended newline) from the server output.
@@ -869,8 +869,7 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read_until_newline)
 
     def write_bare(self, text):
-        """Writes the given `text` on the remote machine without appending
-        a newline.
+        """Writes the given `text` on the remote machine without appending a newline.
 
         Unlike `Write`, this keyword returns and [#Interactive shells|consumes]
         nothing.
@@ -896,8 +895,7 @@ class SSHLibrary(object):
 
     def write_until_expected_output(self, text, expected, timeout,
                                     retry_interval, loglevel=None):
-        """Writes the given `text` repeatedly until `expected` appears in
-        the server output.
+        """Writes the given `text` repeatedly until `expected` appears in the server output.
 
         This keyword returns nothing.
 
@@ -923,11 +921,12 @@ class SSHLibrary(object):
                            expected, timeout, retry_interval)
 
     def read(self, loglevel=None):
-        """[#Interactive shells|Consumes] and returns everything available
-        on the server output.
+        """Consumes and returns everything available on the server output.
 
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
+
+        See `interactive shells` for information on what is consumed.
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -945,13 +944,14 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read)
 
     def read_until(self, expected, loglevel=None):
-        """[#Interactive shells|Consumes] and returns the server output until
-        `expected` is encountered.
+        """Consumes and returns the server output until `expected` is encountered.
 
         Text up until and including the `expected` will be returned.
 
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
+
+        See `interactive shells` for information on what is consumed.
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -971,8 +971,7 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read_until, expected)
 
     def read_until_prompt(self, loglevel=None):
-        """[#Interactive shells|Consumes] and returns the server output until
-        [#Default prompt|the prompt] is found.
+        """Consumes and returns the server output until the prompt is found.
 
         Text up and until prompt is returned. [#Default prompt|The prompt must
         be set] before this keyword is used.
@@ -983,6 +982,8 @@ class SSHLibrary(object):
         This keyword is useful for reading output of a single command when
         output of previous command has been read and that command does not
         produce prompt characters in its output.
+
+        See `interactive shells` for information on what is consumed.
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -1001,8 +1002,7 @@ class SSHLibrary(object):
         return self._read_and_log(loglevel, self.current.read_until_prompt)
 
     def read_until_regexp(self, regexp, loglevel=None):
-        """[#Interactive shells|Consumes] and returns the server output until
-        a match to `regexp` is found.
+        """Consumes and returns the server output until a match to `regexp` is found.
 
         `regexp` can be a pattern or a compiled regexp object.
 
@@ -1027,6 +1027,8 @@ class SSHLibrary(object):
 
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
+
+        See `interactive shells` for information on what is consumed.
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -1113,8 +1115,7 @@ class SSHLibrary(object):
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
-        """Downloads a directory, including its content, from the remote
-        machine to the local machine.
+        """Downloads a directory, including its content, from the remote machine to the local machine.
 
         `source` is a path on the remote machine.
 
@@ -1259,8 +1260,7 @@ class SSHLibrary(object):
 
     def put_directory(self, source, destination='.', mode='0744',
                       newline="", path_separator='/', recursive=False):
-        """Uploads a directory, including its content, from the local machine
-        to the remote machine.
+        """Uploads a directory, including its content, from the local machine to the remote machine.
 
         `source` is the path on the local machine.
 
@@ -1404,8 +1404,7 @@ class SSHLibrary(object):
         return not self.current.dir_exists(path)
 
     def list_directory(self, path, pattern=None, absolute=False):
-        """Returns and logs items in a remote directory, optionally filtered
-        with `pattern`.
+        """Returns and logs items in a remote directory, optionally filtered with `pattern`.
 
         File and directory names are returned in case-sensitive alphabetical
         order, e.g. ['A Name', 'Second', 'a lower case name', 'one more'].
