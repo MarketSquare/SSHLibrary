@@ -573,6 +573,9 @@ class SSHLibrary(object):
         | height    | integer  | Height of the [#Default terminal settings|virtual terminal]. |
         | encoding  | string   | [#Default encoding|The encoding] used for inputs and outputs. |
 
+        If there is no connection, an object having `index` and `host` as `None`
+        is returned, rest of its attributes being the configuration defaults.
+
         If you want the information for all the open connections, use `Get Connections`.
 
         This keyword logs the connection information. `loglevel` can be used to
