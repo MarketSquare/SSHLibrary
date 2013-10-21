@@ -559,11 +559,21 @@ class SSHLibrary(object):
         If `index_or_alias` is not given, the information of the current
         connection is returned.
 
-        This keyword returns an object that describes the connection.
-        The object has attributes that correspond to the [#Configurable per
-        connection|connection configuration values] and attributes `host`,
-        `port`, `index` and `alias`. If you want the information for all
-        the open connections, use `Get Connections`.
+        This keyword returns an object that has the following attributes:
+        | = Name =  | = Type = | = Explanation = |
+        | index     | integer  | Number of the connection. Numbering starts from `1`. |
+        | host      | string   | Destination hostname. |
+        | alias     | string   | An optional alias given when creating the connection.  |
+        | port      | integer  | Destination port. |
+        | timeout   | string   | [#Default timeout|Timeout] length in textual representation. |
+        | newline   | string   | [#Default newline|The line break sequence] used by `Write` keyword. |
+        | prompt    | string   | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
+        | term_type | string   | Type of the [#Default terminal settings|virtual terminal]. |
+        | width     | integer  | Width of the [#Default terminal settings|virtual terminal]. |
+        | height    | integer  | Height of the [#Default terminal settings|virtual terminal]. |
+        | encoding  | string   | [#Default encoding|The encoding] used for inputs and outputs. |
+
+        If you want the information for all the open connections, use `Get Connections`.
 
         This keyword logs the connection information. `loglevel` can be used to
         override [#Default loglevel|the default log level].
@@ -602,9 +612,7 @@ class SSHLibrary(object):
         """Return information about all the open connections.
 
         This keyword returns a list of objects that are similar to what is
-        returned by `Get Connection`. These objects have attributes that
-        correspond to the [#Configurable per connection|connection configuration
-        values] and attributes `host`, `port`, `index` and `alias`.
+        returned by `Get Connection`.
 
         This keyword logs the connection information. `loglevel` can be used to
         override [#Default loglevel|the default log level].
