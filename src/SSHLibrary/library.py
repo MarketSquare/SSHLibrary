@@ -550,7 +550,10 @@ class SSHLibrary(object):
         """
         self._connections.close_all()
 
-    def get_connection(self, index_or_alias=None, loglevel=None):
+    def get_connection(self, index_or_alias=None, loglevel=None, index=False,
+                       host=False, alias=False, port=False, timeout=False,
+                       newline=False, prompt=False, term_type=False,
+                       width=False, height=False, encoding=False):
         """Return information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -574,7 +577,8 @@ class SSHLibrary(object):
         | encoding  | string   | [#Default encoding|The encoding] used for inputs and outputs. |
 
         If there is no connection, an object having `index` and `host` as `None`
-        is returned, rest of its attributes being the configuration defaults.
+        is returned, rest of its attributes having their values as configuration
+        defaults.
 
         If you want the information for all the open connections, use `Get Connections`.
 
@@ -603,6 +607,26 @@ class SSHLibrary(object):
         | Should Be Equal | ${farhost.host}  | far.server.com       |
         | Should Be Equal | ${farhost.alias} | far                  |
 
+        This keyword can also return plain connection attributes instead of the
+        whole object. This can be adjusted using the boolean arguments that
+        correspond to the attribute names of the object. If an argument
+        evaluates to true, only the respective connection attribute value is
+        returned.
+
+        Getting the connection host only:
+        | Open Connection | my.server.com  |
+        | ${host}=        | Get Connection | host=True     |
+        | Should Be Equal | ${host}        | my.server.com |
+
+        If several arguments evaluate to true, multiple values are returned.
+        Non-empty strings, except `false` and `False`, evaluate to true.
+
+        Getting both the connection host and port:
+        | Open Connection             | my.server.com  |
+        | ${host}  ${port}=           | Get Connection | host=True     | port=yea |
+        | Should Be Equal             | ${host}        | my.server.com |
+        | Should Be Equal As Integers | ${port}        | 22            |
+
         New in SSHLibrary 1.2.
         """
         if not index_or_alias:
@@ -611,8 +635,45 @@ class SSHLibrary(object):
             config = self._connections.get_connection(index_or_alias).config
         except RuntimeError:
             config = SSHClient(None).config
-        self._log(str(config), loglevel)
-        return config
+        return_values = tuple(self._get_config_values(config, index, host,
+                                                      alias, port, timeout,
+                                                      newline, prompt,
+                                                      term_type, width, height,
+                                                      encoding))
+        if not return_values:
+            self._log(str(config), loglevel)
+            return config
+        if len(return_values) == 1:
+            return return_values[0]
+        return return_values
+
+    def _get_config_values(self, config, index, host, alias, port, timeout,
+                           newline, prompt, term_type, width, height, encoding):
+        if self._output_wanted(index):
+            yield config.index
+        if self._output_wanted(host):
+            yield config.host
+        if self._output_wanted(alias):
+            yield config.alias
+        if self._output_wanted(port):
+            yield config.port
+        if self._output_wanted(timeout):
+            yield config.timeout
+        if self._output_wanted(newline):
+            yield config.newline
+        if self._output_wanted(prompt):
+            yield config.prompt
+        if self._output_wanted(term_type):
+            yield config.term_type
+        if self._output_wanted(width):
+            yield config.width
+        if self._output_wanted(height):
+            yield config.height
+        if self._output_wanted(encoding):
+            yield config.encoding
+
+    def _output_wanted(self, value):
+        return value and str(value).lower() != 'false'
 
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
@@ -852,9 +913,6 @@ class SSHLibrary(object):
         if len(ret) == 1:
             return ret[0]
         return ret
-
-    def _output_wanted(self, value):
-        return value and str(value).lower() != 'false'
 
     def write(self, text, loglevel=None):
         """Writes the given `text` on the remote machine and appends a newline.
