@@ -604,7 +604,10 @@ class SSHLibrary(object):
         """
         if not index_or_alias:
             index_or_alias = self._connections.current_index
-        config = self._connections.get_connection(index_or_alias).config
+        try:
+            config = self._connections.get_connection(index_or_alias).config
+        except RuntimeError:
+            config = SSHClient(None).config
         self._log(str(config), loglevel)
         return config
 

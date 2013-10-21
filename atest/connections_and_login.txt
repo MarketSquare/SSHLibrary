@@ -65,8 +65,18 @@ Get Connection
     ${conn} =  Get Connection  2
     Should Be Equal  ${conn.index}  ${conn2_index}
 
-Get Connection Fails When No Connections
-    Run Keyword And Expect Error  No open connection.  Get Connection
+Get Connection When No Connection Is Open
+    ${conn}=  Get Connection  1
+    Should Be Equal   ${conn.host}               ${None}
+    Should Be Equal   ${conn.index}              ${None}
+    Should Be Equal   ${conn.alias}              ${None}
+    Should Be Equal   ${conn.prompt}             ${None}
+    Should Be Equal As Integers  ${conn.port}    22
+    Should Be Equal   ${conn.newline}            \n
+    Should Be Equal   ${conn.encoding}           utf8
+    Should Be Equal   ${conn.term_type}          vt100
+    Should Be Equal As Integers  ${conn.width}   80
+    Should Be Equal As Integers  ${conn.height}  24
 
 Get Connections
     Open Connection   ${HOST}   prompt=>>
