@@ -348,10 +348,10 @@ class SSHLibrary(object):
         | Set Default Configuration   | timeout=20 seconds |
         | Open Connection             | emea.server.com    |
         | Open Connection             | apac.server.com    |
-        | ${local}  ${emea}  ${apac}= | Get Connections    |
-        | Should Be Equal As Integers | ${local.timeout}   | 5  |
-        | Should Be Equal As Integers | ${emea.timeout}    | 20 |
-        | Should Be Equal As Integers | ${apac.timeout}    | 20 |
+        | ${local}                    | ${emea}            | ${apac}= | Get Connections |
+        | Should Be Equal As Integers | ${local.timeout}   | 5        |
+        | Should Be Equal As Integers | ${emea.timeout}    | 20       |
+        | Should Be Equal As Integers | ${apac.timeout}    | 20       |
 
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
@@ -378,13 +378,13 @@ class SSHLibrary(object):
         | Should Be Equal          | ${myserver.prompt} | $ |
 
         Using keyword does not affect the other connections:
-        | Open Connection          | linux.server.com   |   |
-        | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
-        | Open Connection          | windows.server.com |   |
-        | Set Client Configuration | prompt=>           |   | # Only windows.server.com affected  |
-        | ${linux}  ${windows}=    | Get Connections    |
-        | Should Be Equal          | ${linux.prompt}    | $ |
-        | Should Be Equal          | ${windows.prompt}  | > |
+        | Open Connection          | linux.server.com   |                 |
+        | Set Client Configuration | prompt=$           |                 | # Only linux.server.com affected   |
+        | Open Connection          | windows.server.com |                 |
+        | Set Client Configuration | prompt=>           |                 | # Only windows.server.com affected |
+        | ${linux}                 | ${windows}=        | Get Connections |
+        | Should Be Equal          | ${linux.prompt}    | $               |
+        | Should Be Equal          | ${windows.prompt}  | >               |
 
         Multiple settings are possible. This example updates [#Default terminal
         settings|the terminal settings] of the current connection:
