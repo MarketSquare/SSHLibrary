@@ -678,7 +678,7 @@ class SSHLibrary(object):
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
-        This keyword returns a list of objects that are similar to what is
+        This keyword returns a list of objects that are identical to the ones
         returned by `Get Connection`.
 
         This keyword logs the connection information. `loglevel` can be used to
