@@ -607,25 +607,26 @@ class SSHLibrary(object):
         | Should Be Equal | ${farhost.host}  | far.server.com       |
         | Should Be Equal | ${farhost.alias} | far                  |
 
-        This keyword can also return plain connection attributes instead of the
-        whole object. This can be adjusted using the boolean arguments that
-        correspond to the attribute names of the object. If an argument
-        evaluates to true, only the respective connection attribute value is
-        returned.
+        This keyword can also return plain connection attributes instead of
+        the whole connection object. This can be adjusted using the boolean
+        arguments `index`, `host`, `alias`, and so on, that correspond to
+        the attribute names of the object. If such arguments are given, and
+        they evaluate to true (e.g. any non-empty string except `false` or
+        `False`), only the respective connection attributes are returned.
+        Note that attributes are always returned in the same order arguments
+        are specified in the signature.
 
-        Getting the connection host only:
-        | Open Connection | my.server.com  |
-        | ${host}=        | Get Connection | host=True     |
-        | Should Be Equal | ${host}        | my.server.com |
+        | Open Connection | my.server.com  | alias=example  |
+        | ${host}=        | Get Connection | host=True      |
+        | Should Be Equal | ${host}        | my.server.com  |
+        | ${host}         | ${alias}=      | Get Connection | host=yes | alias=please |
+        | Should Be Equal | ${host}        | my.server.com  |
+        | Should Be Equal | ${alias}       | example        |
 
-        If several arguments evaluate to true, multiple values are returned.
-        Non-empty strings, except `false` and `False`, evaluate to true.
-
-        Getting both the connection host and port:
-        | Open Connection             | my.server.com  |
-        | ${host}  ${port}=           | Get Connection | host=True     | port=yea |
-        | Should Be Equal             | ${host}        | my.server.com |
-        | Should Be Equal As Integers | ${port}        | 22            |
+        Getting only certain attributes is especially useful when using this
+        library via the Remote library interface. This interface does not
+        support returning custom objects, but individual attributes can be
+        returned just fine.
 
         New in SSHLibrary 1.2.
         """
