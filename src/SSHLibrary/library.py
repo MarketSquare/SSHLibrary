@@ -124,9 +124,8 @@ class SSHLibrary(object):
     === Default loglevel ===
 
     Argument `loglevel` sets the log level used to log the output read by
-    `Read`, `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
-    `Write Until Expected Output`, `Get Connection` and `Get Connections`.
-    The default level is `INFO`.
+    `Read`, `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write` and
+    `Write Until Expected Output`. The default level is `INFO`.
 
     `loglevel` is not configurable per connection but can be overridden by
     passing it as an argument to any of the mentioned keywords.
@@ -550,10 +549,10 @@ class SSHLibrary(object):
         """
         self._connections.close_all()
 
-    def get_connection(self, index_or_alias=None, loglevel=None, index=False,
-                       host=False, alias=False, port=False, timeout=False,
-                       newline=False, prompt=False, term_type=False,
-                       width=False, height=False, encoding=False):
+    def get_connection(self, index_or_alias=None, index=False, host=False,
+                       alias=False, port=False, timeout=False, newline=False,
+                       prompt=False, term_type=False, width=False, height=False,
+                       encoding=False):
         """Return information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -580,10 +579,8 @@ class SSHLibrary(object):
         is returned, rest of its attributes having their values as configuration
         defaults.
 
-        If you want the information for all the open connections, use `Get Connections`.
-
-        This keyword logs the connection information. `loglevel` can be used to
-        override [#Default loglevel|the default log level].
+        If you want the information for all the open connections, use
+        `Get Connections`.
 
         Getting connection information of the current connection:
         | Open Connection | far.server.com        |
@@ -628,6 +625,8 @@ class SSHLibrary(object):
         support returning custom objects, but individual attributes can be
         returned just fine.
 
+        This keyword logs the connection information with log level `INFO`.
+
         New in SSHLibrary 1.2.
         """
         if not index_or_alias:
@@ -636,13 +635,13 @@ class SSHLibrary(object):
             config = self._connections.get_connection(index_or_alias).config
         except RuntimeError:
             config = SSHClient(None).config
+        self._info(str(config))
         return_values = tuple(self._get_config_values(config, index, host,
                                                       alias, port, timeout,
                                                       newline, prompt,
                                                       term_type, width, height,
                                                       encoding))
         if not return_values:
-            self._log(str(config), loglevel)
             return config
         if len(return_values) == 1:
             return return_values[0]
@@ -676,14 +675,11 @@ class SSHLibrary(object):
     def _output_wanted(self, value):
         return value and str(value).lower() != 'false'
 
-    def get_connections(self, loglevel=None):
+    def get_connections(self):
         """Return information about all the open connections.
 
         This keyword returns a list of objects that are identical to the ones
         returned by `Get Connection`.
-
-        This keyword logs the connection information. `loglevel` can be used to
-        override [#Default loglevel|the default log level].
 
         Example:
         | Open Connection             | near.server.com     | timeout=10s     |
@@ -694,11 +690,11 @@ class SSHLibrary(object):
         | Should Be Equal As Integers | ${farhost.port}     | 22              |
         | Should Be Equal As Integers | ${farhost.timeout}  | 5               |
 
-        Argument `loglevel` was added in SSHLibrary 1.2.
+        This keyword logs the information of connections with log level `INFO`.
         """
         configs = [c.config for c in self._connections._connections]
         for c in configs:
-            self._log(str(c), loglevel)
+            self._info(str(c))
         return configs
 
     def login(self, username, password):
@@ -796,8 +792,8 @@ class SSHLibrary(object):
         `Write` and `Read` can be used for
         [#Interactive shells|running multiple commands in the same shell].
 
-        This keyword also logs the executed command and its exit status
-        with log level `INFO`.
+        This keyword logs the executed command and its exit status with
+        log level `INFO`.
         """
         self._info("Executing command '%s'." % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
@@ -832,7 +828,7 @@ class SSHLibrary(object):
         `Write` and `Read` can be used for
         [#Interactive shells|running multiple commands in the same shell].
 
-        This keyword also logs the started command with log level `INFO`.
+        This keyword logs the started command with log level `INFO`.
         """
         self._info("Starting command '%s'." % command)
         self._last_command = command
@@ -880,7 +876,7 @@ class SSHLibrary(object):
         | ${stdout}=     | Read Command Output |
         | Should Contain | ${stdout}           | 'HELLO'  |
 
-        This keyword also logs the read command with log level `INFO`.
+        This keyword logs the read command with log level `INFO`.
         """
         self._info("Reading output of command '%s'." % self._last_command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
