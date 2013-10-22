@@ -135,11 +135,7 @@ class AbstractSSHClient(object):
     def _read_server_output(self):
         if self.config.prompt:
             return self.read_until_prompt()
-        else:
-            while True:
-                text = self.read()
-                if text:
-                    return text
+        return self.read()
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
@@ -187,9 +183,19 @@ class AbstractSSHClient(object):
             text += self.config.newline
         self.shell.write(text)
 
-    def read(self):
+    def read(self, delay=None):
         """Read and return currently available output."""
-        server_output = self.shell.read()
+        server_output = ''
+        timeout = self.config.get('timeout')
+        delay = TimeEntry(delay) if delay else None
+        max_time = time.time() + timeout.value
+        while time.time() < max_time:
+            if delay:
+                time.sleep(delay.value)
+            read_output = self.shell.read()
+            if not read_output:
+                break
+            server_output += read_output
         return server_output.decode(self.config.encoding)
 
     def read_char(self):

@@ -348,10 +348,10 @@ class SSHLibrary(object):
         | Set Default Configuration   | timeout=20 seconds |
         | Open Connection             | emea.server.com    |
         | Open Connection             | apac.server.com    |
-        | ${local}  ${emea}  ${apac}= | Get Connections    |
-        | Should Be Equal As Integers | ${local.timeout}   | 5  |
-        | Should Be Equal As Integers | ${emea.timeout}    | 20 |
-        | Should Be Equal As Integers | ${apac.timeout}    | 20 |
+        | ${local}                    | ${emea}            | ${apac}= | Get Connections |
+        | Should Be Equal As Integers | ${local.timeout}   | 5        |
+        | Should Be Equal As Integers | ${emea.timeout}    | 20       |
+        | Should Be Equal As Integers | ${apac.timeout}    | 20       |
 
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
@@ -378,13 +378,13 @@ class SSHLibrary(object):
         | Should Be Equal          | ${myserver.prompt} | $ |
 
         Using keyword does not affect the other connections:
-        | Open Connection          | linux.server.com   |   |
-        | Set Client Configuration | prompt=$           |   | # Only linux.server.com affected    |
-        | Open Connection          | windows.server.com |   |
-        | Set Client Configuration | prompt=>           |   | # Only windows.server.com affected  |
-        | ${linux}  ${windows}=    | Get Connections    |
-        | Should Be Equal          | ${linux.prompt}    | $ |
-        | Should Be Equal          | ${windows.prompt}  | > |
+        | Open Connection          | linux.server.com   |                 |
+        | Set Client Configuration | prompt=$           |                 | # Only linux.server.com affected   |
+        | Open Connection          | windows.server.com |                 |
+        | Set Client Configuration | prompt=>           |                 | # Only windows.server.com affected |
+        | ${linux}                 | ${windows}=        | Get Connections |
+        | Should Be Equal          | ${linux.prompt}    | $               |
+        | Should Be Equal          | ${windows.prompt}  | >               |
 
         Multiple settings are possible. This example updates [#Default terminal
         settings|the terminal settings] of the current connection:
@@ -679,7 +679,7 @@ class SSHLibrary(object):
     def get_connections(self, loglevel=None):
         """Return information about all the open connections.
 
-        This keyword returns a list of objects that are similar to what is
+        This keyword returns a list of objects that are identical to the ones
         returned by `Get Connection`.
 
         This keyword logs the connection information. `loglevel` can be used to
@@ -993,13 +993,19 @@ class SSHLibrary(object):
         self._read_and_log(loglevel, self.current.write_until_expected, text,
                            expected, timeout, retry_interval)
 
-    def read(self, loglevel=None):
+    def read(self, loglevel=None, delay=None):
         """Consumes and returns everything available on the server output.
 
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
 
         See `interactive shells` for information on what is consumed.
+.
+        The keyword continuously reads the server output and returns when
+        no more text is available or if [#Default timeout|the timeout] expires.
+        `delay` can be used to wait some time before every read on the server.
+        `delay` must be given in Robot Framework's time format
+        (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -1014,7 +1020,7 @@ class SSHLibrary(object):
         | ${output}=      | Read          | loglevel=WARN                | # Shown in the console due to loglevel |
         | Should Contain  | ${output}     | root@                        |
         """
-        return self._read_and_log(loglevel, self.current.read)
+        return self._read_and_log(loglevel, self.current.read, delay)
 
     def read_until(self, expected, loglevel=None):
         """Consumes and returns the server output until `expected` is encountered.
