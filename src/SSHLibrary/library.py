@@ -1134,56 +1134,48 @@ class SSHLibrary(object):
     def get_file(self, source, destination='.', path_separator='/'):
         """Downloads file(s) from the remote machine to the local machine.
 
-        `source` is a path on the remote machine.
+        `source` is a path on the remote machine. Both absolute paths and
+        paths relative to the current working directory are supported.
+        If the source contains wildcards explained in `pattern matching`,
+        all files matching it are downloaded. In this case `destination`
+        must always be a directory.
 
-        `destination` is the target path on the local machine.
+        `destination` is the target path on the local machine. Both absolute
+        paths and paths relative to the current working directory are supported.
 
-        Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative paths are relative to the current working
-        directory. On the local machine the cwd typically is
-        the directory where test execution was started from, and thus
-        accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically the user's home directory.
-
-        Using wildcards is possible in `source`. The pattern matching syntax
-        is explained in `pattern matching`. When wildcards are used,
-        `destination` must be a directory and only files matching the pattern
-        are downloaded, subdirectories being ignored.
-
-        This example downloads all the text files to the cwd:
-        | Get File | /path/to/*.txt |
-
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
+        `path_separator` is the operating system path separator on the remote
+        machine. With Windows remote machines, `path_separator`
         must be set as `\\\\` (an escaped backslash in the test data):
-        | Get File | /path/to/remote_file.txt | local_file.txt | path_separator=\\\\ |
 
-        The local `destination` is created as following:
+        Examples:
 
-        1. If `destination` is an existing file, `source` file is downloaded
-           over it.
+        | Get File | /var/log/auth.log | /tmp/                      |
+        | Get File | /tmp/example.txt  | C:\\\\temp\\\\new_name.txt |
+        | Get File | /path/to/*.txt    |
 
-        2. If `destination` is an existing directory, `source` file is
+        The local `destination` is created using the rules explained below:
+
+        1. If the `destination` is an existing file, the `source` file is
+           downloaded over it.
+
+        2. If the `destination` is an existing directory, the `source` file is
            downloaded into it. Possible file with the same name is overwritten.
 
-        3. If `destination` does not exist and it ends with `path_separator`,
-           it is considered a directory. The directory is then created and
-           `source` file is downloaded into it. Possible missing intermediate
-           directories are also created.
+        3. If the `destination` does not exist and it ends with the path
+           separator of the local operating system, it is considered a
+           directory. The directory is then created and the `source` file is
+           downloaded into it. Possible missing intermediate directories
+           are also created.
 
-        4. If `destination` does not exist and does not end with
-           `path_separator`, it is considered a file. If the path to the file
-           does not exist, it is created.
-
-           In this example, the missing local path `not/existing` is
-           first created:
-           | Get File | remote_file.txt | not/existing/local_file.txt |
+        4. If the `destination` does not exist and does not end with the local
+           path separator, it is considered a file. The `source` file is
+           downloaded and saved using that file name, and possible missing
+           intermediate directories are also created.
 
         5. If `destination` is not given, the current working directory on
-           the local machine is used as the destination. This will most probably
-           be the directory where the test execution was started.
-
-        Argument `path_separator` was added in SSHLibrary 1.1.
+           the local machine is used as the destination. This is typically
+           the directory where the test execution was started and thus
+           accessible using built-in `${EXECDIR}` variable.
         """
         return self._run_sftp_command(self.current.get_file, source,
                                       destination, path_separator)
