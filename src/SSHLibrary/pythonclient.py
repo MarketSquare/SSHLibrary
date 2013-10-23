@@ -89,9 +89,10 @@ class Shell(AbstractShell):
         self._shell = client.invoke_shell(term_type, term_width, term_height)
 
     def read(self):
-        if self._output_available():
-            return self._shell.recv(4096)
-        return ''
+        data = ''
+        while self._output_available():
+            data += self._shell.recv(4096)
+        return data
 
     def read_byte(self):
          if self._output_available():

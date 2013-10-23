@@ -992,16 +992,16 @@ class SSHLibrary(object):
     def read(self, loglevel=None, delay=None):
         """Consumes and returns everything available on the server output.
 
+        If `delay` is specified, the keyword continuously reads the server
+        output and returns when no more text is available or if
+        [#Default timeout|the timeout] expires. Before every read, amount of
+        `delay` is wait. `delay` must be given in Robot Framework's time format
+        (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
+
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
 
         See `interactive shells` for information on what is consumed.
-.
-        The keyword continuously reads the server output and returns when
-        no more text is available or if [#Default timeout|the timeout] expires.
-        `delay` can be used to wait some time before every read on the server.
-        `delay` must be given in Robot Framework's time format
-        (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -1015,6 +1015,8 @@ class SSHLibrary(object):
         | Write           | secretpasswd  |
         | ${output}=      | Read          | loglevel=WARN                | # Shown in the console due to loglevel |
         | Should Contain  | ${output}     | root@                        |
+
+        Argument `delay` was added in SSHLibrary 1.2.
         """
         return self._read_and_log(loglevel, self.current.read, delay)
 
