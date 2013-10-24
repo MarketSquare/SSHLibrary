@@ -48,7 +48,7 @@ class _ClientConfiguration(Configuration):
 
 
 class AbstractSSHClient(object):
-    """A base class for SSH client implementations, defines the public API
+    """A base class for SSH client implementations, defines the public API.
 
     Subclasses  provide the tool/language specific concrete implementations.
     """
@@ -355,20 +355,17 @@ class AbstractSSHClient(object):
                                       absolute)
         items += self.sftp_client.list(self.sftp_client.listdirs, path, pattern,
                                        absolute)
-        items.sort()
-        return items
+        return sorted(items)
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
         files = self.sftp_client.list(self.sftp_client.listfiles, path, pattern,
                                       absolute)
-        files.sort()
-        return files
+        return sorted(files)
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
         dirs = self.sftp_client.list(self.sftp_client.listdirs, path, pattern,
                                      absolute)
-        dirs.sort()
-        return dirs
+        return sorted(dirs)
 
     def dir_exists(self, path):
         return self.sftp_client.dir_exists(path)
@@ -392,7 +389,7 @@ class AbstractShell(object):
 class AbstractSFTPClient(object):
 
     def __init__(self):
-       self._homedir = self._absolute_path('.')
+        self._homedir = self._absolute_path('.')
 
     def _absolute_path(self, path):
         raise NotImplementedError
@@ -470,25 +467,24 @@ class AbstractSFTPClient(object):
         if source.endswith(path_separator):
             source = source[:-len(path_separator)]
         if not self.dir_exists(source):
-            msg = "There was no source path matching '%s'." % source
-            raise SSHClientException(msg)
-        remotefiles = []
-        localfiles = []
+            raise SSHClientException("There was no source path matching '%s'."
+                                     % source)
+        remote_files = []
+        local_files = []
         parent_dir = os.path.basename(source)
-        subdirs = [parent_dir]
-        local_target_exists = True if os.path.isdir(destination) else False
-        for path in subdirs:
+        sub_dirs = [parent_dir]
+        for path in sub_dirs:
             if recursive:
-                [subdirs.append(path_separator.join([path, subdir_name]))
-                for subdir_name in self.listdirs(path)]
+                for subdir_name in self.listdirs(path):
+                    sub_dirs.append(path_separator.join([path, subdir_name]))
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
-            if not local_target_exists:
+            if not os.path.isdir(destination):
                 local_path = local_path.replace(parent_dir + path_separator, '')
             r, l = self.get_file(remote_path, local_path, path_separator)
-            remotefiles.extend(r)
-            localfiles.extend(l)
-        return remotefiles, localfiles
+            remote_files.extend(r)
+            local_files.extend(l)
+        return remote_files, local_files
 
     def get_file(self, source, destination, path_separator='/'):
         remotefiles = self._get_get_file_sources(source, path_separator)
