@@ -185,18 +185,23 @@ class AbstractSSHClient(object):
 
     def read(self, delay=None):
         """Read and return currently available output."""
+        if delay:
+            server_output = self._delayed_read(delay)
+        else:
+            server_output = self.shell.read()
+        return server_output.decode(self.config.encoding)
+
+    def _delayed_read(self, delay):
         server_output = ''
         timeout = self.config.get('timeout')
-        delay = TimeEntry(delay) if delay else None
+        delay = TimeEntry(delay)
         max_time = time.time() + timeout.value
         while time.time() < max_time:
-            if delay:
-                time.sleep(delay.value)
+            time.sleep(delay.value)
             read_output = self.shell.read()
             if not read_output:
-                break
+                return server_output
             server_output += read_output
-        return server_output.decode(self.config.encoding)
 
     def read_char(self):
         """Read and return a single char from the current session."""
