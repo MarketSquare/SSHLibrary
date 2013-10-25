@@ -992,10 +992,11 @@ class SSHLibrary(object):
     def read(self, loglevel=None, delay=None):
         """Consumes and returns everything available on the server output.
 
-        If `delay` is specified, the keyword continuously reads the server
-        output and returns when no more text is available or if
-        [#Default timeout|the timeout] expires. Before every read, amount of
-        `delay` is wait. `delay` must be given in Robot Framework's time format
+        If `delay` is given, this keyword waits amount of it and reads again.
+        This wait-read cycle is repeated as long as more text is available on
+        the server output and [#Default timeout|the timeout] has not expired.
+        If no more text is available, the keyword returns.
+        `delay` must be given in Robot Framework's time format
         (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
 
         This keyword is most useful for reading everything from
