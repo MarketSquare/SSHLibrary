@@ -17,10 +17,12 @@ Close Connection Fails If No Connection
     Run Keyword And Expect Error  No open connection.  Close Connection
 
 Switch Connection
-    ${conn1_id} =  Login As Valid User  one
+    ${conn1_id} =  Open Connection  ${HOST}  alias=one  prompt=${PROMPT}
+    Login  ${USERNAME}  ${PASSWORD}
     Write  cd /tmp
     Read Until Prompt
-    ${conn_id2} =  Login As Valid User  second
+    ${conn_id2} =  Open Connection  ${HOST}  alias=second  prompt=${PROMPT}
+    Login  ${USERNAME}  ${PASSWORD}
     ${prev id} =  Switch Connection  ${conn1_id}
     Should Be Equal  ${prev id}  ${conn_id2}
     Write  pwd
@@ -39,19 +41,22 @@ Switch Connection To None
 Login Returns Server Output
     [Setup]  Open Connection  ${HOST}
     ${output}=  Login  ${USERNAME}  ${PASSWORD}
-    Should Contain  ${output}  :~$
+    Should Contain  ${output}  Last login:
+    ${output}=  Read
+    Should Be Equal  ${output.strip()}  ${EMPTY}
 
-Login Returns Server Output Until Prompt If Prompt Is Set
-    [Setup]  Open Connection  ${HOST}  prompt=$
+Login Returns Server Output If Prompt Is Set
+    [Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
     ${output}=  Login  ${USERNAME}  ${PASSWORD}
-    Should Contain  ${output}  :~$
+    Should Contain  ${output}  Last login:
+    ${output}=  Read
+    Should Be Equal  ${output.strip()}  ${EMPTY}
 
 Enable Logging
     [Tags]   pybot
     [Setup]  Remove File  ${OUTPUTDIR}/sshlog.txt
     Enable SSH Logging  ${OUTPUTDIR}/sshlog.txt
-    Open Connection  ${HOST}
-    Login  ${username}  ${password}
+    Login As Valid User
     File Should Not Be Empty  ${OUTPUTDIR}/sshlog.txt
 
 *** Keywords ***

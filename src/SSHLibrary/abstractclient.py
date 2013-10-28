@@ -94,7 +94,7 @@ class AbstractSSHClient(object):
         """
         self.client.close()
 
-    def login(self, username, password):
+    def login(self, username, password, delay=None):
         """Login using given credentials.
 
         :param str username: username to log in with
@@ -107,12 +107,12 @@ class AbstractSSHClient(object):
         except SSHClientException:
             msg = "Authentication failed for user '%s'." % username
             raise SSHClientException(msg)
-        return self._read_server_output()
+        return self._read_login_output(delay)
 
     def _login(self, username, password):
         raise NotImplementedError
 
-    def login_with_public_key(self, username, keyfile, password):
+    def login_with_public_key(self, username, keyfile, password, delay=None):
         """Login using given credentials.
 
         :param str username: username to log in with
@@ -127,15 +127,15 @@ class AbstractSSHClient(object):
         except SSHClientException:
             msg = "Login with public key failed for user '%s'." % username
             raise SSHClientException(msg)
-        return self._read_server_output()
+        return self._read_login_output(delay)
 
     def _login_with_public_key(self, username, keyfile, password):
         raise NotImplementedError
 
-    def _read_server_output(self):
+    def _read_login_output(self, delay):
         if self.config.prompt:
             return self.read_until_prompt()
-        return self.read()
+        return self.read(delay)
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):

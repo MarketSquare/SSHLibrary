@@ -1,8 +1,9 @@
 *** Settings ***
-Library         SSHLibrary  ${EMPTY}  ${EMPTY}  $  WITH NAME  SSH
+Library         SSHLibrary  WITH NAME  SSH
 Variables       user_information.py
 
 *** Variables ***
+${PROMPT}                          $
 ${TEST ROOT NAME}                  robot-testdir
 ${REMOTE TEST ROOT}                ${USER HOME}${/}${TEST ROOT NAME}
 ${LOCAL TMPDIR}                    ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir
@@ -40,12 +41,6 @@ Remove Test Files And Close Connections
     Close All Connections
 
 Login As Valid User
-    [Arguments]  ${options}=${EMPTY}
-    ${id} =  Open Connection To Test Host  ${options}
+    ${id} =  Open Connection  ${HOST}  prompt=${PROMPT}
     Login  ${USERNAME}  ${PASSWORD}
-    [Return]  ${id}
-
-Open Connection To Test Host
-    [Arguments]  ${options}=${EMPTY}
-    ${id} =  Open Connection  ${HOST}  ${options}
     [Return]  ${id}

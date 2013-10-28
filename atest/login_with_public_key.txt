@@ -14,7 +14,7 @@ ${INVALID PUBKEY FILE}      ${PUBKEYDIR}/id_rsa_invalid
 
 *** Test Cases ***
 Login With Public Key
-    Open Connection  ${HOST}
+    Open Connection  ${HOST}  prompt=${PROMPT}
     Login With Public Key  ${PUBKEY USERNAME}  ${PUBKEY FILE}
 
 Login With Non Existing Public Key

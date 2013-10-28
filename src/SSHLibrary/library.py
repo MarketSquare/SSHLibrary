@@ -696,14 +696,16 @@ class SSHLibrary(object):
             self._info(str(c))
         return configs
 
-    def login(self, username, password):
+    def login(self, username, password, delay='0.5 seconds'):
         """Logs into the SSH server with the given `username` and `password`.
 
         Connection must be opened before using this keyword.
 
-        This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If [#Default prompt|the prompt is set],
-        everything until the prompt is returned and consumed.
+        This keyword returns the server output after logging in, thus clearing
+        it. If `delay` is given, the server output is read and consumed the same
+        way as with `Read` with the given `delay`.
+        If [#Default prompt|the prompt is set], `delay` is not effective and
+        everything until the prompt is read and consumed.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -714,10 +716,13 @@ class SSHLibrary(object):
         | Open Connection | linux.server.com | prompt=$         |
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
-        """
-        return self._login(self.current.login, username, password)
 
-    def login_with_public_key(self, username, keyfile, password=''):
+        Argument `delay` was added in SSHLibrary 1.2.
+        """
+        return self._login(self.current.login, username, password, delay)
+
+    def login_with_public_key(self, username, keyfile, password='',
+                              delay='0.5 seconds'):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -729,9 +734,11 @@ class SSHLibrary(object):
 
         `password` is used to unlock the `keyfile` if unlocking is required.
 
-        This keyword returns and consumes everything on the server output
-        (usually the server MOTD). If [#Default prompt|the prompt is set],
-        everything until the prompt is returned and consumed.
+        This keyword returns the server output after logging in, thus clearing
+        it. If `delay` is given, the server output is read and consumed the same
+        way as with `Read` with the given `delay`.
+        If [#Default prompt|the prompt is set], `delay` is not effective and
+        everything until the prompt is read and consumed.
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.server.com      |
@@ -741,9 +748,11 @@ class SSHLibrary(object):
         With locked private keys, the keyring `password` is required:
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
+
+        Argument `delay` was added in SSHLibrary 1.2.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password)
+                           keyfile, password, delay)
 
     def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."
