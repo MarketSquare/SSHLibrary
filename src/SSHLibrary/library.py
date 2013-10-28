@@ -1156,10 +1156,9 @@ class SSHLibrary(object):
 
         `path_separator` is the operating system path separator on the remote
         machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
+        must be set as `\\\\` (an escaped backslash in the test data).
 
         Examples:
-
         | Get File | /var/log/auth.log | /tmp/                      |
         | Get File | /tmp/example.txt  | C:\\\\temp\\\\new_name.txt |
         | Get File | /path/to/*.txt    |
@@ -1187,6 +1186,8 @@ class SSHLibrary(object):
            the local machine is used as the destination. This is typically
            the directory where the test execution was started and thus
            accessible using built-in `${EXECDIR}` variable.
+
+        See also `Get Directory`.
         """
         return self._run_sftp_command(self.current.get_file, source,
                                       destination, path_separator)
@@ -1195,116 +1196,75 @@ class SSHLibrary(object):
                       recursive=False):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
-        `source` is a path on the remote machine.
+        `source` is a path on the remote machine. Both absolute paths and
+        paths relative to the current working directory are supported.
 
-        `destination` is the target path on the local machine.
+        `destination` is the target path on the local machine.  Both absolute
+        paths and paths relative to the current working directory are supported.
 
-        Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative path is relative to the current working
-        directory. On the local machine the cwd typically is
-        the directory where test execution was started from, and thus
-        accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically the user's home directory.
-
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Get Directory | /path/to/files | path_separator=\\\\ |
+        `path_separator` is the operating system path separator on the remote
+        machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data).
 
         `recursive` specifies, whether to recursively download all
         subdirectories inside `source`. Subdirectories are downloaded if
         the argument value evaluates to true.
 
-        The following example downloads the content of `var/logs`, including
-        its subdirectories (and subdirectories of the subdirectories,
-        ad infinitum), to the cwd:
-        | Get Directory | /var/logs | recursive=True |
-
-        As the result, the content of the remote directory `/var/logs`,
-        including its subdirectories, is now found at the current working
-        directory with name `logs`. Subdirectory paths are preserved, e.g.
-        remote `/var/logs/mysql` is now found locally at `logs/mysql`.
+        Examples:
+        | Get Directory | /var/logs      | /tmp                |
+        | Get Directory | /var/logs      | /tmp/non/existing   |
+        | Get Directory | /var/logs      |
+        | Get Directory | /var/logs      | recursive=True      |
+        | Get Directory | /path/to/files | path_separator=\\\\ |
 
         The local `destination` is created as following:
 
         1. If `destination` is an existing path on the local machine,
            `source` directory is downloaded into it.
 
-           In this example, the remote `/var/logs`, is downloaded into
-           an existing local path `/tmp`:
-           | Get Directory | /var/logs | /tmp |
-
-           As the result, the content of remote directory `/var/logs` is now
-           found at `/tmp/logs`.
-
         2. If `destination` does not exist on the local machine, it is created
            and the content of `source` directory is downloaded into it.
 
-           In this example, the content of the remote `/var/logs`,
-           is downloaded to a non-existing local path `not/existing`:
-           | Get Directory | /var/logs | /tmp/non/existing |
-
-           Because `/tmp/non/existing` does not already exist on the local
-           machine, it is created. As the result of keyword, `/tmp/non/existing`
-           now has the same content as the remote `/var/logs` but not the `logs`
-           directory itself.
-
         3. If `destination` is not given, `source` directory is downloaded into
-           the current working directory on the local machine.
-
-           In this example, `/var/logs` is downloaded into the current
-           working directory:
-           | Get Directory | /var/logs |
-
-           In this case, `destination` always exists. As the result,
-           the remote directory `/var/logs` is now found at the current
-           working directory with name `logs`.
+           the current working directory on the local machine. This is typically
+           the directory where the test execution was started and thus
+           accessible using built-in `${EXECDIR}` variable.
 
         New in SSHLibrary 1.2.
+
+        See also `Get File`.
         """
         return self._run_sftp_command(self.current.get_directory, source,
                                       destination, path_separator, recursive)
 
-    def put_file(self, source, destination='.', mode='0744', newline="",
+    def put_file(self, source, destination='.', mode='0744', newline='',
                  path_separator='/'):
         """Uploads file(s) from the local machine to the remote machine.
 
-        `source` is the path on the local machine.
+        `source` is the path on the local machine. Both absolute paths and
+        paths relative to the current working directory are supported.
+        If the source contains wildcards explained in `pattern matching`,
+        all files matching it are uploaded. In this case `destination`
+        must always be a directory.
 
-        `destination` is the target path on the remote machine.
-
-        Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative paths are relative to the current working
-        directory. On the local machine the cwd typically is
-        the directory where test execution was started from, and thus
-        accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically the user's home directory.
-
-        Using wildcards is possible in `source`. The pattern matching syntax
-        is explained in `pattern matching`. When wildcards are used,
-        `destination` must be a directory and only files are uploaded,
-        subdirectories being ignored.
-
-        This example uploads all the text files to the remote cwd
-        (typically the user's home directory):
-        | Put File | /path/to/*.txt |
+        `destination` is the target path on the remote machine. Both absolute
+        paths and paths relative to the current working directory are supported.
 
         `mode` can be used to set the target file permission.
         Numeric values are accepted. The default value is `0744` (-rwxr--r--).
-        This example gives the group all permissions to the uploaded files on
-        the remote machine (-rwxrwx---):
-        | Put File | /path/to/*.txt | /home/groups/robot | mode=0770 |
 
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
-        This example converts the line breaks of the uploaded files
-        on the remote to the Windows format:
-        | Put File | /path/to/*.txt | newline=CRLF |
 
         `path_separator` is the path separator character of the operating system
         on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Put File | /path/to/local_file.txt | remote_file.txt | path_separator=\\\\ |
+        must be set as `\\\\` (an escaped backslash in the test data).
+
+        Examples:
+        | Put File | /path/to/*.txt          |
+        | Put File | /path/to/*.txt          | /home/groups/robot | mode=0770 |
+        | Put File | /path/to/*.txt          | newline=CRLF       |
+        | Put File | /path/to/local_file.txt | remote_file.txt    | path_separator=\\\\ |
 
         The remote `destination` is created as following:
 
@@ -1321,101 +1281,66 @@ class SSHLibrary(object):
 
         4. If `destination` does not exist and it does not end with
            `path_separator`, it is considered a file. If the path to the file
-           does not exist, it is created:
-
-           In this example, the missing remote path `non/existing` is
-           first created:
-           | Put File | local_file.txt | non/existing/remote_file.txt |
+           does not exist, it is created.
 
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
         Argument `path_separator` was added in SSHLibrary 1.1.
+
+        See also `Put Directory`.
         """
         return self._run_sftp_command(self.current.put_file, source,
                                       destination, mode, newline,
                                       path_separator)
 
     def put_directory(self, source, destination='.', mode='0744',
-                      newline="", path_separator='/', recursive=False):
+                      newline='', path_separator='/', recursive=False):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
-        `source` is the path on the local machine.
+        `source` is the path on the local machine. Both absolute paths and
+        paths relative to the current working directory are supported.
 
-        `destination` is the target path on the remote machine.
-
-        Both absolute and relative paths are accepted as `source` and
-        `destination`. Relative paths are relative to the current working
-        directory (cwd). On the local machine the cwd typically is
-        the directory where test execution was started from, and thus
-        accessible using the built-in `${EXECDIR}` variable. On the remote
-        machine the cwd is typically the user's home directory.
+        `destination` is the target path on the remote machine. Both absolute
+        paths and paths relative to the current working directory are supported.
 
         `mode` can be used to set the target file permission.
         Numeric values are accepted. The default value is `0744` (-rwxr--r--).
-        This example gives the group all permissions to the uploaded files on
-        the remote machine (-rwxrwx---):
-        | Put Directory | /var/logs | /home/groups/robot | mode=0770 |
 
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
-        This example converts the line breaks of the uploaded files
-        on the remote to the Windows format:
-        | Put Directory | /var/logs | newline=CRLF |
 
         `path_separator` is the path separator character of the operating system
         on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data):
-        | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
+        must be set as `\\\\` (an escaped backslash in the test data).
 
         `recursive` specifies, whether to recursively upload all
         subdirectories inside `source`. Subdirectories are uploaded if the
         argument value evaluates to true.
 
-        The following example uploads the content of `/var/logs`, including
-        its subdirectories (and subdirectories of the subdirectories,
-        ad infinitum), to the remote cwd (typically the user's home directory):
-        | Put Directory | /var/logs | recursive=True |
-
-        As a result, the content of the local directory `/var/logs`,
-        including its subdirectories, is now found at the user's home on
-        the remote machine. Subdirectory paths are preserved, e.g.
-        content of local `var/logs/mysql` is on the remote machine
-        at `logs/mysql`.
+        Examples:
+        | Put Directory | /var/logs | /tmp               |
+        | Put Directory | /var/logs | /tmp/non/existing  |
+        | Put Directory | /var/logs |
+        | Put Directory | /var/logs | recursive=True     |
+        | Put Directory | /var/logs | /home/groups/robot | mode=0770 |
+        | Put Directory | /var/logs | newline=CRLF       |
+        | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
 
         The remote `destination` is created as following:
 
         1. If `destination` is an existing path on the remote machine,
            `source` directory is uploaded into it.
 
-           In this example, local `/var/logs`, is uploaded into an already
-           existing remote path `/tmp`:
-           | Put Directory | /var/logs | /tmp |
-
-           As the result, the content of local directory `/var/logs` is
-           found on the remote machine at `/tmp/logs`.
-
         2. If `destination` does not exist on the remote machine, it is
            created and the content of `source` directory is uploaded into it.
-
-           In this example, the content of the local working directory,
-           is uploaded to remote `/tmp/non/existing`:
-           | Put Directory | . | /tmp/non/existing |
-
-           Because `/tmp/non/existing` does not already exist on the remote
-           machine, it is created. As the result of keyword, `/tmp/non/existing`
-           now has the same content as the local working directory.
 
         3. If `destination` is not given, `source` directory is typically
            uploaded to user's home directory on the remote machine.
 
-           In this example, `source` is uploaded to the user's home:
-           | Put Directory | /var/logs |
-
-           As the result, the local directory `/var/logs` is now found on
-           the remote machine at the user's home with name `logs`.
-
         New in SSHLibrary 1.2.
+
+        See also `Put File`.
         """
         return self._run_sftp_command(self.current.put_directory, source,
                                       destination, mode, newline,
