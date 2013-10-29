@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
+from sys import platform
+
+requires = {}
+
 try:
     from setuptools import setup
-    requires = {
-        'install_requires': ['robotframework', 'paramiko >= 1.8.0'],
-    }
+
+    if not platform.startswith('java'):
+        requires = {
+            'install_requires': ['robotframework', 'paramiko >= 1.8.0'],
+        }
 except ImportError:
     from distutils.core import setup
-    requires = {}
+
 
 from os.path import abspath, dirname, join
 
