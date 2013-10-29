@@ -717,6 +717,8 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
 
+        This keyword logs the read output with log level `INFO`.
+
         Argument `delay` was added in SSHLibrary 1.2.
         """
         return self._login(self.current.login, username, password, delay)
@@ -749,6 +751,8 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
+        This keyword logs the read output with log level `INFO`.
+
         Argument `delay` was added in SSHLibrary 1.2.
         """
         return self._login(self.current.login_with_public_key, username,
@@ -759,7 +763,9 @@ class SSHLibrary(object):
                    % (self.current.config.host, self.current.config.port,
                       username))
         try:
-            return login_method(username, *args)
+            login_output = login_method(username, *args)
+            self._info('Read output: %s' % login_output)
+            return login_output
         except SSHClientException, e:
             raise RuntimeError(e)
 
