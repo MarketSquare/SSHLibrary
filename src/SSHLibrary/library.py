@@ -107,9 +107,10 @@ class SSHLibrary(object):
     Argument `prompt` defines the character sequence used by `Read Until Prompt`
     and must be set before that keyword can be used.
 
-    If you know the prompt on the remote machine, it's recommended to set is as
-    `Login` and `Login With Public Key` can then consume and return the server
-    output until the prompt after logging in.
+    If you know the prompt on the remote machine, it is recommended to set it
+    to ease reading output from the server after using `Write`. In addition to
+    that, `Login` and `Login With Public Key` can read the server output more
+    efficiently when the prompt is set.
 
     === Default terminal settings ===
 
@@ -706,11 +707,11 @@ class SSHLibrary(object):
 
         Connection must be opened before using this keyword.
 
-        This keyword returns the server output after logging in, thus clearing
-        it. If [#Default prompt|the prompt is set], `delay` is not effective and
-        everything until the prompt is read and consumed. If `delay` is given,
-        the server output is read and consumed the same way as with `Read`
-        with the given `delay`.
+        This keyword reads, returns and logs the server output after logging in.
+        If the [#Default prompt|prompt is set], everything until the prompt
+        is read. Otherwise the output is read using the `Read` keyword with
+        the given `delay`. The output is logged using the [#Default loglevel|
+        default log level].
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -721,9 +722,6 @@ class SSHLibrary(object):
         | Open Connection | linux.server.com | prompt=$         |
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
-
-        The read output is logged with the [#Default loglevel|
-        default log level].
 
         Argument `delay` was added in SSHLibrary 1.2.
         """
@@ -742,11 +740,11 @@ class SSHLibrary(object):
 
         `password` is used to unlock the `keyfile` if unlocking is required.
 
-        This keyword returns the server output after logging in, thus clearing
-        it. If [#Default prompt|the prompt is set], `delay` is not effective and
-        everything until the prompt is read and consumed. If `delay` is given,
-        the server output is read and consumed the same way as with `Read`
-        with the given `delay`.
+        This keyword reads, returns and logs the server output after logging in.
+        If the [#Default prompt|prompt is set], everything until the prompt
+        is read. Otherwise the output is read using the `Read` keyword with
+        the given `delay`. The output is logged using the [#Default loglevel|
+        default log level].
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.server.com      |
@@ -756,9 +754,6 @@ class SSHLibrary(object):
         With locked private keys, the keyring `password` is required:
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
-
-        The read output is logged with the [#Default loglevel|
-        default log level].
 
         Argument `delay` was added in SSHLibrary 1.2.
         """
