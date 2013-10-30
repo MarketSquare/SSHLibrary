@@ -1006,17 +1006,15 @@ class SSHLibrary(object):
     def read(self, loglevel=None, delay=None):
         """Consumes and returns everything available on the server output.
 
-        If `delay` is given, this keyword waits amount of it and reads again.
-        This wait-read cycle is repeated as long as more text is available on
-        the server output and [#Default timeout|the timeout] has not expired.
-        If no more text is available, the keyword returns.
-        `delay` must be given in Robot Framework's time format
-        (e.g. `5`, `1 minute`, `2 min 3 s`, `4.5`).
+        If `delay` is given, this keyword waits that amount of time and reads
+        output again. This wait-read cycle is repeated as long as further reads
+        return more output or the [#Default timeout|timeout] expires.
+        `delay` must be given in Robot Framework's time format (e.g. `5`,
+        `4.5s` `3 minutes`, `2 min 3 sec`) that is explained in detail in
+        the User Guide.
 
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
-
-        See `interactive shells` for information on what is consumed.
 
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
@@ -1024,12 +1022,15 @@ class SSHLibrary(object):
         Example:
         | Open Connection | my.server.com |
         | Login           | johndoe       | secretpasswd                 |
-        | Write           | sudo su -     |
-        | ${output}=      | Read          |
+        | Write           | sudo su -     |                              |
+        | ${output}=      | Read          | delay=0.5s                   |
         | Should Contain  | ${output}     | [sudo] password for johndoe: |
-        | Write           | secretpasswd  |
-        | ${output}=      | Read          | loglevel=WARN                | # Shown in the console due to loglevel |
+        | Write           | secretpasswd  |                              |
+        | ${output}=      | Read          | loglevel=WARN | # Shown in the console due to loglevel |
         | Should Contain  | ${output}     | root@                        |
+
+        See `interactive shells` for more information about writing and reading
+        in general.
 
         Argument `delay` was added in SSHLibrary 1.2.
         """
@@ -1043,22 +1044,22 @@ class SSHLibrary(object):
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
 
-        See `interactive shells` for information on what is consumed.
-
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com |
         | Login           | johndoe       | ${PASSWORD}                  |
-        | Write           | sudo su -     |
+        | Write           | sudo su -     |                              |
         | ${output}=      | Read Until    | :                            |
         | Should Contain  | ${output}     | [sudo] password for johndoe: |
-        | Write           | ${PASSWORD}   |
+        | Write           | ${PASSWORD}   |                              |
         | ${output}=      | Read Until    | @                            |
         | Should End With | ${output}     | root@                        |
 
-        See also `Read Until Prompt` and `Read Until Regexp`.
+        See also `Read Until Prompt` and `Read Until Regexp` keywords. For more
+        details about reading and writing in general, see `interactive shells`
+        section.
         """
         return self._read_and_log(loglevel, self.current.read_until, expected)
 
@@ -1075,21 +1076,21 @@ class SSHLibrary(object):
         output of previous command has been read and that command does not
         produce prompt characters in its output.
 
-        See `interactive shells` for information on what is consumed.
-
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
 
         Example:
-        | Open Connection          | my.server.com     | prompt=$                    |
-        | Login                    | johndoe           | ${PASSWORD}                 |
-        | Write                    | sudo su -         |
-        | Write                    | ${PASSWORD}       |
+        | Open Connection          | my.server.com     | prompt=$         |
+        | Login                    | johndoe           | ${PASSWORD}      |
+        | Write                    | sudo su -         |                  |
+        | Write                    | ${PASSWORD}       |                  |
         | Set Client Configuration | prompt=#          | # For root, the prompt is # |
-        | ${output}=               | Read Until Prompt |                             |
-        | Should End With          | ${output}         | root@myserver:~#            |
+        | ${output}=               | Read Until Prompt |                  |
+        | Should End With          | ${output}         | root@myserver:~# |
 
-        See also `Read Until` and `Read Until Regexp`.
+        See also `Read Until` and `Read Until Regexp` keywords. For more
+        details about reading and writing in general, see `interactive shells`
+        section.
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt)
 
@@ -1120,22 +1121,22 @@ class SSHLibrary(object):
         If [#Default timeout|the timeout] expires before the match is found,
         this keyword fails.
 
-        See `interactive shells` for information on what is consumed.
-
         The read output is logged. `loglevel` can be used to override
         the [#Default loglevel|default log level].
 
         Example:
         | Open Connection | my.server.com     |
         | Login           | johndoe           | ${PASSWORD}                  |
-        | Write           | sudo su -         |
+        | Write           | sudo su -         |                              |
         | ${output}=      | Read Until Regexp | \\\\[.*\\\\].*:              |
         | Should Contain  | ${output}         | [sudo] password for johndoe: |
-        | Write           | ${PASSWORD}       |
+        | Write           | ${PASSWORD}       |                              |
         | ${output}=      | Read Until Regexp | .*@                          |
         | Should Contain  | ${output}         | root@                        |
 
-        See also `Read Until` and `Read Until Prompt`.
+        See also `Read Until` and `Read Until Prompt` keywords. For more
+        details about reading and writing in general, see `interactive shells`
+        section.
         """
         return self._read_and_log(loglevel, self.current.read_until_regexp,
                                   regexp)
