@@ -7,7 +7,7 @@ Releasing a new version
 1. Update the release notes at https://code.google.com/p/robotframework-sshlibrary/wiki/ReleaseNotes
 
     Either by cloning the wiki as a Git repository or via the GoogleCode wiki editing UI.
-    
+
     The script at
     https://code.google.com/p/robotframework/source/browse/tools/get_issues.py?repo=wiki
     can be used for generating the issue list.
@@ -35,3 +35,8 @@ Releasing a new version
 6. Update the 'News' section at https://code.google.com/p/robotframework-sshlibrary
 
     Done via https://code.google.com/p/robotframework-sshlibrary/admin.
+
+7. Tweet (or re-tweet) about the release as @robotframework to get it into
+   News at http://robotframework.org.
+
+8. Send release mails.
