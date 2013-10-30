@@ -107,6 +107,10 @@ class SSHLibrary(object):
     Argument `prompt` defines the character sequence used by `Read Until Prompt`
     and must be set before that keyword can be used.
 
+    If you know the prompt on the remote machine, it's recommended to set is as
+    `Login` and `Login With Public Key` can then consume and return the server
+    output until the prompt after logging in.
+
     === Default terminal settings ===
 
     Argument `term_type` defines the virtual terminal type, and arguments
@@ -124,11 +128,12 @@ class SSHLibrary(object):
     === Default loglevel ===
 
     Argument `loglevel` sets the log level used to log the output read by
-    `Read`, `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write` and
-    `Write Until Expected Output`. The default level is `INFO`.
+    `Read`, `Read Until`, `Read Until Prompt`, `Read Until Regexp`, `Write`,
+    `Write Until Expected Output`, `Login` and `Login With Public Key`.
+    The default level is `INFO`.
 
     `loglevel` is not configurable per connection but can be overridden by
-    passing it as an argument to any of the mentioned keywords.
+    passing it as an argument to the most of the mentioned keywords.
     Possible argument values are `TRACE`, `DEBUG`, `INFO` and `WARN`.
 
     = Executing commands =
@@ -702,10 +707,10 @@ class SSHLibrary(object):
         Connection must be opened before using this keyword.
 
         This keyword returns the server output after logging in, thus clearing
-        it. If `delay` is given, the server output is read and consumed the same
-        way as with `Read` with the given `delay`.
-        If [#Default prompt|the prompt is set], `delay` is not effective and
-        everything until the prompt is read and consumed.
+        it. If [#Default prompt|the prompt is set], `delay` is not effective and
+        everything until the prompt is read and consumed. If `delay` is given,
+        the server output is read and consumed the same way as with `Read`
+        with the given `delay`.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -717,7 +722,8 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
 
-        This keyword logs the read output with log level `INFO`.
+        The read output is logged with the [#Default loglevel|
+        default log level].
 
         Argument `delay` was added in SSHLibrary 1.2.
         """
@@ -737,10 +743,10 @@ class SSHLibrary(object):
         `password` is used to unlock the `keyfile` if unlocking is required.
 
         This keyword returns the server output after logging in, thus clearing
-        it. If `delay` is given, the server output is read and consumed the same
-        way as with `Read` with the given `delay`.
-        If [#Default prompt|the prompt is set], `delay` is not effective and
-        everything until the prompt is read and consumed.
+        it. If [#Default prompt|the prompt is set], `delay` is not effective and
+        everything until the prompt is read and consumed. If `delay` is given,
+        the server output is read and consumed the same way as with `Read`
+        with the given `delay`.
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.server.com      |
@@ -751,7 +757,8 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
-        This keyword logs the read output with log level `INFO`.
+        The read output is logged with the [#Default loglevel|
+        default log level].
 
         Argument `delay` was added in SSHLibrary 1.2.
         """
@@ -764,7 +771,7 @@ class SSHLibrary(object):
                       username))
         try:
             login_output = login_method(username, *args)
-            self._info('Read output: %s' % login_output)
+            self._log('Read output: %s' % login_output)
             return login_output
         except SSHClientException, e:
             raise RuntimeError(e)
