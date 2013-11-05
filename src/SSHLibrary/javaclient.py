@@ -103,20 +103,14 @@ class SFTPClient(AbstractSFTPClient):
         self._client = SFTPv3Client(ssh_client)
         super(SFTPClient, self).__init__()
 
-    def _get_mode(self, item):
-        return item.permissions
-
     def _list(self, path):
-        items = []
-        for fileinfo in self._client.ls(path):
-            if isinstance(fileinfo, SFTPv3DirectoryEntry):
-                if fileinfo.filename in ['.', '..']:
-                    continue
-                mode = fileinfo.attributes.permissions
-            else:
-                mode = fileinfo.permissions
-            items.append(SFTPFileInfo(fileinfo.filename, mode))
-        return items
+        for item in self._client.ls(path):
+            if item.filename not in ('.', '..'):
+                yield SFTPFileInfo(item.filename, item.attributes.permissions)
+
+    def _stat(self, path):
+        attributes = self._client.stat(path)
+        return SFTPFileInfo('', attributes.permissions)
 
     def _create_remote_file(self, dest, mode):
         remote_file = self._client.createFile(dest)

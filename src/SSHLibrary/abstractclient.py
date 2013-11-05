@@ -404,25 +404,17 @@ class AbstractSFTPClient(object):
 
     def is_file(self, path):
         try:
-            item = self._get_file_info(path)
+            item = self._stat(path)
         except IOError:
             return False
         return item.is_regular()
 
-    def _get_file_info(self, path, follow_symlinks=True):
-        if follow_symlinks:
-            item = self._client.stat(path)
-        else:
-            item = self._client.lstat(path)
-        file_name = getattr(item, 'filename', '')
-        return SFTPFileInfo(file_name, self._get_mode(item))
-
-    def _get_mode(self, item):
+    def _stat(self):
         raise NotImplementedError
 
     def is_dir(self, path):
         try:
-            item = self._get_file_info(path)
+            item = self._stat(path)
         except IOError:
             return False
         return item.is_directory()

@@ -112,12 +112,13 @@ class SFTPClient(AbstractSFTPClient):
         self._client = ssh_client.open_sftp()
         super(SFTPClient, self).__init__()
 
-    def _get_mode(self, item):
-        return item.st_mode
-
     def _list(self, path):
-        return [SFTPFileInfo(item.filename, item.st_mode) for item in
-                self._client.listdir_attr(path)]
+        return [SFTPFileInfo(item.filename, item.st_mode)
+                for item in self._client.listdir_attr(path)]
+
+    def _stat(self, path):
+        attributes = self._client.stat(path)
+        return SFTPFileInfo('', attributes.st_mode)
 
     def _create_remote_file(self, dest, mode):
         remote_file = self._client.file(dest, 'wb')
