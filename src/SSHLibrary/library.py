@@ -1416,15 +1416,19 @@ class SSHLibrary(object):
         return not self.current.dir_exists(path)
 
     def list_directory(self, path, pattern=None, absolute=False):
-        """Returns and logs items in a remote directory, optionally filtered with `pattern`.
+        """Returns and logs items in the remote `path`, optionally filtered with `pattern`.
 
-        File and directory names are returned in case-sensitive alphabetical
-        order, e.g. ['A Name', 'Second', 'a lower case name', 'one more'].
+        `path` is a path on the remote machine. Both absolute paths and
+        paths relative to the current working directory are supported.
+        If `path` is a symlink, it is followed.
+
+        Item names are returned in case-sensitive alphabetical order,
+        e.g. ['A Name', 'Second', 'a lower case name', 'one more'].
         Implicit directories `.` and `..` are not returned. The returned items
         are automatically logged.
 
-        By default, the file and directory names are returned relative to the
-        given remote path (e.g. `file.txt`). If you want them be returned in the
+        By default, the item names are returned relative to the given
+        remote path (e.g. `file.txt`). If you want them be returned in the
         absolute format (e.g. `/home/johndoe/file.txt`), set the `absolute`
         argument to any non-empty string.
 

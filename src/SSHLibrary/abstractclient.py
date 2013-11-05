@@ -350,8 +350,7 @@ class AbstractSSHClient(object):
         return sources, destination
 
     def list_dir(self, path, pattern=None, absolute=False):
-        items = self.sftp_client.list_files(path, pattern, absolute)
-        items += self.sftp_client.list_dirs(path, pattern, absolute)
+        items = self.sftp_client.list(path, pattern, absolute)
         return sorted(items)
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
@@ -419,23 +418,24 @@ class AbstractSFTPClient(object):
             return False
         return item.is_directory()
 
-    def list_files(self, path, pattern=None, absolute=False):
+    def list(self, path, pattern=None, absolute=False):
         self._verify_path_exists(path)
-        items = self._get_file_names(path)
+        items = self._get_item_names(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)
         if absolute:
             items = self._include_absolute_path(items, path)
         return items
 
-    def _get_file_names(self, path):
-        return [item.name for item in self._list(path) if item.is_regular()]
+    def _verify_path_exists(self, path):
+        if not self.is_dir(path):
+            raise SSHClientException("There was no path matching '%s'." % path)
+
+    def _get_item_names(self, path):
+        return [item.name for item in self._list(path)]
 
     def _list(self, path):
         raise NotImplementedError
-
-    def _get_directory_names(self, path):
-        return [item.name for item in self._list(path) if item.is_directory()]
 
     def _filter_by_pattern(self, items, pattern):
         return [name for name in items if fnmatchcase(name, pattern)]
@@ -448,6 +448,18 @@ class AbstractSFTPClient(object):
             absolute_path += '/'
         return [absolute_path + name for name in items]
 
+    def list_files(self, path, pattern=None, absolute=False):
+        self._verify_path_exists(path)
+        items = self._get_file_names(path)
+        if pattern:
+            items = self._filter_by_pattern(items, pattern)
+        if absolute:
+            items = self._include_absolute_path(items, path)
+        return items
+
+    def _get_file_names(self, path):
+        return [item.name for item in self._list(path) if item.is_regular()]
+
     def list_dirs(self, path, pattern=None, absolute=False):
         self._verify_path_exists(path)
         items = self._get_directory_names(path)
@@ -457,9 +469,8 @@ class AbstractSFTPClient(object):
             items = self._include_absolute_path(items, path)
         return items
 
-    def _verify_path_exists(self, path):
-        if not self.is_dir(path):
-            raise SSHClientException("There was no path matching '%s'." % path)
+    def _get_directory_names(self, path):
+        return [item.name for item in self._list(path) if item.is_directory()]
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
