@@ -22,7 +22,7 @@ except ImportError:
 
 from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
-                             SSHClientException)
+                             SSHClientException, SFTPFileInfo)
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -112,11 +112,12 @@ class SFTPClient(AbstractSFTPClient):
         self._client = ssh_client.open_sftp()
         super(SFTPClient, self).__init__()
 
-    def _list(self, path):
-        return self._client.listdir_attr(path)
+    def _get_mode(self, item):
+        return item.st_mode
 
-    def _get_permissions(self, fileinfo):
-        return fileinfo.st_mode
+    def _list(self, path):
+        return [SFTPFileInfo(item.filename, item.st_mode) for item in
+                self._client.listdir_attr(path)]
 
     def _create_remote_file(self, dest, mode):
         remote_file = self._client.file(dest, 'wb')

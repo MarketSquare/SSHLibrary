@@ -350,27 +350,23 @@ class AbstractSSHClient(object):
         return sources, destination
 
     def list_dir(self, path, pattern=None, absolute=False):
-        items = self.sftp_client.list(self.sftp_client.listfiles, path, pattern,
-                                      absolute)
-        items += self.sftp_client.list(self.sftp_client.listdirs, path, pattern,
-                                       absolute)
+        items = self.sftp_client.list_files(path, pattern, absolute)
+        items += self.sftp_client.list_dirs(path, pattern, absolute)
         return sorted(items)
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
-        files = self.sftp_client.list(self.sftp_client.listfiles, path, pattern,
-                                      absolute)
+        files = self.sftp_client.list_files(path, pattern, absolute)
         return sorted(files)
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
-        dirs = self.sftp_client.list(self.sftp_client.listdirs, path, pattern,
-                                     absolute)
+        dirs = self.sftp_client.list_dirs(path, pattern, absolute)
         return sorted(dirs)
 
     def dir_exists(self, path):
-        return self.sftp_client.dir_exists(path)
+        return self.sftp_client.is_dir(path)
 
     def file_exists(self, path):
-        return self.sftp_client.file_exists(path)
+        return self.sftp_client.is_file(path)
 
 
 class AbstractShell(object):
@@ -385,6 +381,19 @@ class AbstractShell(object):
         raise NotImplementedError
 
 
+class SFTPFileInfo(object):
+
+    def __init__(self, name, mode):
+        self.name = name
+        self.mode = mode
+
+    def is_regular(self):
+        return stat.S_ISREG(self.mode)
+
+    def is_directory(self):
+        return stat.S_ISDIR(self.mode)
+
+
 class AbstractSFTPClient(object):
 
     def __init__(self):
@@ -393,62 +402,48 @@ class AbstractSFTPClient(object):
     def _absolute_path(self, path):
         raise NotImplementedError
 
-    def file_exists(self, path, follow_symlinks=True):
-        return self._exists(path, stat.S_ISREG, follow_symlinks)
-
-    def dir_exists(self, path, follow_symlinks=True):
-        return self._exists(path, stat.S_ISDIR, follow_symlinks)
-
-    def _exists(self, path, file_type, follow_symlinks):
+    def is_file(self, path):
         try:
-            if follow_symlinks:
-                fileinfo = self._client.stat(path)
-            else:
-                fileinfo = self._client.lstat(path)
+            item = self._get_file_info(path)
         except IOError:
             return False
-        return file_type(self._get_permissions(fileinfo))
+        return item.is_regular()
 
-    def _get_permissions(self, fileinfo):
+    def _get_file_info(self, path, follow_symlinks=True):
+        if follow_symlinks:
+            item = self._client.stat(path)
+        else:
+            item = self._client.lstat(path)
+        file_name = getattr(item, 'filename', '')
+        return SFTPFileInfo(file_name, self._get_mode(item))
+
+    def _get_mode(self, item):
         raise NotImplementedError
 
-    def _create_missing_remote_path(self, path):
-        if path.startswith('/'):
-            curdir = '/'
-        else:
-            curdir = self._client._absolute_path('.')
-        for dirname in path.split('/'):
-            if dirname:
-                curdir = '%s/%s' % (curdir, dirname)
-            try:
-                self._client.stat(curdir)
-            except:
-                self._client.mkdir(curdir, 0744)
+    def is_dir(self, path):
+        try:
+            item = self._get_file_info(path)
+        except IOError:
+            return False
+        return item.is_directory()
 
-    def list(self, command, path, pattern=None, absolute=False):
-        if not self.dir_exists(path):
-            msg = "There was no path matching '%s'." % path
-            raise SSHClientException(msg)
-        items = command(path)
+    def list_files(self, path, pattern=None, absolute=False):
+        self._verify_path_exists(path)
+        items = self._get_file_names(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)
         if absolute:
             items = self._include_absolute_path(items, path)
         return items
 
-    def listfiles(self, path):
-        return self._files_of_type(stat.S_ISREG, path)
-
-    def listdirs(self, path):
-        return self._files_of_type(stat.S_ISDIR, path)
-
-    def _files_of_type(self, file_type, path):
-        return [fileinfo.filename for fileinfo in self._list(path)
-                if file_type(self._get_permissions(fileinfo)) and
-                (fileinfo.filename not in ('.', '..'))]
+    def _get_file_names(self, path):
+        return [item.name for item in self._list(path) if item.is_regular()]
 
     def _list(self, path):
         raise NotImplementedError
+
+    def _get_directory_names(self, path):
+        return [item.name for item in self._list(path) if item.is_directory()]
 
     def _filter_by_pattern(self, items, pattern):
         return [name for name in items if fnmatchcase(name, pattern)]
@@ -461,11 +456,24 @@ class AbstractSFTPClient(object):
             absolute_path += '/'
         return [absolute_path + name for name in items]
 
+    def list_dirs(self, path, pattern=None, absolute=False):
+        self._verify_path_exists(path)
+        items = self._get_directory_names(path)
+        if pattern:
+            items = self._filter_by_pattern(items, pattern)
+        if absolute:
+            items = self._include_absolute_path(items, path)
+        return items
+
+    def _verify_path_exists(self, path):
+        if not self.is_dir(path):
+            raise SSHClientException("There was no path matching '%s'." % path)
+
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
         if source.endswith(path_separator):
             source = source[:-len(path_separator)]
-        if not self.dir_exists(source):
+        if not self.is_dir(source):
             raise SSHClientException("There was no source path matching '%s'."
                                      % source)
         remote_files = []
@@ -474,7 +482,7 @@ class AbstractSFTPClient(object):
         sub_dirs = [parent_dir]
         for path in sub_dirs:
             if recursive:
-                for subdir_name in self.listdirs(path):
+                for subdir_name in self.list_dirs(path):
                     sub_dirs.append(path_separator.join([path, subdir_name]))
             remote_path = path + path_separator + "*"
             local_path = os.path.join(destination, path) + path_separator
@@ -503,7 +511,7 @@ class AbstractSFTPClient(object):
         if not path:
             path = '.'
         sourcefiles = []
-        for filename in self.listfiles(path):
+        for filename in self.list_files(path):
             if fnmatchcase(filename, pattern):
                 if path:
                     filename = path_separator.join([path, filename])
@@ -545,7 +553,7 @@ class AbstractSFTPClient(object):
         parent = os.path.basename(source)
         if destination.endswith(path_separator):
             destination = destination[:-len(path_separator)]
-        remote_target_exists = True if self.dir_exists(destination) else False
+        remote_target_exists = True if self.is_dir(destination) else False
         for dirpath, _, filenames in os.walk(parent):
             for filename in filenames:
                 local_path = os.path.join(dirpath, filename)
@@ -611,6 +619,19 @@ class AbstractSFTPClient(object):
             dest = path_separator.join([self._homedir, dest])
         return dest.rsplit(path_separator, 1)
 
+    def _create_missing_remote_path(self, path):
+        if path.startswith('/'):
+            curdir = '/'
+        else:
+            curdir = self._client._absolute_path('.')
+        for dirname in path.split('/'):
+            if dirname:
+                curdir = '%s/%s' % (curdir, dirname)
+            try:
+                self._client.stat(curdir)
+            except:
+                self._client.mkdir(curdir, 0744)
+
     def _put_file(self, source, destination, mode, newline):
         remotefile = self._create_remote_file(destination, mode)
         with open(source, 'rb') as localfile:
@@ -632,9 +653,6 @@ class AbstractSFTPClient(object):
         raise NotImplementedError
 
     def _close_remote_file(self, remotefile):
-        raise NotImplementedError
-
-    def _absolute_path(self, path):
         raise NotImplementedError
 
 

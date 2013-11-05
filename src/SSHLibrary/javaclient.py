@@ -26,7 +26,7 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
-                             SSHClientException)
+                             SSHClientException, SFTPFileInfo)
 
 
 class JavaSSHClient(AbstractSSHClient):
@@ -103,14 +103,20 @@ class SFTPClient(AbstractSFTPClient):
         self._client = SFTPv3Client(ssh_client)
         super(SFTPClient, self).__init__()
 
-    def _list(self, path):
-        return self._client.ls(path)
+    def _get_mode(self, item):
+        return item.permissions
 
-    def _get_permissions(self, fileinfo):
-        if isinstance(fileinfo, SFTPv3DirectoryEntry):
-            return fileinfo.attributes.permissions
-        else:
-            return fileinfo.permissions
+    def _list(self, path):
+        items = []
+        for fileinfo in self._client.ls(path):
+            if isinstance(fileinfo, SFTPv3DirectoryEntry):
+                if fileinfo.filename in ['.', '..']:
+                    continue
+                mode = fileinfo.attributes.permissions
+            else:
+                mode = fileinfo.permissions
+            items.append(SFTPFileInfo(fileinfo.filename, mode))
+        return items
 
     def _create_remote_file(self, dest, mode):
         remote_file = self._client.createFile(dest)
