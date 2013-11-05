@@ -419,13 +419,8 @@ class AbstractSFTPClient(object):
         return item.is_directory()
 
     def list(self, path, pattern=None, absolute=False):
-        self._verify_path_exists(path)
-        items = self._get_item_names(path)
-        if pattern:
-            items = self._filter_by_pattern(items, pattern)
-        if absolute:
-            items = self._include_absolute_path(items, path)
-        return items
+        return self._list_filtered(path, self._get_item_names,
+                                   pattern, absolute)
 
     def _verify_path_exists(self, path):
         if not self.is_dir(path):
@@ -448,26 +443,25 @@ class AbstractSFTPClient(object):
             absolute_path += '/'
         return [absolute_path + name for name in items]
 
-    def list_files(self, path, pattern=None, absolute=False):
+    def _list_filtered(self, path, filter_method, pattern=None, absolute=False):
         self._verify_path_exists(path)
-        items = self._get_file_names(path)
+        items = filter_method(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)
         if absolute:
             items = self._include_absolute_path(items, path)
         return items
+
+    def list_files(self, path, pattern=None, absolute=False):
+        return self._list_filtered(path, self._get_file_names,
+                                   pattern, absolute)
 
     def _get_file_names(self, path):
         return [item.name for item in self._list(path) if item.is_regular()]
 
     def list_dirs(self, path, pattern=None, absolute=False):
-        self._verify_path_exists(path)
-        items = self._get_directory_names(path)
-        if pattern:
-            items = self._filter_by_pattern(items, pattern)
-        if absolute:
-            items = self._include_absolute_path(items, path)
-        return items
+        return self._list_filtered(path, self._get_directory_names,
+                                   pattern, absolute)
 
     def _get_directory_names(self, path):
         return [item.name for item in self._list(path) if item.is_directory()]
