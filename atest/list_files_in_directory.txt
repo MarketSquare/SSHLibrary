@@ -9,29 +9,33 @@ Library         Collections
 List Files Using Absolute Path
     ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
     ...                         ${TEST FILE NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Files In Directory  ${target}
+    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Files Using Relative Path
     ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
     ...                         ${TEST FILE NAME}
-    ${target} =  Set Variable  ${TEST_ROOT_NAME}
-    ${listing} =  List Files In Directory  ${target}
+    ${listing} =  List Files In Directory  ${TEST_ROOT_NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Files Using Current Directory
-    ${target} =  Set Variable  .
-    ${listing} =  List Files In Directory  ${target}
+    ${listing} =  List Files In Directory  .
     Should Not Contain  ${listing}  ${TEST_ROOT_NAME}
+
+List Files Using Symlink As Path
+    [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
+    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${FILE WITH NEWLINES NAME}
+    ...                         ${TEST FILE NAME}
+    ${listing} =  List Files In Directory  symlink
+    Lists Should Be Equal  ${listing}  ${expected}
+    [Teardown]  Execute Command  rm -f symlink
 
 List Files With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
     ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Files In Directory  ${target}  absolute=True
+    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Files With Absolute Paths Using Relative
@@ -39,27 +43,23 @@ List Files With Absolute Paths Using Relative
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
     ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
-    ${target} =  Set Variable  ${TEST_ROOT_NAME}
-    ${listing} =  List Files In Directory  ${target}  absolute=True
+    ${listing} =  List Files In Directory  ${TEST_ROOT_NAME}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
 
 List Files With Absolute Paths Using Current Directory
-    ${target} =  Set Variable  .
-    ${listing} =  List Files In Directory  ${target}  absolute=True
+    ${listing} =  List Files In Directory  .  absolute=True
     Should Not Contain  ${listing}  ${TEST_ROOT_NAME}
 
 List Files Using Pattern
     ${expected} =  Create List  ${FILE WITH NEWLINES NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Files In Directory  ${target}  pattern=*newlines.txt
+    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}  pattern=*newlines.txt
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Files With Absolute Paths Using Pattern
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Files In Directory  ${target}  pattern=?est*
+    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}  pattern=?est*
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 

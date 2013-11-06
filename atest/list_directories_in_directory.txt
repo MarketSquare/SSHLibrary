@@ -6,36 +6,40 @@ Resource        resources/ssh_library_resources.txt
 Library         Collections
 
 *** Test Cases ***
-List Subdirectories Using Absolute Path
+List Directories Using Absolute Path
     ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Directories In Directory  ${target}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Subdirectories Using Relative Path
+List Directories Using Relative Path
     ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}
-    ${target} =  Set Variable  ${TEST_ROOT_NAME}
-    ${listing} =  List Directories In Directory  ${target}
+    ${listing} =  List Directories In Directory  ${TEST_ROOT_NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Subdirectories Using Current Directory
+List Directories Using Current Directory
     ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
     ...                         ${SPECIAL TEXTFILES NAME}
-    ${target} =  Set Variable  .
-    ${listing} =  List Directories In Directory  ${target}
+    ${listing} =  List Directories In Directory  .
     Should Contain  ${listing}  ${TEST_ROOT_NAME}
 
-List Subdirectories With Absolute Paths Using Absolute Path
+List Directories Using Symlink As Path
+    [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
+    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
+    ...                         ${SPECIAL TEXTFILES NAME}
+    ${listing} =  List Directories In Directory  symlink
+    Lists Should Be Equal  ${listing}  ${expected}
+    [Teardown]  Execute Command  rm -f symlink
+
+List Directories With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
     ...                  ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Directories In Directory  ${target}  absolute=True
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Subdirectories With Absolute Paths Using Relative
+List Directories With Absolute Paths Using Relative
     ${expected} =  Create List
     ...                  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
     ...                  ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
@@ -43,25 +47,23 @@ List Subdirectories With Absolute Paths Using Relative
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
 
-List Subdirectories With Absolute Paths Using Current Directory
-    ${target} =  Set Variable  .
-    ${listing} =  List Directories In Directory  ${target}  absolute=True
+List Directories With Absolute Paths Using Current Directory
+    ${listing} =  List Directories In Directory  .  absolute=True
     Should Contain  ${listing}  ${REMOTE TEST ROOT}
 
-List Subdirectories Using Pattern
+List Directories Using Pattern
     ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Directories In Directory  ${target}  pattern=spec*
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=spec*
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Subdirectories With Absolute Paths Using Pattern
+List Directories With Absolute Paths Using Pattern
     ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    ${listing} =  List Directories In Directory  ${target}  pattern=emp*
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=emp*
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Subdirectories Should Fail When Source Path Not Exists
+List Directories Should Fail When Source Path Not Exists
     ${target} =  Set Variable  not_exists
     Run Keyword And Expect Error  There was no path matching '${target}'.
     ...                           List Directories In Directory  ${target}
+
