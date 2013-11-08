@@ -156,8 +156,15 @@ class AbstractSSHClient(object):
 
     def start_command(self, command):
         """Execute given command over existing connection."""
-        command = command.encode(self.config.encoding)
+        command = self._encode(command)
         self._started_commands.append(self._start_command(command))
+
+    def _encode(self, text):
+        if isinstance(text, str):
+            return text
+        if not isinstance(text, basestring):
+            text = unicode(text)
+        return text.encode(self.config.encoding)
 
     def _start_command(self, command):
         raise NotImplementedError
@@ -178,7 +185,7 @@ class AbstractSSHClient(object):
         :param str text: the text to be written
         :param bool add_newline: if True, a newline will be added to `text`.
         """
-        text = text.encode(self.config.encoding)
+        text = self._encode(text)
         if add_newline:
             text += self.config.newline
         self.shell.write(text)

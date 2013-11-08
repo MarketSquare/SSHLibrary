@@ -8,25 +8,13 @@ Resource        resources/ssh_library_resources.txt
 ${COUNTER NAME}  counter.txt
 
 *** Test Cases ***
-Read
+Write And Read
     Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
-    Write  ääöö
+    Write  Mr. Ääkkönen
     ${output} =  Read
-    Should Contain  ${output}  Hello ääöö
+    Should Contain  ${output}  Hello Mr. Ääkkönen
 
-Read Until Prompt
-    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
-    Write  ääöö
-    ${output} =  Read Until Prompt
-    Should Contain  ${output}  Hello ääöö
-
-Read Until Regexp
-    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
-    Write  ääöö
-    ${output} =  Read Until Regexp  \n
-    Should Contain  ${output}  Hello ääöö
-
-Basic Interactive Session
+Write And Read Until
     ${output} =  Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     Should Contain  ${output}  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Read Until  Give your name?
@@ -36,24 +24,40 @@ Basic Interactive Session
     ${output} =  Read Until Prompt
     Should Contain  ${output}  Hello Juha
 
-Interactive Session With Regular Expressions
+Write And Read Until Prompt
+    Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
+    Write  Mr. Ääkkönen
+    ${output} =  Read Until Prompt
+    Should Contain  ${output}  Hello Mr. Ääkkönen
+
+Write And Read Until Regexp
     Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Read Until Regexp  Give.*\\?
     Should Contain  ${output}  Give your name?
-    Write  Juha
+    Write  Mr. Ääkkönen
     Comment  Prompt needs to be escaped because it might be $
     ${output} =  Read Until Regexp  (?s).*\\${PROMPT}
-    Should Contain  ${output}  Hello Juha
+    Should Contain  ${output}  Hello Mr. Ääkkönen
     Should End With  ${output}  ${PROMPT}
 
-Interactive Session In Case Of Timeout
+Write Non-String
+    Write  ${1}
+    ${output} =  Read Until Prompt
+    Should Contain  ${output}  1
+
+Write Bare Non-String
+    Write Bare  ${False}\n
+    ${output} =  Read Until Prompt
+    Should Contain  ${output}  False
+
+Write In Case Of Timeout
     Write  Foo Bar And Some Other
     Set Client Configuration   timeout=1
     ${status}  ${error} =  Run Keyword And Ignore Error
     ...                    Read Until  This is not found
     Should Start With  ${error}  No match found for 'This is not found' in 1 second
 
-Interactive Session Returning Stderr
+Write Returning Stderr
     Write  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}
     Read Until  Give your name?
     Write  Error
@@ -61,13 +65,13 @@ Interactive Session Returning Stderr
     Should Contain  ${output}  Hello Error
     Should Contain  ${output}  This is Error
 
-Write Bare And Read
+Write Bare And Read Until
     Write Bare  ${REMOTE TEST ROOT}${/}${INTERACTIVE TEST SCRIPT NAME}\n
     ${output} =  Read Until  name?
-    Write Bare  Janne\n
+    Write Bare  Mr. Ääkkönen\n
     ${output2} =  Read Until Prompt
     Should Contain  ${output}  Give your name?
-    Should Contain  ${output2}  Hello Janne
+    Should Contain  ${output2}  Hello Mr. Ääkkönen
     Should Contain  ${output2}  ${PROMPT}
 
 Write Until Expected Output
