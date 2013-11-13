@@ -358,7 +358,7 @@ class AbstractSSHClient(object):
                                                                destination,
                                                                path_separator,
                                                                recursive)
-        return sources, destination
+        return sources, destinations
 
     def list_dir(self, path, pattern=None, absolute=False):
         items = self.sftp_client.list(path, pattern, absolute)
