@@ -434,7 +434,7 @@ class AbstractSFTPClient(object):
                                    absolute)
 
     def _list_filtered(self, path, filter_method, pattern=None, absolute=False):
-        self._verify_path_exists(path)
+        self._verify_dir_exists(path)
         items = filter_method(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)
@@ -442,9 +442,9 @@ class AbstractSFTPClient(object):
             items = self._include_absolute_path(items, path)
         return items
 
-    def _verify_path_exists(self, path):
+    def _verify_dir_exists(self, path):
         if not self.is_dir(path):
-            raise SSHClientException("There was no path matching '%s'." % path)
+            raise SSHClientException("There was no directory matching '%s'." % path)
 
     def _get_item_names(self, path):
         return [item.name for item in self._list(path)]
@@ -479,27 +479,26 @@ class AbstractSFTPClient(object):
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
+        source = self._remove_ending_path_separator(path_separator, source)
+        self._verify_dir_exists(source)
+        remote_files, local_files = [], []
+        for child in self.list(source):
+            remote = source + path_separator + child
+            local = os.path.join(destination, child)
+            if self.is_file(remote):
+                self.get_file(remote, local)
+                remote_files.append(remote)
+                local_files.append(local)
+            elif recursive:
+                remote_sub, local_sub = self.get_directory(remote, local, path_separator, recursive)
+                remote_files += remote_sub
+                local_files += local_sub
+        return remote_files, local_files
+
+    def _remove_ending_path_separator(self, path_separator, source):
         if source.endswith(path_separator):
             source = source[:-len(path_separator)]
-        if not self.is_dir(source):
-            raise SSHClientException("There was no source path matching '%s'."
-                                     % source)
-        remote_files = []
-        local_files = []
-        parent_dir = os.path.basename(source)
-        sub_dirs = [parent_dir]
-        for path in sub_dirs:
-            if recursive:
-                for subdir_name in self.list_dirs(path):
-                    sub_dirs.append(path_separator.join([path, subdir_name]))
-            remote_path = path + path_separator + "*"
-            local_path = os.path.join(destination, path) + path_separator
-            if not os.path.isdir(destination):
-                local_path = local_path.replace(parent_dir + path_separator, '')
-            r, l = self.get_file(remote_path, local_path, path_separator)
-            remote_files.extend(r)
-            local_files.extend(l)
-        return remote_files, local_files
+        return source
 
     def get_file(self, source, destination, path_separator='/'):
         remotefiles = self._get_remote_file_paths(source, path_separator)

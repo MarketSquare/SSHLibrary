@@ -82,5 +82,5 @@ List Content With Absolute Paths Using Pattern
 
 List Content Should Fail When Source Path Not Exists
     ${target} =  Set Variable  not_exists
-    Run Keyword And Expect Error  There was no path matching '${target}'.
+    Run Keyword And Expect Error  There was no directory matching '${target}'.
     ...                           List Directory  ${target}
