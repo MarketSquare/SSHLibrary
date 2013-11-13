@@ -323,20 +323,18 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        sources, destinations = self.sftp_client.put_file(source, destination,
-                                                          mode, newline,
-                                                          path_separator)
-        return sources, destinations
+        return self.sftp_client.put_file(source, destination,
+                                         mode, newline,
+                                         path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       path_separator='/', recursive=False):
-        sources, destinations = self.sftp_client.put_directory(source,
-                                                               destination,
-                                                               mode,
-                                                               newline,
-                                                               path_separator,
-                                                               recursive)
-        return sources, destinations
+        return self.sftp_client.put_directory(source,
+                                              destination,
+                                              mode,
+                                              newline,
+                                              path_separator,
+                                              recursive)
 
     def get_file(self, source, destination='.', path_separator='/'):
         """Get file(s) from the remote host to localhost.
@@ -348,17 +346,14 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        sources, destinations = self.sftp_client.get_file(source, destination,
-                                                          path_separator)
-        return sources, destinations
+        return self.sftp_client.get_file(source, destination, path_separator)
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
-        sources, destinations = self.sftp_client.get_directory(source,
-                                                               destination,
-                                                               path_separator,
-                                                               recursive)
-        return sources, destinations
+        return self.sftp_client.get_directory(source,
+                                              destination,
+                                              path_separator,
+                                              recursive)
 
     def list_dir(self, path, pattern=None, absolute=False):
         items = self.sftp_client.list(path, pattern, absolute)
@@ -481,19 +476,15 @@ class AbstractSFTPClient(object):
                       recursive=False):
         source = self._remove_ending_path_separator(path_separator, source)
         self._verify_dir_exists(source)
-        remote_files, local_files = [], []
+        files = []
         for child in self.list(source):
             remote = source + path_separator + child
             local = os.path.join(destination, child)
             if self.is_file(remote):
-                self.get_file(remote, local)
-                remote_files.append(remote)
-                local_files.append(local)
+                files += self.get_file(remote, local)
             elif recursive:
-                remote_sub, local_sub = self.get_directory(remote, local, path_separator, recursive)
-                remote_files += remote_sub
-                local_files += local_sub
-        return remote_files, local_files
+                files += self.get_directory(remote, local, path_separator, recursive)
+        return files
 
     def _remove_ending_path_separator(self, path_separator, source):
         if source.endswith(path_separator):
@@ -501,14 +492,15 @@ class AbstractSFTPClient(object):
         return source
 
     def get_file(self, source, destination, path_separator='/'):
-        remotefiles = self._get_remote_file_paths(source, path_separator)
-        if not remotefiles:
+        remote_files = self._get_remote_file_paths(source, path_separator)
+        if not remote_files:
             msg = "There were no source files matching '%s'." % source
             raise SSHClientException(msg)
-        localfiles = self._get_local_file_paths(remotefiles, destination)
-        for src, dst in zip(remotefiles, localfiles):
+        local_files = self._get_local_file_paths(remote_files, destination)
+        files = zip(remote_files, local_files)
+        for src, dst in files:
             self._get_file(src, dst)
-        return remotefiles, localfiles
+        return files
 
     def _get_remote_file_paths(self, source, path_separator):
         if path_separator in source:
@@ -548,8 +540,7 @@ class AbstractSFTPClient(object):
         if not os.path.isdir(source):
             msg = "There was no source path matching '%s'." % source
             raise SSHClientException(msg)
-        localfiles = []
-        remotefiles = []
+        files = []
         source = os.path.abspath(source)
         os.chdir(os.path.dirname(source))
         parent = os.path.basename(source)
@@ -567,13 +558,11 @@ class AbstractSFTPClient(object):
                     if not remote_target_exists:
                         remote_path = remote_path.replace(parent +
                                                           path_separator, '')
-                l, r = self.put_file(local_path, remote_path, mode, newline,
+                files += self.put_file(local_path, remote_path, mode, newline,
                                      path_separator)
-                localfiles.extend(l)
-                remotefiles.extend(r)
             if not recursive:
                 break
-        return localfiles, remotefiles
+        return files
 
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         mode = int(mode, 8)
@@ -583,9 +572,10 @@ class AbstractSFTPClient(object):
                                                                  destination,
                                                                  path_separator)
         self._create_missing_remote_path(remotedir)
-        for src, dst in zip(localfiles, remotefiles):
+        files = zip(localfiles, remotefiles)
+        for src, dst in files:
             self._put_file(src, dst, mode, newline)
-        return localfiles, remotefiles
+        return files
 
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep))

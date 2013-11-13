@@ -1357,10 +1357,10 @@ class SSHLibrary(object):
 
     def _run_sftp_command(self, command, *args):
         try:
-            sources, destinations = command(*args)
+            files = command(*args)
         except SSHClientException, e:
             raise RuntimeError(e)
-        for src, dst in zip(sources, destinations):
+        for src, dst in files:
             self._info("'%s' -> '%s'" % (src, dst))
 
     def file_should_exist(self, path):
