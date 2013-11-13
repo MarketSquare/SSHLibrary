@@ -3,8 +3,7 @@ import unittest
 
 from SSHLibrary import abstractclient
 
-abstractclient.AbstractSFTPClient._homedir = "/home"
-
+abstractclient.AbstractSFTPClient._absolute_path = lambda obj, path: '/home'
 
 class TestRemoteAndLocalPathResolution(unittest.TestCase):
 
