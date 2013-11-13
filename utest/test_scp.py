@@ -29,7 +29,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
                     [os.path.join(os.path.abspath(os.curdir), 'baz.file')])]
         for src, dest, exp in data:
             client = abstractclient.AbstractSFTPClient()
-            local = client._get_local_file_paths(src, dest)
+            local = client._get_get_file_destinations(src, dest)
             self.assertEquals(local, exp)
 
 

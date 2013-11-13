@@ -323,17 +323,13 @@ class AbstractSSHClient(object):
         :param path_separator: The path separator on the remote machine.
             Must be defined if the remote machine runs Windows.
         """
-        return self.sftp_client.put_file(source, destination,
-                                         mode, newline,
+        return self.sftp_client.put_file(source, destination, mode, newline,
                                          path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       path_separator='/', recursive=False):
-        return self.sftp_client.put_directory(source,
-                                              destination,
-                                              mode,
-                                              newline,
-                                              path_separator,
+        return self.sftp_client.put_directory(source, destination, mode,
+                                              newline, path_separator,
                                               recursive)
 
     def get_file(self, source, destination='.', path_separator='/'):
@@ -350,10 +346,8 @@ class AbstractSSHClient(object):
 
     def get_directory(self, source, destination='.', path_separator='/',
                       recursive=False):
-        return self.sftp_client.get_directory(source,
-                                              destination,
-                                              path_separator,
-                                              recursive)
+        return self.sftp_client.get_directory(source, destination,
+                                              path_separator, recursive)
 
     def list_dir(self, path, pattern=None, absolute=False):
         items = self.sftp_client.list(path, pattern, absolute)
@@ -439,7 +433,8 @@ class AbstractSFTPClient(object):
 
     def _verify_dir_exists(self, path):
         if not self.is_dir(path):
-            raise SSHClientException("There was no directory matching '%s'." % path)
+            raise SSHClientException("There was no directory matching '%s'." %
+                                     path)
 
     def _get_item_names(self, path):
         return [item.name for item in self._list(path)]
@@ -483,7 +478,8 @@ class AbstractSFTPClient(object):
             if self.is_file(remote):
                 files += self.get_file(remote, local)
             elif recursive:
-                files += self.get_directory(remote, local, path_separator, recursive)
+                files += self.get_directory(remote, local, path_separator,
+                                            recursive)
         return files
 
     def _remove_ending_path_separator(self, path_separator, source):
@@ -492,17 +488,17 @@ class AbstractSFTPClient(object):
         return source
 
     def get_file(self, source, destination, path_separator='/'):
-        remote_files = self._get_remote_file_paths(source, path_separator)
+        remote_files = self._get_get_file_sources(source, path_separator)
         if not remote_files:
             msg = "There were no source files matching '%s'." % source
             raise SSHClientException(msg)
-        local_files = self._get_local_file_paths(remote_files, destination)
+        local_files = self._get_get_file_destinations(remote_files, destination)
         files = zip(remote_files, local_files)
         for src, dst in files:
             self._get_file(src, dst)
         return files
 
-    def _get_remote_file_paths(self, source, path_separator):
+    def _get_get_file_sources(self, source, path_separator):
         if path_separator in source:
             path, pattern = source.rsplit(path_separator, 1)
         else:
@@ -512,7 +508,7 @@ class AbstractSFTPClient(object):
         return [filename for filename in
                 self.list_files(path, pattern, absolute=True)]
 
-    def _get_local_file_paths(self, sourcefiles, dest):
+    def _get_get_file_destinations(self, sourcefiles, dest):
         if dest == '.':
             dest += os.sep
         is_dir = dest.endswith(os.sep)
