@@ -7,42 +7,34 @@ Library         Collections
 
 *** Test Cases ***
 List Directories Using Absolute Path
-    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Relative Path
-    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${TEST_ROOT_NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Current Directory
-    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  .
     Should Contain  ${listing}  ${TEST_ROOT_NAME}
 
 List Directories Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
-    ${expected} =  Create List  ${EMPTY TEXTFILES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  symlink
     Lists Should Be Equal  ${listing}  ${expected}
     [Teardown]  Execute Command  rm -f symlink
 
 List Directories With Absolute Paths Using Absolute Path
-    ${expected} =  Create List
-    ...                  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
-    ...                  ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Relative
-    ${expected} =  Create List
-    ...                  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
-    ...                  ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
     ${target} =  Set Variable  ${TEST_ROOT_NAME}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
@@ -52,12 +44,12 @@ List Directories With Absolute Paths Using Current Directory
     Should Contain  ${listing}  ${REMOTE TEST ROOT}
 
 List Directories Using Pattern
-    ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=spec*
+    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=emp*
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Pattern
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=emp*
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}

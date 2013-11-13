@@ -32,7 +32,7 @@ Get Directory Including Subdirectories To Non-Existing Local Path
     OS.Directory Should Not Exist  ${target}
     Get Directory  ${REMOTE_TEST_ROOT}  ${target}  recursive=True
     Directory Should Exist Including Subdirectories  ${target}
-    ${target} =  Set Variable  my
+    [Teardown]  Remove Directory  my  recursive=True
 
 Get Directory To Current Local Path
     ${target} =  Set Variable  .${/}${TEST ROOT NAME}
@@ -58,13 +58,11 @@ Directory Should Exist With Content
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    OS.File Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
-    OS.Directory Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
+    OS.Directory Should Not Exist  ${destination}${/}${EMPTY DIRECTORY NAME}
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    OS.Directory Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
-    OS.File Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}/${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${EMPTY DIRECTORY NAME}${/}${EMPTY FILE NAME}

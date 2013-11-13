@@ -1,8 +1,8 @@
 *** Settings ***
 Force Tags      pybot   jybot
-Suite Setup     Login And Move Test Files
-Suite Teardown  Remove Test Files and Close Connections
-Resource        resources/ssh_library_resources.txt
+Resource        resources/executing_commands.txt
+Suite Setup     Login And Upload Test Script And File
+Suite Teardown  Remove Test Files And Close Connections
 
 *** Test Cases ***
 Start Command And Read Process Output With Defaults
@@ -42,8 +42,3 @@ Reading Command Output Without Command Started
     Run Keyword And Expect Error
     ...  No started commands to read output from.
     ...  Read Command Output
-
-*** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put File  ${TEST SCRIPT}  ${REMOTE TEST ROOT}${/}

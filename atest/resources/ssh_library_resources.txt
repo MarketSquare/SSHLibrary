@@ -1,25 +1,17 @@
 *** Settings ***
 Library         SSHLibrary  WITH NAME  SSH
-Variables       user_information.py
 
 *** Variables ***
+${USERNAME}                        test
+${PASSWORD}                        test
+${HOST}                            localhost
 ${PROMPT}                          $
 ${TEST ROOT NAME}                  robot-testdir
-${REMOTE TEST ROOT}                ${USER HOME}${/}${TEST ROOT NAME}
+${REMOTE TEST ROOT}                /home/test/${TEST ROOT NAME}
 ${LOCAL TMPDIR}                    ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir
 ${TESTDATA}                        ${CURDIR}${/}..${/}testdata
-${SCRIPTS}                         ${TESTDATA}${/}scripts
 ${TEXTFILES}                       ${TESTDATA}${/}textfiles
-${SPECIAL TEXTFILES NAME}          special
-${SPECIAL TEXTFILES}               ${TEXTFILES}${/}${SPECIAL TEXTFILES NAME}
-${EMPTY TEXTFILES NAME}            empty
-${EMPTY TEXTFILES}                 ${TEXTFILES}${/}${EMPTY TEXTFILES NAME}
-${TEST SCRIPT NAME}                test.sh
-${TEST SCRIPT}                     ${SCRIPTS}${/}${TEST SCRIPT NAME}
-${INTERACTIVE TEST SCRIPT NAME}    test_interactive.sh
-${INTERACTIVE TEST SCRIPT}         ${SCRIPTS}${/}${INTERACTIVE TEST SCRIPT NAME}
-${REPEAT TEST SCRIPT NAME}         test_repeat.sh
-${REPEAT TEST SCRIPT}              ${SCRIPTS}${/}${REPEAT TEST SCRIPT NAME}
+${SCRIPTS}                         ${TESTDATA}${/}scripts
 ${TEST FILE NAME}                  test_file.txt
 ${TEST FILE}                       ${TEXTFILES}${/}${TEST FILE NAME}
 ${TEST FILE 2 NAME}                Test_file2.txt
@@ -27,20 +19,22 @@ ${TEST FILE 2}                     ${TEXTFILES}${/}${TEST FILE 2 NAME}
 ${FILE WITH NEWLINES NAME}         file_with_newlines.txt
 ${FILE WITH NEWLINES}              ${TEXTFILES}${/}${FILE WITH NEWLINES NAME}
 ${FILE WITH NON-ASCII NAME}        aaääöö.txt
-${FILE WITH NON-ASCII}             ${SPECIAL TEXTFILES}${/}${FILE WITH NON-ASCII NAME}
+${FILE WITH NON-ASCII}             ${TEXTFILES}${/}${FILE WITH NON-ASCII NAME}
 ${FILE WITH SPECIAL CHARS NAME}    special%2Fchars.txt
-${FILE WITH SPECIAL CHARS}         ${SPECIAL TEXTFILES}${/}${FILE WITH SPECIAL CHARS NAME}
+${FILE WITH SPECIAL CHARS}         ${TEXTFILES}${/}${FILE WITH SPECIAL CHARS NAME}
+${EMPTY DIRECTORY NAME}            empty
+${EMPTY FILE NAME}                 empty.txt
 
 *** Keywords ***
 Login And Move Test Files
     Login As Valid User
     Put Directory  ${TEXTFILES}  ${REMOTE TEST ROOT}  recursive=True
 
-Remove Test Files And Close Connections
-    Execute Command  rm -rf ${REMOTE_TEST_ROOT}
-    Close All Connections
-
 Login As Valid User
     ${id} =  Open Connection  ${HOST}  prompt=${PROMPT}
     Login  ${USERNAME}  ${PASSWORD}
     [Return]  ${id}
+
+Remove Test Files And Close Connections
+    Execute Command  rm -rf ${REMOTE_TEST_ROOT}
+    Close All Connections

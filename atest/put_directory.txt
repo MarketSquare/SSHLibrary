@@ -67,15 +67,14 @@ Remote Directory Should Exist With Content
     SSH.File Should Exist  ${destination}${/}${TEST FILE NAME}
     SSH.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     SSH.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    SSH.Directory Should Not Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
+    SSH.Directory Should Not Exist  ${destination}${/}${EMPTY DIRECTORY NAME}
 
 Remote Directory Should Exist With Subdirectories
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}${/}${TEST FILE NAME}
     SSH.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     SSH.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
-    SSH.Directory Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}
-    SSH.File Should Exist  ${destination}${/}${SPECIAL TEXTFILES NAME}${/}${FILE WITH SPECIAL CHARS NAME}
+    SSH.File Should Exist  ${destination}${/}${EMPTY DIRECTORY NAME}${/}${EMPTY FILE NAME}
 
 Remove Remote Files
     [Arguments]  ${destination}

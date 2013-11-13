@@ -14,6 +14,7 @@
 
 from __future__ import with_statement
 from fnmatch import fnmatchcase
+from robot.utils import unic
 import os
 import re
 import stat
@@ -195,6 +196,9 @@ class AbstractSSHClient(object):
         output = self.shell.read()
         if delay:
             output += self._delayed_read(delay)
+        return self._decode(output)
+
+    def _decode(self, output):
         return output.decode(self.config.encoding)
 
     def _delayed_read(self, delay):
@@ -215,7 +219,7 @@ class AbstractSSHClient(object):
         while True:
             try:
                 server_output += self.shell.read_byte()
-                return server_output.decode(self.config.encoding)
+                return self._decode(server_output)
             except UnicodeDecodeError:
                 pass
 
@@ -296,7 +300,7 @@ class AbstractSSHClient(object):
         while time.time() < max_time:
             try:
                 server_output += self.shell.read_byte()
-                decoded_output = server_output.decode(self.config.encoding)
+                decoded_output = self._decode(server_output)
                 if matcher(decoded_output):
                     return decoded_output
             except UnicodeDecodeError:
@@ -390,7 +394,7 @@ class AbstractShell(object):
 class SFTPFileInfo(object):
 
     def __init__(self, name, mode):
-        self.name = name
+        self.name = unic(name)
         self.mode = mode
 
     def is_regular(self):
@@ -498,34 +502,26 @@ class AbstractSFTPClient(object):
         return remote_files, local_files
 
     def get_file(self, source, destination, path_separator='/'):
-        remotefiles = self._get_get_file_sources(source, path_separator)
-        localfiles = self._get_get_file_destinations(remotefiles, destination)
+        remotefiles = self._get_remote_file_paths(source, path_separator)
+        if not remotefiles:
+            msg = "There were no source files matching '%s'." % source
+            raise SSHClientException(msg)
+        localfiles = self._get_local_file_paths(remotefiles, destination)
         for src, dst in zip(remotefiles, localfiles):
             self._get_file(src, dst)
         return remotefiles, localfiles
 
-    def _get_file(self, src, dst):
-        raise NotImplementedError
-
-    def _get_get_file_sources(self, source, path_separator):
+    def _get_remote_file_paths(self, source, path_separator):
         if path_separator in source:
             path, pattern = source.rsplit(path_separator, 1)
         else:
             path, pattern = '', source
         if not path:
             path = '.'
-        sourcefiles = []
-        for filename in self.list_files(path):
-            if fnmatchcase(filename, pattern):
-                if path:
-                    filename = path_separator.join([path, filename])
-                sourcefiles.append(filename)
-        if not sourcefiles:
-            msg = "There were no source files matching '%s'." % source
-            raise SSHClientException(msg)
-        return sourcefiles
+        return [filename for filename in
+                self.list_files(path, pattern, absolute=True)]
 
-    def _get_get_file_destinations(self, sourcefiles, dest):
+    def _get_local_file_paths(self, sourcefiles, dest):
         if dest == '.':
             dest += os.sep
         is_dir = dest.endswith(os.sep)
@@ -544,6 +540,9 @@ class AbstractSFTPClient(object):
             dest = os.path.dirname(dest)
         if not os.path.exists(dest):
             os.makedirs(dest)
+
+    def _get_file(self, src, dst):
+        raise NotImplementedError
 
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):

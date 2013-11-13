@@ -31,7 +31,7 @@ Switch Connection
     ${prev id} =  Switch Connection  second
     Write  pwd
     ${result} =  Read Until Prompt
-    Should Contain  ${result}  ${USER HOME}
+    Should Contain  ${result}  ~
 
 Switch Connection To None
     [Setup]   Login As Valid User

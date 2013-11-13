@@ -7,31 +7,37 @@ Library         Collections
 
 *** Test Cases ***
 List Content Using Absolute Path
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
+    ${expected} =  Create List  ${TEST FILE 2 NAME}
+    ...                         ${FILE WITH NON-ASCII NAME}
+    ...                         ${EMPTY DIRECTORY NAME}
     ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
+    ...                         ${FILE WITH SPECIAL CHARS NAME}
+    ...                         ${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Content Using Relative Path
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
+    ${expected} =  Create List  ${TEST FILE 2 NAME}
+    ...                         ${FILE WITH NON-ASCII NAME}
+    ...                         ${EMPTY DIRECTORY NAME}
     ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
+    ...                         ${FILE WITH SPECIAL CHARS NAME}
+    ...                         ${TEST FILE NAME}
     ${listing} =  List Directory  ${TEST_ROOT_NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Content Using Current Directory
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
     ${listing} =  List Directory  .
     Should Contain  ${listing}  ${TEST_ROOT_NAME}
 
 List Content Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
-    ${expected} =  Create List  ${TEST FILE 2 NAME}  ${EMPTY TEXTFILES NAME}
+    ${expected} =  Create List  ${TEST FILE 2 NAME}
+    ...                         ${FILE WITH NON-ASCII NAME}
+    ...                         ${EMPTY DIRECTORY NAME}
     ...                         ${FILE WITH NEWLINES NAME}
-    ...                         ${SPECIAL TEXTFILES NAME}  ${TEST FILE NAME}
+    ...                         ${FILE WITH SPECIAL CHARS NAME}
+    ...                         ${TEST FILE NAME}
     ${listing} =  List Directory  symlink
     Lists Should Be Equal  ${listing}  ${expected}
     [Teardown]  Execute Command  rm -f symlink
@@ -39,9 +45,10 @@ List Content Using Symlink As Path
 List Content With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
-    ...                 ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NON-ASCII NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
-    ...                 ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
@@ -49,9 +56,10 @@ List Content With Absolute Paths Using Absolute Path
 List Content With Absolute Paths Using Relative
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
-    ...                 ${REMOTE TEST ROOT}${/}${EMPTY TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NON-ASCII NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
-    ...                 ${REMOTE TEST ROOT}${/}${SPECIAL TEXTFILES NAME}
+    ...                 ${REMOTE TEST ROOT}${/}${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
     ${listing} =  List Directory  ${TEST_ROOT_NAME}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
@@ -61,7 +69,7 @@ List Content With Absolute Paths Using Current Directory
     Should Contain  ${listing}  ${REMOTE TEST ROOT}
 
 List Content Using Pattern
-    ${expected} =  Create List  ${SPECIAL TEXTFILES NAME}
+    ${expected} =  Create List  ${FILE WITH SPECIAL CHARS NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT}  pattern=spec*
     Lists Should Be Equal  ${listing}  ${expected}
 

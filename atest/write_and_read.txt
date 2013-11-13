@@ -6,6 +6,10 @@ Resource        resources/ssh_library_resources.txt
 
 *** Variables ***
 ${COUNTER NAME}  counter.txt
+${INTERACTIVE TEST SCRIPT NAME}    test_interactive.sh
+${INTERACTIVE TEST SCRIPT}         ${SCRIPTS}${/}${INTERACTIVE TEST SCRIPT NAME}
+${REPEAT TEST SCRIPT NAME}         test_repeat.sh
+${REPEAT TEST SCRIPT}              ${SCRIPTS}${/}${REPEAT TEST SCRIPT NAME}
 
 *** Test Cases ***
 Write And Read

@@ -1,8 +1,8 @@
 *** Settings ***
 Force Tags      pybot   jybot
-Suite Setup     Login And Move Test Files
+Resource        resources/executing_commands.txt
+Suite Setup     Login And Upload Test Script And File
 Suite Teardown  Remove Test Files And Close Connections
-Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
@@ -44,9 +44,9 @@ Execute Command With Legacy Stdout And Stderr Config
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command With Output Containing Newlines
-    ${res} =  Execute Command  cat ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
+    ${result} =  Execute Command  cat ${REMOTE TEST ROOT}${/}${FILE WITH NEWLINES NAME}
     ${actual} =  OS.Get File  ${FILE WITH NEWLINES}
-    Should Be Equal  ${res}\n  ${actual}
+    Should Be Equal  ${result}\n  ${actual}
 
 Execute Command With Multiple Statements
     ${result} =  Execute Command  echo "foo\n"; echo RC=$?
@@ -55,9 +55,3 @@ Execute Command With Multiple Statements
 Executing Command With Non-ASCII characters
     ${result}=  Execute Command  echo 'aaääöö'
     Should Contain  ${result}  aaääöö
-
-*** Keywords ***
-Login And Move Test Files
-    Login As Valid User
-    Put File  ${TEST SCRIPT}  ${REMOTE TEST ROOT}${/}
-    Put File  ${FILE WITH NEWLINES}  ${REMOTE TEST ROOT}${/}
