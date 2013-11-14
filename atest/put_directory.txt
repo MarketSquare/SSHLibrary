@@ -1,72 +1,51 @@
 *** Settings ***
 Force Tags      pybot   jybot
+Resource        resources/ssh_library_resources.txt
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
-Test Teardown   Remove Remote Files  ${target}
-Resource        resources/ssh_library_resources.txt
 
 *** Test Cases ***
 Put Directory To Existing Remote Path
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    Verify Remote Directory Exists  ${target}
-    Put Directory  ${TEXTFILES}  ${target}
-    ${target} =  Set Variable  ${target}${/}textfiles
-    Remote Directory Should Exist With Content  ${target}
+    Put Directory  ${TEXTFILES}  .
+    Remote Directory Should Exist With Content  .
+    [Teardown]  Execute Command  rm -rf .${/}textfiles
 
 Put Directory To Non-Existing Remote Path
-    ${target} =  Set Variable  another_dir_name
-    Verify Remote Directory Does Not Exists  ${target}
-    Put Directory  ${TEXTFILES}  ${target}
-    Remote Directory Should Exist With Content  ${target}
+    [Setup]  SSH.Directory Should Not Exist  another_dir_name
+    Put Directory  ${TEXTFILES}  another_dir_name
+    Remote Directory Should Exist With Content  another_dir_name
+    [Teardown]  Execute Command  rm -rf another_dir_name
 
 Put Directory Including Subdirectories To Existing Remote Path
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    Verify Remote Directory Exists  ${target}
-    Put Directory  ${TEXTFILES}  ${target}  recursive=True
-    ${target} =  Set Variable  ${target}${/}textfiles
-    Remote Directory Should Exist With Subdirectories  ${target}
+    Put Directory  ${TEXTFILES}  .  recursive=True
+    Remote Directory Should Exist With Subdirectories  .${/}textfiles
+    [Teardown]  Execute Command  rm -rf .${/}textfiles
 
 Put Directory Including Subdirectories To Non-Existing Remote Path
-    ${target} =  Set Variable  another/dir/path
-    Verify Remote Directory Does Not Exists  ${target}
-    Put Directory  ${TEXTFILES}  ${target}  recursive=True
-    Remote Directory Should Exist With Subdirectories  ${target}
-    ${target} =  Set Variable  another
-
-Put Directory To Current Remote Path
-    ${target} =  Set Variable  .
-    Verify Remote Directory Exists  ${target}
-    Put Directory  ${TEXTFILES}  ${target}
-    ${target} =  Set Variable  ${target}${/}textfiles
-    Remote Directory Should Exist With Content  ${target}
+    [Setup]  SSH.Directory Should Not Exist  another/dir/path
+    Put Directory  ${TEXTFILES}  another/dir/path  recursive=True
+    Remote Directory Should Exist With Subdirectories  another/dir/path
+    [Teardown]  Execute Command  rm -rf another
 
 Put Directory Using Relative Source
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
-    Verify Remote Directory Exists  ${target}
-    Put Directory  textfiles  ${target}
-    ${target} =  Set Variable  ${target}${/}textfiles
-    Remote Directory Should Exist With Content  ${target}
+    [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
+    Put Directory  ${CURDIR}/testdata/textfiles  ${REMOTE TEST ROOT}
+    Remote Directory Should Exist With Content  ${REMOTE TEST ROOT}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put Directory Should Fail When Source Does Not Exists
-    ${target} =  Set Variable  another_dir_name
     Run Keyword And Expect Error  There was no source path matching 'non-existing'.
     ...                           Put Directory  non-existing
-    Verify Remote Directory Does Not Exists  ${target}
 
 *** Keywords ***
-Verify Remote Directory Exists
-    [Arguments]  ${destination}
-    SSH.Directory Should Exist  ${destination}
-
-Verify Remote Directory Does Not Exists
-    [Arguments]  ${destination}
-    SSH.Directory Should Not Exist  ${destination}
-
 Remote Directory Should Exist With Content
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}${/}${TEST FILE NAME}
     SSH.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     SSH.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    SSH.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
+    SSH.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
+    SSH.File Should Not Exist  ${destination}${/}${EMPTY FILE NAME}
     SSH.Directory Should Not Exist  ${destination}${/}${EMPTY DIRECTORY NAME}
 
 Remote Directory Should Exist With Subdirectories
@@ -74,8 +53,7 @@ Remote Directory Should Exist With Subdirectories
     SSH.File Should Exist  ${destination}${/}${TEST FILE NAME}
     SSH.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     SSH.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    SSH.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
+    SSH.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
+    SSH.File Should Not Exist  ${destination}${/}${EMPTY FILE NAME}
     SSH.File Should Exist  ${destination}${/}${EMPTY DIRECTORY NAME}${/}${EMPTY FILE NAME}
-
-Remove Remote Files
-    [Arguments]  ${destination}
-    Execute Command  rm -rf ${destination}

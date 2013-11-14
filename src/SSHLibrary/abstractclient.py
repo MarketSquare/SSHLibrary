@@ -423,7 +423,7 @@ class AbstractSFTPClient(object):
                                    absolute)
 
     def _list_filtered(self, path, filter_method, pattern=None, absolute=False):
-        self._verify_dir_exists(path)
+        self._verify_remote_dir_exists(path)
         items = filter_method(path)
         if pattern:
             items = self._filter_by_pattern(items, pattern)
@@ -431,7 +431,7 @@ class AbstractSFTPClient(object):
             items = self._include_absolute_path(items, path)
         return items
 
-    def _verify_dir_exists(self, path):
+    def _verify_remote_dir_exists(self, path):
         if not self.is_dir(path):
             raise SSHClientException("There was no directory matching '%s'." %
                                      path)
@@ -470,7 +470,7 @@ class AbstractSFTPClient(object):
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
         source = self._remove_ending_path_separator(path_separator, source)
-        self._verify_dir_exists(source)
+        self._verify_remote_dir_exists(source)
         files = []
         for child in self.list(source):
             remote = source + path_separator + child
@@ -508,50 +508,46 @@ class AbstractSFTPClient(object):
         return [filename for filename in
                 self.list_files(path, pattern, absolute=True)]
 
-    def _get_get_file_destinations(self, sourcefiles, dest):
-        if dest == '.':
-            dest += os.sep
-        is_dir = dest.endswith(os.sep)
-        if not is_dir and len(sourcefiles) > 1:
-            msg = 'Cannot copy multiple source files to one destination file.'
-            raise SSHClientException(msg)
-        dest = os.path.abspath(dest.replace('/', os.sep))
-        self._create_missing_local_dirs(dest, is_dir)
-        if is_dir:
-            return [os.path.join(dest, os.path.basename(name))
+    def _get_get_file_destinations(self, sourcefiles, destination):
+        target_is_dir = destination.endswith(os.sep) or destination == '.'
+        if not target_is_dir and len(sourcefiles) > 1:
+            raise SSHClientException('Cannot copy multiple source files to one '
+                                     'destination file.')
+        destination = os.path.abspath(destination.replace('/', os.sep))
+        self._create_missing_local_dirs(destination, target_is_dir)
+        if target_is_dir:
+            return [os.path.join(destination, os.path.basename(name))
                     for name in sourcefiles]
-        return [dest]
+        return [destination]
 
-    def _create_missing_local_dirs(self, dest, is_dir):
-        if not is_dir:
-            dest = os.path.dirname(dest)
-        if not os.path.exists(dest):
-            os.makedirs(dest)
+    def _create_missing_local_dirs(self, destination, target_is_dir):
+        if not target_is_dir:
+            destination = os.path.dirname(destination)
+        if not os.path.exists(destination):
+            os.makedirs(destination)
 
     def _get_file(self, src, dst):
         raise NotImplementedError
 
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
-        if not os.path.isdir(source):
-            msg = "There was no source path matching '%s'." % source
-            raise SSHClientException(msg)
+        self._verify_local_dir_exists(source)
+        destination = self._remove_ending_path_separator(path_separator,
+                                                         destination)
         files = []
-        source = os.path.abspath(source)
+        parent = os.path.basename(os.path.abspath(source))
+        remote_destination_exists = self.is_dir(destination)
         os.chdir(os.path.dirname(source))
-        parent = os.path.basename(source)
-        if destination.endswith(path_separator):
-            destination = destination[:-len(path_separator)]
-        remote_target_exists = True if self.is_dir(destination) else False
-        for dirpath, _, filenames in os.walk(parent):
+        for subdirectory, _, filenames in os.walk(parent):
             for filename in filenames:
-                local_path = os.path.join(dirpath, filename)
+                local_path = os.path.join(subdirectory, filename)
                 if destination.endswith('.'):
-                    remote_path = path_separator.join([dirpath, filename])
+                    remote_path = path_separator.join([subdirectory, filename])
                 else:
-                    remote_path = path_separator.join([destination, dirpath,
+                    remote_path = path_separator.join([destination,
+                                                       subdirectory,
                                                        filename])
-                    if not remote_target_exists:
+                    if not remote_destination_exists:
                         remote_path = remote_path.replace(parent +
                                                           path_separator, '')
                 files += self.put_file(local_path, remote_path, mode, newline,
@@ -559,6 +555,11 @@ class AbstractSFTPClient(object):
             if not recursive:
                 break
         return files
+
+    def _verify_local_dir_exists(self, path):
+        if not os.path.isdir(path):
+            raise SSHClientException("There was no source path matching '%s'."
+                                     % path)
 
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         mode = int(mode, 8)
