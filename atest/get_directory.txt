@@ -2,55 +2,43 @@
 Force Tags      pybot   jybot
 Suite Setup     Login and Move Test Files
 Suite Teardown  Remove Test Files And Close Connections
-Test Teardown   Remove Directory  ${target}  recursive=True
 Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
-    OS.Directory Should Exist  ${target}
-    Get Directory  ${REMOTE_TEST_ROOT}  ${target}
-    Directory Should Exist With Content  ${target}
+    Get Directory  ${REMOTE_TEST_ROOT}  ${LOCAL TMPDIR}
+    Directory Should Exist With Content  ${LOCAL TMPDIR}
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory To Non-Existing Local Path
-    ${target} =  Set Variable  tmpdir
-    OS.Directory Should Not Exist  ${target}
-    SSH.Get Directory  ${REMOTE_TEST_ROOT}${/}  ${target}
-    Directory Should Exist With Content  ${target}
+    [Setup]  OS.Directory Should Not Exist  .${/}tmpdir
+    SSH.Get Directory  ${REMOTE_TEST_ROOT}${/}  .${/}tmpdir
+    Directory Should Exist With Content  .${/}tmpdir
+    [Teardown]  Remove Directory  .${/}tmpdir  recursive=True
 
 Get Directory Including Subdirectories To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
-    OS.Directory Should Exist  ${target}
-    Get Directory  ${REMOTE_TEST_ROOT}  ${target}  recursive=True
-    Directory Should Exist Including Subdirectories  ${target}
+    Get Directory  ${REMOTE_TEST_ROOT}  ${LOCAL TMPDIR}  recursive=True
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory Including Subdirectories To Non-Existing Local Path
-    ${target} =  Set Variable  my/own/tmpdir
-    OS.Directory Should Not Exist  ${target}
-    Get Directory  ${REMOTE_TEST_ROOT}  ${target}  recursive=True
-    Directory Should Exist Including Subdirectories  ${target}
+    [Setup]  OS.Directory Should Not Exist  my
+    Get Directory  ${REMOTE_TEST_ROOT}  my/own/tmpdir  recursive=True
+    Directory Should Exist Including Subdirectories  my/own/tmpdir
     [Teardown]  Remove Directory  my  recursive=True
 
-Get Directory To Current Local Path
-    ${target} =  Set Variable  .${/}${TEST ROOT NAME}
-    OS.Directory Should Not Exist  ${target}
-    Get Directory  ${REMOTE_TEST_ROOT}  ${target}
-    Directory Should Exist With Content  ${target}
-
 Get Directory Using Relative Source
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
-    OS.Directory Should Not Exist  ${target}
-    Get Directory  ${TEST ROOT NAME}  ${target}
-    Directory Should Exist With Content  ${target}
+    [Setup]  OS.Directory Should Not Exist  my
+    Get Directory  ${TEST ROOT NAME}  my
+    Directory Should Exist With Content  my
+    [Teardown]  Remove Directory  my  recursive=True
 
 Get Directory Should Fail When Source Does Not Exists
-    ${target} =  Set Variable  ${LOCAL TMPDIR}
     Run Keyword And Expect Error  There was no directory matching 'non-existing'.
-    ...                           SSH.Get Directory  non-existing
-    OS.Directory Should Not Exist  ${target}
+    ...                           SSH.Get Directory  non-existing  /tmp
 
 *** Keywords ***
 Directory Should Exist With Content
@@ -58,6 +46,8 @@ Directory Should Exist With Content
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
     OS.Directory Should Not Exist  ${destination}${/}${EMPTY DIRECTORY NAME}
 
 Directory Should Exist Including Subdirectories
@@ -65,4 +55,6 @@ Directory Should Exist Including Subdirectories
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
     OS.File Should Exist  ${destination}${/}${EMPTY DIRECTORY NAME}${/}${EMPTY FILE NAME}
