@@ -107,8 +107,8 @@ class AbstractSSHClient(object):
         try:
             self._login(username, password)
         except SSHClientException:
-            msg = "Authentication failed for user '%s'." % username
-            raise SSHClientException(msg)
+            raise SSHClientException("Authentication failed for user '%s'."
+                                     % username)
         return self._read_login_output(delay)
 
     def _login(self, username, password):
@@ -127,8 +127,8 @@ class AbstractSSHClient(object):
         try:
             self._login_with_public_key(username, keyfile, password)
         except SSHClientException:
-            msg = "Login with public key failed for user '%s'." % username
-            raise SSHClientException(msg)
+            raise SSHClientException("Login with public key failed for user "
+                                     "'%s'." % username)
         return self._read_login_output(delay)
 
     def _login_with_public_key(self, username, keyfile, password):

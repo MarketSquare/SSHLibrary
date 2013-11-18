@@ -6,7 +6,7 @@ Library        OperatingSystem
 
 *** Test Cases ***
 Open Connection
-    Login As Valid User
+    Open Connection  ${HOST}
 
 Close Connection
     [Setup]  Login As Valid User
@@ -37,20 +37,6 @@ Switch Connection To None
     [Setup]   Login As Valid User
     Switch Connection  ${NONE}
     Connection Should Be Closed
-
-Login Returns Server Output
-    [Setup]  Open Connection  ${HOST}
-    ${output}=  Login  ${USERNAME}  ${PASSWORD}
-    Should Contain  ${output}  Last login:
-    ${output}=  Read
-    Should Be Equal  ${output.strip()}  ${EMPTY}
-
-Login Returns Server Output If Prompt Is Set
-    [Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
-    ${output}=  Login  ${USERNAME}  ${PASSWORD}
-    Should Contain  ${output}  Last login:
-    ${output}=  Read
-    Should Be Equal  ${output.strip()}  ${EMPTY}
 
 Enable Logging
     [Tags]   pybot

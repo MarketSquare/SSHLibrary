@@ -12,9 +12,8 @@ ${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
 
 *** Keywords ***
 Login As Valid User
-    ${id} =  Open Connection  ${HOST}  prompt=${PROMPT}
+    Open Connection  ${HOST}  prompt=${PROMPT}
     Login  ${USERNAME}  ${PASSWORD}
-    [Return]  ${id}
 
 Remove Test Files And Close Connections
     Execute Command  rm -rf ${REMOTE TEST ROOT}
