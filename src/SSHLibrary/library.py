@@ -678,6 +678,23 @@ class SSHLibrary(object):
             return return_values[0]
         return return_values
 
+    def _info(self, msg):
+        self._log(msg, 'INFO')
+
+    def _log(self, msg, level=None):
+        level = self._active_loglevel(level)
+        msg = msg.strip()
+        if msg:
+            print '*%s* %s' % (level, msg)
+
+    def _active_loglevel(self, level):
+        if level is None:
+            return self._config.loglevel
+        if isinstance(level, basestring) and \
+                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
+            return level.upper()
+        raise AssertionError("Invalid log level '%s'." % level)
+
     def _get_config_values(self, config, index, host, alias, port, timeout,
                            newline, prompt, term_type, width, height, encoding):
         if self._output_wanted(index):
@@ -1177,7 +1194,7 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', path_separator=''):
         """Downloads file(s) from the remote machine to the local machine.
 
         `source` is a path on the remote machine. Both absolute paths and
@@ -1188,6 +1205,12 @@ class SSHLibrary(object):
 
         `destination` is the target path on the local machine. Both absolute
         paths and paths relative to the current working directory are supported.
+
+        `path_separator` is the operating system path separator on the remote
+        machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data).
+        The argument was deprecated is SSHLibrary 1.2, please use [#Default
+        path separator|the library or the connection specific setting] instead.
 
         Examples:
         | Get File | /var/log/auth.log | /tmp/                      |
@@ -1218,10 +1241,19 @@ class SSHLibrary(object):
            the directory where the test execution was started and thus
            accessible using built-in `${EXECDIR}` variable.
 
+        Argument `path_separator` was deprecated in SSHLibrary 1.2.
+
         See also `Get Directory`.
         """
+        if path_separator:
+            self._print_path_separator_deprecation_warning()
         return self._run_sftp_command(self.current.get_file, source,
-                                      destination)
+                                      destination, path_separator)
+
+    def _print_path_separator_deprecation_warning(self):
+        self._log("Argument 'path_separator' was deprecated in SSHLibrary 1.2 "
+                  "and will be removed in 1.3. Please use the library or the "
+                  "connection specific 'path_separator' instead.", 'WARN')
 
     def get_directory(self, source, destination='.', recursive=False):
         """Downloads a directory, including its content, from the remote machine to the local machine.
@@ -1262,7 +1294,8 @@ class SSHLibrary(object):
         return self._run_sftp_command(self.current.get_directory, source,
                                       destination, recursive)
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+    def put_file(self, source, destination='.', mode='0744', newline='',
+                 path_separator=''):
         """Uploads file(s) from the local machine to the remote machine.
 
         `source` is the path on the local machine. Both absolute paths and
@@ -1279,6 +1312,12 @@ class SSHLibrary(object):
 
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
+
+        `path_separator` is the operating system path separator on the remote
+        machine. With Windows remote machines, `path_separator`
+        must be set as `\\\\` (an escaped backslash in the test data).
+        The argument was deprecated is SSHLibrary 1.2, please use [#Default
+        path separator|the library or the connection specific setting] instead.
 
         Examples:
         | Put File | /path/to/*.txt          |
@@ -1305,10 +1344,15 @@ class SSHLibrary(object):
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
+        Argument `path_separator` was deprecated in SSHLibrary 1.2.
+
         See also `Put Directory`.
         """
+        if path_separator:
+            self._print_path_separator_deprecation_warning()
         return self._run_sftp_command(self.current.put_file, source,
-                                      destination, mode, newline)
+                                      destination, mode, newline,
+                                      path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):
@@ -1485,23 +1529,6 @@ class SSHLibrary(object):
                                           'y' if len(dirs) == 1 else 'ies',
                                           '\n'.join(dirs)))
         return dirs
-
-    def _info(self, msg):
-        self._log(msg, 'INFO')
-
-    def _log(self, msg, level=None):
-        level = self._active_loglevel(level)
-        msg = msg.strip()
-        if msg:
-            print '*%s* %s' % (level, msg)
-
-    def _active_loglevel(self, level):
-        if level is None:
-            return self._config.loglevel
-        if isinstance(level, basestring) and \
-                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
-            return level.upper()
-        raise AssertionError("Invalid log level '%s'." % level)
 
 
 class _DefaultConfiguration(Configuration):

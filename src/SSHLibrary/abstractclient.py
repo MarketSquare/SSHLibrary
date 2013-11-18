@@ -309,20 +309,23 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
                                  % (expected, timeout, decoded_output))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+    def put_file(self, source, destination='.', mode='0744', newline='',
+                 path_separator=''):
         """Put file(s) from localhost to remote host.
 
         :param source: Local file path. May be a simple pattern containing
             '*' and '?', in which case all matching files are tranferred
-        :param destintation: Remote path. If many files are transferred,
+        :param destination: Remote path. If many files are transferred,
             must be a directory. Defaults to users home directory.
         :param mode: File permissions for the remote file. Defined as a
             Unix file format string, e.g. '0600'
         :param newline: Newline character to be used in the remote file.
             Default is 'LF', i.e. the line feed character.
         """
+        # Path separator was deprecated in SSHLibrary 1.2
+        path_separator = path_separator or self.config.path_separator
         return self.sftp_client.put_file(source, destination, mode, newline,
-                                         self.config.path_separator)
+                                         path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):
@@ -331,7 +334,7 @@ class AbstractSSHClient(object):
                                               self.config.path_separator,
                                               recursive)
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', path_separator=''):
         """Get file(s) from the remote host to localhost.
 
         :param source: Remote file path. May be a simple pattern containing
@@ -339,8 +342,9 @@ class AbstractSSHClient(object):
             :param destintation: Local path. If many files are transferred,
             must be a directory. Defaults to current working directory.
         """
-        return self.sftp_client.get_file(source, destination,
-                                         self.config.path_separator)
+        # Path separator was deprecated in SSHLibrary 1.2
+        path_separator = path_separator or self.config.path_separator
+        return self.sftp_client.get_file(source, destination, path_separator)
 
     def get_directory(self, source, destination='.', recursive=False):
         return self.sftp_client.get_directory(source, destination,
