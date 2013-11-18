@@ -1,8 +1,8 @@
 *** Settings ***
-Default Tags    pybot   jybot
-Test Teardown   Close All Connections
-Resource        resources/ssh_library_resources.txt
-Library         OperatingSystem
+Default Tags   pybot   jybot
+Resource       resources/common.txt
+Test Teardown  Close All Connections
+Library        OperatingSystem
 
 *** Test Cases ***
 Get Connection
@@ -57,4 +57,3 @@ Get Connections Returns Empty List When No Connections
     ${conns} =  Get Connections
     ${empty_list} =  Create List
     Should Be Equal  ${conns}  ${empty_list}
-

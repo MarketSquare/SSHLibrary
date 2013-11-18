@@ -1,0 +1,21 @@
+*** Settings ***
+Library     SSHLibrary  WITH NAME  SSH
+
+*** Variables ***
+${USERNAME}               test
+${PASSWORD}               test
+${HOST}                   localhost
+${PROMPT}                 $
+${REMOTE TEST ROOT NAME}  robot-testdir
+${REMOTE TEST ROOT}       /home/test/${REMOTE TEST ROOT NAME}
+${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
+
+*** Keywords ***
+Login As Valid User
+    ${id} =  Open Connection  ${HOST}  prompt=${PROMPT}
+    Login  ${USERNAME}  ${PASSWORD}
+    [Return]  ${id}
+
+Remove Test Files And Close Connections
+    Execute Command  rm -rf ${REMOTE TEST ROOT}
+    Close All Connections

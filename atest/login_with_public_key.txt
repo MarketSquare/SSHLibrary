@@ -1,27 +1,29 @@
 *** Settings ***
-Force Tags      pybot   jybot
-Test Setup      Open Connection  ${HOST}
-Test Teardown   Close All Connections
-Resource        resources/ssh_library_resources.txt
-Library         OperatingSystem  WITH NAME  OS
+Force Tags     pybot   jybot
+Resource       resources/common.txt
+Test Setup     Open Connection  ${HOST}
+Test Teardown  Close All Connections
 
 *** Variables ***
-${PUBKEYDIR}                ${CURDIR}/testdata/keyfiles
-${PUBKEY USERNAME}          testkey
-${PUBKEY FILE}              ${PUBKEYDIR}/id_rsa
-${INVALID PUBKEY USERNAME}  invalid_key_username
-${INVALID PUBKEY FILE}      ${PUBKEYDIR}/id_rsa_invalid
+${VALID USERNAME}    testkey
+${INVALID USERNAME}  invalid
+${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
+${VALID KEY}         ${KEY DIR}${/}id_rsa
+${INVALID KEY}       ${KEY DIR}${/}id_rsa_invalid
 
 *** Test Cases ***
-Login With Public Key
+Login With Valid Username And Key
     Open Connection  ${HOST}  prompt=${PROMPT}
-    Login With Public Key  ${PUBKEY USERNAME}  ${PUBKEY FILE}
+    Login With Public Key  ${VALID USERNAME}  ${VALID KEY}
 
-Login With Non Existing Public Key
-    Run Keyword And Expect Error  Given key file '/invalid/path' does not exist.
-    ...                           Login With Public Key  ${PUBKEY USERNAME}
-    ...                           /invalid/path
+Login With Invalid Username
+    Run Keyword And Expect Error  Login with public key failed for user 'invalid'.
+    ...    Login With Public Key  ${INVALID USERNAME}  ${VALID KEY}
 
-Login With Invalid Public Key
+Login With Invalid Key
     Run Keyword And Expect Error  Login with public key failed for user 'testkey'.
-    ...    Login With Public Key  ${PUBKEY USERNAME}  ${INVALID PUBKEY FILE}
+    ...    Login With Public Key  ${VALID USERNAME}  ${INVALID KEY}
+
+Login With Non-Existing Key
+    Run Keyword And Expect Error  Given key file 'not_existing_key' does not exist.
+    ...    Login With Public Key  ${VALID USERNAME}  not_existing_key

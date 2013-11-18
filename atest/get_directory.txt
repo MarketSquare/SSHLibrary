@@ -1,38 +1,38 @@
 *** Settings ***
 Force Tags      pybot   jybot
-Resource        resources/ssh_library_resources.txt
-Suite Setup     Login and Move Test Files
+Resource        resources/sftp.txt
+Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
 Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Get Directory  ${REMOTE_TEST_ROOT}  ${LOCAL TMPDIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}
     Directory Should Exist With Content  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory To Non-Existing Local Path
     [Setup]  OS.Directory Should Not Exist  .${/}tmpdir
-    SSH.Get Directory  ${REMOTE_TEST_ROOT}${/}  .${/}tmpdir
+    SSH.Get Directory  ${REMOTE TEST ROOT}/  .${/}tmpdir
     Directory Should Exist With Content  .${/}tmpdir
     [Teardown]  Remove Directory  .${/}tmpdir  recursive=True
 
 Get Directory Including Subdirectories To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Get Directory  ${REMOTE_TEST_ROOT}  ${LOCAL TMPDIR}  recursive=True
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory Including Subdirectories To Non-Existing Local Path
     [Setup]  OS.Directory Should Not Exist  my
-    Get Directory  ${REMOTE_TEST_ROOT}  my/own/tmpdir  recursive=True
-    Directory Should Exist Including Subdirectories  my/own/tmpdir
+    Get Directory  ${REMOTE TEST ROOT}  my${/}own${/}tmpdir  recursive=True
+    Directory Should Exist Including Subdirectories  my${/}own${/}tmpdir
     [Teardown]  Remove Directory  my  recursive=True
 
 Get Directory Using Relative Source
     [Setup]  OS.Directory Should Not Exist  my
-    Get Directory  ${TEST ROOT NAME}  my
+    Get Directory  ${REMOTE TEST ROOT NAME}  my
     Directory Should Exist With Content  my
     [Teardown]  Remove Directory  my  recursive=True
 

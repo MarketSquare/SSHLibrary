@@ -1,8 +1,8 @@
 *** Settings ***
-Default Tags    pybot   jybot
-Test Teardown   Close All Connections
-Resource        resources/ssh_library_resources.txt
-Library         OperatingSystem
+Default Tags   pybot   jybot
+Resource       resources/common.txt
+Test Teardown  Close All Connections
+Library        OperatingSystem
 
 *** Test Cases ***
 Open Connection
@@ -54,10 +54,10 @@ Login Returns Server Output If Prompt Is Set
 
 Enable Logging
     [Tags]   pybot
-    [Setup]  Remove File  ${OUTPUTDIR}/sshlog.txt
-    Enable SSH Logging  ${OUTPUTDIR}/sshlog.txt
+    [Setup]  Remove File  ${OUTPUTDIR}${/}sshlog.txt
+    Enable SSH Logging  ${OUTPUTDIR}${/}sshlog.txt
     Login As Valid User
-    File Should Not Be Empty  ${OUTPUTDIR}/sshlog.txt
+    File Should Not Be Empty  ${OUTPUTDIR}${/}sshlog.txt
 
 *** Keywords ***
 Connection Should Be Closed

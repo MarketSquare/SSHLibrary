@@ -1,8 +1,8 @@
 *** Settings ***
 Force Tags      pybot   jybot
-Suite Setup     Login And Move Test Files
+Resource        resources/sftp.txt
+Suite Setup     Login And Upload Test Files
 Suite Teardown  Remove Test Files and Close Connections
-Resource        resources/ssh_library_resources.txt
 Library         Collections
 
 *** Test Cases ***
@@ -13,13 +13,13 @@ List Directories Using Absolute Path
 
 List Directories Using Relative Path
     ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${TEST_ROOT_NAME}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Current Directory
     ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  .
-    Should Contain  ${listing}  ${TEST_ROOT_NAME}
+    Should Contain  ${listing}  ${REMOTE TEST ROOT NAME}
 
 List Directories Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
@@ -35,7 +35,7 @@ List Directories With Absolute Paths Using Absolute Path
 
 List Directories With Absolute Paths Using Relative
     ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
-    ${target} =  Set Variable  ${TEST_ROOT_NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
 

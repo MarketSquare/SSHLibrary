@@ -1,23 +1,23 @@
 *** Settings ***
 Force Tags      pybot   jybot
+Resource        resources/sftp.txt
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
-Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem  WITH NAME  OS
 Library         String
 
 *** Test Cases ***
 Put File To Absolute Destination
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}${/}
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/
     SSH.File Should Exist  ${target}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File To Absolute Destination With Intermediate Subdirectories
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}${/}robotdir${/}${TEST FILE NAME}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/robotdir/${TEST FILE NAME}
     SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}${/}robotdir${/}
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/robotdir/
     SSH.File Should Exist  ${target}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
@@ -29,9 +29,9 @@ Put File To Relative Destination
     [Teardown]  Execute Command  rm -f ${target}
 
 Put File To Relative Destination With Intermediate Subdirectories
-    ${target} =  Set Variable  robotdir${/}anotherdir${/}${TEST FILE NAME}
+    ${target} =  Set Variable  robotdir/anotherdir/${TEST FILE NAME}
     SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  robotdir${/}anotherdir${/}
+    Put File  ${TEST FILE}  robotdir/anotherdir/
     SSH.File Should Exist  ${target}
     [Teardown]  Execute Command  rm -rf robotdir
 
@@ -75,23 +75,22 @@ Put File And Specify Remote Newlines
     [Teardown]  Remove Local Temp Dir And Remote File  ${target}
 
 Put File With Pattern In Source File Name
-    SSH.File Should Not Exist  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
-    SSH.File Should Not Exist  ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
-    Put File  ${TEXTFILES}${/}?est*.txt  ${REMOTE TEST ROOT}${/}
-    SSH.File Should Exist  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
-    SSH.File Should Exist  ${REMOTE TEST ROOT}${/}${TEST FILE 2 NAME}
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE 2 NAME}
+    Put File  ${LOCAL TEXTFILES}${/}?est*.txt  ${REMOTE TEST ROOT}/
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE 2 NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With Pattern In Source Directory Name
-    SSH.File Should Not Exist  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
-    Put File  ${TEST DATA}${/}text*es${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}${/}
-    SSH.File Should Exist  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Put File  ${LOCAL TEST DATA}${/}text*es${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Putting Multiple Source Files To Single File Fails
     Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.
-    ...                           Put File  ${TEXTFILES}${/}?est*.txt  invalid.txt
-
+    ...                           Put File  ${LOCAL TEXTFILES}${/}?est*.txt  invalid.txt
 
 *** Keywords ***
 Remove Local Temp Dir And Remote File

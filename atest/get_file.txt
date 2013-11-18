@@ -1,30 +1,30 @@
 *** Settings ***
 Force Tags      pybot   jybot
-Suite Setup     Login and Move Test Files
+Resource        resources/sftp.txt
+Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
 Test Teardown   Remove Directory  ${LOCAL TMPDIR}  yes
-Resource        resources/ssh_library_resources.txt
 Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Get File From Absolute Source
-    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
     OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
     [Teardown]  OS.Remove File  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
 
 Get File From Relative Source
-    SSH.Get File  ${TEST_ROOT_NAME}${/}${TEST FILE NAME}  ${TEST FILE NAME}
+    SSH.Get File  ${REMOTE TEST ROOT NAME}/${TEST FILE NAME}  ${TEST FILE NAME}
     OS.File Should Exist  ${TEST FILE NAME}
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File With Different Name
     ${new name} =  Set Variable  foo.txt
-    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${new name}
+    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${new name}
     OS.File Should Exist  ${new name}
     [Teardown]  OS.Remove File  ${new name}
 
 Get File With Non-ASCII Name
-    SSH.Get File  ${REMOTE TEST ROOT}${/}${FILE WITH NON-ASCII NAME}  foo.txt
+    SSH.Get File  ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}  foo.txt
     OS.File Should Exist  foo.txt
     [Teardown]  OS.Remove File  foo.txt
 
@@ -42,13 +42,13 @@ Getting Multiple Source Files To Single File Fails
     ...  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
 
 Get File To Curdir
-    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  .
+    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  .
     OS.File Should Exist  ${TEST_FILE_NAME}
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File When Destination Directory Does Not Exist
     ${target} =  Set Variable  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
-    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${target}
+    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${target}
     OS.File Should Exist  ${target}
     [Teardown]  OS.Remove File  ${target}
 
@@ -59,7 +59,7 @@ Get File From A Path Not Under Home Directory
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File To Absolute Destination
-    SSH.Get File  ${REMOTE TEST ROOT}${/}${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
+    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
     OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST_FILE_NAME}
     [Teardown]  OS.Remove Directory  ${LOCAL TMPDIR}  yes
 
