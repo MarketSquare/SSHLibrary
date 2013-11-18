@@ -6,8 +6,9 @@ Suite Teardown  Close All Connections
 
 *** Test Cases ***
 Put Directory To Existing Remote Path
+    [Setup]  SSH.Directory Should Not Exist  textfiles
     Put Directory  ${TEXTFILES}  .
-    Remote Directory Should Exist With Content  .
+    Remote Directory Should Exist With Content  .${/}textfiles
     [Teardown]  Execute Command  rm -rf .${/}textfiles
 
 Put Directory To Non-Existing Remote Path

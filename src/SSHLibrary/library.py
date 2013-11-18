@@ -1374,7 +1374,8 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        return self.current.file_exists(path)
+        if not self.current.file_exists(path):
+            raise AssertionError("File '%s' does not exist." % path)
 
     def file_should_not_exist(self, path):
         """Fails if the given `path` points to an existing file.
@@ -1387,7 +1388,8 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        return not self.current.file_exists(path)
+        if self.current.file_exists(path):
+            raise AssertionError("File '%s' exists." % path)
 
     def directory_should_exist(self, path):
         """Fails if the given `path` does not point to an existing directory.
@@ -1400,7 +1402,8 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        return self.current.dir_exists(path)
+        if not self.current.dir_exists(path):
+            raise AssertionError("Directory '%s' does not exist." % path)
 
     def directory_should_not_exist(self, path):
         """Fails if the given `path` points to an existing directory.
@@ -1413,7 +1416,8 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        return not self.current.dir_exists(path)
+        if self.current.dir_exists(path):
+            raise AssertionError("Directory '%s' exists." % path)
 
     def list_directory(self, path, pattern=None, absolute=False):
         """Returns and logs items in the remote `path`, optionally filtered with `pattern`.

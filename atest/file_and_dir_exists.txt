@@ -1,0 +1,60 @@
+*** Settings ***
+Force Tags      pybot   jybot
+Suite Setup     Login And Move Test Files
+Suite Teardown  Remove Test Files and Close Connections
+Resource        resources/ssh_library_resources.txt
+
+*** Test Cases ***
+Directory Should Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    SSH.Directory Should Exist  ${target}
+    Run Keyword And Expect Error  Directory '${target}' exists.
+    ...                           SSH.Directory Should Not Exist  ${target}
+
+Directory Should Not Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/not_exists
+    SSH.Directory Should Not Exist  ${target}
+    Run Keyword And Expect Error  Directory '${target}' does not exist.
+    ...                           SSH.Directory Should Exist  ${target}
+
+Directory Should Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}
+    SSH.Directory Should Exist  ${target}
+    Run Keyword And Expect Error  Directory '${target}' exists.
+    ...                           SSH.Directory Should Not Exist  ${target}
+
+Directory Should Not Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}/not_exists
+    SSH.Directory Should Not Exist  ${target}
+    Run Keyword And Expect Error  Directory '${target}' does not exist.
+    ...                           SSH.Directory Should Exist  ${target}
+
+Directory Should Exist Using Current Path
+    ${target} =  Set Variable  .
+    SSH.Directory Should Exist  ${target}
+    Run Keyword And Expect Error  Directory '${target}' exists.
+    ...                           SSH.Directory Should Not Exist  ${target}
+
+File Should Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    SSH.File Should Exist  ${target}
+    Run Keyword And Expect Error  File '${target}' exists.
+    ...                           SSH.File Should Not Exist  ${target}
+
+File Should Not Exist Using Absolute Path
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/not_exists
+    SSH.File Should Not Exist  ${target}
+    Run Keyword And Expect Error  File '${target}' does not exist.
+    ...                           SSH.File Should Exist  ${target}
+
+File Should Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}/${TEST FILE NAME}
+    SSH.File Should Exist  ${target}
+    Run Keyword And Expect Error  File '${target}' exists.
+    ...                           SSH.File Should Not Exist  ${target}
+
+File Should Not Exist Using Relative Path
+    ${target} =  Set Variable  ${TEST ROOT NAME}/not_exists
+    SSH.File Should Not Exist  ${target}
+    Run Keyword And Expect Error  File '${target}' does not exist.
+    ...                           SSH.File Should Exist  ${target}
