@@ -32,7 +32,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, encoding):
+                 width, height, path_separator, encoding):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -44,6 +44,7 @@ class _ClientConfiguration(Configuration):
             term_type=StringEntry(term_type),
             width=IntegerEntry(width),
             height=IntegerEntry(height),
+            path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding)
         )
 
@@ -55,10 +56,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 encoding='utf8'):
+                 path_separator='/', encoding='utf8'):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           encoding)
+                                           path_separator, encoding)
         self._sftp_client = None
         self._shell = None
         self._started_commands = []
@@ -308,8 +309,7 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
                                  % (expected, timeout, decoded_output))
 
-    def put_file(self, source, destination='.', mode='0744', newline='',
-                 path_separator='/'):
+    def put_file(self, source, destination='.', mode='0744', newline=''):
         """Put file(s) from localhost to remote host.
 
         :param source: Local file path. May be a simple pattern containing
@@ -320,34 +320,32 @@ class AbstractSSHClient(object):
             Unix file format string, e.g. '0600'
         :param newline: Newline character to be used in the remote file.
             Default is 'LF', i.e. the line feed character.
-        :param path_separator: The path separator on the remote machine.
-            Must be defined if the remote machine runs Windows.
         """
         return self.sftp_client.put_file(source, destination, mode, newline,
-                                         path_separator)
+                                         self.config.path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
-                      path_separator='/', recursive=False):
+                      recursive=False):
         return self.sftp_client.put_directory(source, destination, mode,
-                                              newline, path_separator,
+                                              newline,
+                                              self.config.path_separator,
                                               recursive)
 
-    def get_file(self, source, destination='.', path_separator='/'):
+    def get_file(self, source, destination='.'):
         """Get file(s) from the remote host to localhost.
 
         :param source: Remote file path. May be a simple pattern containing
             '*' and '?', in which case all matching files are tranferred
             :param destintation: Local path. If many files are transferred,
             must be a directory. Defaults to current working directory.
-        :param path_separator: The path separator on the remote machine.
-            Must be defined if the remote machine runs Windows.
         """
-        return self.sftp_client.get_file(source, destination, path_separator)
+        return self.sftp_client.get_file(source, destination,
+                                         self.config.path_separator)
 
-    def get_directory(self, source, destination='.', path_separator='/',
-                      recursive=False):
+    def get_directory(self, source, destination='.', recursive=False):
         return self.sftp_client.get_directory(source, destination,
-                                              path_separator, recursive)
+                                              self.config.path_separator,
+                                              recursive)
 
     def list_dir(self, path, pattern=None, absolute=False):
         items = self.sftp_client.list(path, pattern, absolute)

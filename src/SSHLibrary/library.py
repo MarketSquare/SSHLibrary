@@ -85,6 +85,33 @@ class SSHLibrary(object):
 
     == Configurable per connection ==
 
+    === Default prompt ===
+
+    Argument `prompt` defines the character sequence used by `Read Until Prompt`
+    and must be set before that keyword can be used.
+
+    If you know the prompt on the remote machine, it is recommended to set it
+    to ease reading output from the server after using `Write`. In addition to
+    that, `Login` and `Login With Public Key` can read the server output more
+    efficiently when the prompt is set.
+
+    === Default encoding ===
+
+    Argument `encoding` defines the
+    [http://docs.python.org/2/library/codecs.html#standard-encodings|
+    character encoding] of input and output sequences.
+    Starting fro SSHLibrary 1.2, the default value is `UTF-8`.
+
+    === Default path separator ===
+
+    Argument `path_separator` must be set to the one known by the operating
+    system on the remote machine. The path separator is used by keywords
+    `Get File`, `Put File`, `Get Directory` and `Put Directory` for joining
+    paths correctly on the remote host.
+
+    With Windows remote machines, this must be set as `\\\\`.
+    The default value is `/`, which is known by Unix-like operating systems.
+
     === Default timeout ===
 
     Argument `timeout` is used by `Read Until` variants. The default value is
@@ -102,27 +129,10 @@ class SSHLibrary(object):
     operating systems. With Windows remote machines, you need to set this to
     `CRLF` (`\\r\\n`).
 
-    === Default prompt ===
-
-    Argument `prompt` defines the character sequence used by `Read Until Prompt`
-    and must be set before that keyword can be used.
-
-    If you know the prompt on the remote machine, it is recommended to set it
-    to ease reading output from the server after using `Write`. In addition to
-    that, `Login` and `Login With Public Key` can read the server output more
-    efficiently when the prompt is set.
-
     === Default terminal settings ===
 
     Argument `term_type` defines the virtual terminal type, and arguments
     `width` and `height` can be used to control its  virtual size.
-
-    === Default encoding ===
-
-    Argument `encoding` defines the
-    [http://docs.python.org/2/library/codecs.html#standard-encodings|
-    character encoding] of input and output sequences.
-    Starting fro SSHLibrary 1.2, the default value is `UTF-8`.
 
     == Not configurable per connection ==
 
@@ -275,6 +285,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_TYPE = 'vt100'
     DEFAULT_TERM_WIDTH = 80
     DEFAULT_TERM_HEIGHT = 24
+    DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
 
     def __init__(self,
@@ -285,6 +296,7 @@ class SSHLibrary(object):
                  term_type=DEFAULT_TERM_TYPE,
                  width=DEFAULT_TERM_WIDTH,
                  height=DEFAULT_TERM_HEIGHT,
+                 path_separator=DEFAULT_PATH_SEPARATOR,
                  encoding=DEFAULT_ENCODING):
         """SSHLibrary allows some import time `configuration`.
 
@@ -303,25 +315,29 @@ class SSHLibrary(object):
         | Library | SSHLibrary | prompt=$ |
 
         Multiple settings are possible. In this example, the library is brought
-        into use with [#Default timeout|the timeout] of 10 seconds and
-        [#Default newline|newlines] used by Windows:
-        | Library | SSHLibrary | 10 seconds | CRLF |
+        into use with [#Default newline|newline] and [#Default path separator|
+        path_separator] known by Windows:
+        | Library | SSHLibrary | newline=CRLF | path_separator=\\\\ |
 
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
-        [#Default terminal settings|`height`] and
+        [#Default terminal settings|`height`],
+        [#Default path separator|`path separator`] and
         [#Default encoding|`encoding`]
         were added in SSHLibrary 1.2.
         """
         self._connections = ConnectionCache()
-        self._config = _DefaultConfiguration(timeout or self.DEFAULT_TIMEOUT,
-                                             newline or self.DEFAULT_NEWLINE,
-                                             prompt or self.DEFAULT_PROMPT,
-                                             loglevel or self.DEFAULT_LOGLEVEL,
-                                             term_type or self.DEFAULT_TERM_TYPE,
-                                             width or self.DEFAULT_TERM_WIDTH,
-                                             height or self.DEFAULT_TERM_HEIGHT,
-                                             encoding or self.DEFAULT_ENCODING)
+        self._config = _DefaultConfiguration(
+            timeout or self.DEFAULT_TIMEOUT,
+            newline or self.DEFAULT_NEWLINE,
+            prompt or self.DEFAULT_PROMPT,
+            loglevel or self.DEFAULT_LOGLEVEL,
+            term_type or self.DEFAULT_TERM_TYPE,
+            width or self.DEFAULT_TERM_WIDTH,
+            height or self.DEFAULT_TERM_HEIGHT,
+            path_separator or self.DEFAULT_PATH_SEPARATOR,
+            encoding or self.DEFAULT_ENCODING
+        )
 
     @property
     def current(self):
@@ -329,7 +345,8 @@ class SSHLibrary(object):
 
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
-                                  height=None, encoding=None):
+                                  height=None, path_separator=None,
+                                  encoding=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -341,9 +358,9 @@ class SSHLibrary(object):
         This example sets [#Default prompt|`prompt`] to `$`:
         | Set Default Configuration | prompt=$ |
 
-        This example sets [#Default newline|`newline`] and [#Default loglevel|
-        `loglevel`], but leaves the other settings intact:
-        | Set Default Configuration | newline=CRLF | loglevel=WARN |
+        This example sets [#Default newline|`newline`] and [#Default path
+        separator| `path_separator`] to the ones known by Windows:
+        | Set Default Configuration | newline=CRLF | path_separator=\\\\ |
 
         Sometimes you might want to use longer [#Default timeout|`timeout`]
         for all the subsequent connections without affecting the existing ones:
@@ -359,17 +376,19 @@ class SSHLibrary(object):
 
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
-        [#Default terminal settings|`height`] and
+        [#Default terminal settings|`height`],
+        [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`]
         were added in SSHLibrary 1.2.
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
-                            height=height, encoding=encoding)
+                            height=height, path_separator=path_separator,
+                            encoding=encoding)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 encoding=None):
+                                 path_separator=None, encoding=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than `None` are updated.
@@ -395,11 +414,14 @@ class SSHLibrary(object):
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
 
-        Argument [#Default encoding|`encoding`] was added in SSHLibrary 1.2.
+        Arguments [#Default path separator|`path_separator`] and
+        [#Default encoding|`encoding`]
+        were added in SSHLibrary 1.2.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
                                    width=width, height=height,
+                                   path_separator=path_separator,
                                    encoding=encoding)
 
     def enable_ssh_logging(self, logfile):
@@ -428,7 +450,7 @@ class SSHLibrary(object):
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, encoding=None):
+                        height=None, path_separator=None, encoding=None):
         """Opens a new SSH connection to the given `host` and `port`.
 
         The new connection is made active. Possible existing connections
@@ -475,7 +497,9 @@ class SSHLibrary(object):
         per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
 
-        Argument [#Default encoding|`encoding`] was added in SSHLibrary 1.2.
+        Arguments [#Default path separator|`path_separator`] and
+        [#Default encoding|`encoding`]
+        were added in SSHLibrary 1.2.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -483,9 +507,10 @@ class SSHLibrary(object):
         term_type = term_type or self._config.term_type
         width = width or self._config.width
         height = height or self._config.height
+        path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, encoding)
+                           term_type, width, height, path_separator, encoding)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -567,18 +592,19 @@ class SSHLibrary(object):
         connection is returned.
 
         This keyword returns an object that has the following attributes:
-        | = Name =  | = Type = | = Explanation = |
-        | index     | integer  | Number of the connection. Numbering starts from `1`. |
-        | host      | string   | Destination hostname. |
-        | alias     | string   | An optional alias given when creating the connection.  |
-        | port      | integer  | Destination port. |
-        | timeout   | string   | [#Default timeout|Timeout] length in textual representation. |
-        | newline   | string   | [#Default newline|The line break sequence] used by `Write` keyword. |
-        | prompt    | string   | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
-        | term_type | string   | Type of the [#Default terminal settings|virtual terminal]. |
-        | width     | integer  | Width of the [#Default terminal settings|virtual terminal]. |
-        | height    | integer  | Height of the [#Default terminal settings|virtual terminal]. |
-        | encoding  | string   | [#Default encoding|The encoding] used for inputs and outputs. |
+        | = Name =       | = Type = | = Explanation = |
+        | index          | integer  | Number of the connection. Numbering starts from `1`. |
+        | host           | string   | Destination hostname. |
+        | alias          | string   | An optional alias given when creating the connection.  |
+        | port           | integer  | Destination port. |
+        | timeout        | string   | [#Default timeout|Timeout] length in textual representation. |
+        | newline        | string   | [#Default newline|The line break sequence] used by `Write` keyword. |
+        | prompt         | string   | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
+        | term_type      | string   | Type of the [#Default terminal settings|virtual terminal]. |
+        | width          | integer  | Width of the [#Default terminal settings|virtual terminal]. |
+        | height         | integer  | Height of the [#Default terminal settings|virtual terminal]. |
+        | path_separator | string   | [#Default path separator|The path separator] used on the remote host. |
+        | encoding       | string   | [#Default encoding|The encoding] used for inputs and outputs. |
 
         If there is no connection, an object having `index` and `host` as `None`
         is returned, rest of its attributes having their values as configuration
@@ -1151,7 +1177,7 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.', path_separator='/'):
+    def get_file(self, source, destination='.'):
         """Downloads file(s) from the remote machine to the local machine.
 
         `source` is a path on the remote machine. Both absolute paths and
@@ -1162,10 +1188,6 @@ class SSHLibrary(object):
 
         `destination` is the target path on the local machine. Both absolute
         paths and paths relative to the current working directory are supported.
-
-        `path_separator` is the operating system path separator on the remote
-        machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data).
 
         Examples:
         | Get File | /var/log/auth.log | /tmp/                      |
@@ -1199,10 +1221,9 @@ class SSHLibrary(object):
         See also `Get Directory`.
         """
         return self._run_sftp_command(self.current.get_file, source,
-                                      destination, path_separator)
+                                      destination)
 
-    def get_directory(self, source, destination='.', path_separator='/',
-                      recursive=False):
+    def get_directory(self, source, destination='.', recursive=False):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
         `source` is a path on the remote machine. Both absolute paths and
@@ -1210,10 +1231,6 @@ class SSHLibrary(object):
 
         `destination` is the target path on the local machine.  Both absolute
         paths and paths relative to the current working directory are supported.
-
-        `path_separator` is the operating system path separator on the remote
-        machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data).
 
         `recursive` specifies, whether to recursively download all
         subdirectories inside `source`. Subdirectories are downloaded if
@@ -1224,7 +1241,6 @@ class SSHLibrary(object):
         | Get Directory | /var/logs      | /tmp/non/existing   |
         | Get Directory | /var/logs      |
         | Get Directory | /var/logs      | recursive=True      |
-        | Get Directory | /path/to/files | path_separator=\\\\ |
 
         The local `destination` is created as following:
 
@@ -1244,10 +1260,9 @@ class SSHLibrary(object):
         See also `Get File`.
         """
         return self._run_sftp_command(self.current.get_directory, source,
-                                      destination, path_separator, recursive)
+                                      destination, recursive)
 
-    def put_file(self, source, destination='.', mode='0744', newline='',
-                 path_separator='/'):
+    def put_file(self, source, destination='.', mode='0744', newline=''):
         """Uploads file(s) from the local machine to the remote machine.
 
         `source` is the path on the local machine. Both absolute paths and
@@ -1265,15 +1280,10 @@ class SSHLibrary(object):
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
 
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data).
-
         Examples:
         | Put File | /path/to/*.txt          |
         | Put File | /path/to/*.txt          | /home/groups/robot | mode=0770 |
         | Put File | /path/to/*.txt          | newline=CRLF       |
-        | Put File | /path/to/local_file.txt | remote_file.txt    | path_separator=\\\\ |
 
         The remote `destination` is created as following:
 
@@ -1283,28 +1293,25 @@ class SSHLibrary(object):
         2. If `destination` is an existing directory, `source` file is
            uploaded into it. Possible file with same name is overwritten.
 
-        3. If `destination` does not exist and it ends with `path_separator`,
-           it is considered a directory. The directory is then created and
-           `source` file uploaded into it. Possibly missing intermediate
-           directories are also created.
+        3. If `destination` does not exist and it ends with [#Default path
+           separator|the path separator], it is considered a directory.
+           The directory is then created and `source` file uploaded into it.
+           Possibly missing intermediate directories are also created.
 
-        4. If `destination` does not exist and it does not end with
-           `path_separator`, it is considered a file. If the path to the file
-           does not exist, it is created.
+        4. If `destination` does not exist and it does not end with [#Default
+           path separator|the path separator], it is considered a file.
+           If the path to the file does not exist, it is created.
 
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
-        Argument `path_separator` was added in SSHLibrary 1.1.
-
         See also `Put Directory`.
         """
         return self._run_sftp_command(self.current.put_file, source,
-                                      destination, mode, newline,
-                                      path_separator)
+                                      destination, mode, newline)
 
-    def put_directory(self, source, destination='.', mode='0744',
-                      newline='', path_separator='/', recursive=False):
+    def put_directory(self, source, destination='.', mode='0744', newline='',
+                      recursive=False):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
         `source` is the path on the local machine. Both absolute paths and
@@ -1319,10 +1326,6 @@ class SSHLibrary(object):
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
 
-        `path_separator` is the path separator character of the operating system
-        on the remote machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data).
-
         `recursive` specifies, whether to recursively upload all
         subdirectories inside `source`. Subdirectories are uploaded if the
         argument value evaluates to true.
@@ -1334,7 +1337,6 @@ class SSHLibrary(object):
         | Put Directory | /var/logs | recursive=True     |
         | Put Directory | /var/logs | /home/groups/robot | mode=0770 |
         | Put Directory | /var/logs | newline=CRLF       |
-        | Put Directory | /var/logs | /path/to/the/files | path_separator=\\\\ |
 
         The remote `destination` is created as following:
 
@@ -1352,8 +1354,7 @@ class SSHLibrary(object):
         See also `Put File`.
         """
         return self._run_sftp_command(self.current.put_directory, source,
-                                      destination, mode, newline,
-                                      path_separator, recursive)
+                                      destination, mode, newline, recursive)
 
     def _run_sftp_command(self, command, *args):
         try:
@@ -1506,7 +1507,7 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, encoding):
+                 height, path_separator, encoding):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1515,5 +1516,6 @@ class _DefaultConfiguration(Configuration):
             term_type=StringEntry(term_type),
             width=IntegerEntry(width),
             height=IntegerEntry(height),
+            path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding)
         )
