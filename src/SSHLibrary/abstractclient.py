@@ -295,19 +295,15 @@ class AbstractSSHClient(object):
                                  % (expected, timeout))
 
     def _read_until(self, matcher, expected, timeout=None):
-        server_output = ''
+        output = ''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         max_time = time.time() + timeout.value
         while time.time() < max_time:
-            try:
-                server_output += self.shell.read_byte()
-                decoded_output = self._decode(server_output)
-                if matcher(decoded_output):
-                    return decoded_output
-            except UnicodeDecodeError:
-                pass
+            output += self.read_char()
+            if matcher(output):
+                    return output
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
-                                 % (expected, timeout, decoded_output))
+                                 % (expected, timeout, output))
 
     def put_file(self, source, destination='.', mode='0744', newline='',
                  path_separator=''):
