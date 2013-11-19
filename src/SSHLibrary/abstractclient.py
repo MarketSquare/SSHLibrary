@@ -14,12 +14,14 @@
 
 from __future__ import with_statement
 from fnmatch import fnmatchcase
-from robot.utils import unic
+
 import os
 import re
 import stat
 import time
 import glob
+
+from robot.utils import unic
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
