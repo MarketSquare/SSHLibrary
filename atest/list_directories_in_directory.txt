@@ -7,34 +7,34 @@ Library         Collections
 
 *** Test Cases ***
 List Directories Using Absolute Path
-    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${SUBDIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Relative Path
-    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${SUBDIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Current Directory
-    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${SUBDIRECTORY NAME}
     ${listing} =  List Directories In Directory  .
     Should Contain  ${listing}  ${REMOTE TEST ROOT NAME}
 
 List Directories Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
-    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${SUBDIRECTORY NAME}
     ${listing} =  List Directories In Directory  symlink
     Lists Should Be Equal  ${listing}  ${expected}
     [Teardown]  Execute Command  rm -f symlink
 
 List Directories With Absolute Paths Using Absolute Path
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Relative
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
     ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
@@ -44,13 +44,13 @@ List Directories With Absolute Paths Using Current Directory
     Should Contain  ${listing}  ${REMOTE TEST ROOT}
 
 List Directories Using Pattern
-    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=emp*
+    ${expected} =  Create List  ${SUBDIRECTORY NAME}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=sub*
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Pattern
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=emp*
+    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=sub*
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 

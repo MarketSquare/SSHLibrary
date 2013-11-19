@@ -14,8 +14,8 @@ ${FILE WITH NON-ASCII NAME}      aaääöö.txt
 ${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${FILE WITH NON-ASCII NAME}
 ${FILE WITH SPECIAL CHARS NAME}  special%2Fchars.txt
 ${FILE WITH SPECIAL CHARS}       ${LOCAL TEXTFILES}${/}${FILE WITH SPECIAL CHARS NAME}
-${EMPTY DIRECTORY NAME}          empty
-${EMPTY FILE NAME}               empty.txt
+${SUBDIRECTORY NAME}             subdir
+${SUBDIRECTORY FILE NAME}        foobar.txt
 
 *** Keywords ***
 Login And Upload Test Files

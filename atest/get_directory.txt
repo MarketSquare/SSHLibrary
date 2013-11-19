@@ -48,7 +48,7 @@ Directory Should Exist With Content
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
-    OS.Directory Should Not Exist  ${destination}${/}${EMPTY DIRECTORY NAME}
+    OS.Directory Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
 
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
@@ -57,4 +57,4 @@ Directory Should Exist Including Subdirectories
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
-    OS.File Should Exist  ${destination}${/}${EMPTY DIRECTORY NAME}${/}${EMPTY FILE NAME}
+    OS.File Should Exist  ${destination}${/}${SUBDIRECTORY NAME}${/}${SUBDIRECTORY FILE NAME}
