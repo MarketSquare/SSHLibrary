@@ -536,10 +536,9 @@ class AbstractSFTPClient(object):
         self._verify_local_dir_exists(source)
         destination = self._remove_ending_path_separator(path_separator, destination)
         if self.is_dir(destination):
-            destination = destination + path_separator +\
-                                 source.rsplit(os.path.sep)[-1]
+            destination = destination + path_separator + source.rsplit(os.path.sep)[-1]
         return self._put_directory(source, destination, mode, newline,
-                      path_separator, recursive)
+                                   path_separator, recursive)
 
     def _put_directory(self, source, destination, mode, newline,
                       path_separator, recursive):
