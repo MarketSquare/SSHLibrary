@@ -17,7 +17,6 @@ List Directories Using Relative Path
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Current Directory
-    ${expected} =  Create List  ${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  .
     Should Contain  ${listing}  ${REMOTE TEST ROOT NAME}
 
@@ -29,15 +28,15 @@ List Directories Using Symlink As Path
     [Teardown]  Execute Command  rm -f symlink
 
 List Directories With Absolute Paths Using Absolute Path
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}/${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Relative
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}/${EMPTY DIRECTORY NAME}
     ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
-    Lists Should Be Equal  ${listing}  ${EXPECTED}
+    Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Current Directory
     ${listing} =  List Directories In Directory  .  absolute=True
@@ -49,7 +48,7 @@ List Directories Using Pattern
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Pattern
-    ${expected} =  Create List  ${REMOTE TEST ROOT}${/}${EMPTY DIRECTORY NAME}
+    ${expected} =  Create List  ${REMOTE TEST ROOT}/${EMPTY DIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=emp*
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
