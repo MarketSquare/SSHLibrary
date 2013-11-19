@@ -12,6 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+try:
+    from robot.api import logger
+except ImportError:
+    logger = None
 from robot.utils import ConnectionCache
 
 from .abstractclient import SSHClientException
@@ -684,7 +688,11 @@ class SSHLibrary(object):
     def _log(self, msg, level=None):
         level = self._active_loglevel(level)
         msg = msg.strip()
-        if msg:
+        if not msg:
+            return
+        if logger:
+            logger.write(msg, level)
+        else:
             print '*%s* %s' % (level, msg)
 
     def _active_loglevel(self, level):
