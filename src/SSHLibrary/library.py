@@ -109,12 +109,21 @@ class SSHLibrary(object):
     === Default path separator ===
 
     Argument `path_separator` must be set to the one known by the operating
-    system on the remote machine. The path separator is used by keywords
-    `Get File`, `Put File`, `Get Directory` and `Put Directory` for joining
-    paths correctly on the remote host.
+    system and the SSH server on the remote machine. The path separator is
+    used by keywords `Get File`, `Put File`, `Get Directory` and
+    `Put Directory` for joining paths correctly on the remote host.
 
-    With Windows remote machines, this must be set as `\\\\`.
-    The default value is `/`, which is known by Unix-like operating systems.
+    The default path separator is forward slash (`/`) which works on
+    Unix-like machines. On Windows the path separator to use depends on
+    the SSH server. Some servers use forward slash and others backslash,
+    and users need to configure the `path_separator` accordingly. Notice
+    that using a backslash in Robot Framework test data requires doubling
+    it like `\\\\`.
+
+    Configuring the library and connection specific path separator is a new
+    feature in SSHLibrary 1.2. Prior to it `Get File` and `Put File` had
+    their own `path_separator` arguments. These keyword specific arguments
+    were deprecated in 1.2 and will be removed in the future.
 
     === Default timeout ===
 
@@ -1214,10 +1223,7 @@ class SSHLibrary(object):
         `destination` is the target path on the local machine. Both absolute
         paths and paths relative to the current working directory are supported.
 
-        `path_separator` is the operating system path separator on the remote
-        machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data).
-        The argument was deprecated is SSHLibrary 1.2, please use [#Default
+        `path_separator` is *deprecated* in SSHLibrary 1.2. Use [#Default
         path separator|the library or the connection specific setting] instead.
 
         Examples:
@@ -1321,10 +1327,7 @@ class SSHLibrary(object):
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
 
-        `path_separator` is the operating system path separator on the remote
-        machine. With Windows remote machines, `path_separator`
-        must be set as `\\\\` (an escaped backslash in the test data).
-        The argument was deprecated is SSHLibrary 1.2, please use [#Default
+        `path_separator` is *deprecated* in SSHLibrary 1.2. Use [#Default
         path separator|the library or the connection specific setting] instead.
 
         Examples:
