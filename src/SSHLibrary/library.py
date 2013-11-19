@@ -104,7 +104,7 @@ class SSHLibrary(object):
     Argument `encoding` defines the
     [http://docs.python.org/2/library/codecs.html#standard-encodings|
     character encoding] of input and output sequences.
-    Starting fro SSHLibrary 1.2, the default value is `UTF-8`.
+    Starting from SSHLibrary 1.2, the default value is `UTF-8`.
 
     === Default path separator ===
 
