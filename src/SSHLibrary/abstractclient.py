@@ -534,28 +534,25 @@ class AbstractSFTPClient(object):
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
         self._verify_local_dir_exists(source)
-        destination = self._remove_ending_path_separator(path_separator,
-                                                         destination)
+        destination = self._remove_ending_path_separator(path_separator, destination)
+        if self.is_dir(destination):
+            destination = destination + path_separator +\
+                                 source.rsplit(os.path.sep)[-1]
+        return self._put_directory(source, destination, mode, newline,
+                      path_separator, recursive)
+
+    def _put_directory(self, source, destination, mode, newline,
+                      path_separator, recursive):
         files = []
-        parent = os.path.basename(os.path.abspath(source))
-        remote_destination_exists = self.is_dir(destination)
-        os.chdir(os.path.dirname(source))
-        for subdirectory, _, filenames in os.walk(parent):
-            for filename in filenames:
-                local_path = os.path.join(subdirectory, filename)
-                if destination.endswith('.'):
-                    remote_path = path_separator.join([subdirectory, filename])
-                else:
-                    remote_path = path_separator.join([destination,
-                                                       subdirectory,
-                                                       filename])
-                    if not remote_destination_exists:
-                        remote_path = remote_path.replace(parent +
-                                                          path_separator, '')
+        for item in os.listdir(source):
+            local_path = os.path.join(source, item)
+            remote_path = destination + path_separator + item
+            if os.path.isfile(local_path):
                 files += self.put_file(local_path, remote_path, mode, newline,
-                                     path_separator)
-            if not recursive:
-                break
+                                       path_separator)
+            elif recursive and os.path.isdir(local_path):
+                files += self._put_directory(local_path, remote_path, mode,
+                                            newline, path_separator, recursive)
         return files
 
     def _verify_local_dir_exists(self, path):
