@@ -617,7 +617,7 @@ class AbstractSFTPClient(object):
         if path.startswith('/'):
             curdir = '/'
         else:
-            curdir = self._client._absolute_path('.')
+            curdir = self._absolute_path('.')
         for dirname in path.split('/'):
             if dirname:
                 curdir = '%s/%s' % (curdir, dirname)
