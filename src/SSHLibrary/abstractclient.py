@@ -543,15 +543,20 @@ class AbstractSFTPClient(object):
     def _put_directory(self, source, destination, mode, newline,
                       path_separator, recursive):
         files = []
-        for item in os.listdir(source):
-            local_path = os.path.join(source, item)
-            remote_path = destination + path_separator + item
-            if os.path.isfile(local_path):
-                files += self.put_file(local_path, remote_path, mode, newline,
-                                       path_separator)
-            elif recursive and os.path.isdir(local_path):
-                files += self._put_directory(local_path, remote_path, mode,
-                                            newline, path_separator, recursive)
+        items = os.listdir(source)
+        if not items:
+            self._create_missing_remote_path(destination)
+            files += [(source, destination)]
+        else:
+            for item in items:
+                local_path = os.path.join(source, item)
+                remote_path = destination + path_separator + item
+                if os.path.isfile(local_path):
+                    files += self.put_file(local_path, remote_path, mode, newline,
+                                           path_separator)
+                elif recursive and os.path.isdir(local_path):
+                    files += self._put_directory(local_path, remote_path, mode,
+                                                newline, path_separator, recursive)
         return files
 
     def _verify_local_dir_exists(self, path):

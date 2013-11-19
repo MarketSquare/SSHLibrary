@@ -3,6 +3,7 @@ Force Tags      pybot   jybot
 Resource        resources/sftp.txt
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
+Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Put Directory To Existing Remote Path
@@ -28,6 +29,13 @@ Put Directory Including Subdirectories To Non-Existing Remote Path
     Remote Directory Should Exist With Subdirectories  another/dir/path
     [Teardown]  Execute Command  rm -rf another
 
+Put Directory Including Empty Subdirectories
+    [Setup]  OS.Create Directory  ${LOCAL TEXTFILES}${/}empty
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True
+    SSH.Directory Should Exist  textfiles/empty
+    Remote Directory Should Exist With Subdirectories  textfiles
+    [Teardown]  Remove Local Empty Directory And Remote Files
+
 Put Directory Using Relative Source
     [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
     Put Directory  ${CURDIR}${/}testdata${/}textfiles  ${REMOTE TEST ROOT}
@@ -39,6 +47,10 @@ Put Directory Should Fail When Source Does Not Exists
     ...                           Put Directory  non-existing
 
 *** Keywords ***
+Remove Local Empty Directory And Remote Files
+    OS.Remove Directory  ${LOCAL TEXTFILES}${/}empty
+    Execute Command  rm -rf ./textfiles
+
 Remote Directory Should Exist With Content
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}/${TEST FILE NAME}
