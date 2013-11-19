@@ -1055,7 +1055,7 @@ class SSHLibrary(object):
         output again. This wait-read cycle is repeated as long as further reads
         return more output or the [#Default timeout|timeout] expires.
         `delay` must be given in Robot Framework's time format (e.g. `5`,
-        `4.5s` `3 minutes`, `2 min 3 sec`) that is explained in detail in
+        `4.5s`, `3 minutes`, `2 min 3 sec`) that is explained in detail in
         the User Guide.
 
         This keyword is most useful for reading everything from
