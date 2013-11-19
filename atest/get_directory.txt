@@ -30,6 +30,14 @@ Get Directory Including Subdirectories To Non-Existing Local Path
     Directory Should Exist Including Subdirectories  my${/}own${/}tmpdir
     [Teardown]  Remove Directory  my  recursive=True
 
+Get Directory Including Empty Subdirectories
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Execute Command  mkdir ${REMOTE TEST ROOT}/empty
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
+    OS.Directory Should Exist  ${LOCAL TMPDIR}/empty
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
 Get Directory Using Relative Source
     [Setup]  OS.Directory Should Not Exist  my
     Get Directory  ${REMOTE TEST ROOT NAME}  my

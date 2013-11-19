@@ -472,14 +472,19 @@ class AbstractSFTPClient(object):
         source = self._remove_ending_path_separator(path_separator, source)
         self._verify_remote_dir_exists(source)
         files = []
-        for child in self.list(source):
-            remote = source + path_separator + child
-            local = os.path.join(destination, child)
-            if self.is_file(remote):
-                files += self.get_file(remote, local)
-            elif recursive:
-                files += self.get_directory(remote, local, path_separator,
-                                            recursive)
+        items = self.list(source)
+        if items:
+            for item in items:
+                remote = source + path_separator + item
+                local = os.path.join(destination, item)
+                if self.is_file(remote):
+                    files += self.get_file(remote, local)
+                elif recursive:
+                    files += self.get_directory(remote, local, path_separator,
+                                                recursive)
+        else:
+            os.mkdir(destination)
+            files.append((source, destination))
         return files
 
     def _remove_ending_path_separator(self, path_separator, source):
@@ -542,10 +547,7 @@ class AbstractSFTPClient(object):
                       path_separator, recursive):
         files = []
         items = os.listdir(source)
-        if not items:
-            self._create_missing_remote_path(destination)
-            files += [(source, destination)]
-        else:
+        if items:
             for item in items:
                 local_path = os.path.join(source, item)
                 remote_path = destination + path_separator + item
@@ -555,6 +557,9 @@ class AbstractSFTPClient(object):
                 elif recursive and os.path.isdir(local_path):
                     files += self._put_directory(local_path, remote_path, mode,
                                                 newline, path_separator, recursive)
+        else:
+            self._create_missing_remote_path(destination)
+            files.append((source, destination))
         return files
 
     def _verify_local_dir_exists(self, path):
