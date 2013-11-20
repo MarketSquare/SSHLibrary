@@ -44,12 +44,12 @@ List Directories With Absolute Paths Using Current Directory
 
 List Directories Using Pattern
     ${expected} =  Create List  ${SUBDIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=sub*
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=aaä*
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Pattern
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=sub*
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=aaä*
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 

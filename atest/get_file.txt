@@ -24,7 +24,7 @@ Get File With Different Name
     [Teardown]  OS.Remove File  ${new name}
 
 Get File With Non-ASCII Name
-    SSH.Get File  ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}  foo.txt
+    SSH.Get File  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  foo.txt
     OS.File Should Exist  foo.txt
     [Teardown]  OS.Remove File  foo.txt
 

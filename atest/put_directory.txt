@@ -55,16 +55,14 @@ Remote Directory Should Exist With Content
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}/${TEST FILE NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH NEWLINES NAME}
-    SSH.File Should Exist  ${destination}/${FILE WITH NON-ASCII NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH SPECIAL CHARS NAME}
-    SSH.File Should Not Exist  ${destination}/${SUBDIRECTORY FILE NAME}
+    SSH.File Should Not Exist  ${destination}/${FILE WITH NON-ASCII NAME}
     SSH.Directory Should Not Exist  ${destination}/${SUBDIRECTORY NAME}
 
 Remote Directory Should Exist With Subdirectories
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}/${TEST FILE NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH NEWLINES NAME}
-    SSH.File Should Exist  ${destination}/${FILE WITH NON-ASCII NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH SPECIAL CHARS NAME}
-    SSH.File Should Not Exist  ${destination}/${SUBDIRECTORY FILE NAME}
-    SSH.File Should Exist  ${destination}/${SUBDIRECTORY NAME}/${SUBDIRECTORY FILE NAME}
+    SSH.File Should Not Exist  ${destination}/${FILE WITH NON-ASCII NAME}
+    SSH.File Should Exist  ${destination}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}

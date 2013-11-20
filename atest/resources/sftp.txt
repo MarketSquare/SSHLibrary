@@ -4,16 +4,15 @@ Resource    common.txt
 *** Variables ***
 ${LOCAL TMPDIR}                  ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir
 ${LOCAL TEXTFILES}               ${LOCAL TESTDATA}${/}textfiles
+${SUBDIRECTORY NAME}             aaääöö
 ${FILE WITH NEWLINES NAME}       Test_newlines.txt
 ${FILE WITH NEWLINES}            ${LOCAL TEXTFILES}${/}${FILE WITH NEWLINES NAME}
 ${TEST FILE NAME}                test_file.txt
 ${TEST FILE}                     ${LOCAL TEXTFILES}${/}${TEST FILE NAME}
 ${FILE WITH NON-ASCII NAME}      aaääöö.txt
-${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${FILE WITH NON-ASCII NAME}
+${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
 ${FILE WITH SPECIAL CHARS NAME}  special%2Fchars.txt
 ${FILE WITH SPECIAL CHARS}       ${LOCAL TEXTFILES}${/}${FILE WITH SPECIAL CHARS NAME}
-${SUBDIRECTORY NAME}             subdir
-${SUBDIRECTORY FILE NAME}        foobar.txt
 
 *** Keywords ***
 Login And Upload Test Files
