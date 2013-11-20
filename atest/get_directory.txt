@@ -52,7 +52,6 @@ Get Directory Should Fail When Source Does Not Exists
 Directory Should Exist With Content
     [Arguments]  ${destination}
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
-    OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
@@ -61,7 +60,6 @@ Directory Should Exist With Content
 Directory Should Exist Including Subdirectories
     [Arguments]  ${destination}
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
-    OS.File Should Exist  ${destination}${/}${TEST FILE 2 NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NON-ASCII NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}

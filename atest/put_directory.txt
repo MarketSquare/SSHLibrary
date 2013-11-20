@@ -54,7 +54,6 @@ Remove Local Empty Directory And Remote Files
 Remote Directory Should Exist With Content
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}/${TEST FILE NAME}
-    SSH.File Should Exist  ${destination}/${TEST FILE 2 NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH NEWLINES NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH NON-ASCII NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH SPECIAL CHARS NAME}
@@ -64,7 +63,6 @@ Remote Directory Should Exist With Content
 Remote Directory Should Exist With Subdirectories
     [Arguments]  ${destination}
     SSH.File Should Exist  ${destination}/${TEST FILE NAME}
-    SSH.File Should Exist  ${destination}/${TEST FILE 2 NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH NEWLINES NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH NON-ASCII NAME}
     SSH.File Should Exist  ${destination}/${FILE WITH SPECIAL CHARS NAME}

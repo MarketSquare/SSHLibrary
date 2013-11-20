@@ -7,9 +7,8 @@ Library         Collections
 
 *** Test Cases ***
 List Content Using Absolute Path
-    ${expected} =  Create List  ${TEST FILE 2 NAME}
+    ${expected} =  Create List  ${FILE WITH NEWLINES NAME}
     ...                         ${FILE WITH NON-ASCII NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${SUBDIRECTORY NAME}
     ...                         ${TEST FILE NAME}
@@ -17,9 +16,8 @@ List Content Using Absolute Path
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Content Using Relative Path
-    ${expected} =  Create List  ${TEST FILE 2 NAME}
+    ${expected} =  Create List  ${FILE WITH NEWLINES NAME}
     ...                         ${FILE WITH NON-ASCII NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${SUBDIRECTORY NAME}
     ...                         ${TEST FILE NAME}
@@ -32,9 +30,8 @@ List Content Using Current Directory
 
 List Content Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
-    ${expected} =  Create List  ${TEST FILE 2 NAME}
+    ${expected} =  Create List  ${FILE WITH NEWLINES NAME}
     ...                         ${FILE WITH NON-ASCII NAME}
-    ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${SUBDIRECTORY NAME}
     ...                         ${TEST FILE NAME}
@@ -44,9 +41,8 @@ List Content Using Symlink As Path
 
 List Content With Absolute Paths Using Absolute Path
     ${expected} =  Create List
-    ...                 ${REMOTE TEST ROOT}/${TEST FILE 2 NAME}
-    ...                 ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -55,9 +51,8 @@ List Content With Absolute Paths Using Absolute Path
 
 List Content With Absolute Paths Using Relative
     ${expected} =  Create List
-    ...                 ${REMOTE TEST ROOT}/${TEST FILE 2 NAME}
-    ...                 ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -75,7 +70,7 @@ List Content Using Pattern
 
 List Content With Absolute Paths Using Pattern
     ${expected} =  Create List
-    ...                 ${REMOTE TEST ROOT}/${TEST FILE 2 NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT}  pattern=?est*  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
