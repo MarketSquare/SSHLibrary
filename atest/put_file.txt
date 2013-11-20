@@ -50,7 +50,7 @@ Put File With Non-ASCII Characters In Filename
     [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
 
 Put File With Special Characters In Filename
-    [Documentation]    http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
+    [Documentation]  http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
     ${target} =  Set Variable  ${FILE WITH SPECIAL CHARS NAME}
     SSH.File Should Not Exist  ${target}
     Put File  ${FILE WITH SPECIAL CHARS}  ${target}
