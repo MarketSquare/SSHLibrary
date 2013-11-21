@@ -44,10 +44,10 @@ class JavaSSHClient(AbstractSSHClient):
         if not self.client.authenticateWithPassword(username, password):
             raise SSHClientException
 
-    def _login_with_public_key(self, username, keyfile, password):
+    def _login_with_public_key(self, username, key_file, password):
         try:
             success = self.client.authenticateWithPublicKey(username,
-                                                            File(keyfile),
+                                                            File(key_file),
                                                             password)
             if not success:
                 raise SSHClientException
@@ -57,7 +57,8 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
-        cmd.run_in(self.client.openSession())
+        new_session = self.client.openSession()
+        cmd.run_in(new_session)
         return cmd
 
     def _create_sftp_client(self):
@@ -112,43 +113,42 @@ class SFTPClient(AbstractSFTPClient):
         attributes = self._client.stat(path)
         return SFTPFileInfo('', attributes.permissions)
 
-    def _create_remote_file(self, dest, mode):
-        remote_file = self._client.createFile(dest)
+    def _create_remote_file(self, destination, mode):
+        remote_file = self._client.createFile(destination)
         try:
-            tempstats = self._client.fstat(remote_file)
-            tempstats.permissions = mode
-            self._client.fsetstat(remote_file, tempstats)
+            file_stat = self._client.fstat(remote_file)
+            file_stat.permissions = mode
+            self._client.fsetstat(remote_file, file_stat)
         except SFTPException:
             pass
         return remote_file
 
-    def _write_to_remote_file(self, remotefile, data, position):
-        self._client.write(remotefile, position, data, 0, len(data))
+    def _write_to_remote_file(self, remote_file, data, position):
+        self._client.write(remote_file, position, data, 0, len(data))
 
-    def _close_remote_file(self, remotefile):
-        self._client.closeFile(remotefile)
+    def _close_remote_file(self, remote_file):
+        self._client.closeFile(remote_file)
 
-    def _get_file(self, remotepath, localpath):
-        localfile = FileOutputStream(localpath)
-        tempstats = self._client.stat(remotepath)
-        remotefilesize = tempstats.size
-        remotefile = self._client.openFileRO(remotepath)
-        size = 0
-        arraysize = 4096
-        data = jarray.zeros(arraysize, 'b')
+    def _get_file(self, remote_path, local_path):
+        local_file = FileOutputStream(local_path)
+        remote_file_size = self._client.stat(remote_path).size
+        remote_file = self._client.openFileRO(remote_path)
+        array_size_bytes = 4096
+        data = jarray.zeros(array_size_bytes, 'b')
+        offset = 0
         while True:
-            moredata = self._client.read(remotefile, size, data, 0,
-                                             arraysize)
-            datalen = len(data)
-            if moredata == -1:
+            read_bytes = self._client.read(remote_file, offset, data, 0,
+                                           array_size_bytes)
+            data_length = len(data)
+            if read_bytes == -1:
                 break
-            if remotefilesize - size < arraysize:
-                datalen = remotefilesize - size
-            localfile.write(data, 0, datalen)
-            size += datalen
-        self._client.closeFile(remotefile)
-        localfile.flush()
-        localfile.close()
+            if remote_file_size - offset < array_size_bytes:
+                data_length = remote_file_size - offset
+            local_file.write(data, 0, data_length)
+            offset += data_length
+        self._client.closeFile(remote_file)
+        local_file.flush()
+        local_file.close()
 
     def _absolute_path(self, path):
         return self._client.canonicalPath(path)

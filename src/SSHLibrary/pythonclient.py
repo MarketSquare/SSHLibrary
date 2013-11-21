@@ -66,16 +66,17 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _login_with_public_key(self, username, keyfile, password):
+    def _login_with_public_key(self, username, key_file, password):
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, key_filename=keyfile)
+                                password, key_filename=key_file)
         except paramiko.AuthenticationException:
             raise SSHClientException
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
-        cmd.run_in(self.client.get_transport().open_session())
+        new_session = self.client.get_transport().open_session()
+        cmd.run_in(new_session)
         return cmd
 
     def _create_sftp_client(self):

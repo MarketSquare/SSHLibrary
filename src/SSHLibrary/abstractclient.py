@@ -511,16 +511,16 @@ class AbstractSFTPClient(object):
         return [filename for filename in
                 self.list_files(path, pattern, absolute=True)]
 
-    def _get_get_file_destinations(self, sourcefiles, destination):
+    def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
-        if not target_is_dir and len(sourcefiles) > 1:
+        if not target_is_dir and len(source_files) > 1:
             raise SSHClientException('Cannot copy multiple source files to one '
                                      'destination file.')
         destination = os.path.abspath(destination.replace('/', os.sep))
         self._create_missing_local_dirs(destination, target_is_dir)
         if target_is_dir:
             return [os.path.join(destination, os.path.basename(name))
-                    for name in sourcefiles]
+                    for name in source_files]
         return [destination]
 
     def _create_missing_local_dirs(self, destination, target_is_dir):
@@ -535,9 +535,11 @@ class AbstractSFTPClient(object):
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
         self._verify_local_dir_exists(source)
-        destination = self._remove_ending_path_separator(path_separator, destination)
+        destination = self._remove_ending_path_separator(path_separator,
+                                                         destination)
         if self.is_dir(destination):
-            destination = destination + path_separator + source.rsplit(os.path.sep)[-1]
+            destination = destination + path_separator +\
+                          source.rsplit(os.path.sep)[-1]
         return self._put_directory(source, destination, mode, newline,
                                    path_separator, recursive)
 
@@ -550,11 +552,12 @@ class AbstractSFTPClient(object):
                 local_path = os.path.join(source, item)
                 remote_path = destination + path_separator + item
                 if os.path.isfile(local_path):
-                    files += self.put_file(local_path, remote_path, mode, newline,
-                                           path_separator)
+                    files += self.put_file(local_path, remote_path, mode,
+                                           newline, path_separator)
                 elif recursive and os.path.isdir(local_path):
                     files += self._put_directory(local_path, remote_path, mode,
-                                                newline, path_separator, recursive)
+                                                newline, path_separator,
+                                                recursive)
         else:
             self._create_missing_remote_path(destination)
             files.append((source, destination))
@@ -568,12 +571,12 @@ class AbstractSFTPClient(object):
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         mode = int(mode, 8)
         newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
-        localfiles = self._get_put_file_sources(sources)
-        remotefiles, remotedir = self._get_put_file_destinations(localfiles,
-                                                                 destination,
-                                                                 path_separator)
-        self._create_missing_remote_path(remotedir)
-        files = zip(localfiles, remotefiles)
+        local_files = self._get_put_file_sources(sources)
+        remote_files, remote_dir = self._get_put_file_destinations(local_files,
+                                                                   destination,
+                                                                   path_separator)
+        self._create_missing_remote_path(remote_dir)
+        files = zip(local_files, remote_files)
         for src, dst in files:
             self._put_file(src, dst, mode, newline)
         return files
@@ -586,44 +589,45 @@ class AbstractSFTPClient(object):
             raise SSHClientException(msg)
         return sources
 
-    def _get_put_file_destinations(self, sources, dest, path_separator):
-        dest = dest.split(':')[-1].replace('\\', '/')
-        if dest == '.':
-            dest = self._homedir + '/'
-        if len(sources) > 1 and dest[-1] != '/':
+    def _get_put_file_destinations(self, sources, destination, path_separator):
+        destination = destination.split(':')[-1].replace('\\', '/')
+        if destination == '.':
+            destination = self._homedir + '/'
+        if len(sources) > 1 and destination[-1] != '/':
             raise ValueError('It is not possible to copy multiple source '
                              'files to one destination file.')
-        dirpath, filename = self._parse_path_elements(dest, path_separator)
+        dir_path, filename = self._parse_path_elements(destination,
+                                                       path_separator)
         if filename:
-            files = [path_separator.join([dirpath, filename])]
+            files = [path_separator.join([dir_path, filename])]
         else:
-            files = [path_separator.join([dirpath, os.path.basename(path)])
+            files = [path_separator.join([dir_path, os.path.basename(path)])
                      for path in sources]
-        return files, dirpath
+        return files, dir_path
 
-    def _parse_path_elements(self, dest, path_separator):
+    def _parse_path_elements(self, destination, path_separator):
         def _isabs(path):
-            if dest.startswith(path_separator):
+            if destination.startswith(path_separator):
                 return True
             if path_separator == '\\' and path[1:3] == ':\\':
                 return True
             return False
-        if not _isabs(dest):
-            dest = path_separator.join([self._homedir, dest])
-        return dest.rsplit(path_separator, 1)
+        if not _isabs(destination):
+            destination = path_separator.join([self._homedir, destination])
+        return destination.rsplit(path_separator, 1)
 
     def _create_missing_remote_path(self, path):
         if path.startswith('/'):
-            curdir = '/'
+            current_dir = '/'
         else:
-            curdir = self._absolute_path('.')
-        for dirname in path.split('/'):
-            if dirname:
-                curdir = '%s/%s' % (curdir, dirname)
+            current_dir = self._absolute_path('.')
+        for dir_name in path.split('/'):
+            if dir_name:
+                current_dir = '%s/%s' % (current_dir, dir_name)
             try:
-                self._client.stat(curdir)
+                self._client.stat(current_dir)
             except:
-                self._client.mkdir(curdir, 0744)
+                self._client.mkdir(current_dir, 0744)
 
     def _put_file(self, source, destination, mode, newline):
         remotefile = self._create_remote_file(destination, mode)
@@ -642,10 +646,10 @@ class AbstractSFTPClient(object):
     def _create_remote_file(self, destination, mode):
         raise NotImplementedError
 
-    def _write_to_remote_file(self, remotefile, data, position):
+    def _write_to_remote_file(self, remote_file, data, position):
         raise NotImplementedError
 
-    def _close_remote_file(self, remotefile):
+    def _close_remote_file(self, remote_file):
         raise NotImplementedError
 
 
