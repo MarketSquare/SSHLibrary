@@ -318,7 +318,7 @@ class AbstractSSHClient(object):
         :param newline: Newline character to be used in the remote file.
             Default is 'LF', i.e. the line feed character.
         """
-        # Path separator was deprecated in SSHLibrary 1.2
+        # Path separator was deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          path_separator)
