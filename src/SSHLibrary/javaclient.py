@@ -62,7 +62,7 @@ class JavaSSHClient(AbstractSSHClient):
         return cmd
 
     def _create_sftp_client(self):
-        return SFTPClient(self.client)
+        return SFTPClient(self.client, self.config.encoding)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -100,8 +100,9 @@ class Shell(AbstractShell):
 
 class SFTPClient(AbstractSFTPClient):
 
-    def __init__(self, ssh_client):
+    def __init__(self, ssh_client, encoding):
         self._client = SFTPv3Client(ssh_client)
+        self._client.setCharset(encoding)
         super(SFTPClient, self).__init__()
 
     def _list(self, path):

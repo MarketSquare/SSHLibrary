@@ -16,6 +16,10 @@ List Directories Using Relative Path
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
+List Content With Non-ASCII Characters In Path
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    Should Be Empty  ${listing}
+
 List Directories Using Current Directory
     ${listing} =  List Directories In Directory  .
     Should Contain  ${listing}  ${REMOTE TEST ROOT NAME}

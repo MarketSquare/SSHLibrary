@@ -104,12 +104,21 @@ class AbstractSSHClient(object):
         :returns: If prompt is defined, read and return output until prompt.
             Otherwise all output is read and returned.
         """
+        username = self._encode(username)
+        password = self._encode(password)
         try:
             self._login(username, password)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % username)
         return self._read_login_output(delay)
+
+    def _encode(self, text):
+        if isinstance(text, str):
+            return text
+        if not isinstance(text, basestring):
+            text = unicode(text)
+        return text.encode(self.config.encoding)
 
     def _login(self, username, password):
         raise NotImplementedError
@@ -123,6 +132,7 @@ class AbstractSSHClient(object):
         :returns: If prompt is defined, read and return output until prompt.
             Otherwise all output is read and returned.
         """
+        username = self._encode(username)
         self._verify_key_file(keyfile)
         try:
             self._login_with_public_key(username, keyfile, password)
@@ -130,14 +140,6 @@ class AbstractSSHClient(object):
             raise SSHClientException("Login with public key failed for user "
                                      "'%s'." % username)
         return self._read_login_output(delay)
-
-    def _login_with_public_key(self, username, keyfile, password):
-        raise NotImplementedError
-
-    def _read_login_output(self, delay):
-        if self.config.prompt:
-            return self.read_until_prompt()
-        return self.read(delay)
 
     def _verify_key_file(self, keyfile):
         if not os.path.exists(keyfile):
@@ -147,6 +149,14 @@ class AbstractSSHClient(object):
             open(keyfile).close()
         except IOError:
             raise SSHClientException("Could not read key file '%s'." % keyfile)
+
+    def _login_with_public_key(self, username, keyfile, password):
+        raise NotImplementedError
+
+    def _read_login_output(self, delay):
+        if self.config.prompt:
+            return self.read_until_prompt()
+        return self.read(delay)
 
     def execute_command(self, command):
         """Execute given command over existing connection.
@@ -160,13 +170,6 @@ class AbstractSSHClient(object):
         """Execute given command over existing connection."""
         command = self._encode(command)
         self._started_commands.append(self._start_command(command))
-
-    def _encode(self, text):
-        if isinstance(text, str):
-            return text
-        if not isinstance(text, basestring):
-            text = unicode(text)
-        return text.encode(self.config.encoding)
 
     def _start_command(self, command):
         raise NotImplementedError
@@ -233,7 +236,19 @@ class AbstractSSHClient(object):
 
         timeout is defined with :py:meth:`open_connection()`
         """
+        expected = self._encode(expected)
         return self._read_until(lambda s: expected in s, expected)
+
+    def _read_until(self, matcher, expected, timeout=None):
+        output = ''
+        timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
+        max_time = time.time() + timeout.value
+        while time.time() < max_time:
+            output += self.read_char()
+            if matcher(output):
+                return output
+        raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
+                                 % (expected, timeout, output))
 
     def read_until_newline(self):
         """Read and return from the output up to the first newline character.
@@ -266,6 +281,7 @@ class AbstractSSHClient(object):
 
         timeout is defined with :py:meth:`open_connection()`
         """
+        regexp = self._encode(regexp)
         if isinstance(regexp, basestring):
             regexp = re.compile(regexp)
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
@@ -281,6 +297,7 @@ class AbstractSSHClient(object):
         :param int interval: Time to wait between repeated writings. Can be
             defined similarly as `timeout`.
         """
+        expected = self._encode(expected)
         interval = TimeEntry(interval)
         timeout = TimeEntry(timeout)
         max_time = time.time() + timeout.value
@@ -293,17 +310,6 @@ class AbstractSSHClient(object):
                 pass
         raise SSHClientException("No match found for '%s' in %s."
                                  % (expected, timeout))
-
-    def _read_until(self, matcher, expected, timeout=None):
-        output = ''
-        timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
-        max_time = time.time() + timeout.value
-        while time.time() < max_time:
-            output += self.read_char()
-            if matcher(output):
-                    return output
-        raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
-                                 % (expected, timeout, output))
 
     def put_file(self, source, destination='.', mode='0744', newline='',
                  path_separator=''):
@@ -376,19 +382,6 @@ class AbstractShell(object):
 
     def write(self):
         raise NotImplementedError
-
-
-class SFTPFileInfo(object):
-
-    def __init__(self, name, mode):
-        self.name = unic(name)
-        self.mode = mode
-
-    def is_regular(self):
-        return stat.S_ISREG(self.mode)
-
-    def is_directory(self):
-        return stat.S_ISDIR(self.mode)
 
 
 class AbstractSFTPClient(object):
@@ -678,3 +671,16 @@ class AbstractCommand(object):
         :return: a 3-tuple of stdout, stderr and return code.
         """
         raise NotImplementedError
+
+
+class SFTPFileInfo(object):
+
+    def __init__(self, name, mode):
+        self.name = name
+        self.mode = mode
+
+    def is_regular(self):
+        return stat.S_ISREG(self.mode)
+
+    def is_directory(self):
+        return stat.S_ISDIR(self.mode)

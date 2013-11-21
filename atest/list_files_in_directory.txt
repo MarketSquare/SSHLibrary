@@ -23,6 +23,11 @@ List Files Using Relative Path
     ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
+List Directories With Non-ASCII Characters In Path
+    ${expected} =  Create List  ${FILE WITH NON-ASCII NAME}
+    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    Lists Should Be Equal  ${listing}  ${expected}
+
 List Files Using Current Directory
     ${listing} =  List Files In Directory  .
     Should Not Contain  ${listing}  ${REMOTE TEST ROOT}

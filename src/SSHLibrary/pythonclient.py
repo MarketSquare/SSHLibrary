@@ -80,7 +80,7 @@ class PythonSSHClient(AbstractSSHClient):
         return cmd
 
     def _create_sftp_client(self):
-        return SFTPClient(self.client)
+        return SFTPClient(self.client, self.config.encoding)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -112,15 +112,21 @@ class Shell(AbstractShell):
 
 class SFTPClient(AbstractSFTPClient):
 
-    def __init__(self, ssh_client):
+    def __init__(self, ssh_client, encoding):
         self._client = ssh_client.open_sftp()
+        self._encoding = encoding
         super(SFTPClient, self).__init__()
 
     def _list(self, path):
-        return [SFTPFileInfo(item.filename, item.st_mode)
-                for item in self._client.listdir_attr(path)]
+        path = path.encode(self._encoding)
+        for item in self._client.listdir_attr(path):
+            filename = item.filename
+            if not isinstance(filename, unicode):
+                filename = unicode(filename, self._encoding)
+            yield SFTPFileInfo(filename, item.st_mode)
 
     def _stat(self, path):
+        path = path.encode(self._encoding)
         attributes = self._client.stat(path)
         return SFTPFileInfo('', attributes.st_mode)
 
@@ -130,17 +136,22 @@ class SFTPClient(AbstractSFTPClient):
         self._client.chmod(dest, mode)
         return remote_file
 
-    def _write_to_remote_file(self, remotefile, data, position):
-        remotefile.write(data)
+    def _write_to_remote_file(self, remote_file, data, position):
+        remote_file.write(data)
 
-    def _close_remote_file(self, remotefile):
-        remotefile.close()
+    def _close_remote_file(self, remote_file):
+        remote_file.close()
 
-    def _get_file(self, remotepath, localpath):
-        self._client.get(remotepath, localpath)
+    def _get_file(self, remote_path, local_path):
+        remote_path = remote_path.encode(self._encoding)
+        self._client.get(remote_path, local_path)
 
     def _absolute_path(self, path):
-        return self._client.normalize(path)
+        path = path.encode(self._encoding)
+        normalized_path = self._client.normalize(path)
+        if not isinstance(normalized_path, unicode):
+            normalized_path = unicode(normalized_path, self._encoding)
+        return normalized_path
 
 
 class RemoteCommand(AbstractCommand):

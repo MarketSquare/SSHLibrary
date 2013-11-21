@@ -25,6 +25,11 @@ List Content Using Relative Path
     ${listing} =  List Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
+List Content With Non-ASCII Characters In Path
+    ${expected} =  Create List  ${FILE WITH NON-ASCII NAME}
+    ${listing} =  List Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    Lists Should Be Equal  ${listing}  ${expected}
+
 List Content Using Current Directory
     ${listing} =  List Directory  .
     Should Contain  ${listing}  ${REMOTE TEST ROOT NAME}
