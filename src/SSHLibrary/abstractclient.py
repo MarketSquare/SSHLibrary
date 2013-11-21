@@ -21,8 +21,6 @@ import stat
 import time
 import glob
 
-from robot.utils import unic
-
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 
