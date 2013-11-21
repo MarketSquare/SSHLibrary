@@ -49,7 +49,7 @@ List Content With Absolute Paths Using Absolute Path
     ${listing} =  List Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content With Absolute Paths Using Relative
+List Content With Absolute Paths Using Relative Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}

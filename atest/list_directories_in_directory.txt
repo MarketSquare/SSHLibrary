@@ -32,7 +32,7 @@ List Directories With Absolute Paths Using Absolute Path
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories With Absolute Paths Using Relative
+List Directories With Absolute Paths Using Relative Path
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ${target} =  Set Variable  ${REMOTE TEST ROOT}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
