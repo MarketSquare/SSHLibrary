@@ -80,7 +80,7 @@ class Entry(object):
 class StringEntry(Entry):
     """String value to be stored in :py:class:`Configuration`."""
     def _parse_value(self, value):
-        return value
+        return str(value)
 
 
 class IntegerEntry(Entry):
@@ -99,6 +99,7 @@ class TimeEntry(Entry):
     :py:func:`robot.utils.timestr_to_secs`.
     """
     def _parse_value(self, value):
+        value = str(value)
         return utils.timestr_to_secs(value) if value else None
 
     def __str__(self):
@@ -114,7 +115,7 @@ class LogLevelEntry(Entry):
     LEVELS = ('TRACE', 'DEBUG', 'INFO', 'WARN')
 
     def _parse_value(self, value):
-        value = value.upper()
+        value = str(value).upper()
         if value not in self.LEVELS:
             raise ConfigurationException("Invalid log level '%s'." % value)
         return value
@@ -128,4 +129,5 @@ class NewlineEntry(Entry):
         * 'CR' -> '\r'
     """
     def _parse_value(self, value):
-        return value.upper().replace('LF', '\n').replace('CR', '\r')
+        value = str(value).upper()
+        return value.replace('LF', '\n').replace('CR', '\r')
