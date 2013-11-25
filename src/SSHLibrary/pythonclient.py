@@ -130,10 +130,10 @@ class SFTPClient(AbstractSFTPClient):
         attributes = self._client.stat(path)
         return SFTPFileInfo('', attributes.st_mode)
 
-    def _create_remote_file(self, dest, mode):
-        remote_file = self._client.file(dest, 'wb')
+    def _create_remote_file(self, destination, mode):
+        remote_file = self._client.file(destination, 'wb')
         remote_file.set_pipelined(True)
-        self._client.chmod(dest, mode)
+        self._client.chmod(destination, mode)
         return remote_file
 
     def _write_to_remote_file(self, remote_file, data, position):

@@ -570,8 +570,8 @@ class AbstractSFTPClient(object):
                                                                    path_separator)
         self._create_missing_remote_path(remote_dir)
         files = zip(local_files, remote_files)
-        for src, dst in files:
-            self._put_file(src, dst, mode, newline)
+        for source, destination in files:
+            self._put_file(source, destination, mode, newline)
         return files
 
     def _get_put_file_sources(self, source):
