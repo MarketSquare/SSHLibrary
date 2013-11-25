@@ -7,28 +7,17 @@ Test Teardown   Remove Directory  ${LOCAL TMPDIR}  yes
 Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
-Get File From Absolute Source
-    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
-    OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
-    [Teardown]  OS.Remove File  ${LOCAL TMPDIR}${/}${TEST FILE NAME}
+Get File Using Absolute Source
+    SSH.Get File  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  ${LOCAL TMPDIR}${/}
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}${FILE WITH NON-ASCII NAME}
+    [Teardown]  OS.Remove File  ${LOCAL TMPDIR}${/}${FILE WITH NON-ASCII NAME}
 
-Get File From Relative Source
-    SSH.Get File  ${REMOTE TEST ROOT NAME}/${TEST FILE NAME}  ${TEST FILE NAME}
+Get File Using Relative Source
+    SSH.Get File  ${REMOTE TEST ROOT NAME}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  ${TEST FILE NAME}
     OS.File Should Exist  ${TEST FILE NAME}
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
-Get File With Different Name
-    ${new name} =  Set Variable  foo.txt
-    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${new name}
-    OS.File Should Exist  ${new name}
-    [Teardown]  OS.Remove File  ${new name}
-
-Get File With Non-ASCII Name
-    SSH.Get File  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  foo.txt
-    OS.File Should Exist  foo.txt
-    [Teardown]  OS.Remove File  foo.txt
-
-Get File With Pattern
+Get File Using Pattern As Source
     @{expected} =  Create List  ${TEST FILE NAME}
     ...                         ${FILE WITH NEWLINES NAME}
     ${destination} =  Set Variable  ${LOCAL TMPDIR}${/}
@@ -36,32 +25,33 @@ Get File With Pattern
     : FOR  ${filename}  IN  @{expected}
     \  OS.File Should Exist  ${destination}${/}${filename}
 
-Getting Multiple Source Files To Single File Fails
-    Run Keyword And Expect Error
-    ...  Cannot copy multiple source files to one destination file.
-    ...  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
-
-Get File To Curdir
-    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  .
-    OS.File Should Exist  ${TEST_FILE_NAME}
-    [Teardown]  OS.Remove File  ${TEST FILE NAME}
-
-Get File When Destination Directory Does Not Exist
-    ${target} =  Set Variable  ${LOCAL TMPDIR}${/}missingdir${/}foo.txt
-    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${target}
-    OS.File Should Exist  ${target}
-    [Teardown]  OS.Remove File  ${target}
-
-Get File From A Path Not Under Home Directory
+Get File From Path Not Under Remote Home
     [Setup]  Create Tmp Dir And Move File
     SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
-Get File To Absolute Destination
-    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${LOCAL TMPDIR}${/}
-    OS.File Should Exist  ${LOCAL TMPDIR}${/}${TEST_FILE_NAME}
-    [Teardown]  OS.Remove Directory  ${LOCAL TMPDIR}  yes
+Get File With Multiple Sources To Single File Fails
+    Run Keyword And Expect Error
+    ...  Cannot copy multiple source files to one destination file.
+    ...  SSH.Get File  ${REMOTE TEST ROOT}/*.txt  ${LOCAL TMPDIR}${/}foo
+
+Get File To Different Name
+    ${new name} =  Set Variable  foo.txt
+    SSH.Get File  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  ${new name}
+    OS.File Should Exist  ${new name}
+    [Teardown]  OS.Remove File  ${new name}
+
+Get File To Current Working Directory
+    SSH.Get File  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  .
+    OS.File Should Exist  ${FILE WITH NON-ASCII NAME}
+    [Teardown]  OS.Remove File  ${FILE WITH NON-ASCII NAME}
+
+Get File When Destination Path Does Not Exist
+    ${target} =  Set Variable  ${LOCAL TMPDIR}/new/none.txt
+    SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${target}
+    OS.File Should Exist  ${target}
+    [Teardown]  OS.Remove File  ${target}
 
 Get File Should Fail When There Are No Source Files
     Run Keyword And Expect Error

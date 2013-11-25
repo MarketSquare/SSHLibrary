@@ -23,10 +23,10 @@ Write And Read Until
     Should Contain  ${output}  ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
     ${output} =  Read Until  Give your name?
     Should Contain  ${output}  Give your name?
-    ${output} =  Write  Juha
-    Should Contain  ${output}  Juha
+    ${output} =  Write  Mr. Ääkkönen
+    Should Contain  ${output}  Mr. Ääkkönen
     ${output} =  Read Until Prompt
-    Should Contain  ${output}  Hello Juha
+    Should Contain  ${output}  Hello Mr. Ääkkönen
 
 Write And Read Until Prompt
     Write  ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}

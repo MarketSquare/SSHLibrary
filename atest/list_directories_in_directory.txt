@@ -13,14 +13,15 @@ List Directories Using Absolute Path
 
 List Directories Using Relative Path
     ${expected} =  Create List  ${SUBDIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Content With Non-ASCII Characters In Path
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
-    Should Be Empty  ${listing}
+List Directories Using Pattern
+    ${expected} =  Create List  ${SUBDIRECTORY NAME}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=aaä*
+    Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories Using Current Directory
+List Directories Using Current Working Directory
     ${listing} =  List Directories In Directory  .
     Should Contain  ${listing}  ${REMOTE TEST ROOT NAME}
 
@@ -31,6 +32,10 @@ List Directories Using Symlink As Path
     Lists Should Be Equal  ${listing}  ${expected}
     [Teardown]  Execute Command  rm -f symlink
 
+List Directories Using Non-ASCII Characters In Path
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    Should Be Empty  ${listing}
+
 List Directories With Absolute Paths Using Absolute Path
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
@@ -38,18 +43,13 @@ List Directories With Absolute Paths Using Absolute Path
 
 List Directories With Absolute Paths Using Relative Path
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}
+    ${target} =  Set Variable  ${REMOTE TEST ROOT NAME}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories With Absolute Paths Using Current Directory
+List Directories With Absolute Paths Using Current Working Directory
     ${listing} =  List Directories In Directory  .  absolute=True
     Should Contain  ${listing}  ${REMOTE TEST ROOT}
-
-List Directories Using Pattern
-    ${expected} =  Create List  ${SUBDIRECTORY NAME}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  pattern=aaä*
-    Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Pattern
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
@@ -57,8 +57,14 @@ List Directories With Absolute Paths Using Pattern
     ...           absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
-List Directories Should Fail When Source Path Not Exists
+List Directories With Absolute Paths Using Symlink As Path
+    [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
+    ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ${listing} =  List Directories In Directory  symlink  absolute=True
+    Lists Should Be Equal  ${listing}  ${expected}
+    [Teardown]  Execute Command  rm -f symlink
+
+List Directories Should Fail When Source Path Does Not Exists
     ${target} =  Set Variable  not_exists
     Run Keyword And Expect Error  There was no directory matching '${target}'.
     ...                           List Directories In Directory  ${target}
-

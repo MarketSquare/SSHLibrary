@@ -8,45 +8,33 @@ Library         String
 
 *** Test Cases ***
 Put File To Absolute Destination
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}/${TEST FILE NAME}
-    SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/
-    SSH.File Should Exist  ${target}
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
+    Put File  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}/
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File To Absolute Destination With Intermediate Subdirectories
-    ${target} =  Set Variable  ${REMOTE TEST ROOT}/robotdir/${TEST FILE NAME}
-    SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/robotdir/
-    SSH.File Should Exist  ${target}
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/robotdir/${FILE WITH NON-ASCII NAME}
+    Put File  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}/robotdir/
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/robotdir/${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File To Relative Destination
-    ${target} =  Set Variable  foo.txt
-    SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  ${target}
-    SSH.File Should Exist  ${target}
-    [Teardown]  Execute Command  rm -f ${target}
+    SSH.File Should Not Exist  foo.txt
+    Put File  ${FILE WITH NON-ASCII}  foo.txt
+    SSH.File Should Exist  foo.txt
+    [Teardown]  Execute Command  rm -f foo.txt
 
 Put File To Relative Destination With Intermediate Subdirectories
-    ${target} =  Set Variable  robotdir/anotherdir/${TEST FILE NAME}
-    SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  robotdir/anotherdir/
-    SSH.File Should Exist  ${target}
+    SSH.File Should Not Exist  robotdir/${FILE WITH NON-ASCII NAME}
+    Put File  ${FILE WITH NON-ASCII}  robotdir/
+    SSH.File Should Exist  robotdir/${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -rf robotdir
 
 Put File To Home Directory
-    ${target} =  Set Variable  ${TEST FILE NAME}
-    SSH.File Should Not Exist  ${target}
-    Put File  ${TEST FILE}  .
-    SSH.File Should Exist  ${target}
-    [Teardown]  Execute Command  rm -f ${target}
-
-Put File With Non-ASCII Characters In Filename
-    ${target} =  Set Variable  ${FILE WITH NON-ASCII NAME}
-    SSH.File Should Not Exist  ${target}
-    Put File  ${FILE WITH NON-ASCII}  ${target}
-    SSH.File Should Exist  ${target}
+    SSH.File Should Not Exist  ${FILE WITH NON-ASCII NAME}
+    Put File  ${FILE WITH NON-ASCII}  .
+    SSH.File Should Exist  ${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
 
 Put File With Special Characters In Filename

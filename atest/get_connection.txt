@@ -36,7 +36,7 @@ Get Connection Index Only
 
 Get Connection Host And Timeout Only
     Open Connection  ${HOST}  timeout=3 seconds
-    ${host}  ${timeout}=  Get Connection  host=yea  timeout=True  port=false
+    ${host}  ${timeout}=  Get Connection  host=Yes  timeout=True  port=false
     Should Be Equal  ${host}  localhost
     Should Be Equal As Integers  ${timeout}  3
 

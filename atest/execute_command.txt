@@ -27,6 +27,18 @@ Execute Command And Return All Values
     Should Be Equal  ${stderr}  This is stderr
     Should Be Equal As Integers  ${rc}  0
 
+Execute Command With Output Containing Newlines
+    ${result} =  Execute Command  echo -e "\n\nfoo"
+    Should Be Equal  ${result}  \n\nfoo
+
+Execute Command With Multiple Statements
+    ${result} =  Execute Command  echo "foo\n"; echo RC=$?
+    Should Be Equal  ${result}  foo\n\nRC=0
+
+Executing Command With Non-ASCII characters
+    ${result}=  Execute Command  echo 'aaääöö'
+    Should Contain  ${result}  aaääöö
+
 Execute Command With Legacy Stdout Config
     ${stdout} =  Execute Command  ${REMOTE TEST ROOT}/${TEST SCRIPT NAME}
     ...                           STDout
@@ -42,15 +54,3 @@ Execute Command With Legacy Stdout And Stderr Config
     ...                     Both
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
-
-Execute Command With Output Containing Newlines
-    ${result} =  Execute Command  echo -e "\n\nfoo"
-    Should Be Equal  ${result}  \n\nfoo
-
-Execute Command With Multiple Statements
-    ${result} =  Execute Command  echo "foo\n"; echo RC=$?
-    Should Be Equal  ${result}  foo\n\nRC=0
-
-Executing Command With Non-ASCII characters
-    ${result}=  Execute Command  echo 'aaääöö'
-    Should Contain  ${result}  aaääöö
