@@ -130,7 +130,12 @@ class SFTPClient(AbstractSFTPClient):
         attributes = self._client.stat(path)
         return SFTPFileInfo('', attributes.st_mode)
 
+    def _create_missing_remote_path(self, path):
+        path = path.encode(self._encoding)
+        return super(SFTPClient, self)._create_missing_remote_path(path)
+
     def _create_remote_file(self, destination, mode):
+        destination = destination.encode(self._encoding)
         remote_file = self._client.file(destination, 'wb')
         remote_file.set_pipelined(True)
         self._client.chmod(destination, mode)
