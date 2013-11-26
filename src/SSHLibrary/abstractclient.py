@@ -50,9 +50,14 @@ class _ClientConfiguration(Configuration):
 
 
 class AbstractSSHClient(object):
-    """A base class for SSH client implementations, defines the public API.
+    """The base class for the SSH client implementations.
 
-    Subclasses  provide the tool/language specific concrete implementations.
+    This class defines the public API. Subclasses (:py:class:`PythonSSHClient`
+    and :py:class:`JavaSSHClient`) provide the language specific concrete
+    implementations.
+
+    Similarly, the classes :py:class:`AbstractSFTPClient` and
+    :py:class:`AbstractShell` define the SFTP and the shell interfaces.
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
@@ -66,43 +71,84 @@ class AbstractSSHClient(object):
 
     @staticmethod
     def enable_logging(path):
-        """Log SSH events to file.
+        """Enable logging of SSH events to a file.
 
-        :param path: A filename where the log events are written
-        :returns: Whether logging was successfully enabled.
+        :param str path: Path to the file where log is written to.
+
+        :returns: A boolean value whether the logging was successfully enabled.
         """
         raise NotImplementedError
 
     @property
     def sftp_client(self):
+        """Gets the SSH client for the connection.
+
+        The subclass has to implement :py:meth:`_create_sftp_client()` to
+        return the concrete implementation of the SFTP client, derived
+        from :py:class:`AbstractSFTPClient`.
+
+        :returns: An object of the class that inherits from
+            :py:class:`AbstractSFTPClient`.
+        """
         if not self._sftp_client:
             self._sftp_client = self._create_sftp_client()
         return self._sftp_client
 
     @property
     def shell(self):
+        """Gets the shell for the connection.
+
+        The subclass has to implement :py:meth:`_create_shell()` to
+        return the concrete implementation of the shell, derived
+        from :py:class:`AbstractShell`.
+
+        :returns: An object of the class that inherits from
+            :py:class:`AbstractShell`.
+        """
         if not self._shell:
             self._shell = self._create_shell()
         return self._shell
 
     def _create_sftp_client(self):
+        """Creates the SFTP client for the connection.
+
+        :returns: An object of the class that inherits from
+            :py:class:`AbstractSFTPClient`.
+        """
         raise NotImplementedError
 
     def _create_shell(self):
+        """Creates the shell session for the connection.
+
+        :returns: An object of the class that inherits from
+            :py:class:`AbstractShell`.
+        """
         raise NotImplementedError
 
     def close(self):
-        """Closes the connection.
-        """
+        """Closes the connection."""
         self.client.close()
 
     def login(self, username, password, delay=None):
-        """Login using given credentials.
+        """Logs into the remote host using the password authentication.
 
-        :param str username: username to log in with
-        :param str password: password for `username`
-        :returns: If prompt is defined, read and return output until prompt.
-            Otherwise all output is read and returned.
+        This method reads the output from the remote host after logging in,
+        thus clearing the output. If prompt is set, everything until the prompt
+        is read (using :py:meth:`read_until_prompt()` internally).
+        Otherwise everything on the output is read with the specified `delay`
+        (using :py:meth:`read()` internally).
+
+        :param str username: Username to log in with.
+
+        :param str password: Password for the `username`.
+
+        :param str delay: The `delay` passed to :py:meth:`read()` for
+            reading the output after logging in. This is only effective if
+            the prompt is not set.
+
+        :raises SSHClientException: If logging in failed.
+
+        :returns: The read output from the server.
         """
         username = self._encode(username)
         password = self._encode(password)
@@ -121,16 +167,39 @@ class AbstractSSHClient(object):
         return text.encode(self.config.encoding)
 
     def _login(self, username, password):
+        """The concrete implementation of logging into the remote host using
+        `username` and `password`.
+
+        :param str username: Username to log in with.
+
+        :param str password: Password for the `username`.
+
+        :raises SSHClientException: If authentication failed for the `username`.
+        """
         raise NotImplementedError
 
     def login_with_public_key(self, username, keyfile, password, delay=None):
-        """Login using given credentials.
+        """Logs into the remote host using the public key authentication.
 
-        :param str username: username to log in with
-        :param str keyfile: path to a valid OpenSSH keyfile
-        :param str password: password used in unlocking the keyfile
-        :returns: If prompt is defined, read and return output until prompt.
-            Otherwise all output is read and returned.
+        This method reads the output from the remote host after logging in,
+        thus clearing the output. If prompt is set, everything until the prompt
+        is read (using :py:meth:`read_until_prompt()` internally).
+        Otherwise everything on the output is read with the specified `delay`
+        (using :py:meth:`read()` internally).
+
+        :param str username: Username to log in with.
+
+        :param str keyfile: Path to the valid OpenSSH private key file.
+
+        :param str password: Password (if needed) for unlocking the `keyfile`.
+
+        :param str delay: The `delay` passed to :py:meth:`read()` for
+            reading the output after logging in. This is only effective if
+            the prompt is not set.
+
+        :raises SSHClientException: If logging in failed.
+
+        :returns: The read output from the server.
         """
         username = self._encode(username)
         self._verify_key_file(keyfile)
@@ -151,6 +220,18 @@ class AbstractSSHClient(object):
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
     def _login_with_public_key(self, username, keyfile, password):
+        """The concrete implementation of logging into the remote host using
+        the `username` and `keyfile` as the private key.
+
+        :param str username: Username to log in with.
+
+        :param str keyfile: Path to the valid OpenSSH private key file.
+
+        :param str password: Password (if needed) for unlocking the `keyfile`.
+
+        :raises SSHClientException: If logging in failed (e.g. wrong `username`
+            was given, invalid `keyfile` was encountered, etc.)
+        """
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -159,25 +240,66 @@ class AbstractSSHClient(object):
         return self.read(delay)
 
     def execute_command(self, command):
-        """Execute given command over existing connection.
+        """Executes the `command` on the remote host.
 
-        :returns: 3-tuple (stdout, stderr, return_code)
+        This method waits until the output triggered by the execution of the
+        `command` is available and then returns it.
+
+        The `command` is always executed in a new shell session, meaning that
+        changes to the environment are not visible to the subsequent calls of
+        this method.
+
+        :param str command: The command to be executed on the remote host.
+
+        :returns: A 3-Tuple (stdout, stderr, return_code) with values
+            `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         self.start_command(command)
         return self.read_command_output()
 
     def start_command(self, command):
-        """Execute given command over existing connection."""
+        """Starts the execution of the `command` on the remote host.
+
+        The started `command` is pushed into an internal stack. This stack
+        always has the latest started `command` on top of it.
+
+        The `command` is always started in a new shell session, meaning that
+        changes to the environment are not visible to the subsequent calls of
+        this method.
+
+        This method does not return anything. Use :py:meth:`read_command_output()`
+        to get the output of the previous started command.
+
+        :param str command: The command to be started on the remote host.
+        """
         command = self._encode(command)
         self._started_commands.append(self._start_command(command))
 
     def _start_command(self, command):
+        """The concrete implementation of starting `command` on the remote
+        host.
+
+        This method should instantiate from a class derived from
+        :py:class:`AbstractCommand`, instantiate a new shell session and run
+        the `command` on it.
+
+        :returns: An object of the class that inherits from
+            :py:class:`RemoteCommand`.
+        """
         raise NotImplementedError
 
     def read_command_output(self):
-        """Read output of a previously started command.
+        """Reads the output of the previous started command.
 
-        :returns: 3-tuple (stdout, stderr, return_code)
+        The previous started command, started with :py:meth:`start_command()`,
+        is popped out of the stack and its outputs (stdout, stderr, return code)
+        are read and returned.
+
+        :raises SSHClientException: If there are no started commands to read
+            output from.
+
+        :returns: A 3-Tuple (stdout, stderr, return_code) with values
+            `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         try:
             return self._started_commands.pop().read_outputs()
@@ -185,10 +307,13 @@ class AbstractSSHClient(object):
             raise SSHClientException('No started commands to read output from.')
 
     def write(self, text, add_newline=False):
-        """Write `text` in shell session.
+        """Writes `text` in the current shell session.
 
-        :param str text: the text to be written
-        :param bool add_newline: if True, a newline will be added to `text`.
+        :param str text: The text to be written.
+
+        :param bool add_newline: If True, the configured newline will be
+            appended to the `text` before writing it on the remote host.
+            The newline is set when calling :py:meth:`open_connection()`
         """
         text = self._encode(text)
         if add_newline:
@@ -196,7 +321,21 @@ class AbstractSSHClient(object):
         self.shell.write(text)
 
     def read(self, delay=None):
-        """Read and return currently available output."""
+        """Reads all output available in the current shell session.
+
+        Reading always consumes the output, meaning that after being read,
+        the read content is no longer present in the output.
+
+        :param str delay: If given, this method reads again after the delay
+            to see if there is still more output is available. This wait-read
+            cycle is repeated as long as further reads return more output or the
+            configured timeout expires. The timeout is set when calling
+            :py:meth:`open_connection()`. The delay can be given as an integer
+            (number of seconds) or in Robot Framework's time format, e.g.
+            `4.5s`, `3 minutes`, `2 min 3 sec`.
+
+        :returns: The read output from the remote host.
+        """
         output = self.shell.read()
         if delay:
             output += self._delayed_read(delay)
@@ -218,7 +357,13 @@ class AbstractSSHClient(object):
         return output
 
     def read_char(self):
-        """Read and return a single char from the current session."""
+        """Reads a single char from the current shell session.
+
+        Reading always consumes the output, meaning that after being read,
+        the read content is no longer present in the output.
+
+        :returns: A single char read from the output.
+        """
         server_output = ''
         while True:
             try:
@@ -228,13 +373,20 @@ class AbstractSSHClient(object):
                 pass
 
     def read_until(self, expected):
-        """Read and return from the output until expected.
+        """Reads output from the current shell session until the `expected` text
+        is encountered or the timeout expires.
 
-        :param str expected: text to look for in the output
-        :raises SSHClientException: if expected is not found in output when
-            timeout expires.
+        The timeout is set when calling :py:meth:`open_connection()`
 
-        timeout is defined with :py:meth:`open_connection()`
+        Reading always consumes the output, meaning that after being read,
+        the read content is no longer present in the output.
+
+        :param str expected: The text to look for in the output.
+
+        :raises SSHClientException: If `expected` is not found in the output
+            when the timeout expires.
+
+        :returns: The read output, including the encountered `expected` text.
         """
         expected = self._encode(expected)
         return self._read_until(lambda s: expected in s, expected)
@@ -251,35 +403,56 @@ class AbstractSSHClient(object):
                                  % (expected, timeout, output))
 
     def read_until_newline(self):
-        """Read and return from the output up to the first newline character.
+        """Reads output from the current shell session until a newline character
+        is encountered or the timeout expires.
 
-        :raises SSHClientException: if newline is not found in output when
-            timeout expires.
+        The newline character and the timeout are set when calling
+        :py:meth:`open_connection()`
 
-        timeout is defined with :py:meth:`open_connection()`
+        Reading always consumes the output, meaning that after being read,
+        the read content is no longer present in the output.
+
+        :raises SSHClientException: If the newline character is not found in the
+            output when the timeout expires.
+
+        :returns: The read output, including the encountered newline character.
         """
         return self.read_until(self.config.newline)
 
     def read_until_prompt(self):
-        """Read and return from the output until prompt.
+        """Reads output from the current shell session until the prompt
+        is encountered or the timeout expires.
 
-        :raises SSHClientException: if prompt is not set or it is not found
-            in output when timeout expires.
+        The prompt and timeout are set when calling :py:meth:`open_connection()`
 
-        prompt and timeout are defined with :py:meth:`open_connection()`
+        Reading always consumes the output, meaning that after being read,
+        the read content is no longer present in the output.
+
+        :raises SSHClientException: If prompt is not set or is not found
+            in the output when the timeout expires.
+
+        :returns: The read output, including the encountered prompt.
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
         return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):
-        """Read and return from the output until regexp matches.
+        """Reads output from the current shell session until the `regexp`
+        matches or the timeout expires.
 
-        :param regexp: a pattern or a compiled regexp obect used for matching
-        :raises SSHClientException: if match is not found in output when
-            timeout expires.
+        The timeout is set when calling :py:meth:`open_connection()`
 
-        timeout is defined with :py:meth:`open_connection()`
+        Reading always consumes the output, meaning that after being read,
+        the read content is no longer present in the output.
+
+        :param regexp: Either the regular expression as a string or a compiled
+            Regex object used for the matching.
+
+        :raises SSHClientException: If no match against `regexp` is found when
+            the timeout expires.
+
+        :returns: The read output up and until the matching `regexp`.
         """
         regexp = self._encode(regexp)
         if isinstance(regexp, basestring):
@@ -287,15 +460,25 @@ class AbstractSSHClient(object):
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
     def write_until_expected(self, text, expected, timeout, interval):
-        """Write text until expected output appears or timeout expires.
+        """Writes `text` repeatedly in the current shell session until the
+        `expected` appears in the output or the `timeout` expires.
 
-        :param str text: Text to be written using #write_bare().
+        :param str text: Text to be written. Uses :py:meth:`write_bare()`
+            internally so no newline character is appended to the text.
+
         :param str expected: Text to look for in the output.
+
         :param int timeout: The timeout during which `expected` must appear
-            in the output. Can be defined either as seconds or as a Robot
-            Framework time string, e.g. 1 minute 20 seconds.
-        :param int interval: Time to wait between repeated writings. Can be
-            defined similarly as `timeout`.
+            in the output. Can be given as an integer (number of seconds) or in
+            Robot Framework's time format, e.g. `4.5s`, `3 minutes`, `2 min 3 sec`.
+
+        :param int interval: Time to wait between the repeated writings of
+            `expected`.
+
+        :raises SSHClientException: If `expected` is not found in the output
+            before the `timeout` expires.
+
+        :returns: The read output, including the `expected`.
         """
         expected = self._encode(expected)
         interval = TimeEntry(interval)
@@ -313,62 +496,187 @@ class AbstractSSHClient(object):
 
     def put_file(self, source, destination='.', mode='0744', newline='',
                  path_separator=''):
-        """Put file(s) from localhost to remote host.
+        """Uploads the file(s) from the local machine to the remote host.
 
-        :param source: Local file path. May be a simple pattern containing
-            '*' and '?', in which case all matching files are tranferred
-        :param destination: Remote path. If many files are transferred,
-            must be a directory. Defaults to users home directory.
-        :param mode: File permissions for the remote file. Defined as a
-            Unix file format string, e.g. '0600'
-        :param newline: Newline character to be used in the remote file.
-            Default is 'LF', i.e. the line feed character.
+        :param str source: The path to the file on the local machine.
+            Glob patterns, like '*' and '?', can be used in the source, in
+            which case all the matching files are uploaded.
+
+        :param str destination: The target path on the remote host.
+            If multiple files are uploaded, e.g. patterns are used in the
+            `source`, this must be a path to an existing directory.
+            The destination defaults to the user's home the remote host.
+
+        :param str mode: The uploaded files on the remote host are created with
+            these modes. The modes are given as traditional Unix octal
+            permissions, such as '0600'.
+
+        :param str newline: If given, the newline characters of the uploaded
+            files on the remote host are converted to this.
+
+        :returns: A List of Tuples for all the uploaded files. These tuples
+            contain the local path as the first value and the remote target
+            path as the second.
         """
-        # Path separator was deprecated in SSHLibrary 1.2.
+        # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):
+        """Uploads directory(-ies) from the local machine to the remote host,
+        optionally with subdirectories included.
+
+        :param str source: The path to the directory on the local machine.
+
+        :param str destination: The target path on the remote host.
+            The destination defaults to the user's home the remote host.
+
+        :param str mode: The uploaded files on the remote host are created with
+            these modes. The modes are given as traditional Unix octal
+            permissions, such as '0600'.
+
+        :param str newline: If given, the newline characters of the uploaded
+            files on the remote host are converted to this.
+
+        :param bool recursive: If True, the subdirectories in the `source` path
+            are uploaded as well.
+
+        :returns: A List of Tuples for all the uploaded files. These tuples
+            contain the local path as the first value and the remote target
+            path as the second.
+        """
         return self.sftp_client.put_directory(source, destination, mode,
                                               newline,
                                               self.config.path_separator,
                                               recursive)
 
     def get_file(self, source, destination='.', path_separator=''):
-        """Get file(s) from the remote host to localhost.
+        """Downloads file(s) from the remote host to the local machine.
 
-        :param source: Remote file path. May be a simple pattern containing
-            '*' and '?', in which case all matching files are tranferred
-            :param destintation: Local path. If many files are transferred,
-            must be a directory. Defaults to current working directory.
+        :param str source: The path to the file on the remote machine.
+            Glob patterns, like '*' and '?', can be used in the source, in
+            which case all the matching files are downloaded.
+
+        :param str destination: The target path on the local machine.
+            If many files are downloaded, e.g. patterns are used in the
+            `source`, this must be a path to an existing directory.
+            The destination defaults to the current local working directory.
+
+        :returns: A List of Tuples for all the downloaded files. These tuples
+            contain the remote path as the first value and the local target
+            path as the second.
         """
-        # Path separator was deprecated in SSHLibrary 1.2
+        # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.get_file(source, destination, path_separator)
 
     def get_directory(self, source, destination='.', recursive=False):
+        """Downloads directory(-ies) from the remote host to the local machine,
+        optionally with subdirectories included.
+
+        :param str source: The path to the directory on the remote machine.
+
+        :param str destination: The target path on the local machine.
+            The destination defaults to the current local working directory.
+
+        :param bool recursive: If True, the subdirectories in the `source` path
+            are downloaded as well.
+
+        :returns: A List of Tuples for all the downloaded files. These tuples
+            contain the remote path as the first value and the local target
+            path as the second.
+        """
         return self.sftp_client.get_directory(source, destination,
                                               self.config.path_separator,
                                               recursive)
 
     def list_dir(self, path, pattern=None, absolute=False):
+        """Gets the item names, or optionally the absolute paths, on the given
+        `path` on the remote host.
+
+        This includes regular files, directories as well as other file types,
+        e.g. device files.
+
+        :param str path: The path on the remote host to list.
+
+        :param str pattern: If given, only the item names that match
+            the given pattern are returned. Please do note, that the `pattern`
+            is never matched against the full path, even if `absolute` is set True.
+
+        :param bool absolute: If True, the absolute paths of the items are
+            returned instead of the item names.
+
+        :returns: A List containing either the item names or the absolute
+            paths. In both cases, the List is first filtered by the `pattern`
+            if given.
+        """
         items = self.sftp_client.list(path, pattern, absolute)
         return sorted(items)
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
+        """Gets the file names, or optionally the absolute paths, of the regular
+        files on the given `path` on the remote host.
+.
+        :param str path: The path on the remote host to list.
+
+        :param str pattern: If given, only the file names that match
+            the given pattern are returned. Please do note, that the `pattern`
+            is never matched against the full path, even if `absolute` is set True.
+
+        :param bool absolute: If True, the absolute paths of the regular files
+            are returned instead of the file names.
+
+        :returns: A List containing either the regular file names or the absolute
+            paths. In both cases, the List is first filtered by the `pattern`
+            if given.
+        """
         files = self.sftp_client.list_files(path, pattern, absolute)
         return sorted(files)
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
+        """Gets the directory names, or optionally the absolute paths, on the
+        given `path` on the remote host.
+
+        :param str path: The path on the remote host to list.
+
+        :param str pattern: If given, only the directory names that match
+            the given pattern are returned. Please do note, that the `pattern`
+            is never matched against the full path, even if `absolute` is set True.
+
+        :param bool absolute: If True, the absolute paths of the directories
+            are returned instead of the directory names.
+
+        :returns: A List containing either the directory names or the absolute
+            paths. In both cases, the List is first filtered by the `pattern`
+            if given.
+        """
         dirs = self.sftp_client.list_dirs(path, pattern, absolute)
         return sorted(dirs)
 
     def dir_exists(self, path):
+        """Checks if the `path` points to a directory on the remote host.
+
+        If the `path` is a symlink, its destination is checked instead.
+
+        :param str path: The path to check.
+
+        :returns: True if the `path` is points to a directory, False if the
+            `path` does not exists or points to something else than a directory.
+        """
         return self.sftp_client.is_dir(path)
 
     def file_exists(self, path):
+        """Checks if the `path` points to a regular file on the remote host.
+
+        If the `path` is a symlink, its destination is checked instead.
+
+        :param str path: The path to check.
+
+        :returns: True if the `path` is points to a regular file, False if the
+            `path` does not exists or points to something else than a regular file.
+        """
         return self.sftp_client.is_file(path)
 
 
