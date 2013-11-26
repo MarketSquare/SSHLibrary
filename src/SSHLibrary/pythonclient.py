@@ -75,8 +75,8 @@ class PythonSSHClient(AbstractSSHClient):
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
-        new_session = self.client.get_transport().open_session()
-        cmd.run_in(new_session)
+        new_shell = self.client.get_transport().open_session()
+        cmd.run_in(new_shell)
         return cmd
 
     def _create_sftp_client(self):
@@ -162,12 +162,12 @@ class SFTPClient(AbstractSFTPClient):
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self):
-        stdout = self._session.makefile('rb', -1).read().decode(self._encoding)
-        stderr = self._session.makefile_stderr('rb', -1).read().decode(
+        stdout = self._shell.makefile('rb', -1).read().decode(self._encoding)
+        stderr = self._shell.makefile_stderr('rb', -1).read().decode(
             self._encoding)
-        rc = self._session.recv_exit_status()
-        self._session.close()
+        rc = self._shell.recv_exit_status()
+        self._shell.close()
         return stdout, stderr, rc
 
     def _execute(self):
-        self._session.exec_command(self._command)
+        self._shell.exec_command(self._command)

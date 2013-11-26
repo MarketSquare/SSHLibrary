@@ -57,8 +57,8 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
-        new_session = self.client.openSession()
-        cmd.run_in(new_session)
+        new_shell = self.client.openSession()
+        cmd.run_in(new_shell)
         return cmd
 
     def _create_sftp_client(self):
@@ -158,10 +158,10 @@ class SFTPClient(AbstractSFTPClient):
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self):
-        stdout = self._read_from_stream(self._session.getStdout())
-        stderr = self._read_from_stream(self._session.getStderr())
-        rc = self._session.getExitStatus() or 0
-        self._session.close()
+        stdout = self._read_from_stream(self._shell.getStdout())
+        stderr = self._read_from_stream(self._shell.getStderr())
+        rc = self._shell.getExitStatus() or 0
+        self._shell.close()
         return stdout, stderr, rc
 
     def _read_from_stream(self, stream):
@@ -175,4 +175,4 @@ class RemoteCommand(AbstractCommand):
         return result
 
     def _execute(self):
-        self._session.execCommand(self._command)
+        self._shell.execCommand(self._command)

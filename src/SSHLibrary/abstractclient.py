@@ -1126,14 +1126,14 @@ class AbstractCommand(object):
     def __init__(self, command, encoding):
         self._command = command
         self._encoding = encoding
-        self._session = None
+        self._shell = None
 
-    def run_in(self, session):
-        """Run this command in the given shell `session`.
+    def run_in(self, shell):
+        """Runs this command in the given `shell`.
 
-        :param session: A session in the already open connection.
+        :param shell: A shell in the already open connection.
         """
-        self._session = session
+        self._shell = shell
         self._execute()
 
     def _execute(self):
