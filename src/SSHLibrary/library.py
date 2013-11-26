@@ -1430,7 +1430,7 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        if not self.current.file_exists(path):
+        if not self.current.is_file(path):
             raise AssertionError("File '%s' does not exist." % path)
 
     def file_should_not_exist(self, path):
@@ -1444,7 +1444,7 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        if self.current.file_exists(path):
+        if self.current.is_file(path):
             raise AssertionError("File '%s' exists." % path)
 
     def directory_should_exist(self, path):
@@ -1458,7 +1458,7 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        if not self.current.dir_exists(path):
+        if not self.current.is_dir(path):
             raise AssertionError("Directory '%s' does not exist." % path)
 
     def directory_should_not_exist(self, path):
@@ -1472,7 +1472,7 @@ class SSHLibrary(object):
 
         New in SSHLibrary 1.2.
         """
-        if self.current.dir_exists(path):
+        if self.current.is_dir(path):
             raise AssertionError("Directory '%s' exists." % path)
 
     def list_directory(self, path, pattern=None, absolute=False):

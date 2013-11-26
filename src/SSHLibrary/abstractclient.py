@@ -50,13 +50,11 @@ class _ClientConfiguration(Configuration):
 
 
 class AbstractSSHClient(object):
-    """The base class for the SSH client implementations.
+    """The base class for the SSH client implementation.
 
     This class defines the public API. Subclasses (:py:class:`PythonSSHClient`
     and :py:class:`JavaSSHClient`) provide the language specific concrete
-    implementations.
-
-    Similarly, the classes :py:class:`AbstractSFTPClient` and
+    implementations. Similarly, the classes :py:class:`AbstractSFTPClient` and
     :py:class:`AbstractShell` define the SFTP and the shell interfaces.
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
@@ -83,7 +81,7 @@ class AbstractSSHClient(object):
     def sftp_client(self):
         """Gets the SSH client for the connection.
 
-        The subclass has to implement :py:meth:`_create_sftp_client()` to
+        The subclass has to implement :py:meth:`_create_sftp_client` to
         return the concrete implementation of the SFTP client, derived
         from :py:class:`AbstractSFTPClient`.
 
@@ -98,7 +96,7 @@ class AbstractSSHClient(object):
     def shell(self):
         """Gets the shell for the connection.
 
-        The subclass has to implement :py:meth:`_create_shell()` to
+        The subclass has to implement :py:meth:`_create_shell` to
         return the concrete implementation of the shell, derived
         from :py:class:`AbstractShell`.
 
@@ -134,15 +132,15 @@ class AbstractSSHClient(object):
 
         This method reads the output from the remote host after logging in,
         thus clearing the output. If prompt is set, everything until the prompt
-        is read (using :py:meth:`read_until_prompt()` internally).
+        is read (using :py:meth:`read_until_prompt` internally).
         Otherwise everything on the output is read with the specified `delay`
-        (using :py:meth:`read()` internally).
+        (using :py:meth:`read` internally).
 
         :param str username: Username to log in with.
 
         :param str password: Password for the `username`.
 
-        :param str delay: The `delay` passed to :py:meth:`read()` for
+        :param str delay: The `delay` passed to :py:meth:`read` for
             reading the output after logging in. This is only effective if
             the prompt is not set.
 
@@ -183,9 +181,9 @@ class AbstractSSHClient(object):
 
         This method reads the output from the remote host after logging in,
         thus clearing the output. If prompt is set, everything until the prompt
-        is read (using :py:meth:`read_until_prompt()` internally).
+        is read (using :py:meth:`read_until_prompt` internally).
         Otherwise everything on the output is read with the specified `delay`
-        (using :py:meth:`read()` internally).
+        (using :py:meth:`read` internally).
 
         :param str username: Username to log in with.
 
@@ -193,7 +191,7 @@ class AbstractSSHClient(object):
 
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
-        :param str delay: The `delay` passed to :py:meth:`read()` for
+        :param str delay: The `delay` passed to :py:meth:`read` for
             reading the output after logging in. This is only effective if
             the prompt is not set.
 
@@ -267,7 +265,7 @@ class AbstractSSHClient(object):
         changes to the environment are not visible to the subsequent calls of
         this method.
 
-        This method does not return anything. Use :py:meth:`read_command_output()`
+        This method does not return anything. Use :py:meth:`read_command_output`
         to get the output of the previous started command.
 
         :param str command: The command to be started on the remote host.
@@ -291,7 +289,7 @@ class AbstractSSHClient(object):
     def read_command_output(self):
         """Reads the output of the previous started command.
 
-        The previous started command, started with :py:meth:`start_command()`,
+        The previous started command, started with :py:meth:`start_command`,
         is popped out of the stack and its outputs (stdout, stderr, return code)
         are read and returned.
 
@@ -313,7 +311,7 @@ class AbstractSSHClient(object):
 
         :param bool add_newline: If True, the configured newline will be
             appended to the `text` before writing it on the remote host.
-            The newline is set when calling :py:meth:`open_connection()`
+            The newline is set when calling :py:meth:`open_connection`
         """
         text = self._encode(text)
         if add_newline:
@@ -330,7 +328,7 @@ class AbstractSSHClient(object):
             to see if there is still more output is available. This wait-read
             cycle is repeated as long as further reads return more output or the
             configured timeout expires. The timeout is set when calling
-            :py:meth:`open_connection()`. The delay can be given as an integer
+            :py:meth:`open_connection`. The delay can be given as an integer
             (number of seconds) or in Robot Framework's time format, e.g.
             `4.5s`, `3 minutes`, `2 min 3 sec`.
 
@@ -376,7 +374,7 @@ class AbstractSSHClient(object):
         """Reads output from the current shell session until the `expected` text
         is encountered or the timeout expires.
 
-        The timeout is set when calling :py:meth:`open_connection()`
+        The timeout is set when calling :py:meth:`open_connection`
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -407,7 +405,7 @@ class AbstractSSHClient(object):
         is encountered or the timeout expires.
 
         The newline character and the timeout are set when calling
-        :py:meth:`open_connection()`
+        :py:meth:`open_connection`
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -423,7 +421,7 @@ class AbstractSSHClient(object):
         """Reads output from the current shell session until the prompt
         is encountered or the timeout expires.
 
-        The prompt and timeout are set when calling :py:meth:`open_connection()`
+        The prompt and timeout are set when calling :py:meth:`open_connection`
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -441,7 +439,7 @@ class AbstractSSHClient(object):
         """Reads output from the current shell session until the `regexp`
         matches or the timeout expires.
 
-        The timeout is set when calling :py:meth:`open_connection()`
+        The timeout is set when calling :py:meth:`open_connection`
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -463,7 +461,7 @@ class AbstractSSHClient(object):
         """Writes `text` repeatedly in the current shell session until the
         `expected` appears in the output or the `timeout` expires.
 
-        :param str text: Text to be written. Uses :py:meth:`write_bare()`
+        :param str text: Text to be written. Uses :py:meth:`write_bare`
             internally so no newline character is appended to the text.
 
         :param str expected: Text to look for in the output.
@@ -496,27 +494,15 @@ class AbstractSSHClient(object):
 
     def put_file(self, source, destination='.', mode='0744', newline='',
                  path_separator=''):
-        """Uploads the file(s) from the local machine to the remote host.
+        """Calls :py:meth:`.AbstractSFTPClient.put_file` with the given
+        arguments.
 
-        :param str source: The path to the file on the local machine.
-            Glob patterns, like '*' and '?', can be used in the source, in
-            which case all the matching files are uploaded.
+        If `path_separator` is empty, the connection specific path separator,
+        which is set when calling :py:meth:`open_connection`, is used instead.
+        This is due to backward compatibility as `path_separator` was moved
+        to a connection specific setting in SSHLibrary 1.2.
 
-        :param str destination: The target path on the remote host.
-            If multiple files are uploaded, e.g. patterns are used in the
-            `source`, this must be a path to an existing directory.
-            The destination defaults to the user's home the remote host.
-
-        :param str mode: The uploaded files on the remote host are created with
-            these modes. The modes are given as traditional Unix octal
-            permissions, such as '0600'.
-
-        :param str newline: If given, the newline characters of the uploaded
-            files on the remote host are converted to this.
-
-        :returns: A List of Tuples for all the uploaded files. These tuples
-            contain the local path as the first value and the remote target
-            path as the second.
+        See :py:meth:`.AbstractSFTPClient.put_file` for documentation.
         """
         # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
@@ -525,27 +511,13 @@ class AbstractSSHClient(object):
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):
-        """Uploads directory(-ies) from the local machine to the remote host,
-        optionally with subdirectories included.
+        """Calls :py:meth:`.AbstractSFTPClient.put_directory` with the given
+        arguments and the connection specific path separator.
 
-        :param str source: The path to the directory on the local machine.
+        The connection specific path separator is set when calling
+        :py:meth:`open_connection`.
 
-        :param str destination: The target path on the remote host.
-            The destination defaults to the user's home the remote host.
-
-        :param str mode: The uploaded files on the remote host are created with
-            these modes. The modes are given as traditional Unix octal
-            permissions, such as '0600'.
-
-        :param str newline: If given, the newline characters of the uploaded
-            files on the remote host are converted to this.
-
-        :param bool recursive: If True, the subdirectories in the `source` path
-            are uploaded as well.
-
-        :returns: A List of Tuples for all the uploaded files. These tuples
-            contain the local path as the first value and the remote target
-            path as the second.
+        See :py:meth:`.AbstractSFTPClient.put_directory` for documentation.
         """
         return self.sftp_client.put_directory(source, destination, mode,
                                               newline,
@@ -553,44 +525,178 @@ class AbstractSSHClient(object):
                                               recursive)
 
     def get_file(self, source, destination='.', path_separator=''):
-        """Downloads file(s) from the remote host to the local machine.
+        """Calls :py:meth:`.AbstractSFTPClient.get_file` with the given
+        arguments.
 
-        :param str source: The path to the file on the remote machine.
-            Glob patterns, like '*' and '?', can be used in the source, in
-            which case all the matching files are downloaded.
+        If `path_separator` is empty, the connection specific path separator,
+        which is set when calling :py:meth:`open_connection`, is used instead.
+        This is due to backward compatibility as `path_separator` was moved
+        to a connection specific setting in SSHLibrary 1.2.
 
-        :param str destination: The target path on the local machine.
-            If many files are downloaded, e.g. patterns are used in the
-            `source`, this must be a path to an existing directory.
-            The destination defaults to the current local working directory.
-
-        :returns: A List of Tuples for all the downloaded files. These tuples
-            contain the remote path as the first value and the local target
-            path as the second.
+        See :py:meth:`.AbstractSFTPClient.get_file` for documentation.
         """
         # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.get_file(source, destination, path_separator)
 
     def get_directory(self, source, destination='.', recursive=False):
-        """Downloads directory(-ies) from the remote host to the local machine,
-        optionally with subdirectories included.
+        """Calls :py:meth:`.AbstractSFTPClient.get_directory` with the given
+        arguments and the connection specific path separator.
 
-        :param str source: The path to the directory on the remote machine.
+        The connection specific path separator is set when calling
+        :py:meth:`open_connection`.
 
-        :param str destination: The target path on the local machine.
-            The destination defaults to the current local working directory.
-
-        :param bool recursive: If True, the subdirectories in the `source` path
-            are downloaded as well.
-
-        :returns: A List of Tuples for all the downloaded files. These tuples
-            contain the remote path as the first value and the local target
-            path as the second.
+        See :py:meth:`.AbstractSFTPClient.get_directory` for documentation.
         """
         return self.sftp_client.get_directory(source, destination,
                                               self.config.path_separator,
                                               recursive)
+
+    def list_dir(self, path, pattern=None, absolute=False):
+        """Calls :py:meth:`.AbstractSFTPClient.list_dir` with the given
+        arguments.
+
+        See :py:meth:`.AbstractSFTPClient.list_dir` for documentation.
+
+        :returns: A sorted list of items returned by
+            :py:meth:`.AbstractSFTPClient.list_dir`
+        """
+        items = self.sftp_client.list_dir(path, pattern, absolute)
+        return sorted(items)
+
+    def list_files_in_dir(self, path, pattern=None, absolute=False):
+        """Calls :py:meth:`.AbstractSFTPClient.list_files_in_dir` with the given
+        arguments.
+
+        See :py:meth:`.AbstractSFTPClient.list_files_in_dir` for documentation.
+
+        :returns: A sorted list of items returned by
+            :py:meth:`.AbstractSFTPClient.list_files_in_dir`
+        """
+        files = self.sftp_client.list_files_in_dir(path, pattern, absolute)
+        return sorted(files)
+
+    def list_dirs_in_dir(self, path, pattern=None, absolute=False):
+        """Calls :py:meth:`.AbstractSFTPClient.list_dirs_in_dir` with the given
+        arguments.
+
+        See :py:meth:`.AbstractSFTPClient.list_dirs_in_dir` for documentation.
+
+        :returns: A sorted list of items returned by
+            :py:meth:`.AbstractSFTPClient.list_dirs_in_dir`
+        """
+        dirs = self.sftp_client.list_dirs_in_dir(path, pattern, absolute)
+        return sorted(dirs)
+
+    def is_dir(self, path):
+        """Calls :py:meth:`.AbstractSFTPClient.is_dir` with the given
+        arguments.
+
+        See :py:meth:`.AbstractSFTPClient.is_dir` for documentation.
+        """
+        return self.sftp_client.is_dir(path)
+
+    def is_file(self, path):
+        """Calls :py:meth:`.AbstractSFTPClient.is_file` with the given
+        arguments.
+
+        See :py:meth:`.AbstractSFTPClient.is_file` for documentation.
+        """
+        return self.sftp_client.is_file(path)
+
+
+class AbstractShell(object):
+    """The base class for the shell implementation.
+
+    The classes derived from this class (e.g. :py:class:`pythonclient.Shell`
+    and :py:class:`javaclient.Shell`) provide the concrete and the language
+    specific implementations for reading and writing in a shell session.
+    """
+
+    def read(self):
+        """ Reads all the output from the shell.
+
+        :returns: The read output.
+        """
+        raise NotImplementedError
+
+    def read_byte(self):
+        """ Reads a byte from the shell.
+
+        :returns: The read byte.
+        """
+        raise NotImplementedError
+
+    def write(self, text):
+        """ Writes `text` in the current shell.
+
+        :param str text: The text to be written. No newline characters should
+            be appended automatically by this method.
+        """
+        raise NotImplementedError
+
+
+class AbstractSFTPClient(object):
+    """The base class for the SFTP implementation.
+
+    The classes derived from this class (e.g. :py:class:`pythonclient.SFTPClient`
+    and :py:class:`javaclient.SFTPClient`) provide the concrete and the language
+    specific implementations for getting, putting and listing files and
+    directories.
+    """
+
+    def __init__(self):
+        self._homedir = self._absolute_path('.')
+
+    def _absolute_path(self, path):
+        """Returns an absolute path for the given `path`.
+
+        :param str path: The path to get the absolute path for.
+
+        :returns: The absolute path.
+        """
+        raise NotImplementedError
+
+    def is_file(self, path):
+        """Checks if the `path` points to a regular file on the remote host.
+
+        If the `path` is a symlink, its destination is checked instead.
+
+        :param str path: The path to check.
+
+        :returns: True if the `path` is points to an existing regular file.
+            False otherwise.
+        """
+        try:
+            item = self._stat(path)
+        except IOError:
+            return False
+        return item.is_regular()
+
+    def _stat(self, path):
+        """Returns a custom file info object for the given `path`.
+
+        :param str path: The path to stat.
+
+        :returns: An object of type :py:class:`SFTPFileInfo`.
+        """
+        raise NotImplementedError
+
+    def is_dir(self, path):
+        """Checks if the `path` points to a directory on the remote host.
+
+        If the `path` is a symlink, its destination is checked instead.
+
+        :param str path: The path to check.
+
+        :returns: True, if the `path` is points to an existing directory.
+            False otherwise.
+        """
+        try:
+            item = self._stat(path)
+        except IOError:
+            return False
+        return item.is_directory()
 
     def list_dir(self, path, pattern=None, absolute=False):
         """Gets the item names, or optionally the absolute paths, on the given
@@ -612,112 +718,6 @@ class AbstractSSHClient(object):
             paths. In both cases, the List is first filtered by the `pattern`
             if given.
         """
-        items = self.sftp_client.list(path, pattern, absolute)
-        return sorted(items)
-
-    def list_files_in_dir(self, path, pattern=None, absolute=False):
-        """Gets the file names, or optionally the absolute paths, of the regular
-        files on the given `path` on the remote host.
-.
-        :param str path: The path on the remote host to list.
-
-        :param str pattern: If given, only the file names that match
-            the given pattern are returned. Please do note, that the `pattern`
-            is never matched against the full path, even if `absolute` is set True.
-
-        :param bool absolute: If True, the absolute paths of the regular files
-            are returned instead of the file names.
-
-        :returns: A List containing either the regular file names or the absolute
-            paths. In both cases, the List is first filtered by the `pattern`
-            if given.
-        """
-        files = self.sftp_client.list_files(path, pattern, absolute)
-        return sorted(files)
-
-    def list_dirs_in_dir(self, path, pattern=None, absolute=False):
-        """Gets the directory names, or optionally the absolute paths, on the
-        given `path` on the remote host.
-
-        :param str path: The path on the remote host to list.
-
-        :param str pattern: If given, only the directory names that match
-            the given pattern are returned. Please do note, that the `pattern`
-            is never matched against the full path, even if `absolute` is set True.
-
-        :param bool absolute: If True, the absolute paths of the directories
-            are returned instead of the directory names.
-
-        :returns: A List containing either the directory names or the absolute
-            paths. In both cases, the List is first filtered by the `pattern`
-            if given.
-        """
-        dirs = self.sftp_client.list_dirs(path, pattern, absolute)
-        return sorted(dirs)
-
-    def dir_exists(self, path):
-        """Checks if the `path` points to a directory on the remote host.
-
-        If the `path` is a symlink, its destination is checked instead.
-
-        :param str path: The path to check.
-
-        :returns: True if the `path` is points to a directory, False if the
-            `path` does not exists or points to something else than a directory.
-        """
-        return self.sftp_client.is_dir(path)
-
-    def file_exists(self, path):
-        """Checks if the `path` points to a regular file on the remote host.
-
-        If the `path` is a symlink, its destination is checked instead.
-
-        :param str path: The path to check.
-
-        :returns: True if the `path` is points to a regular file, False if the
-            `path` does not exists or points to something else than a regular file.
-        """
-        return self.sftp_client.is_file(path)
-
-
-class AbstractShell(object):
-
-    def read(self):
-        raise NotImplementedError
-
-    def read_byte(self):
-        raise NotImplementedError
-
-    def write(self):
-        raise NotImplementedError
-
-
-class AbstractSFTPClient(object):
-
-    def __init__(self):
-        self._homedir = self._absolute_path('.')
-
-    def _absolute_path(self, path):
-        raise NotImplementedError
-
-    def is_file(self, path):
-        try:
-            item = self._stat(path)
-        except IOError:
-            return False
-        return item.is_regular()
-
-    def _stat(self):
-        raise NotImplementedError
-
-    def is_dir(self, path):
-        try:
-            item = self._stat(path)
-        except IOError:
-            return False
-        return item.is_directory()
-
-    def list(self, path, pattern=None, absolute=False):
         return self._list_filtered(path, self._get_item_names, pattern,
                                    absolute)
 
@@ -739,6 +739,11 @@ class AbstractSFTPClient(object):
         return [item.name for item in self._list(path)]
 
     def _list(self, path):
+        """Yields :py:class:`SFTPFileInfo` objects for the all the items in the
+        given `path`.
+
+        :param str path: The path to get the objects for.
+        """
         raise NotImplementedError
 
     def _filter_by_pattern(self, items, pattern):
@@ -752,14 +757,46 @@ class AbstractSFTPClient(object):
             absolute_path += '/'
         return [absolute_path + name for name in items]
 
-    def list_files(self, path, pattern=None, absolute=False):
+    def list_files_in_dir(self, path, pattern=None, absolute=False):
+        """Gets the file names, or optionally the absolute paths, of the regular
+        files on the given `path` on the remote host.
+.
+        :param str path: The path on the remote host to list.
+
+        :param str pattern: If given, only the file names that match
+            the given pattern are returned. Please do note, that the `pattern`
+            is never matched against the full path, even if `absolute` is set True.
+
+        :param bool absolute: If True, the absolute paths of the regular files
+            are returned instead of the file names.
+
+        :returns: A List containing either the regular file names or the absolute
+            paths. In both cases, the List is first filtered by the `pattern`
+            if given.
+        """
         return self._list_filtered(path, self._get_file_names, pattern,
                                    absolute)
 
     def _get_file_names(self, path):
         return [item.name for item in self._list(path) if item.is_regular()]
 
-    def list_dirs(self, path, pattern=None, absolute=False):
+    def list_dirs_in_dir(self, path, pattern=None, absolute=False):
+        """Gets the directory names, or optionally the absolute paths, on the
+        given `path` on the remote host.
+
+        :param str path: The path on the remote host to list.
+
+        :param str pattern: If given, only the directory names that match
+            the given pattern are returned. Please do note, that the `pattern`
+            is never matched against the full path, even if `absolute` is set True.
+
+        :param bool absolute: If True, the absolute paths of the directories
+            are returned instead of the directory names.
+
+        :returns: A List containing either the directory names or the absolute
+            paths. In both cases, the List is first filtered by the `pattern`
+            if given.
+        """
         return self._list_filtered(path, self._get_directory_names, pattern,
                                    absolute)
 
@@ -768,10 +805,29 @@ class AbstractSFTPClient(object):
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
+        """Downloads directory(-ies) from the remote host to the local machine,
+        optionally with subdirectories included.
+
+        :param str source: The path to the directory on the remote machine.
+
+        :param str destination: The target path on the local machine.
+            The destination defaults to the current local working directory.
+
+        :param str path_separator: The path separator used for joining the
+            paths on the remote host. On Windows, this must be set as `\`.
+            The default is `/`, which is also the default on Linux-like systems.
+
+        :param bool recursive: If True, the subdirectories in the `source` path
+            are downloaded as well.
+
+        :returns: A List of 2-Tuples for all the downloaded files. These tuples
+            contain the remote path as the first value and the local target
+            path as the second.
+        """
         source = self._remove_ending_path_separator(path_separator, source)
         self._verify_remote_dir_exists(source)
         files = []
-        items = self.list(source)
+        items = self.list_dir(source)
         if items:
             for item in items:
                 remote = source + path_separator + item
@@ -792,6 +848,25 @@ class AbstractSFTPClient(object):
         return source
 
     def get_file(self, source, destination, path_separator='/'):
+        """Downloads file(s) from the remote host to the local machine.
+
+        :param str source: The path to the file on the remote machine.
+            Glob patterns, like '*' and '?', can be used in the source, in
+            which case all the matching files are downloaded.
+
+        :param str destination: The target path on the local machine.
+            If many files are downloaded, e.g. patterns are used in the
+            `source`, this must be a path to an existing directory.
+            The destination defaults to the current local working directory.
+
+        :param str path_separator: The path separator used for joining the
+            paths on the remote host. On Windows, this must be set as `\`.
+            The default is `/`, which is also the default on Linux-like systems.
+
+        :returns: A List of 2-Tuples for all the downloaded files. These tuples
+            contain the remote path as the first value and the local target
+            path as the second.
+        """
         remote_files = self._get_get_file_sources(source, path_separator)
         if not remote_files:
             msg = "There were no source files matching '%s'." % source
@@ -810,7 +885,7 @@ class AbstractSFTPClient(object):
         if not path:
             path = '.'
         return [filename for filename in
-                self.list_files(path, pattern, absolute=True)]
+                self.list_files_in_dir(path, pattern, absolute=True)]
 
     def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
@@ -830,11 +905,44 @@ class AbstractSFTPClient(object):
         if not os.path.exists(destination):
             os.makedirs(destination)
 
-    def _get_file(self, src, dst):
+    def _get_file(self, source, destination):
+        """Gets the `source` file from the remote host to the `destination`
+        at the local machine
+
+        :param str source: Path to the file on the remote host.
+
+        :param str destination: The target path on the local machine.
+        """
         raise NotImplementedError
 
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
+        """Uploads directory(-ies) from the local machine to the remote host,
+        optionally with subdirectories included.
+
+        :param str source: The path to the directory on the local machine.
+
+        :param str destination: The target path on the remote host.
+            The destination defaults to the user's home the remote host.
+
+        :param str mode: The uploaded files on the remote host are created with
+            these modes. The modes are given as traditional Unix octal
+            permissions, such as '0600'.
+
+        :param str newline: If given, the newline characters of the uploaded
+            files on the remote host are converted to this.
+
+        :param str path_separator: The path separator used for joining the
+            paths on the remote host. On Windows, this must be set as `\`.
+            The default is `/`, which is also the default on Linux-like systems.
+
+        :param bool recursive: If True, the subdirectories in the `source` path
+            are uploaded as well.
+
+        :returns: A List of 2-Tuples for all the uploaded files. These tuples
+            contain the local path as the first value and the remote target
+            path as the second.
+        """
         self._verify_local_dir_exists(source)
         destination = self._remove_ending_path_separator(path_separator,
                                                          destination)
@@ -870,6 +978,32 @@ class AbstractSFTPClient(object):
                                      % path)
 
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
+        """Uploads the file(s) from the local machine to the remote host.
+
+        :param str source: The path to the file on the local machine.
+            Glob patterns, like '*' and '?', can be used in the source, in
+            which case all the matching files are uploaded.
+
+        :param str destination: The target path on the remote host.
+            If multiple files are uploaded, e.g. patterns are used in the
+            `source`, this must be a path to an existing directory.
+            The destination defaults to the user's home the remote host.
+
+        :param str mode: The uploaded files on the remote host are created with
+            these modes. The modes are given as traditional Unix octal
+            permissions, such as '0600'.
+
+        :param str newline: If given, the newline characters of the uploaded
+            files on the remote host are converted to this.
+
+        :param str path_separator: The path separator used for joining the
+            paths on the remote host. On Windows, this must be set as `\`.
+            The default is `/`, which is also the default on Linux-like systems.
+
+        :returns: A List of 2-Tuples for all the uploaded files. These tuples
+            contain the local path as the first value and the remote target
+            path as the second.
+        """
         mode = int(mode, 8)
         newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
         local_files = self._get_put_file_sources(sources)
@@ -931,31 +1065,63 @@ class AbstractSFTPClient(object):
                 self._client.mkdir(current_dir, 0744)
 
     def _put_file(self, source, destination, mode, newline):
-        remotefile = self._create_remote_file(destination, mode)
-        with open(source, 'rb') as localfile:
+        remote_file = self._create_remote_file(destination, mode)
+        with open(source, 'rb') as local_file:
             position = 0
             while True:
-                data = localfile.read(4096)
+                data = local_file.read(4096)
                 if not data:
                     break
                 if newline and '\n' in data:
                     data = data.replace('\n', newline)
-                self._write_to_remote_file(remotefile, data, position)
+                self._write_to_remote_file(remote_file, data, position)
                 position += len(data)
-            self._close_remote_file(remotefile)
+            self._close_remote_file(remote_file)
 
     def _create_remote_file(self, destination, mode):
+        """Creates a new empty file on the remote host at `destination` with the
+        given `mode`.
+
+        :param str destination: The path where the file will be created to.
+
+        :param str mode: The file will be created with these modes. The modes
+            are given as traditional Unix octal permissions, such as '0600'.
+
+        :returns: The file object defined by the concrete implementation.
+        """
         raise NotImplementedError
 
     def _write_to_remote_file(self, remote_file, data, position):
+        """Writes to the `remote_file`.
+
+        :param str remote_file: The object returned by
+            :py:meth:`_create_remote_file`. Its type depends on the concrete
+            implementation.
+
+        :param str data: The actual data to write into the file.
+
+        :param str position: The position in a number of bytes (an integer)
+            where to start the writing from.
+        """
         raise NotImplementedError
 
     def _close_remote_file(self, remote_file):
+        """Closes the `remote_file`.
+
+        :param str remote_file`: The object returned by
+            :py:meth:`_create_remote_file`. Its type depends on the concrete
+            implementation.
+        """
         raise NotImplementedError
 
 
 class AbstractCommand(object):
-    """Base class for remote commands."""
+    """The base class for the remote command.
+
+    The classes derived from this class (e.g. :py:class:`pythonclient.RemoteCommand`
+    and :py:class:`javaclient.RemoteCommand`) provide the concrete and the
+    language specific implementations for running the command on the remote.
+    """
 
     def __init__(self, command, encoding):
         self._command = command
@@ -963,32 +1129,46 @@ class AbstractCommand(object):
         self._session = None
 
     def run_in(self, session):
-        """Run this command in given SSH session.
+        """Run this command in the given shell `session`.
 
-        :param session: a session in an already open SSH connection
+        :param session: A session in the already open connection.
         """
         self._session = session
         self._execute()
 
     def _execute(self):
+        """Executes this command in the session set with :py:meth:`run_in`.
+        """
         raise NotImplementedError
 
     def read_outputs(self):
         """Return outputs of this command.
 
-        :return: a 3-tuple of stdout, stderr and return code.
+        :returns: A 3-Tuple (stdout, stderr, return_code) with values
+            `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         raise NotImplementedError
 
 
 class SFTPFileInfo(object):
+    """A wrapper class for the language specific file information objects
+    returned by the concrete client implementations.
+    """
 
     def __init__(self, name, mode):
         self.name = name
         self.mode = mode
 
     def is_regular(self):
+        """Checks if this file is a regular file.
+
+        :returns: True, if the file is a regular file. False otherwise.
+        """
         return stat.S_ISREG(self.mode)
 
     def is_directory(self):
+        """Checks if this file is a directory.
+
+        :returns: True, if the file is a regular file. False otherwise.
+        """
         return stat.S_ISDIR(self.mode)
