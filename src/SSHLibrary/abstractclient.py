@@ -52,10 +52,9 @@ class _ClientConfiguration(Configuration):
 class AbstractSSHClient(object):
     """The base class for the SSH client implementation.
 
-    This class defines the public API. Subclasses (:py:class:`PythonSSHClient`
-    and :py:class:`JavaSSHClient`) provide the language specific concrete
-    implementations. Similarly, the classes :py:class:`AbstractSFTPClient` and
-    :py:class:`AbstractShell` define the SFTP and the shell interfaces.
+    This class defines the public API. Subclasses (:py:class:`pythonclient.
+    PythonSSHClient` and :py:class:`javaclient.JavaSSHClient`) provide the
+    language specific concrete implementations.
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
@@ -69,11 +68,12 @@ class AbstractSSHClient(object):
 
     @staticmethod
     def enable_logging(path):
-        """Enable logging of SSH events to a file.
+        """The concrete implementation that enables the logging of SSH events to
+        a file.
 
-        :param str path: Path to the file where log is written to.
+        :param str path: Path to the file the log is written to.
 
-        :returns: A boolean value whether the logging was successfully enabled.
+        :returns: `True`, if logging was successfully enabled. False otherwise.
         """
         raise NotImplementedError
 
@@ -108,7 +108,8 @@ class AbstractSSHClient(object):
         return self._shell
 
     def _create_sftp_client(self):
-        """Creates the SFTP client for the connection.
+        """The concrete implementation that creates the SFTP client for the
+        connection.
 
         :returns: An object of the class that inherits from
             :py:class:`AbstractSFTPClient`.
@@ -116,7 +117,7 @@ class AbstractSSHClient(object):
         raise NotImplementedError
 
     def _create_shell(self):
-        """Creates the shell session for the connection.
+        """The concrete implementation that creates the shell for the connection.
 
         :returns: An object of the class that inherits from
             :py:class:`AbstractShell`.
@@ -128,7 +129,7 @@ class AbstractSSHClient(object):
         self.client.close()
 
     def login(self, username, password, delay=None):
-        """Logs into the remote host using the password authentication.
+        """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
         thus clearing the output. If prompt is set, everything until the prompt
@@ -140,8 +141,8 @@ class AbstractSSHClient(object):
 
         :param str password: Password for the `username`.
 
-        :param str delay: The `delay` passed to :py:meth:`read` for
-            reading the output after logging in. This is only effective if
+        :param str delay: The `delay` passed to :py:meth:`read` for reading
+            the output after logging in. The delay is only effective if
             the prompt is not set.
 
         :raises SSHClientException: If logging in failed.
@@ -176,6 +177,11 @@ class AbstractSSHClient(object):
         """
         raise NotImplementedError
 
+    def _read_login_output(self, delay):
+        if self.config.prompt:
+            return self.read_until_prompt()
+        return self.read(delay)
+
     def login_with_public_key(self, username, keyfile, password, delay=None):
         """Logs into the remote host using the public key authentication.
 
@@ -191,8 +197,8 @@ class AbstractSSHClient(object):
 
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
-        :param str delay: The `delay` passed to :py:meth:`read` for
-            reading the output after logging in. This is only effective if
+        :param str delay: The `delay` passed to :py:meth:`read` for reading
+            the output after logging in. The delay is only effective if
             the prompt is not set.
 
         :raises SSHClientException: If logging in failed.
@@ -227,15 +233,10 @@ class AbstractSSHClient(object):
 
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
-        :raises SSHClientException: If logging in failed (e.g. wrong `username`
-            was given, invalid `keyfile` was encountered, etc.)
+        :raises SSHClientException: If logging in failed for any reason
+            (e.g. wrong `username` was given, the `keyfile` was invalid, etc.)
         """
         raise NotImplementedError
-
-    def _read_login_output(self, delay):
-        if self.config.prompt:
-            return self.read_until_prompt()
-        return self.read(delay)
 
     def execute_command(self, command):
         """Executes the `command` on the remote host.
@@ -243,13 +244,12 @@ class AbstractSSHClient(object):
         This method waits until the output triggered by the execution of the
         `command` is available and then returns it.
 
-        The `command` is always executed in a new shell session, meaning that
-        changes to the environment are not visible to the subsequent calls of
-        this method.
+        The `command` is always executed in a new shell, meaning that changes to
+        the environment are not visible to the subsequent calls of this method.
 
         :param str command: The command to be executed on the remote host.
 
-        :returns: A 3-Tuple (stdout, stderr, return_code) with values
+        :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         self.start_command(command)
@@ -261,9 +261,8 @@ class AbstractSSHClient(object):
         The started `command` is pushed into an internal stack. This stack
         always has the latest started `command` on top of it.
 
-        The `command` is always started in a new shell session, meaning that
-        changes to the environment are not visible to the subsequent calls of
-        this method.
+        The `command` is always started in a new shell, meaning that changes to
+        the environment are not visible to the subsequent calls of this method.
 
         This method does not return anything. Use :py:meth:`read_command_output`
         to get the output of the previous started command.
@@ -274,15 +273,14 @@ class AbstractSSHClient(object):
         self._started_commands.append(self._start_command(command))
 
     def _start_command(self, command):
-        """The concrete implementation of starting `command` on the remote
+        """The concrete implementation of starting the `command` on the remote
         host.
 
-        This method should instantiate from a class derived from
-        :py:class:`AbstractCommand`, instantiate a new shell session and run
-        the `command` on it.
+        This method instantiates the class derived from :py:class:`AbstractCommand`,
+        and runs the `command` in a new shell.
 
         :returns: An object of the class that inherits from
-            :py:class:`RemoteCommand`.
+            :py:class:`AbstractCommand`.
         """
         raise NotImplementedError
 
@@ -290,13 +288,13 @@ class AbstractSSHClient(object):
         """Reads the output of the previous started command.
 
         The previous started command, started with :py:meth:`start_command`,
-        is popped out of the stack and its outputs (stdout, stderr, return code)
-        are read and returned.
+        is popped out of the stack and its outputs (stdout, stderr and the
+        return code) are read and returned.
 
         :raises SSHClientException: If there are no started commands to read
             output from.
 
-        :returns: A 3-Tuple (stdout, stderr, return_code) with values
+        :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         try:
@@ -305,11 +303,11 @@ class AbstractSSHClient(object):
             raise SSHClientException('No started commands to read output from.')
 
     def write(self, text, add_newline=False):
-        """Writes `text` in the current shell session.
+        """Writes `text` in the current shell.
 
         :param str text: The text to be written.
 
-        :param bool add_newline: If True, the configured newline will be
+        :param bool add_newline: If `True`, the configured newline will be
             appended to the `text` before writing it on the remote host.
             The newline is set when calling :py:meth:`open_connection`
         """
@@ -319,17 +317,17 @@ class AbstractSSHClient(object):
         self.shell.write(text)
 
     def read(self, delay=None):
-        """Reads all output available in the current shell session.
+        """Reads all output available in the current shell.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
 
         :param str delay: If given, this method reads again after the delay
-            to see if there is still more output is available. This wait-read
-            cycle is repeated as long as further reads return more output or the
+            to see if there is more output is available. This wait-read cycle is
+            repeated as long as further reads return more output or the
             configured timeout expires. The timeout is set when calling
             :py:meth:`open_connection`. The delay can be given as an integer
-            (number of seconds) or in Robot Framework's time format, e.g.
+            (the number of seconds) or in Robot Framework's time format, e.g.
             `4.5s`, `3 minutes`, `2 min 3 sec`.
 
         :returns: The read output from the remote host.
@@ -355,7 +353,7 @@ class AbstractSSHClient(object):
         return output
 
     def read_char(self):
-        """Reads a single char from the current shell session.
+        """Reads a single char from the current shell.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -371,10 +369,10 @@ class AbstractSSHClient(object):
                 pass
 
     def read_until(self, expected):
-        """Reads output from the current shell session until the `expected` text
-        is encountered or the timeout expires.
+        """Reads output from the current shell until the `expected` text is
+        encountered or the timeout expires.
 
-        The timeout is set when calling :py:meth:`open_connection`
+        The timeout is set when calling :py:meth:`open_connection`.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -401,11 +399,11 @@ class AbstractSSHClient(object):
                                  % (expected, timeout, output))
 
     def read_until_newline(self):
-        """Reads output from the current shell session until a newline character
-        is encountered or the timeout expires.
+        """Reads output from the current shell until a newline character is
+        encountered or the timeout expires.
 
         The newline character and the timeout are set when calling
-        :py:meth:`open_connection`
+        :py:meth:`open_connection`.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -418,10 +416,10 @@ class AbstractSSHClient(object):
         return self.read_until(self.config.newline)
 
     def read_until_prompt(self):
-        """Reads output from the current shell session until the prompt
-        is encountered or the timeout expires.
+        """Reads output from the current shell until the prompt is encountered
+        or the timeout expires.
 
-        The prompt and timeout are set when calling :py:meth:`open_connection`
+        The prompt and timeout are set when calling :py:meth:`open_connection`.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -436,21 +434,21 @@ class AbstractSSHClient(object):
         return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):
-        """Reads output from the current shell session until the `regexp`
-        matches or the timeout expires.
+        """Reads output from the current shell until the `regexp` matches or
+        the timeout expires.
 
-        The timeout is set when calling :py:meth:`open_connection`
+        The timeout is set when calling :py:meth:`open_connection`.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
 
         :param regexp: Either the regular expression as a string or a compiled
-            Regex object used for the matching.
+            Regex object.
 
         :raises SSHClientException: If no match against `regexp` is found when
             the timeout expires.
 
-        :returns: The read output up and until the matching `regexp`.
+        :returns: The read output up and until the `regexp` matches.
         """
         regexp = self._encode(regexp)
         if isinstance(regexp, basestring):
@@ -458,25 +456,26 @@ class AbstractSSHClient(object):
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
     def write_until_expected(self, text, expected, timeout, interval):
-        """Writes `text` repeatedly in the current shell session until the
-        `expected` appears in the output or the `timeout` expires.
+        """Writes `text` repeatedly in the current shell until the `expected`
+        appears in the output or the `timeout` expires.
 
         :param str text: Text to be written. Uses :py:meth:`write_bare`
-            internally so no newline character is appended to the text.
+            internally so no newline character is appended to the written text.
 
         :param str expected: Text to look for in the output.
 
         :param int timeout: The timeout during which `expected` must appear
-            in the output. Can be given as an integer (number of seconds) or in
-            Robot Framework's time format, e.g. `4.5s`, `3 minutes`, `2 min 3 sec`.
+            in the output. Can be given as an integer (the number of seconds)
+            or in Robot Framework's time format, e.g. `4.5s`, `3 minutes`,
+            `2 min 3 sec`.
 
         :param int interval: Time to wait between the repeated writings of
-            `expected`.
+            `text`.
 
         :raises SSHClientException: If `expected` is not found in the output
             before the `timeout` expires.
 
-        :returns: The read output, including the `expected`.
+        :returns: The read output, including the encountered `expected` text.
         """
         expected = self._encode(expected)
         interval = TimeEntry(interval)
@@ -494,7 +493,7 @@ class AbstractSSHClient(object):
 
     def put_file(self, source, destination='.', mode='0744', newline='',
                  path_separator=''):
-        """Calls :py:meth:`.AbstractSFTPClient.put_file` with the given
+        """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
         arguments.
 
         If `path_separator` is empty, the connection specific path separator,
@@ -502,7 +501,7 @@ class AbstractSSHClient(object):
         This is due to backward compatibility as `path_separator` was moved
         to a connection specific setting in SSHLibrary 1.2.
 
-        See :py:meth:`.AbstractSFTPClient.put_file` for documentation.
+        See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
         # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
@@ -511,13 +510,13 @@ class AbstractSSHClient(object):
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):
-        """Calls :py:meth:`.AbstractSFTPClient.put_directory` with the given
+        """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
 
         The connection specific path separator is set when calling
         :py:meth:`open_connection`.
 
-        See :py:meth:`.AbstractSFTPClient.put_directory` for documentation.
+        See :py:meth:`AbstractSFTPClient.put_directory` for more documentation.
         """
         return self.sftp_client.put_directory(source, destination, mode,
                                               newline,
@@ -525,7 +524,7 @@ class AbstractSSHClient(object):
                                               recursive)
 
     def get_file(self, source, destination='.', path_separator=''):
-        """Calls :py:meth:`.AbstractSFTPClient.get_file` with the given
+        """Calls :py:meth:`AbstractSFTPClient.get_file` with the given
         arguments.
 
         If `path_separator` is empty, the connection specific path separator,
@@ -533,20 +532,20 @@ class AbstractSSHClient(object):
         This is due to backward compatibility as `path_separator` was moved
         to a connection specific setting in SSHLibrary 1.2.
 
-        See :py:meth:`.AbstractSFTPClient.get_file` for documentation.
+        See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
         # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.get_file(source, destination, path_separator)
 
     def get_directory(self, source, destination='.', recursive=False):
-        """Calls :py:meth:`.AbstractSFTPClient.get_directory` with the given
+        """Calls :py:meth:`AbstractSFTPClient.get_directory` with the given
         arguments and the connection specific path separator.
 
         The connection specific path separator is set when calling
         :py:meth:`open_connection`.
 
-        See :py:meth:`.AbstractSFTPClient.get_directory` for documentation.
+        See :py:meth:`AbstractSFTPClient.get_directory` for more documentation.
         """
         return self.sftp_client.get_directory(source, destination,
                                               self.config.path_separator,
@@ -556,51 +555,49 @@ class AbstractSSHClient(object):
         """Calls :py:meth:`.AbstractSFTPClient.list_dir` with the given
         arguments.
 
-        See :py:meth:`.AbstractSFTPClient.list_dir` for documentation.
+        See :py:meth:`AbstractSFTPClient.list_dir` for more documentation.
 
         :returns: A sorted list of items returned by
-            :py:meth:`.AbstractSFTPClient.list_dir`
+            :py:meth:`AbstractSFTPClient.list_dir`.
         """
         items = self.sftp_client.list_dir(path, pattern, absolute)
         return sorted(items)
 
     def list_files_in_dir(self, path, pattern=None, absolute=False):
-        """Calls :py:meth:`.AbstractSFTPClient.list_files_in_dir` with the given
+        """Calls :py:meth:`AbstractSFTPClient.list_files_in_dir` with the given
         arguments.
 
-        See :py:meth:`.AbstractSFTPClient.list_files_in_dir` for documentation.
+        See :py:meth:`AbstractSFTPClient.list_files_in_dir` for more documentation.
 
         :returns: A sorted list of items returned by
-            :py:meth:`.AbstractSFTPClient.list_files_in_dir`
+            :py:meth:`AbstractSFTPClient.list_files_in_dir`.
         """
         files = self.sftp_client.list_files_in_dir(path, pattern, absolute)
         return sorted(files)
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
-        """Calls :py:meth:`.AbstractSFTPClient.list_dirs_in_dir` with the given
+        """Calls :py:meth:`AbstractSFTPClient.list_dirs_in_dir` with the given
         arguments.
 
-        See :py:meth:`.AbstractSFTPClient.list_dirs_in_dir` for documentation.
+        See :py:meth:`AbstractSFTPClient.list_dirs_in_dir` for more documentation.
 
         :returns: A sorted list of items returned by
-            :py:meth:`.AbstractSFTPClient.list_dirs_in_dir`
+            :py:meth:`AbstractSFTPClient.list_dirs_in_dir`.
         """
         dirs = self.sftp_client.list_dirs_in_dir(path, pattern, absolute)
         return sorted(dirs)
 
     def is_dir(self, path):
-        """Calls :py:meth:`.AbstractSFTPClient.is_dir` with the given
-        arguments.
+        """Calls :py:meth:`AbstractSFTPClient.is_dir` with the given `path`.
 
-        See :py:meth:`.AbstractSFTPClient.is_dir` for documentation.
+        See :py:meth:`AbstractSFTPClient.is_dir` for more documentation.
         """
         return self.sftp_client.is_dir(path)
 
     def is_file(self, path):
-        """Calls :py:meth:`.AbstractSFTPClient.is_file` with the given
-        arguments.
+        """Calls :py:meth:`AbstractSFTPClient.is_file` with the given `path`.
 
-        See :py:meth:`.AbstractSFTPClient.is_file` for documentation.
+        See :py:meth:`AbstractSFTPClient.is_file` for more documentation.
         """
         return self.sftp_client.is_file(path)
 
@@ -614,24 +611,25 @@ class AbstractShell(object):
     """
 
     def read(self):
-        """ Reads all the output from the shell.
+        """The concrete implementation that reads all the output from the shell.
 
         :returns: The read output.
         """
         raise NotImplementedError
 
     def read_byte(self):
-        """ Reads a byte from the shell.
+        """The concrete implementation that reads a single byte from the shell.
 
         :returns: The read byte.
         """
         raise NotImplementedError
 
     def write(self, text):
-        """ Writes `text` in the current shell.
+        """The concrete implementation that writes the `text` in the current
+        shell.
 
-        :param str text: The text to be written. No newline characters should
-            be appended automatically by this method.
+        :param str text: The text to be written. No newline characters are
+            be appended automatically to the written text by this method.
         """
         raise NotImplementedError
 
@@ -649,7 +647,8 @@ class AbstractSFTPClient(object):
         self._homedir = self._absolute_path('.')
 
     def _absolute_path(self, path):
-        """Returns an absolute path for the given `path`.
+        """The concrete implementation that returns the absolute path for
+        the given `path` on the remote host.
 
         :param str path: The path to get the absolute path for.
 
@@ -664,7 +663,7 @@ class AbstractSFTPClient(object):
 
         :param str path: The path to check.
 
-        :returns: True if the `path` is points to an existing regular file.
+        :returns: `True`, if the `path` is points to an existing regular file.
             False otherwise.
         """
         try:
@@ -674,9 +673,10 @@ class AbstractSFTPClient(object):
         return item.is_regular()
 
     def _stat(self, path):
-        """Returns a custom file info object for the given `path`.
+        """The concrete implementation that returns a :py:class:`SFTPFileInfo`
+        object for the given `path`.
 
-        :param str path: The path to stat.
+        :param str path: The path to get the file information for.
 
         :returns: An object of type :py:class:`SFTPFileInfo`.
         """
@@ -689,7 +689,7 @@ class AbstractSFTPClient(object):
 
         :param str path: The path to check.
 
-        :returns: True, if the `path` is points to an existing directory.
+        :returns: `True`, if the `path` is points to an existing directory.
             False otherwise.
         """
         try:
@@ -709,14 +709,15 @@ class AbstractSFTPClient(object):
 
         :param str pattern: If given, only the item names that match
             the given pattern are returned. Please do note, that the `pattern`
-            is never matched against the full path, even if `absolute` is set True.
+            is never matched against the full path, even if `absolute` is set
+            `True`.
 
-        :param bool absolute: If True, the absolute paths of the items are
+        :param bool absolute: If `True`, the absolute paths of the items are
             returned instead of the item names.
 
-        :returns: A List containing either the item names or the absolute
+        :returns: A list containing either the item names or the absolute
             paths. In both cases, the List is first filtered by the `pattern`
-            if given.
+            if it is given.
         """
         return self._list_filtered(path, self._get_item_names, pattern,
                                    absolute)
@@ -739,8 +740,8 @@ class AbstractSFTPClient(object):
         return [item.name for item in self._list(path)]
 
     def _list(self, path):
-        """Yields :py:class:`SFTPFileInfo` objects for the all the items in the
-        given `path`.
+        """The concrete implementation that yields :py:class:`SFTPFileInfo`
+        objects for the all the items in the given `path`.
 
         :param str path: The path to get the objects for.
         """
@@ -765,14 +766,15 @@ class AbstractSFTPClient(object):
 
         :param str pattern: If given, only the file names that match
             the given pattern are returned. Please do note, that the `pattern`
-            is never matched against the full path, even if `absolute` is set True.
+            is never matched against the full path, even if `absolute` is set
+            `True`.
 
-        :param bool absolute: If True, the absolute paths of the regular files
+        :param bool absolute: If `True`, the absolute paths of the regular files
             are returned instead of the file names.
 
-        :returns: A List containing either the regular file names or the absolute
+        :returns: A list containing either the regular file names or the absolute
             paths. In both cases, the List is first filtered by the `pattern`
-            if given.
+            if it is given.
         """
         return self._list_filtered(path, self._get_file_names, pattern,
                                    absolute)
@@ -788,14 +790,15 @@ class AbstractSFTPClient(object):
 
         :param str pattern: If given, only the directory names that match
             the given pattern are returned. Please do note, that the `pattern`
-            is never matched against the full path, even if `absolute` is set True.
+            is never matched against the full path, even if `absolute` is set
+            `True`.
 
-        :param bool absolute: If True, the absolute paths of the directories
+        :param bool absolute: If `True`, the absolute paths of the directories
             are returned instead of the directory names.
 
-        :returns: A List containing either the directory names or the absolute
+        :returns: A list containing either the directory names or the absolute
             paths. In both cases, the List is first filtered by the `pattern`
-            if given.
+            if it is given.
         """
         return self._list_filtered(path, self._get_directory_names, pattern,
                                    absolute)
@@ -817,10 +820,10 @@ class AbstractSFTPClient(object):
             paths on the remote host. On Windows, this must be set as `\`.
             The default is `/`, which is also the default on Linux-like systems.
 
-        :param bool recursive: If True, the subdirectories in the `source` path
-            are downloaded as well.
+        :param bool recursive: If `True`, the subdirectories in the `source`
+            path are downloaded as well.
 
-        :returns: A List of 2-Tuples for all the downloaded files. These tuples
+        :returns: A list of 2-tuples for all the downloaded files. These tuples
             contain the remote path as the first value and the local target
             path as the second.
         """
@@ -856,14 +859,14 @@ class AbstractSFTPClient(object):
 
         :param str destination: The target path on the local machine.
             If many files are downloaded, e.g. patterns are used in the
-            `source`, this must be a path to an existing directory.
+            `source`, then this must be a path to an existing directory.
             The destination defaults to the current local working directory.
 
         :param str path_separator: The path separator used for joining the
             paths on the remote host. On Windows, this must be set as `\`.
             The default is `/`, which is also the default on Linux-like systems.
 
-        :returns: A List of 2-Tuples for all the downloaded files. These tuples
+        :returns: A list of 2-tuples for all the downloaded files. These tuples
             contain the remote path as the first value and the local target
             path as the second.
         """
@@ -906,8 +909,8 @@ class AbstractSFTPClient(object):
             os.makedirs(destination)
 
     def _get_file(self, source, destination):
-        """Gets the `source` file from the remote host to the `destination`
-        at the local machine
+        """The concrete implementation that gets the `source` file from the
+        remote host to the `destination` at the local machine.
 
         :param str source: Path to the file on the remote host.
 
@@ -923,7 +926,7 @@ class AbstractSFTPClient(object):
         :param str source: The path to the directory on the local machine.
 
         :param str destination: The target path on the remote host.
-            The destination defaults to the user's home the remote host.
+            The destination defaults to the user's home at the remote host.
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
@@ -936,10 +939,10 @@ class AbstractSFTPClient(object):
             paths on the remote host. On Windows, this must be set as `\`.
             The default is `/`, which is also the default on Linux-like systems.
 
-        :param bool recursive: If True, the subdirectories in the `source` path
-            are uploaded as well.
+        :param bool recursive: If `True`, the subdirectories in the `source`
+            path are uploaded as well.
 
-        :returns: A List of 2-Tuples for all the uploaded files. These tuples
+        :returns: A list of 2-tuples for all the uploaded files. These tuples
             contain the local path as the first value and the remote target
             path as the second.
         """
@@ -986,8 +989,8 @@ class AbstractSFTPClient(object):
 
         :param str destination: The target path on the remote host.
             If multiple files are uploaded, e.g. patterns are used in the
-            `source`, this must be a path to an existing directory.
-            The destination defaults to the user's home the remote host.
+            `source`, then this must be a path to an existing directory.
+            The destination defaults to the user's home at the remote host.
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
@@ -1000,7 +1003,7 @@ class AbstractSFTPClient(object):
             paths on the remote host. On Windows, this must be set as `\`.
             The default is `/`, which is also the default on Linux-like systems.
 
-        :returns: A List of 2-Tuples for all the uploaded files. These tuples
+        :returns: A list of 2-tuples for all the uploaded files. These tuples
             contain the local path as the first value and the remote target
             path as the second.
         """
@@ -1079,20 +1082,21 @@ class AbstractSFTPClient(object):
             self._close_remote_file(remote_file)
 
     def _create_remote_file(self, destination, mode):
-        """Creates a new empty file on the remote host at `destination` with the
-        given `mode`.
+        """The concrete implementation that creates a new empty file on the
+        remote host at `destination` with the given `mode` as the file
+        permissions.
 
         :param str destination: The path where the file will be created to.
 
         :param str mode: The file will be created with these modes. The modes
             are given as traditional Unix octal permissions, such as '0600'.
 
-        :returns: The file object defined by the concrete implementation.
+        :returns: Some file object defined by the concrete implementation.
         """
         raise NotImplementedError
 
     def _write_to_remote_file(self, remote_file, data, position):
-        """Writes to the `remote_file`.
+        """The concrete implementation that writes to the `remote_file`.
 
         :param str remote_file: The object returned by
             :py:meth:`_create_remote_file`. Its type depends on the concrete
@@ -1100,13 +1104,13 @@ class AbstractSFTPClient(object):
 
         :param str data: The actual data to write into the file.
 
-        :param str position: The position in a number of bytes (an integer)
+        :param str position: The position in a number of bytes (as an integer)
             where to start the writing from.
         """
         raise NotImplementedError
 
     def _close_remote_file(self, remote_file):
-        """Closes the `remote_file`.
+        """The concrete implementation that closes the `remote_file`.
 
         :param str remote_file`: The object returned by
             :py:meth:`_create_remote_file`. Its type depends on the concrete
@@ -1120,7 +1124,8 @@ class AbstractCommand(object):
 
     The classes derived from this class (e.g. :py:class:`pythonclient.RemoteCommand`
     and :py:class:`javaclient.RemoteCommand`) provide the concrete and the
-    language specific implementations for running the command on the remote.
+    language specific implementations for running the command on the remote
+    host.
     """
 
     def __init__(self, command, encoding):
@@ -1137,14 +1142,15 @@ class AbstractCommand(object):
         self._execute()
 
     def _execute(self):
-        """Executes this command in the session set with :py:meth:`run_in`.
+        """The concrete implementation that executes this command in the shell
+        set with :py:meth:`run_in`.
         """
         raise NotImplementedError
 
     def read_outputs(self):
-        """Return outputs of this command.
+        """The concrete implementation that returns the outputs of this command.
 
-        :returns: A 3-Tuple (stdout, stderr, return_code) with values
+        :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         raise NotImplementedError
@@ -1152,7 +1158,7 @@ class AbstractCommand(object):
 
 class SFTPFileInfo(object):
     """A wrapper class for the language specific file information objects
-    returned by the concrete client implementations.
+    returned by the concrete SFTP client implementations.
     """
 
     def __init__(self, name, mode):
@@ -1162,13 +1168,13 @@ class SFTPFileInfo(object):
     def is_regular(self):
         """Checks if this file is a regular file.
 
-        :returns: True, if the file is a regular file. False otherwise.
+        :returns: `True`, if the file is a regular file. False otherwise.
         """
         return stat.S_ISREG(self.mode)
 
     def is_directory(self):
         """Checks if this file is a directory.
 
-        :returns: True, if the file is a regular file. False otherwise.
+        :returns: `True`, if the file is a regular file. False otherwise.
         """
         return stat.S_ISDIR(self.mode)
