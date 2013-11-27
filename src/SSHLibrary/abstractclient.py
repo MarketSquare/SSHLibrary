@@ -50,7 +50,7 @@ class _ClientConfiguration(Configuration):
 
 
 class AbstractSSHClient(object):
-    """The base class for the SSH client implementation.
+    """Base class for the SSH client implementation.
 
     This class defines the public API. Subclasses (:py:class:`pythonclient.
     PythonSSHClient` and :py:class:`javaclient.JavaSSHClient`) provide the
@@ -68,8 +68,7 @@ class AbstractSSHClient(object):
 
     @staticmethod
     def enable_logging(path):
-        """The concrete implementation that enables the logging of SSH events to
-        a file.
+        """Enables logging of SSH events to a file.
 
         :param str path: Path to the file the log is written to.
 
@@ -80,10 +79,6 @@ class AbstractSSHClient(object):
     @property
     def sftp_client(self):
         """Gets the SSH client for the connection.
-
-        The subclass has to implement :py:meth:`_create_sftp_client` to
-        return the concrete implementation of the SFTP client, derived
-        from :py:class:`AbstractSFTPClient`.
 
         :returns: An object of the class that inherits from
             :py:class:`AbstractSFTPClient`.
@@ -96,10 +91,6 @@ class AbstractSSHClient(object):
     def shell(self):
         """Gets the shell for the connection.
 
-        The subclass has to implement :py:meth:`_create_shell` to
-        return the concrete implementation of the shell, derived
-        from :py:class:`AbstractShell`.
-
         :returns: An object of the class that inherits from
             :py:class:`AbstractShell`.
         """
@@ -108,20 +99,9 @@ class AbstractSSHClient(object):
         return self._shell
 
     def _create_sftp_client(self):
-        """The concrete implementation that creates the SFTP client for the
-        connection.
-
-        :returns: An object of the class that inherits from
-            :py:class:`AbstractSFTPClient`.
-        """
         raise NotImplementedError
 
     def _create_shell(self):
-        """The concrete implementation that creates the shell for the connection.
-
-        :returns: An object of the class that inherits from
-            :py:class:`AbstractShell`.
-        """
         raise NotImplementedError
 
     def close(self):
@@ -166,15 +146,6 @@ class AbstractSSHClient(object):
         return text.encode(self.config.encoding)
 
     def _login(self, username, password):
-        """The concrete implementation of logging into the remote host using
-        `username` and `password`.
-
-        :param str username: Username to log in with.
-
-        :param str password: Password for the `username`.
-
-        :raises SSHClientException: If authentication failed for the `username`.
-        """
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -224,18 +195,6 @@ class AbstractSSHClient(object):
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
     def _login_with_public_key(self, username, keyfile, password):
-        """The concrete implementation of logging into the remote host using
-        the `username` and `keyfile` as the private key.
-
-        :param str username: Username to log in with.
-
-        :param str keyfile: Path to the valid OpenSSH private key file.
-
-        :param str password: Password (if needed) for unlocking the `keyfile`.
-
-        :raises SSHClientException: If logging in failed for any reason
-            (e.g. wrong `username` was given, the `keyfile` was invalid, etc.)
-        """
         raise NotImplementedError
 
     def execute_command(self, command):
@@ -273,15 +232,6 @@ class AbstractSSHClient(object):
         self._started_commands.append(self._start_command(command))
 
     def _start_command(self, command):
-        """The concrete implementation of starting the `command` on the remote
-        host.
-
-        This method instantiates the class derived from :py:class:`AbstractCommand`,
-        and runs the `command` in a new shell.
-
-        :returns: An object of the class that inherits from
-            :py:class:`AbstractCommand`.
-        """
         raise NotImplementedError
 
     def read_command_output(self):
@@ -503,7 +453,7 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
-        # TODO: Remove path_separator deprecated in SSHLibrary 2.0.
+        # TODO: Remove deprecated path_separator in SSHLibrary 2.1.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          path_separator)
@@ -534,7 +484,7 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
-        # TODO: Remove path_separator deprecated in SSHLibrary 2.0.
+        # TODO: Remove deprecated path_separator in SSHLibrary 2.1.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.get_file(source, destination, path_separator)
 
@@ -603,30 +553,29 @@ class AbstractSSHClient(object):
 
 
 class AbstractShell(object):
-    """The base class for the shell implementation.
+    """Base class for the shell implementation.
 
-    The classes derived from this class (e.g. :py:class:`pythonclient.Shell`
+    Classes derived from this class (i.e. :py:class:`pythonclient.Shell`
     and :py:class:`javaclient.Shell`) provide the concrete and the language
     specific implementations for reading and writing in a shell session.
     """
 
     def read(self):
-        """The concrete implementation that reads all the output from the shell.
+        """Reads all the output from the shell.
 
         :returns: The read output.
         """
         raise NotImplementedError
 
     def read_byte(self):
-        """The concrete implementation that reads a single byte from the shell.
+        """Reads a single byte from the shell.
 
         :returns: The read byte.
         """
         raise NotImplementedError
 
     def write(self, text):
-        """The concrete implementation that writes the `text` in the current
-        shell.
+        """Writes the `text` in the current shell.
 
         :param str text: The text to be written. No newline characters are
             be appended automatically to the written text by this method.
@@ -635,9 +584,9 @@ class AbstractShell(object):
 
 
 class AbstractSFTPClient(object):
-    """The base class for the SFTP implementation.
+    """Base class for the SFTP implementation.
 
-    The classes derived from this class (e.g. :py:class:`pythonclient.SFTPClient`
+    Classes derived from this class (i.e. :py:class:`pythonclient.SFTPClient`
     and :py:class:`javaclient.SFTPClient`) provide the concrete and the language
     specific implementations for getting, putting and listing files and
     directories.
@@ -647,13 +596,6 @@ class AbstractSFTPClient(object):
         self._homedir = self._absolute_path('.')
 
     def _absolute_path(self, path):
-        """The concrete implementation that returns the absolute path for
-        the given `path` on the remote host.
-
-        :param str path: The path to get the absolute path for.
-
-        :returns: The absolute path.
-        """
         raise NotImplementedError
 
     def is_file(self, path):
@@ -673,13 +615,6 @@ class AbstractSFTPClient(object):
         return item.is_regular()
 
     def _stat(self, path):
-        """The concrete implementation that returns a :py:class:`SFTPFileInfo`
-        object for the given `path`.
-
-        :param str path: The path to get the file information for.
-
-        :returns: An object of type :py:class:`SFTPFileInfo`.
-        """
         raise NotImplementedError
 
     def is_dir(self, path):
@@ -740,11 +675,6 @@ class AbstractSFTPClient(object):
         return [item.name for item in self._list(path)]
 
     def _list(self, path):
-        """The concrete implementation that yields :py:class:`SFTPFileInfo`
-        objects for the all the items in the given `path`.
-
-        :param str path: The path to get the objects for.
-        """
         raise NotImplementedError
 
     def _filter_by_pattern(self, items, pattern):
@@ -909,13 +839,6 @@ class AbstractSFTPClient(object):
             os.makedirs(destination)
 
     def _get_file(self, source, destination):
-        """The concrete implementation that gets the `source` file from the
-        remote host to the `destination` at the local machine.
-
-        :param str source: Path to the file on the remote host.
-
-        :param str destination: The target path on the local machine.
-        """
         raise NotImplementedError
 
     def put_directory(self, source, destination, mode, newline,
@@ -1082,47 +1005,19 @@ class AbstractSFTPClient(object):
             self._close_remote_file(remote_file)
 
     def _create_remote_file(self, destination, mode):
-        """The concrete implementation that creates a new empty file on the
-        remote host at `destination` with the given `mode` as the file
-        permissions.
-
-        :param str destination: The path where the file will be created to.
-
-        :param str mode: The file will be created with these modes. The modes
-            are given as traditional Unix octal permissions, such as '0600'.
-
-        :returns: Some file object defined by the concrete implementation.
-        """
         raise NotImplementedError
 
     def _write_to_remote_file(self, remote_file, data, position):
-        """The concrete implementation that writes to the `remote_file`.
-
-        :param str remote_file: The object returned by
-            :py:meth:`_create_remote_file`. Its type depends on the concrete
-            implementation.
-
-        :param str data: The actual data to write into the file.
-
-        :param str position: The position in a number of bytes (as an integer)
-            where to start the writing from.
-        """
         raise NotImplementedError
 
     def _close_remote_file(self, remote_file):
-        """The concrete implementation that closes the `remote_file`.
-
-        :param str remote_file`: The object returned by
-            :py:meth:`_create_remote_file`. Its type depends on the concrete
-            implementation.
-        """
         raise NotImplementedError
 
 
 class AbstractCommand(object):
-    """The base class for the remote command.
+    """Base class for the remote command.
 
-    The classes derived from this class (e.g. :py:class:`pythonclient.RemoteCommand`
+    Classes derived from this class (i.e. :py:class:`pythonclient.RemoteCommand`
     and :py:class:`javaclient.RemoteCommand`) provide the concrete and the
     language specific implementations for running the command on the remote
     host.
@@ -1142,13 +1037,10 @@ class AbstractCommand(object):
         self._execute()
 
     def _execute(self):
-        """The concrete implementation that executes this command in the shell
-        set with :py:meth:`run_in`.
-        """
         raise NotImplementedError
 
     def read_outputs(self):
-        """The concrete implementation that returns the outputs of this command.
+        """Returns the outputs of this command.
 
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
@@ -1157,8 +1049,9 @@ class AbstractCommand(object):
 
 
 class SFTPFileInfo(object):
-    """A wrapper class for the language specific file information objects
-    returned by the concrete SFTP client implementations.
+    """Wrapper class for the language specific file information objects.
+
+    Returned by the concrete SFTP client implementations.
     """
 
     def __init__(self, name, mode):
