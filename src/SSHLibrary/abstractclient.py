@@ -499,11 +499,11 @@ class AbstractSSHClient(object):
         If `path_separator` is empty, the connection specific path separator,
         which is set when calling :py:meth:`open_connection`, is used instead.
         This is due to backward compatibility as `path_separator` was moved
-        to a connection specific setting in SSHLibrary 1.2.
+        to a connection specific setting in SSHLibrary 2.0.
 
         See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
-        # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
+        # TODO: Remove path_separator deprecated in SSHLibrary 2.0.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          path_separator)
@@ -530,11 +530,11 @@ class AbstractSSHClient(object):
         If `path_separator` is empty, the connection specific path separator,
         which is set when calling :py:meth:`open_connection`, is used instead.
         This is due to backward compatibility as `path_separator` was moved
-        to a connection specific setting in SSHLibrary 1.2.
+        to a connection specific setting in SSHLibrary 2.0.
 
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
-        # TODO: Remove path_separator deprecated in SSHLibrary 1.2.
+        # TODO: Remove path_separator deprecated in SSHLibrary 2.0.
         path_separator = path_separator or self.config.path_separator
         return self.sftp_client.get_file(source, destination, path_separator)
 

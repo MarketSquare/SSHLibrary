@@ -104,7 +104,7 @@ class SSHLibrary(object):
     Argument `encoding` defines the
     [http://docs.python.org/2/library/codecs.html#standard-encodings|
     character encoding] of input and output sequences.
-    Starting from SSHLibrary 1.2, the default value is `UTF-8`.
+    Starting from SSHLibrary 2.0, the default value is `UTF-8`.
 
     === Default path separator ===
 
@@ -121,9 +121,9 @@ class SSHLibrary(object):
     it like `\\\\`.
 
     Configuring the library and connection specific path separator is a new
-    feature in SSHLibrary 1.2. Prior to it `Get File` and `Put File` had
+    feature in SSHLibrary 2.0. Prior to it `Get File` and `Put File` had
     their own `path_separator` arguments. These keyword specific arguments
-    were deprecated in 1.2 and will be removed in the future.
+    were deprecated in 2.0 and will be removed in the future.
 
     === Default timeout ===
 
@@ -337,7 +337,7 @@ class SSHLibrary(object):
         [#Default terminal settings|`height`],
         [#Default path separator|`path separator`] and
         [#Default encoding|`encoding`]
-        were added in SSHLibrary 1.2.
+        were added in SSHLibrary 2.0.
         """
         self._connections = ConnectionCache()
         self._config = _DefaultConfiguration(
@@ -392,7 +392,7 @@ class SSHLibrary(object):
         [#Default terminal settings|`height`],
         [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`]
-        were added in SSHLibrary 1.2.
+        were added in SSHLibrary 2.0.
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
@@ -429,7 +429,7 @@ class SSHLibrary(object):
 
         Arguments [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`]
-        were added in SSHLibrary 1.2.
+        were added in SSHLibrary 2.0.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
@@ -512,7 +512,7 @@ class SSHLibrary(object):
 
         Arguments [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`]
-        were added in SSHLibrary 1.2.
+        were added in SSHLibrary 2.0.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -671,7 +671,7 @@ class SSHLibrary(object):
 
         This keyword logs the connection information with log level `INFO`.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         if not index_or_alias:
             index_or_alias = self._connections.current_index
@@ -783,7 +783,7 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
 
-        Argument `delay` was added in SSHLibrary 1.2.
+        Argument `delay` was added in SSHLibrary 2.0.
         """
         return self._login(self.current.login, username, password, delay)
 
@@ -815,7 +815,7 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
-        Argument `delay` was added in SSHLibrary 1.2.
+        Argument `delay` was added in SSHLibrary 2.0.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, delay)
@@ -1094,7 +1094,7 @@ class SSHLibrary(object):
         See `interactive shells` for more information about writing and reading
         in general.
 
-        Argument `delay` was added in SSHLibrary 1.2.
+        Argument `delay` was added in SSHLibrary 2.0.
         """
         return self._read_and_log(loglevel, self.current.read, delay)
 
@@ -1223,7 +1223,7 @@ class SSHLibrary(object):
         `destination` is the target path on the local machine. Both absolute
         paths and paths relative to the current working directory are supported.
 
-        `path_separator` is *deprecated* in SSHLibrary 1.2. Use [#Default
+        `path_separator` is *deprecated* in SSHLibrary 2.0. Use [#Default
         path separator|the library or the connection specific setting] instead.
 
         Examples:
@@ -1255,7 +1255,7 @@ class SSHLibrary(object):
            the directory where the test execution was started and thus
            accessible using built-in `${EXECDIR}` variable.
 
-        Argument `path_separator` was deprecated in SSHLibrary 1.2.
+        Argument `path_separator` was deprecated in SSHLibrary 2.0.
 
         See also `Get Directory`.
         """
@@ -1265,7 +1265,7 @@ class SSHLibrary(object):
                                       destination, path_separator)
 
     def _print_path_separator_deprecation_warning(self):
-        self._log("Argument 'path_separator' was deprecated in SSHLibrary 1.2 "
+        self._log("Argument 'path_separator' was deprecated in SSHLibrary 2.0 "
                   "and will be removed in 1.3. Please use the library or the "
                   "connection specific 'path_separator' instead.", 'WARN')
 
@@ -1301,7 +1301,7 @@ class SSHLibrary(object):
            the directory where the test execution was started and thus
            accessible using built-in `${EXECDIR}` variable.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
 
         See also `Get File`.
         """
@@ -1327,7 +1327,7 @@ class SSHLibrary(object):
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
 
-        `path_separator` is *deprecated* in SSHLibrary 1.2. Use [#Default
+        `path_separator` is *deprecated* in SSHLibrary 2.0. Use [#Default
         path separator|the library or the connection specific setting] instead.
 
         Examples:
@@ -1355,7 +1355,7 @@ class SSHLibrary(object):
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
-        Argument `path_separator` was deprecated in SSHLibrary 1.2.
+        Argument `path_separator` was deprecated in SSHLibrary 2.0.
 
         See also `Put Directory`.
         """
@@ -1404,7 +1404,7 @@ class SSHLibrary(object):
         3. If `destination` is not given, `source` directory is typically
            uploaded to user's home directory on the remote machine.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
 
         See also `Put File`.
         """
@@ -1428,7 +1428,7 @@ class SSHLibrary(object):
         Note that symlinks are followed:
         | File Should Exist | /initrd.img | # Points to boot/initrd.img |
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         if not self.current.is_file(path):
             raise AssertionError("File '%s' does not exist." % path)
@@ -1442,7 +1442,7 @@ class SSHLibrary(object):
         Note that this keyword follows symlinks. Thus the example fails if
         `/non/existing` is a link that points an existing file.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         if self.current.is_file(path):
             raise AssertionError("File '%s' exists." % path)
@@ -1456,7 +1456,7 @@ class SSHLibrary(object):
         Note that symlinks are followed:
         | Directory Should Exist | /usr/local/man | # Points to /usr/share/man/ |
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         if not self.current.is_dir(path):
             raise AssertionError("Directory '%s' does not exist." % path)
@@ -1470,7 +1470,7 @@ class SSHLibrary(object):
         Note that this keyword follows symlinks. Thus the example fails if
         `/non/existing` is a link that points to an existing directory.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         if self.current.is_dir(path):
             raise AssertionError("Directory '%s' exists." % path)
@@ -1503,7 +1503,7 @@ class SSHLibrary(object):
         use `List Files In Directory` or `List Directories In Directory`,
         respectively.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         try:
             items = self.current.list_dir(path, pattern, absolute)
@@ -1516,7 +1516,7 @@ class SSHLibrary(object):
     def list_files_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only files.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         try:
             files = self.current.list_files_in_dir(path, pattern, absolute)
@@ -1530,7 +1530,7 @@ class SSHLibrary(object):
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only directories.
 
-        New in SSHLibrary 1.2.
+        New in SSHLibrary 2.0.
         """
         try:
             dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
