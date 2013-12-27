@@ -1,22 +1,11 @@
 *** Settings ***
+Resource        resources/write_and_read_resource.txt
 Force Tags      pybot   jybot
-Resource        resources/shell.txt
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files and Close Connections
 
-*** Variables ***
-${COUNTER NAME}                  counter.txt
-${INTERACTIVE TEST SCRIPT NAME}  test_interactive.sh
-${INTERACTIVE TEST SCRIPT}       ${LOCAL SCRIPTS}${/}${INTERACTIVE TEST SCRIPT NAME}
-${REPEAT TEST SCRIPT NAME}       test_repeat.sh
-${REPEAT TEST SCRIPT}            ${LOCAL SCRIPTS}${/}${REPEAT TEST SCRIPT NAME}
 
 *** Test Cases ***
-Write And Read
-    Write  ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
-    Write  Mr. Ääkkönen
-    ${output} =  Read
-    Should Contain  ${output}  Hello Mr. Ääkkönen
 
 Write And Read Until
     ${output} =  Write  ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
