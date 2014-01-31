@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import time
 
 try:
     import paramiko
@@ -162,12 +163,22 @@ class SFTPClient(AbstractSFTPClient):
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self):
+        self._wait_for_ready_to_read()
         stdout = self._shell.makefile('rb', -1).read().decode(self._encoding)
         stderr = self._shell.makefile_stderr('rb', -1).read().decode(
             self._encoding)
         rc = self._shell.recv_exit_status()
         self._shell.close()
         return stdout, stderr, rc
+
+    def _wait_for_ready_to_read(self):
+        while not (self._shell.closed or
+                   self._shell.eof_received or
+                   self._shell.eof_sent or
+                   not self._shell.active) \
+            and (not self._shell.recv_ready() or
+                 not self._shell.recv_stderr_ready()):
+            time.sleep(0.1)
 
     def _execute(self):
         self._shell.exec_command(self._command)
