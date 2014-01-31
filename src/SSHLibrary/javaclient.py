@@ -31,10 +31,10 @@ from .abstractclient import (AbstractShell, AbstractSSHClient,
 
 class JavaSSHClient(AbstractSSHClient):
 
-    def __init__(self, *args):
-        super(JavaSSHClient, self).__init__(*args)
-        self.client = Connection(self.config.host, self.config.port)
-        self.client.connect()
+    def _get_client(self):
+        client = Connection(self.config.host, self.config.port)
+        client.connect()
+        return client
 
     @staticmethod
     def enable_logging(logfile):

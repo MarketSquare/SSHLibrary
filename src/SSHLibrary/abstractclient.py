@@ -65,6 +65,10 @@ class AbstractSSHClient(object):
         self._sftp_client = None
         self._shell = None
         self._started_commands = []
+        self.client = self._get_client()
+
+    def _get_client(self):
+      raise NotImplementedError('This should be implemented in the subclass.')
 
     @staticmethod
     def enable_logging(path):
