@@ -5,6 +5,7 @@ dist
 *.pyc
 *.class
 *.egg-info
+*.swp
 results
 atest/testdata/keyfiles/id_rsa
 examples/output.xml
