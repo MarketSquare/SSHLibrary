@@ -1,5 +1,5 @@
 *** Settings ***
-Resource        resources/shell.txt
+Resource        shell.txt
 
 *** Variables ***
 ${COUNTER NAME}                  counter.txt

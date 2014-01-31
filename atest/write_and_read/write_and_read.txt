@@ -1,5 +1,5 @@
 *** Settings ***
-Resource        resources/write_and_read_resource.txt
+Resource        ../resources/write_and_read_resource.txt
 Force Tags      pybot   jybot
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files and Close Connections
