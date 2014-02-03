@@ -54,3 +54,8 @@ Execute Command With Legacy Stdout And Stderr Config
     ...                     Both
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
+
+Execute Command With Robot Timeout
+   [Documentation]   FAIL Test timeout 500 milliseconds exceeded.
+   [Timeout]   0.5 seconds
+   Execute Command     cat

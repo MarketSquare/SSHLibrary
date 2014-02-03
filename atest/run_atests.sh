@@ -18,13 +18,13 @@ if [ "$1" == "python" ]; then
     shift
     OUTPUT_DIR="$OUTPUT_ROOT/python"
     silent_remove_dir $OUTPUT_DIR
-    pybot $COMMON_ARGS -d $OUTPUT_DIR -i pybot $*
+    pybot $COMMON_ARGS -d $OUTPUT_DIR --log NONE --report NONE -i pybot $*
 elif [ "$1" == "jython" ]; then
     shift
     JAR_PATH+="trilead-ssh2-1.0.0-build217.jar"
     OUTPUT_DIR="$OUTPUT_ROOT/jython"
     silent_remove_dir $OUTPUT_DIR
-    jybot $COMMON_ARGS -P $JAR_PATH -d $OUTPUT_DIR -i jybot $*
+    jybot $COMMON_ARGS -P $JAR_PATH --log NONE --report NONE -d $OUTPUT_DIR -i jybot $*
 else
     echo "usage: $0 (python|jython) <test_suite_path>"
     echo ""
@@ -41,3 +41,6 @@ else
     echo ""
     exit 1
 fi
+
+python -m robotstatuschecker $OUTPUT_DIR/output.xml
+rebot -d $OUTPUT_DIR $OUTPUT_DIR/output.xml
