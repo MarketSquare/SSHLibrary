@@ -163,22 +163,34 @@ class SFTPClient(AbstractSFTPClient):
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self):
-        self._wait_for_ready_to_read()
-        stdout = self._shell.makefile('rb', -1).read().decode(self._encoding)
-        stderr = self._shell.makefile_stderr('rb', -1).read().decode(
-            self._encoding)
+        stderr, stdout = self._receive_stdout_and_stderr()
         rc = self._shell.recv_exit_status()
         self._shell.close()
         return stdout, stderr, rc
 
-    def _wait_for_ready_to_read(self):
-        while not (self._shell.closed or
-                   self._shell.eof_received or
-                   self._shell.eof_sent or
-                   not self._shell.active) \
-            and (not self._shell.recv_ready() or
-                 not self._shell.recv_stderr_ready()):
-            time.sleep(0.1)
+    def _receive_stdout_and_stderr(self):
+        stdout_filebuffer = self._shell.makefile('rb', -1)
+        stderr_filebuffer = self._shell.makefile_stderr('rb', -1)
+        stdouts = []
+        stderrs = []
+        while self._shell_open():
+            self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts)
+            time.sleep(0.01) # lets not be so busy
+        stdout = (''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
+        stderr = (''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
+        return stderr, stdout
+
+    def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts):
+        if self._shell.recv_ready():
+            stdouts.append(stdout_filebuffer.read(len(self._shell.in_buffer)))
+        if self._shell.recv_stderr_ready():
+            stderrs.append(stderr_filebuffer.read(len(self._shell.in_stderr_buffer)))
+
+    def _shell_open(self):
+        return not (self._shell.closed or
+                self._shell.eof_received or
+                self._shell.eof_sent or
+                not self._shell.active)
 
     def _execute(self):
         self._shell.exec_command(self._command)
