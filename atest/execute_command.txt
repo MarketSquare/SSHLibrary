@@ -59,3 +59,9 @@ Execute Command With Robot Timeout
    [Documentation]   FAIL Test timeout 500 milliseconds exceeded.
    [Timeout]   0.5 seconds
    Execute Command     cat
+
+Execute Command With Huge Output
+   Execute Command     echo 'foo\\nbar\\n' > file.txt
+   Execute Command     for i in {1..20}; do cat file.txt file.txt > file2.txt && mv file2.txt file.txt; done
+   Execute Command     cat file.txt
+   Execute Command     rm file.txt
