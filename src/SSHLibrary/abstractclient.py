@@ -110,6 +110,7 @@ class AbstractSSHClient(object):
 
     def close(self):
         """Closes the connection."""
+        self._shell = None
         self.client.close()
 
     def login(self, username, password, delay=None):
