@@ -45,6 +45,24 @@ Enable Logging
     Login As Valid User
     File Should Not Be Empty  ${OUTPUTDIR}${/}sshlog.txt
 
+Switch to closed connection pybot
+    [Tags]   pybot
+    Open Connection  ${HOST}  alias=SUT
+    Login  ${USERNAME}  ${PASSWORD}
+    Execute command   ls
+    close connection
+    switch connection   SUT
+    Run keyword and expect error  Connection not open   Execute command   ls
+
+Switch to closed connection jybot
+    [Tags]   jybot
+    Open Connection  ${HOST}  alias=SUT
+    Login  ${USERNAME}  ${PASSWORD}
+    Execute command   ls
+    close connection
+    switch connection   SUT
+    Run keyword and expect error  IllegalStateException: Cannot open session*   Execute command   ls
+
 *** Keywords ***
 Connection Should Be Closed
     Run Keyword And Expect Error  No open connection.  Write  pwd

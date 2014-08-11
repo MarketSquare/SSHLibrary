@@ -76,7 +76,10 @@ class PythonSSHClient(AbstractSSHClient):
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)
-        new_shell = self.client.get_transport().open_session()
+        transport = self.client.get_transport()
+        if not transport:
+            raise AssertionError("Connection not open")
+        new_shell = transport.open_session()
         cmd.run_in(new_shell)
         return cmd
 
