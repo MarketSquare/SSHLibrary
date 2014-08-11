@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import with_statement
 from sys import platform
 
 requires = {}
