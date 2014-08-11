@@ -112,7 +112,6 @@ class AbstractSSHClient(object):
         """Closes the connection."""
         self._shell = None
         self.client.close()
-        self._shell = None
 
     def login(self, username, password, delay=None):
         """Logs into the remote host using password authentication.
