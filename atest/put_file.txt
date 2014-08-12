@@ -31,6 +31,13 @@ Put File To Relative Destination With Intermediate Subdirectories
     SSH.File Should Exist  robotdir/${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -rf robotdir
 
+Put File To Existing Directory Without Trailing Path Separator
+    SSH.Directory Should Not Exist  robotdir
+    Execute Command    mkdir robotdir
+    Put File  ${FILE WITH NON-ASCII}  robotdir
+    SSH.File Should Exist  robotdir/${FILE WITH NON-ASCII NAME}
+    [Teardown]  Execute Command  rm -rf robotdir
+
 Put File To Home Directory
     SSH.File Should Not Exist  ${FILE WITH NON-ASCII NAME}
     Put File  ${FILE WITH NON-ASCII}  .

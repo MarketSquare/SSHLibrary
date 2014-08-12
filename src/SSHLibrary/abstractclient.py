@@ -959,7 +959,7 @@ class AbstractSFTPClient(object):
         destination = destination.split(':')[-1].replace('\\', '/')
         if destination == '.':
             destination = self._homedir + '/'
-        if len(sources) > 1 and destination[-1] != '/':
+        if len(sources) > 1 and destination[-1] != '/' and not self.is_dir(destination):
             raise ValueError('It is not possible to copy multiple source '
                              'files to one destination file.')
         dir_path, filename = self._parse_path_elements(destination,
@@ -980,6 +980,8 @@ class AbstractSFTPClient(object):
             return False
         if not _isabs(destination):
             destination = path_separator.join([self._homedir, destination])
+        if self.is_dir(destination):
+            return destination, ''
         return destination.rsplit(path_separator, 1)
 
     def _create_missing_remote_path(self, path):
