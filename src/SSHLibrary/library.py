@@ -469,6 +469,10 @@ class SSHLibrary(object):
         The new connection is made active. Possible existing connections
         are left open in the background.
 
+        Note that on Jython this keyword actually opens a connection and
+        will fail immediately on unreachable hosts. On Python the actual
+        connection attempt will not be done until `Login` is called.
+
         This keyword returns the index of the new connection which can be used
         later to switch back to it. Indices start from `1` and are reset
         when `Close All Connections` is used.
