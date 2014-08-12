@@ -63,3 +63,4 @@ Directory Should Exist Including Subdirectories
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
     OS.File Should Exist  ${destination}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
+    OS.Directory Should Exist  ${destination}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}

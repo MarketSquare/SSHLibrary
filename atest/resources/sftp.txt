@@ -12,9 +12,13 @@ ${FILE WITH SPECIAL CHARS NAME}  special%2Fchars.txt
 ${FILE WITH SPECIAL CHARS}       ${LOCAL TEXTFILES}${/}${FILE WITH SPECIAL CHARS NAME}
 ${SUBDIRECTORY NAME}             aaääöö
 ${FILE WITH NON-ASCII NAME}      aaääöö.txt
+${DIRECTORY WITH EMPTY SUBDIRECTORY}     contains_only_empty_subdir
+${EMPTY SUB DIR}                 empty
 ${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
 
 *** Keywords ***
 Login And Upload Test Files
     Login As Valid User
     Put Directory  ${LOCAL TEXTFILES}  ${REMOTE TEST ROOT}  recursive=True
+    Execute command   mkdir ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}
+    Execute command   mkdir ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}
