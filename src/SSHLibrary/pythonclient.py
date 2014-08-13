@@ -63,14 +63,16 @@ class PythonSSHClient(AbstractSSHClient):
     def _login(self, username, password):
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, look_for_keys=False, allow_agent=False)
+                                password, look_for_keys=False, allow_agent=False,
+                                timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password):
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, key_filename=key_file, allow_agent=False)
+                                password, key_filename=key_file,
+                                allow_agent=False, timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
 

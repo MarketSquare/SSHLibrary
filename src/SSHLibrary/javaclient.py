@@ -33,7 +33,8 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _get_client(self):
         client = Connection(self.config.host, self.config.port)
-        client.connect()
+        timeout = int(float(self.config.timeout)*1000)
+        client.connect(None, timeout, timeout)
         return client
 
     @staticmethod
