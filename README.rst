@@ -25,7 +25,7 @@ See LICENSE.txt for details.
 Installation
 ------------
 
-Install from Python Package Index:: 
+Install from Python Package Index with `pip <http://pip-installer.org>`__:: 
 
     pip install robotframework-sshlibrary
 
