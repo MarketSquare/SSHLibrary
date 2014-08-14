@@ -40,6 +40,5 @@ http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#usi
 Documentation
 -------------
 
-The documentation and examples can be found at 'doc/SSHLibrary.html' or at
-https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation.
+The documentation and examples can be found at http://robotframework.org/SSHLibrary/.
 
