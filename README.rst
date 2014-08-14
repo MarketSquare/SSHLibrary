@@ -4,7 +4,7 @@ SSHLibrary for Robot Framework
 Introduction
 ------------
 
-SSHLibrary is a Robot Framework (http://robotframework.org) test library for
+SSHLibrary is a `Robot Framework <http://robotframework.org>`__  test library for
 testing SSH and SFTP.
 
 The library has the following main usages:
