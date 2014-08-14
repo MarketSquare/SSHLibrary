@@ -48,7 +48,27 @@ Get Directory Should Fail When Source Does Not Exists
     Run Keyword And Expect Error  There was no directory matching 'non-existing'.
     ...                           SSH.Get Directory  non-existing  /tmp
 
+Get Directory overrrides existing files
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Create File   ${LOCAL TMPDIR}${/}${TEST FILE NAME}    foo
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
+    File content should be   ${LOCAL TMPDIR}${/}${TEST FILE NAME}    This is a test file.\n
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
+Get Directory works if there are existing local directories
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Create directory   ${LOCAL TMPDIR}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
 *** Keywords ***
+File content should be
+    [Arguments]    ${file}    ${expected}
+    ${actual}=     OS.Get file    ${file}
+    Should be equal    ${actual}    ${expected}
+
 Directory Should Exist With Content
     [Arguments]  ${destination}
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}

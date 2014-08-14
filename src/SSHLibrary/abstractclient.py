@@ -761,7 +761,8 @@ class AbstractSFTPClient(object):
                     files += self.get_directory(remote, local, path_separator,
                                                 recursive)
         else:
-            os.makedirs(destination)
+            if not os.path.exists(destination):
+                os.makedirs(destination)
             files.append((source, destination))
         return files
 
