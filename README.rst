@@ -20,7 +20,7 @@ License
 
 SSHLibrary is licensed under Apache License 2.0.
 
-See LICENSE.txt for details.
+See `LICENSE.txt <https://github.com/robotframework/SSHLibrary/blob/master/LICENSE.txt>`__ for details.
 
 
 Installation
