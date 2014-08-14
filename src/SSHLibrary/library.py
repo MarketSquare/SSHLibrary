@@ -1215,7 +1215,7 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.', path_separator=''):
+    def get_file(self, source, destination='.'):
         """Downloads file(s) from the remote machine to the local machine.
 
         `source` is a path on the remote machine. Both absolute paths and
@@ -1227,7 +1227,7 @@ class SSHLibrary(object):
         `destination` is the target path on the local machine. Both absolute
         paths and paths relative to the current working directory are supported.
 
-        `path_separator` is *deprecated* in SSHLibrary 2.0. Use [#Default
+        `path_separator` was *removed* in SSHLibrary 2.1. Use [#Default
         path separator|the library or the connection specific setting] instead.
 
         Examples:
@@ -1263,15 +1263,8 @@ class SSHLibrary(object):
 
         See also `Get Directory`.
         """
-        if path_separator:
-            self._print_path_separator_deprecation_warning()
         return self._run_sftp_command(self.current.get_file, source,
-                                      destination, path_separator)
-
-    def _print_path_separator_deprecation_warning(self):
-        self._log("Argument 'path_separator' was deprecated in SSHLibrary 2.0 "
-                  "and will be removed in 1.3. Please use the library or the "
-                  "connection specific 'path_separator' instead.", 'WARN')
+                                      destination)
 
     def get_directory(self, source, destination='.', recursive=False):
         """Downloads a directory, including its content, from the remote machine to the local machine.
@@ -1312,8 +1305,7 @@ class SSHLibrary(object):
         return self._run_sftp_command(self.current.get_directory, source,
                                       destination, recursive)
 
-    def put_file(self, source, destination='.', mode='0744', newline='',
-                 path_separator=''):
+    def put_file(self, source, destination='.', mode='0744', newline=''):
         """Uploads file(s) from the local machine to the remote machine.
 
         `source` is the path on the local machine. Both absolute paths and
@@ -1331,7 +1323,7 @@ class SSHLibrary(object):
         `newline` can be used to force the line break characters that are
         written to the remote files. Valid values are `LF` and `CRLF`.
 
-        `path_separator` is *deprecated* in SSHLibrary 2.0. Use [#Default
+        `path_separator` was *removed* in SSHLibrary 2.1. Use [#Default
         path separator|the library or the connection specific setting] instead.
 
         Examples:
@@ -1359,15 +1351,10 @@ class SSHLibrary(object):
         5. If `destination` is not given, the user's home directory
            on the remote machine is used as the destination.
 
-        Argument `path_separator` was deprecated in SSHLibrary 2.0.
-
         See also `Put Directory`.
         """
-        if path_separator:
-            self._print_path_separator_deprecation_warning()
         return self._run_sftp_command(self.current.put_file, source,
-                                      destination, mode, newline,
-                                      path_separator)
+                                      destination, mode, newline)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):

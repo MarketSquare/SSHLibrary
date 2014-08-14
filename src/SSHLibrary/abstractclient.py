@@ -446,22 +446,14 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s."
                                  % (expected, timeout))
 
-    def put_file(self, source, destination='.', mode='0744', newline='',
-                 path_separator=''):
+    def put_file(self, source, destination='.', mode='0744', newline=''):
         """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
         arguments.
 
-        If `path_separator` is empty, the connection specific path separator,
-        which is set when calling :py:meth:`open_connection`, is used instead.
-        This is due to backward compatibility as `path_separator` was moved
-        to a connection specific setting in SSHLibrary 2.0.
-
         See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
-        # TODO: Remove deprecated path_separator in SSHLibrary 2.1.
-        path_separator = path_separator or self.config.path_separator
         return self.sftp_client.put_file(source, destination, mode, newline,
-                                         path_separator)
+                                         self.config.path_separator)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False):
@@ -478,20 +470,13 @@ class AbstractSSHClient(object):
                                               self.config.path_separator,
                                               recursive)
 
-    def get_file(self, source, destination='.', path_separator=''):
+    def get_file(self, source, destination='.'):
         """Calls :py:meth:`AbstractSFTPClient.get_file` with the given
         arguments.
 
-        If `path_separator` is empty, the connection specific path separator,
-        which is set when calling :py:meth:`open_connection`, is used instead.
-        This is due to backward compatibility as `path_separator` was moved
-        to a connection specific setting in SSHLibrary 2.0.
-
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
-        # TODO: Remove deprecated path_separator in SSHLibrary 2.1.
-        path_separator = path_separator or self.config.path_separator
-        return self.sftp_client.get_file(source, destination, path_separator)
+        return self.sftp_client.get_file(source, destination, self.config.path_separator)
 
     def get_directory(self, source, destination='.', recursive=False):
         """Calls :py:meth:`AbstractSFTPClient.get_directory` with the given
