@@ -25,14 +25,15 @@ See LICENSE.txt for details.
 Installation
 ------------
 
-Install from Python Package Index:
-pip install robotframework-sshlibrary
+Install from Python Package Index:: 
+
+    pip install robotframework-sshlibrary
 
 The installation is documented at
-http://code.google.com/p/robotframework-sshlibrary/wiki/InstallationInstructions.
+https://github.com/robotframework/SSHLibrary/blob/master/INSTALL.rst.
 
 For general information about using test libraries with Robot Framework, see
-http://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.html#using-test-libraries.
+http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries.
 
 
 Documentation
@@ -41,29 +42,3 @@ Documentation
 The documentation and examples can be found at 'doc/SSHLibrary.html' or at
 https://code.google.com/p/robotframework-sshlibrary/wiki/KeywordDocumentation.
 
-
-Directory Layout
-----------------
-
-atest/
-    Acceptance tests. Naturally using Robot Framework.
-
-doc/
-    SSHLibrary documentation.
-
-lib/
-    Contains Trilead SSH library JAR distribution which must be in CLASSPATH
-    when executing tests with Jython.
-
-src/
-    SSHLibrary source code.
-
-utests/
-    Unit tests.
-
-
-Running the Acceptance Tests
-----------------------------
-
-Running the acceptance tests requires some configuration which is explained at
-https://code.google.com/p/robotframework-sshlibrary/wiki/RunningLibraryAcceptanceTests
