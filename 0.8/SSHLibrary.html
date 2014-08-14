@@ -1,0 +1,646 @@
+
+<html>
+<head>
+<title>SSHLibrary - Documentation</title>
+<style>
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  /* Generic Table Styles */
+  table {
+    background: white;
+    border: 1px solid black;
+    border-collapse: collapse;
+    empty-cells: show;
+    margin: 0.3em 0em;
+  }
+  th, td {
+    border: 1px solid black;
+    padding: 0.2em;
+  }
+  th {
+    background: #C6C6C6;
+  }
+  td {
+    vertical-align: top;
+  }    
+
+  /* Columns */
+  td.kw {
+    font-weight: bold;
+  }
+  td.arg {
+    width: 300px;
+    font-style: italic;
+  }
+  td.doc {
+  }
+
+  /* Tables in documentation */
+  table.doc {
+    border: 1px solid gray;
+    background: transparent;
+    border-collapse: collapse;
+    empty-cells: show;
+    font-size: 0.85em;
+    font-family: arial,helvetica,sans-serif;
+  }
+  table.doc td {
+    border: 1px solid gray;
+    padding: 0.1em 0.3em;
+    height: 1.2em;
+  }
+
+  /* Paragraphs */
+  .libdoc, .links {
+    width: 800px;
+  }
+
+  /* Misc */
+  a.name, span.name {  
+    font-style: italic;
+    background: #f4f4f4;
+    text-decoration: none;
+  }
+  a:link, a:visited {
+    color: blue;
+  }
+  a:hover, a:active {
+    text-decoration: underline;
+    color: purple;
+  }
+  .footer {
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+<h1>SSHLibrary - Documentation</h1>
+<p><b>Version:</b> 0.8</p>
+
+<h2><a name="introduction"/>Introduction</h2>
+<p class='libdoc'>SSHLibrary is a test library for Robot Framework that enables executing commands over SSH connection.<br />
+<br />
+SSHLibrary works with both Python and Jython interpreters. To use SSHLibrary with Python, you must first install paramiko SSH implementation[1] for Python and its dependencies. To use SSHLibrary with Jython, you must have jar distribution of trilead SSH implementation[2] in the Classpath during test execution<br />
+<br />
+[1] <a href="http://www.lag.net/paramiko/">http://www.lag.net/paramiko/</a><br />
+[2] <a href="http://www.trilead.com/Products/Trilead_SSH_for_Java/">http://www.trilead.com/Products/Trilead_SSH_for_Java/</a><br />
+<br />
+Currently, there are two modes of operation:<br />
+<br />
+1. When keyword <a href="#Execute Command" class="name">Execute Command</a> or <a href="#Start Command" class="name">Start Command</a> is used to execute something, a new channel is opened over the SSH connection. In practice it means that no session information is stored.<br />
+<br />
+2. Keywords <a href="#Write" class="name">Write</a> and <span class="name">Read XXX</span> operate in an interactive shell, which means that changes to state are visible to next keywords. Note that in interactive mode, a prompt must be set before using any of the Write-keywords. Prompt can be set either when the library is taken into use or when a new connection is opened using <a href="#Open Connection" class="name">Open Connection</a>, or using keyword <a href="#Set Prompt" class="name">Set Prompt</a>.<br />
+<br />
+Both modes require that a connection is opened with <a href="#Open Connection" class="name">Open Connection</a>.</p>
+
+<h2>Shortcuts</h2>
+<div class='links'>
+<a href="#Close All Connections" title="Closes all open connections and empties the connection cache.">Close&nbsp;All&nbsp;Connections</a>&nbsp;
+<a href="#Close Connection" title="Closes the currently active connection.">Close&nbsp;Connection</a>&nbsp;
+<a href="#Enable Ssh Logging" title="Enables the logging of SSH protocol output to given `logfile`">Enable&nbsp;Ssh&nbsp;Logging</a>&nbsp;
+<a href="#Execute Command" title="Executes command on remote host over existing SSH connection and returns stdout and/or stderr.">Execute&nbsp;Command</a>&nbsp;
+<a href="#Get File" title="Copies a file from remote host to local host using existing SSH connection.">Get&nbsp;File</a>&nbsp;
+<a href="#Login" title="Logs in to SSH server with given user information.">Login</a>&nbsp;
+<a href="#Open Connection" title="Opens a new SSH connection to given `host` and `port`.">Open&nbsp;Connection</a>&nbsp;
+<a href="#Put File" title="Copies file(s) from local host to remote host using existing SSH connection.">Put&nbsp;File</a>&nbsp;
+<a href="#Read" title="Reads and returns/logs everything currently available on the output.">Read</a>&nbsp;
+<a href="#Read Command Output" title="Reads and returns/logs everything currently available on the output (stdout and/or stderr).">Read&nbsp;Command&nbsp;Output</a>&nbsp;
+<a href="#Read Until" title="Reads from the current output until expected is encountered or timeout expires.">Read&nbsp;Until</a>&nbsp;
+<a href="#Read Until Prompt" title="Reads and returns text from the current output until prompt is found.">Read&nbsp;Until&nbsp;Prompt</a>&nbsp;
+<a href="#Read Until Regexp" title="Reads from the current output until a match to `regexp` is found or timeout expires.">Read&nbsp;Until&nbsp;Regexp</a>&nbsp;
+<a href="#Set Default Log Level" title="Sets the default log level used by all read keywords.">Set&nbsp;Default&nbsp;Log&nbsp;Level</a>&nbsp;
+<a href="#Set Newline" title="Sets the newline used by `Write` keyword.">Set&nbsp;Newline</a>&nbsp;
+<a href="#Set Prompt" title="Sets the prompt used by `Read Until Prompt` keyword.">Set&nbsp;Prompt</a>&nbsp;
+<a href="#Set Timeout" title="Sets the timeout used in read operations to given value.">Set&nbsp;Timeout</a>&nbsp;
+<a href="#Start Command" title="Starts command execution on remote host over existing SSH connection.">Start&nbsp;Command</a>&nbsp;
+<a href="#Switch Connection" title="Switches between active connections using index or alias.">Switch&nbsp;Connection</a>&nbsp;
+<a href="#Write" title="Writes given text over the connection and appends newline.">Write</a>&nbsp;
+<a href="#Write Bare" title="Writes given text over the connection without appending newline">Write&nbsp;Bare</a>&nbsp;
+<a href="#Write Until Expected Output" title="Writes given text repeatedly until `expected` appears in output.">Write&nbsp;Until&nbsp;Expected&nbsp;Output</a>&nbsp;
+</div>
+
+<h2>Keywords</h2>
+<table class="keywords">
+<tr>
+  <th class="kw">Keyword</th>
+  <th class="arg">Arguments</th>
+  <th class="doc">Documentation</th>
+</tr>
+<tr>
+  <td class="kw"><a name="Close All Connections"></a>Close All Connections</td>
+  <td class="arg"></td>
+  <td class="doc">Closes all open connections and empties the connection cache.<br />
+<br />
+After this keyword indices returned by <a href="#Open Connection" class="name">Open Connection</a> start from 1.<br />
+<br />
+This keyword ought to be used in test or suite teardown to make sure all connections are closed.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Close Connection"></a>Close Connection</td>
+  <td class="arg"></td>
+  <td class="doc">Closes the currently active connection.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Enable Ssh Logging"></a>Enable Ssh Logging</td>
+  <td class="arg">logfile</td>
+  <td class="doc">Enables the logging of SSH protocol output to given <span class="name">logfile</span><br />
+<br />
+<span class="name">logfile</span> can be relative or absolute path to a file that is writable by current user. In case that it already exists, it will be overwritten.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Execute Command"></a>Execute Command</td>
+  <td class="arg">command, ret_mode=stdout</td>
+  <td class="doc">Executes command on remote host over existing SSH connection and returns stdout and/or stderr.<br />
+<br />
+This keyword waits until the command is completed. If non-blocking behavior is required, use <a href="#Start Command" class="name">Start Command</a> instead.<br />
+<br />
+Examples:<br />
+<table border="1" class="doc">
+<tr>
+<td>${out}=</td>
+<td>Execute Command</td>
+<td>some command</td>
+<td></td>
+<td>#stdout is returned</td>
+<td></td>
+</tr>
+<tr>
+<td>${err}=</td>
+<td>Execute Command</td>
+<td>some command</td>
+<td>stderr</td>
+<td>#stderr is returned</td>
+<td></td>
+</tr>
+<tr>
+<td>${out}</td>
+<td>${err}=</td>
+<td>Execute Command</td>
+<td>some command</td>
+<td>both</td>
+<td>#stdout and stderr are returned</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Get File"></a>Get File</td>
+  <td class="arg">source, destination=.</td>
+  <td class="doc">Copies a file from remote host to local host using existing SSH connection.<br />
+<br />
+1. If the destination is an existing file, the source file is copied over it.<br />
+2. If the destination is an existing directory, the source file is copied into it. Possible file with same name is overwritten.<br />
+3. If the destination does not exist and it ends with path separator ('/' in unixes, '\' in Windows), it is considered a directory. That directory is created and source file copied into it. Possible missing intermediate directories are also created.<br />
+4. If the destination does not exist and it does not end with path separator, it is considered a file. If the path to the file does not exist it is created.<br />
+5. By default, destination is empty, and in that case the current working directory in the local machine is used as destination. This will most probably be the directory where test execution was started.<br />
+<br />
+Using wild cards like '*' and '?' are allowed. When wild cards are used, destination MUST be a directory and only files are copied from the source, sub directories are ignored. If the contents of sub directories are also needed, use the keyword again.<br />
+<br />
+Examples:<br />
+<br />
+<table border="1" class="doc">
+<tr>
+<td>Get File</td>
+<td>/path_to_remote_file/remote_file.txt</td>
+<td>/path_to_local_file/local_file.txt</td>
+<td># single file</td>
+</tr>
+<tr>
+<td>Get File</td>
+<td>/path_to_remote_files/*.txt</td>
+<td>/path_to_local_files/</td>
+<td># multiple files with wild cards</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Login"></a>Login</td>
+  <td class="arg">username, password</td>
+  <td class="doc">Logs in to SSH server with given user information.<br />
+<br />
+Example:<br />
+<table border="1" class="doc">
+<tr>
+<td>Login</td>
+<td>john</td>
+<td>secret</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Open Connection"></a>Open Connection</td>
+  <td class="arg">host, alias=None, port=22, timeout=None, newline=None, prompt=None</td>
+  <td class="doc">Opens a new SSH connection to given <span class="name">host</span> and <span class="name">port</span>.<br />
+<br />
+Possible already opened connections are cached.<br />
+<br />
+Returns the index of this connection which can be used later to switch back to it. Index starts from 1 and is reset back to it when <span class="name">Close All</span> keyword is used.<br />
+<br />
+Optional <span class="name">alias</span> is a name for the connection and it can be used for switching between connections similarly as the index. See <a href="#Switch Connection" class="name">Switch Connection</a> for more details about that.<br />
+<br />
+For more information about <span class="name">timeout</span>, <span class="name">newline</span> and <span class="name">prompt</span>, see <a href="#Set Timeout" class="name">Set Timeout</a>, <a href="#Set Newline" class="name">Set Newline</a> and <a href="#Set Prompt" class="name">Set Prompt</a>, respectively.<br />
+<br />
+Examples:<br />
+<table border="1" class="doc">
+<tr>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Open Connection</td>
+<td>yourhost.com</td>
+<td>2nd conn</td>
+<td># alias</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>${id} =</td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td># index to variable</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>${id} =</td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td>${None}</td>
+<td>23</td>
+<td># index and port</td>
+</tr>
+<tr>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td>3rd conn</td>
+<td>25</td>
+<td># alias and port</td>
+<td></td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Put File"></a>Put File</td>
+  <td class="arg">source, destination=., mode=0744</td>
+  <td class="doc">Copies file(s) from local host to remote host using existing SSH connection.<br />
+<br />
+1. If the destination is an existing file, the src file is copied over it.<br />
+2. If the destination is an existing directory, the src file is copied into it. Possible file with same name is overwritten.<br />
+3. If the destination does not exist and it ends with path separator ('/'), it is considered a directory. That directory is created and src file copied into it. Possibly missing intermediate directories are also created.<br />
+4. If the destination does not exist and it does not end with path separator, it is considered a file. If the path to the file does not exist it is created.<br />
+5. By default, destination is empty and the user's home directory in the remote machine is used as destination.<br />
+<br />
+Using wild cards like '*' and '?' are allowed. When wild cards are used, destination MUST be a directory and only files are copied from the src, sub directories are ignored. If the contents of sub directories are also needed, use the keyword again. Default file permission is 0744 (-rwxr--r--) and can be changed by giving a value to the optional <span class="name">mode</span> parameter.<br />
+<br />
+Examples:<br />
+<br />
+<table border="1" class="doc">
+<tr>
+<td>Put File</td>
+<td>/path_to_local_file/local_file.txt</td>
+<td>/path_to_remote_file/remote_file.txt</td>
+<td># single file</td>
+<td></td>
+</tr>
+<tr>
+<td>Put File</td>
+<td>/path_to_local_files/*.txt</td>
+<td>/path_to_remote_files/</td>
+<td># multiple files with wild cards</td>
+<td></td>
+</tr>
+<tr>
+<td>Put File</td>
+<td>/path_to_local_files/*.txt</td>
+<td>/path_to_remote_files/</td>
+<td>0777</td>
+<td># file permissions</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read"></a>Read</td>
+  <td class="arg">loglevel=None</td>
+  <td class="doc">Reads and returns/logs everything currently available on the output.<br />
+<br />
+Read message is always returned and logged. Default log level is either 'INFO', or the level set with <a href="#Set Default Log Level" class="name">Set Default Log Level</a>. <span class="name">loglevel</span> can be used to override the default log level, and available levels are TRACE, DEBUG, INFO and WARN.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Command Output"></a>Read Command Output</td>
+  <td class="arg">ret_mode=stdout</td>
+  <td class="doc">Reads and returns/logs everything currently available on the output (stdout and/or stderr).<br />
+<br />
+Examples:<br />
+<table border="1" class="doc">
+<tr>
+<td>${out}=</td>
+<td>Read Command Output</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>${err}=</td>
+<td>Read Command Output</td>
+<td>stderr</td>
+<td>#stderr is returned</td>
+<td></td>
+</tr>
+<tr>
+<td>${out}</td>
+<td>${err}=</td>
+<td>Read Command Output</td>
+<td>both</td>
+<td>#stdout and stderr are returned</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Until"></a>Read Until</td>
+  <td class="arg">expected, loglevel=None</td>
+  <td class="doc">Reads from the current output until expected is encountered or timeout expires.<br />
+<br />
+Text up until and including the match will be returned, If no match is found, the keyword fails.<br />
+<br />
+The timeout is by default three seconds but can be changed using <a href="#Set Timeout" class="name">Set Timeout</a> keyword.<br />
+<br />
+See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Until Prompt"></a>Read Until Prompt</td>
+  <td class="arg">loglevel=None</td>
+  <td class="doc">Reads and returns text from the current output until prompt is found.<br />
+<br />
+Prompt must have been set, either in Library import or by using <a href="#Set Prompt" class="name">Set Prompt</a> -keyword.<br />
+<br />
+See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Until Regexp"></a>Read Until Regexp</td>
+  <td class="arg">regexp, loglevel=None</td>
+  <td class="doc">Reads from the current output until a match to <span class="name">regexp</span> is found or timeout expires.<br />
+<br />
+<span class="name">regexp</span> can be a pattern or a compiled re-object.<br />
+<br />
+Returns text up until and including the regexp.<br />
+<br />
+The timeout is by default two seconds but can be changed using <a href="#Set Timeout" class="name">Set Timeout</a> keyword.<br />
+<br />
+See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>. Examples:<br />
+<table border="1" class="doc">
+<tr>
+<td>Read Until Regexp</td>
+<td>(#|$)</td>
+<td></td>
+</tr>
+<tr>
+<td>Read Until Regexp</td>
+<td>some regexp</td>
+<td>DEBUG</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Default Log Level"></a>Set Default Log Level</td>
+  <td class="arg">level</td>
+  <td class="doc">Sets the default log level used by all read keywords.<br />
+<br />
+The possible values are TRACE, DEBUG, INFO and WARN. The default is INFO. The old value is returned and can be used to restore it later, similarly as with <a href="#Set Timeout" class="name">Set Timeout</a>.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Newline"></a>Set Newline</td>
+  <td class="arg">newline</td>
+  <td class="doc">Sets the newline used by <a href="#Write" class="name">Write</a> keyword.<br />
+<br />
+Old newline is returned and it can be used to restore it later. See <a href="#Set Timeout" class="name">Set Timeout</a> for an example.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Prompt"></a>Set Prompt</td>
+  <td class="arg">prompt</td>
+  <td class="doc">Sets the prompt used by <a href="#Read Until Prompt" class="name">Read Until Prompt</a> keyword.<br />
+<br />
+Old prompt is returned and it can be used to restore it later.<br />
+<br />
+Example:<br />
+<table border="1" class="doc">
+<tr>
+<td>${prompt}</td>
+<td>Set Prompt</td>
+<td>$</td>
+</tr>
+<tr>
+<td>Do Something</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Set Prompt</td>
+<td>${prompt}</td>
+<td></td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Timeout"></a>Set Timeout</td>
+  <td class="arg">timeout</td>
+  <td class="doc">Sets the timeout used in read operations to given value.<br />
+<br />
+<span class="name">timeout</span> is given in Robot Framework's time format (e.g. 1 minute 20 seconds).<br />
+<br />
+The read operations of keywords <a href="#Read Until" class="name">Read Until</a>, <a href="#Read Until Prompt" class="name">Read Until Prompt</a>, <a href="#Read Until Regexp" class="name">Read Until Regexp</a> and <a href="#Write Until Expected Output" class="name">Write Until Expected Output</a> will try to read the output until either the expected text appears in the output or the timeout expires. For commands that take long time to produce their output, this timeout must be set properly.<br />
+<br />
+Old timeout is returned and it can be used to restore it later.<br />
+<br />
+Example:<br />
+<table border="1" class="doc">
+<tr>
+<td>${tout} =</td>
+<td>Set Timeout</td>
+<td>2 minute 30 seconds</td>
+</tr>
+<tr>
+<td>Do Something</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Set Timeout</td>
+<td>${tout}</td>
+<td></td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Start Command"></a>Start Command</td>
+  <td class="arg">command</td>
+  <td class="doc">Starts command execution on remote host over existing SSH connection.<br />
+<br />
+This keyword doesn't return anything. Use <a href="#Read Command Output" class="name">Read Command Output</a> to read the output generated from command execution.<br />
+<br />
+Note that the <a href="#Read Command Output" class="name">Read Command Output</a> keyword always reads the output of the most recently started command.<br />
+<br />
+Example:<br />
+<table border="1" class="doc">
+<tr>
+<td>Start Command</td>
+<td>some command</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Switch Connection"></a>Switch Connection</td>
+  <td class="arg">index_or_alias</td>
+  <td class="doc">Switches between active connections using index or alias.<br />
+<br />
+Index is got from <a href="#Open Connection" class="name">Open Connection</a> and alias can be given to it.<br />
+<br />
+Returns the index of previous connection, which can be used to restore the connection later. This works with Robot Framework 2.0.2 or newer.<br />
+<br />
+Example:<br />
+<br />
+<table border="1" class="doc">
+<tr>
+<td>Open Connection</td>
+<td>myhost.net</td>
+<td></td>
+</tr>
+<tr>
+<td>Login</td>
+<td>john</td>
+<td>secret</td>
+</tr>
+<tr>
+<td>Execute Command</td>
+<td>some command</td>
+<td></td>
+</tr>
+<tr>
+<td>Open Connection</td>
+<td>yourhost.com</td>
+<td>2nd conn</td>
+</tr>
+<tr>
+<td>Login</td>
+<td>root</td>
+<td>password</td>
+</tr>
+<tr>
+<td>Start Command</td>
+<td>another cmd</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch Connection</td>
+<td>1</td>
+<td># index</td>
+</tr>
+<tr>
+<td>Execute Command</td>
+<td>something</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch Connection</td>
+<td>2nd conn</td>
+<td># alias</td>
+</tr>
+<tr>
+<td>Read Command Output</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Close All Connections</td>
+<td></td>
+<td></td>
+</tr>
+</table>
+<br />
+Above example expects that there was no other open connections when opening the first one because it used index '1' when switching to it later. If you aren't sure about that you can store the index into a variable as below.<br />
+<br />
+<table border="1" class="doc">
+<tr>
+<td>${id} =</td>
+<td>Open Connection</td>
+<td>myhost.net</td>
+</tr>
+<tr>
+<td># Do something ...</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Switch Connection</td>
+<td>${id}</td>
+<td></td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Write"></a>Write</td>
+  <td class="arg">text, loglevel=None</td>
+  <td class="doc">Writes given text over the connection and appends newline.<br />
+<br />
+Consumes the written text (until the appended newline) from output and returns it. Given text must not contain newlines.<br />
+<br />
+Note: This keyword does not return the possible output of the executed command. To get the output, one of the <span class="name">Read XXX</span> keywords must be used.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Write Bare"></a>Write Bare</td>
+  <td class="arg">text</td>
+  <td class="doc">Writes given text over the connection without appending newline</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Write Until Expected Output"></a>Write Until Expected Output</td>
+  <td class="arg">text, expected, timeout, retry_interval, loglevel=None</td>
+  <td class="doc">Writes given text repeatedly until <span class="name">expected</span> appears in output.<br />
+<br />
+<span class="name">text</span> is written without appending newline. <span class="name">retry_interval</span> defines the time that is waited before writing <span class="name">text</span> again. <span class="name">text</span> will be consumed from the output before <span class="name">expected</span> is tried to be read.<br />
+<br />
+If <span class="name">expected</span> does not appear on output within <span class="name">timeout</span>, this keyword fails.<br />
+<br />
+See <a href="#Read" class="name">Read</a> for more information on <span class="name">loglevel</span>.<br />
+<br />
+Example:<br />
+<table border="1" class="doc">
+<tr>
+<td>Write Until Expected Output</td>
+<td>ps -ef| grep myprocess\n</td>
+<td>myprocess</td>
+</tr>
+<tr>
+<td>...</td>
+<td>5s</td>
+<td>0.5s</td>
+</tr>
+</table>
+<br />
+This will write the 'ps -ef | grep myprocess\n' until 'myprocess' appears on the output. The command is written every 0.5 seconds and the keyword will fail if 'myprocess' does not appear on the output in 5 seconds.</td>
+</tr>
+</table>
+<p class="footer">
+Altogether 22 keywords.<br />
+Generated by <a href="http://code.google.com/p/robotframework/wiki/LibraryDocumentationTool">libdoc.py</a>
+on 2008-11-07 14:27:24.
+</p>
+</body>
+</html>

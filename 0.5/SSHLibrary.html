@@ -1,0 +1,655 @@
+
+<html>
+<head>
+<title>SSHLibrary - Documentation</title>
+<style>
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  /* Generic Table Styles */
+  
+  table {
+    background: white;
+    border: 1px solid black;
+    border-collapse: collapse;
+    empty-cells: show;
+    margin: 0px 1px;
+  }
+  th, td {
+    border: 1px solid black;
+    padding: 1px 5px;
+  }
+  th {
+    background: #C6C6C6;
+  }
+  td {
+    vertical-align: top;
+  }    
+
+  /* Columns */
+
+  td.kw {
+    font-weight: bold;
+  }
+  td.arg {
+    width: 300px;
+  }
+  td.doc {
+  }
+
+  /* Paragraphs */
+
+  .libdoc, .links {
+    width: 800px;
+  }
+  /* 
+</style>
+</head>
+<body>
+<h1>SSHLibrary - Documentation</h1>
+
+<h2>Introduction</h2>
+<p class='libdoc'>SSHLibrary is a test library for Robot Framework that enables<br />
+executing commands over SSH connection.<br />
+<br />
+SSHLibrary works with both Python and Jython interpreters.<br />
+To use SSHLibrary with Python, you must first install paramiko[1] SSH<br />
+implementation for Python and it's dependencies.<br />
+To use SSHLibrary with Jython, you must have jar file of trilead[2] SSH<br />
+implementation in the Classpath during test execution<br />
+<br />
+[1] <a href="http://www.lag.net/paramiko/">http://www.lag.net/paramiko/</a><br />
+[2] <a href="http://www.trilead.com/Products/Trilead_SSH_for_Java/">http://www.trilead.com/Products/Trilead_SSH_for_Java/</a><br />
+<br />
+Currently, there are two modes of operation:<br />
+1. When keyword 'Execute Command' or 'Start Command' is used to execute<br />
+something, a new channel is opened over the SSH connection. In practice it<br />
+means that no session information is stored.<br />
+<br />
+2. Keywords 'Write' and 'Read XXX' operate in an interactive shell, which<br />
+means that changes to state are visible to next keywords.<br />
+<br />
+Both modes require that a connection is opened with 'Open Connection'.</p>
+
+<h2>Shortcuts</h2>
+<div class='links'>
+<a href="#Close All Connections" title="Closes all open connections and empties the connection cache.">Close&nbsp;All&nbsp;Connections</a>&nbsp;
+<a href="#Close Connection" title="Closes the currently active connection.">Close&nbsp;Connection</a>&nbsp;
+<a href="#Execute Command" title="Executes command on remote host over existing SSH connection and returns stdout and/or stderr.">Execute&nbsp;Command</a>&nbsp;
+<a href="#Get File" title="Copies a file from remote host to local host using existing SSH connection.">Get&nbsp;File</a>&nbsp;
+<a href="#Login" title="Logs in to SSH server with given user information.">Login</a>&nbsp;
+<a href="#Open Connection" title="Opens a new SSH connection to given host and port.">Open&nbsp;Connection</a>&nbsp;
+<a href="#Put File" title="Copies file(s) from local host to remote host using existing SSH connection.">Put&nbsp;File</a>&nbsp;
+<a href="#Read" title="Reads and returns/logs everything currently available on the output.">Read</a>&nbsp;
+<a href="#Read Command Output" title="Reads and returns/logs everything currently available on the output (stdout and/or stderr).">Read&nbsp;Command&nbsp;Output</a>&nbsp;
+<a href="#Read Until" title="Reads from the current output until expected is encountered or timeout expires.">Read&nbsp;Until</a>&nbsp;
+<a href="#Read Until Prompt" title="Reads from the current output until prompt is found.">Read&nbsp;Until&nbsp;Prompt</a>&nbsp;
+<a href="#Read Until Regexp" title="Reads from the current output until a match to 'regexp' is found or timeout expires.">Read&nbsp;Until&nbsp;Regexp</a>&nbsp;
+<a href="#Set Default Log Level" title="Sets the default log level used by all read keywords.">Set&nbsp;Default&nbsp;Log&nbsp;Level</a>&nbsp;
+<a href="#Set Newline" title="Sets the newline used by 'Write' keyword.">Set&nbsp;Newline</a>&nbsp;
+<a href="#Set Prompt" title="Sets the prompt used by 'Read Until Prompt' keyword.">Set&nbsp;Prompt</a>&nbsp;
+<a href="#Set Timeout" title="Sets the timeout used in read operations to given value.">Set&nbsp;Timeout</a>&nbsp;
+<a href="#Start Command" title="Starts command execution on remote host over existing SSH connection.">Start&nbsp;Command</a>&nbsp;
+<a href="#Switch Connection" title="Switches between active connections using index or alias.">Switch&nbsp;Connection</a>&nbsp;
+<a href="#Write" title="Writes given text over the connection and appends newline.">Write</a>&nbsp;
+<a href="#Write Bare" title="Writes given text over the connection without appending newline">Write&nbsp;Bare</a>&nbsp;
+<a href="#Write Until Expected Output" title="Writes given text repeatedly until 'expected' appears in output.">Write&nbsp;Until&nbsp;Expected&nbsp;Output</a>&nbsp;
+</div>
+
+<h2>Keywords</h2>
+<table class="keywords">
+<tr>
+  <th class="kw">Keyword</th>
+  <th class="arg">Arguments</th>
+  <th class="doc">Documentation</th>
+</tr>
+<tr>
+  <td class="kw"><a name="Close All Connections"></a>Close All Connections</td>
+  <td class="arg"></td>
+  <td class="doc">Closes all open connections and empties the connection cache.<br />
+<br />
+After this keyword new indexes get from Open keyword are reset to 1.<br />
+<br />
+This keyword ought to be used in test or suite teardown to make sure<br />
+all connections are closed.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Close Connection"></a>Close Connection</td>
+  <td class="arg"></td>
+  <td class="doc">Closes the currently active connection.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Execute Command"></a>Execute Command</td>
+  <td class="arg">command, ret_mode=stdout</td>
+  <td class="doc">Executes command on remote host over existing SSH connection and returns stdout and/or stderr.<br />
+<br />
+This keyword waits until the command is completed. If non-blocking<br />
+behavior is required, use Start Command instead.<br />
+<br />
+Examples:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${out}=</td>
+<td style="border: 1px solid gray; padding: 2px;">Execute Command</td>
+<td style="border: 1px solid gray; padding: 2px;">some command</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;">#stdout is returned</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${err}=</td>
+<td style="border: 1px solid gray; padding: 2px;">Execute Command</td>
+<td style="border: 1px solid gray; padding: 2px;">some command</td>
+<td style="border: 1px solid gray; padding: 2px;">stderr</td>
+<td style="border: 1px solid gray; padding: 2px;">#stderr is returned</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${out}</td>
+<td style="border: 1px solid gray; padding: 2px;">${err}=</td>
+<td style="border: 1px solid gray; padding: 2px;">Execute Command</td>
+<td style="border: 1px solid gray; padding: 2px;">some command</td>
+<td style="border: 1px solid gray; padding: 2px;">both</td>
+<td style="border: 1px solid gray; padding: 2px;">#stdout and stderr are returned</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Get File"></a>Get File</td>
+  <td class="arg">source, destination=</td>
+  <td class="doc">Copies a file from remote host to local host using existing SSH connection.<br />
+<br />
+1) If the destination is an existing file, the source file is copied<br />
+over it.<br />
+2) If the destination is an existing directory, the source file is<br />
+copied into it. Possible file with same name is overwritten.<br />
+3) If the destination does not exist and it ends with path separator<br />
+('/' in unixes, '\' in Windows), it is considered a directory. That<br />
+directory is created and source file copied into it. Possible missing<br />
+intermediate directories are also created.<br />
+4) If the destination does not exist and it does not end with path<br />
+separator, it is considered a file. If the path to the file does not<br />
+exist it is created.<br />
+5) By default, destination is empty, and in that case the current working<br />
+directory in the local machine is used as destination. This will most<br />
+probably be the direcotry where test execution was started.<br />
+<br />
+Using wild cards like '*' and '?' are allowed.<br />
+When wild cards are used, destination MUST be a directory and only files<br />
+are copied from the source, subdirectories are discarded. If the contents of<br />
+subdirectories are also needed, use the keyword again.<br />
+<br />
+Examples:<br />
+<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Get File</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_remote_file/remote_file.txt</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_local_file/local_file.txt</td>
+<td style="border: 1px solid gray; padding: 2px;"># single file</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Get File</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_remote_files/*.txt</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_local_files/</td>
+<td style="border: 1px solid gray; padding: 2px;"># multiple files with wild cards</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Login"></a>Login</td>
+  <td class="arg">username, password</td>
+  <td class="doc">Logs in to SSH server with given user information.<br />
+<br />
+Example:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Login</td>
+<td style="border: 1px solid gray; padding: 2px;">john</td>
+<td style="border: 1px solid gray; padding: 2px;">secret</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Open Connection"></a>Open Connection</td>
+  <td class="arg">host, alias=None, port=22, timeout=None</td>
+  <td class="doc">Opens a new SSH connection to given host and port.<br />
+<br />
+Possible already opened connections are cached.<br />
+<br />
+Returns the index of this connection which can be used later to switch<br />
+back to it. Index starts from 1 and is reset back to it when Close All<br />
+keyword is used.<br />
+<br />
+Optional alias is a name for the connection and it can be used for<br />
+switching between connections similarly as the index. See Switch<br />
+Connection for more details about that.<br />
+<br />
+Examples:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">myhost.net</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">yourhost.com</td>
+<td style="border: 1px solid gray; padding: 2px;">2nd conn</td>
+<td style="border: 1px solid gray; padding: 2px;"># alias</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${id} =</td>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">myhost.net</td>
+<td style="border: 1px solid gray; padding: 2px;"># index to variable</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${id} =</td>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">myhost.net</td>
+<td style="border: 1px solid gray; padding: 2px;">${None}</td>
+<td style="border: 1px solid gray; padding: 2px;">23</td>
+<td style="border: 1px solid gray; padding: 2px;"># index and port</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">myhost.net</td>
+<td style="border: 1px solid gray; padding: 2px;">3rd conn</td>
+<td style="border: 1px solid gray; padding: 2px;">25</td>
+<td style="border: 1px solid gray; padding: 2px;"># alias and port</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Put File"></a>Put File</td>
+  <td class="arg">source, destination=, mode=0744</td>
+  <td class="doc">Copies file(s) from local host to remote host using existing SSH connection.<br />
+<br />
+1) If the destination is an existing file, the source file is copied<br />
+over it.<br />
+2) If the destination is an existing directory, the source file is<br />
+copied into it. Possible file with same name is overwritten.<br />
+3) If the destination does not exist and it ends with path slash ('/'),<br />
+it is considered a directory. That directory is created and source file<br />
+copied into it. Possible missing intermediate directories are also created.<br />
+4) If the destination does not exist and it does not end with path<br />
+separator, it is considered a file. If the path to the file does not<br />
+exist it is created.<br />
+5) By default, destination is empty and the user's home directory in the<br />
+remote machine is used as destination.<br />
+<br />
+Using wild cards like '*' and '?' are allowed.<br />
+When wild cards are used, destination MUST be a directory and only files<br />
+are copied from the source, sub directories are ignores. If the contents<br />
+of sub directories are also needed, use the keyword again.<br />
+Default file permission is 0744 (-rwxr--r--) and can be changed by<br />
+giving a value to the optional mode-parameter.<br />
+<br />
+Examples:<br />
+<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Put File</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_local_file/local_file.txt</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_remote_file/remote_file.txt</td>
+<td style="border: 1px solid gray; padding: 2px;"># single file</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Put File</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_local_files/*.txt</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_remote_files/</td>
+<td style="border: 1px solid gray; padding: 2px;"># multiple files with wild cards</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Put File</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_local_files/*.txt</td>
+<td style="border: 1px solid gray; padding: 2px;">/path_to_remote_files/</td>
+<td style="border: 1px solid gray; padding: 2px;">0777</td>
+<td style="border: 1px solid gray; padding: 2px;"># file permissions</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read"></a>Read</td>
+  <td class="arg">loglevel=None</td>
+  <td class="doc">Reads and returns/logs everything currently available on the output.<br />
+<br />
+Read message is always returned and logged. Default log level is<br />
+either 'INFO', or the level set with 'Set Default Log Level'.<br />
+'loglevel' can be used to override the default log level, and available<br />
+levels are TRACE, DEBUG, INFO and WARN.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Command Output"></a>Read Command Output</td>
+  <td class="arg">ret_mode=stdout</td>
+  <td class="doc">Reads and returns/logs everything currently available on the output (stdout and/or stderr).<br />
+<br />
+Examples:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${out}=</td>
+<td style="border: 1px solid gray; padding: 2px;">Read Command Output</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${err}=</td>
+<td style="border: 1px solid gray; padding: 2px;">Read Command Output</td>
+<td style="border: 1px solid gray; padding: 2px;">stderr</td>
+<td style="border: 1px solid gray; padding: 2px;">#stderr is returned</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${out}</td>
+<td style="border: 1px solid gray; padding: 2px;">${err}=</td>
+<td style="border: 1px solid gray; padding: 2px;">Read Command Output</td>
+<td style="border: 1px solid gray; padding: 2px;">both</td>
+<td style="border: 1px solid gray; padding: 2px;">#stdout and stderr are returned</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Until"></a>Read Until</td>
+  <td class="arg">expected, loglevel=None</td>
+  <td class="doc">Reads from the current output until expected is encountered or timeout expires.<br />
+<br />
+Text up until and including the match will be returned, If no match is<br />
+found, the keyword fails.<br />
+<br />
+The timeout is by default two seconds but can be changed using<br />
+'Set Timeout' keyword.<br />
+<br />
+See 'Read' for more information on 'loglevel'.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Until Prompt"></a>Read Until Prompt</td>
+  <td class="arg">loglevel=None</td>
+  <td class="doc">Reads from the current output until prompt is found.<br />
+<br />
+Prompt must have been set, either in Library import or by using<br />
+'Set Prompt' -keyword.<br />
+<br />
+See 'Read' for more information on 'loglevel'.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Read Until Regexp"></a>Read Until Regexp</td>
+  <td class="arg">regexp, loglevel=None</td>
+  <td class="doc">Reads from the current output until a match to 'regexp' is found or timeout expires.<br />
+<br />
+Return text up until and including the regexp.<br />
+<br />
+The timeout is by default two seconds but can be changed using<br />
+'Set Timeout' keyword.<br />
+<br />
+See 'Read' for more information on 'loglevel'.<br />
+Examples:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Read Until Regexp</td>
+<td style="border: 1px solid gray; padding: 2px;">(#|$)</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Read Until Regexp</td>
+<td style="border: 1px solid gray; padding: 2px;">some regexp</td>
+<td style="border: 1px solid gray; padding: 2px;">DEBUG</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Default Log Level"></a>Set Default Log Level</td>
+  <td class="arg">level</td>
+  <td class="doc">Sets the default log level used by all read keywords.<br />
+<br />
+The possible values are TRACE, DEBUG, INFO and WARN. The default is<br />
+INFO. The old value is returned and can be used to restore it later,<br />
+similarly as with 'Set Timeout'.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Newline"></a>Set Newline</td>
+  <td class="arg">newline</td>
+  <td class="doc">Sets the newline used by 'Write' keyword.<br />
+<br />
+Old newline is returned and it can be used to restore it later.<br />
+See 'Set Timeout' for an example.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Prompt"></a>Set Prompt</td>
+  <td class="arg">prompt</td>
+  <td class="doc">Sets the prompt used by 'Read Until Prompt' keyword.<br />
+<br />
+Old prompt is returned and it can be used to restore it later.<br />
+<br />
+Example:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${prompt}</td>
+<td style="border: 1px solid gray; padding: 2px;">Set Prompt</td>
+<td style="border: 1px solid gray; padding: 2px;">$</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Do Something</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Set Prompt</td>
+<td style="border: 1px solid gray; padding: 2px;">${prompt}</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Set Timeout"></a>Set Timeout</td>
+  <td class="arg">timeout</td>
+  <td class="doc">Sets the timeout used in read operations to given value.<br />
+<br />
+'timeout' is given in Robot Framework's time format<br />
+(e.g. 1 minute 20 seconds).<br />
+<br />
+The read operations of keywords 'Read Until', 'Read Until Prompt',<br />
+'Read Until Regexp' and 'Write Until Expected Output' will try to read<br />
+the output until either the expected text appears in the output or the<br />
+timeout expires. For commands that take long time to produce their<br />
+output, this timeout must be set properly.<br />
+<br />
+Old timeout is returned and it can be used to restore it later.<br />
+<br />
+Example:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${tout} =</td>
+<td style="border: 1px solid gray; padding: 2px;">Set Timeout</td>
+<td style="border: 1px solid gray; padding: 2px;">2 minute 30 seconds</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Do Something</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Set Timeout</td>
+<td style="border: 1px solid gray; padding: 2px;">${tout}</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Start Command"></a>Start Command</td>
+  <td class="arg">command</td>
+  <td class="doc">Starts command execution on remote host over existing SSH connection.<br />
+<br />
+This keyword doesn't return anything. Use Read Command Output to read<br />
+the output generated from command execution.<br />
+<br />
+Note that the 'Read Command Output' keyword always reads the output of<br />
+the most recently started command.<br />
+<br />
+Example:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Start Command</td>
+<td style="border: 1px solid gray; padding: 2px;">some command</td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Switch Connection"></a>Switch Connection</td>
+  <td class="arg">index_or_alias</td>
+  <td class="doc">Switches between active connections using index or alias.<br />
+<br />
+Index is got from Open keywords and alias can be given to it.<br />
+<br />
+Example:<br />
+<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">myhost.net</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Login</td>
+<td style="border: 1px solid gray; padding: 2px;">john</td>
+<td style="border: 1px solid gray; padding: 2px;">secret</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Execute Command</td>
+<td style="border: 1px solid gray; padding: 2px;">some command</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Open Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">yourhost.com</td>
+<td style="border: 1px solid gray; padding: 2px;">2nd conn</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Login</td>
+<td style="border: 1px solid gray; padding: 2px;">root</td>
+<td style="border: 1px solid gray; padding: 2px;">password</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Start Command</td>
+<td style="border: 1px solid gray; padding: 2px;">another cmd</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Switch Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">1</td>
+<td style="border: 1px solid gray; padding: 2px;"># index</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Execute Command</td>
+<td style="border: 1px solid gray; padding: 2px;">something</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Switch Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">2nd conn</td>
+<td style="border: 1px solid gray; padding: 2px;"># alias</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Read Command Output</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Close All Connections</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+</table><br />
+Above example expects that there was no other open connections when<br />
+opening the first one because it used index '1' when switching to it<br />
+later. If you aren't sure about that you can store the index into<br />
+a variable as below.<br />
+<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">${id} =</td>
+<td style="border: 1px solid gray; padding: 2px;">Open</td>
+<td style="border: 1px solid gray; padding: 2px;">myhost.net</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;"># Do something ...</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Switch Connection</td>
+<td style="border: 1px solid gray; padding: 2px;">${id}</td>
+<td style="border: 1px solid gray; padding: 2px;"></td>
+</tr>
+</table></td>
+</tr>
+<tr>
+  <td class="kw"><a name="Write"></a>Write</td>
+  <td class="arg">text, loglevel=None</td>
+  <td class="doc">Writes given text over the connection and appends newline.<br />
+<br />
+Consumes the written text (until the appended newline) from output<br />
+and returns it. Given text must not contain newlines.<br />
+<br />
+Note: This keyword does not return the possible output of the executed<br />
+command. To get the output, one of the 'Read XXX' keywords must be<br />
+used.</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Write Bare"></a>Write Bare</td>
+  <td class="arg">text</td>
+  <td class="doc">Writes given text over the connection without appending newline</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Write Until Expected Output"></a>Write Until Expected Output</td>
+  <td class="arg">text, expected, timeout, retry_interval, loglevel=None</td>
+  <td class="doc">Writes given text repeatedly until 'expected' appears in output.<br />
+<br />
+'text' is written without appending newline. 'retry_interval' defines<br />
+the time that is waited before writing 'text' again. 'text' will be<br />
+consumed from the output before 'expected' is tried to be read.<br />
+<br />
+If 'expected' does not appear on output within 'timeout', this keyword<br />
+fails.<br />
+<br />
+See 'Read' for more information on 'loglevel'.<br />
+<br />
+Example:<br />
+<table border="1" style="border: 1px solid gray; background: transparent; border-collapse: collapse; empty-cells: show;">
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">Write Until Expected Output</td>
+<td style="border: 1px solid gray; padding: 2px;">ps -ef| grep myprocess\n</td>
+<td style="border: 1px solid gray; padding: 2px;">myprocess</td>
+</tr>
+<tr>
+<td style="border: 1px solid gray; padding: 2px;">...</td>
+<td style="border: 1px solid gray; padding: 2px;">5s</td>
+<td style="border: 1px solid gray; padding: 2px;">0.5s</td>
+</tr>
+</table><br />
+This will write the 'ps -ef | grep myprocess\n' until 'myprocess'<br />
+appears on the output. The command is written every 0.5 seconds and<br />
+the keyword will fail if 'myprocess' does not appear on the output in<br />
+5 seconds.</td>
+</tr>
+</table>
+<p class="footer">
+Altogether 21 keywords.
+Documentation generated 20080711 14:37:16.
+</p>
+</body>
+</html>
