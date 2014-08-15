@@ -86,7 +86,7 @@ SSHLibrary using the source distribution:
    https://pypi.python.org/pypi/robotframework-sshlibrary.
 2. Extract the package to a temporary location.
 3. Open command prompt and navigate to the extracted directory.
-4. Run on of the following depending are you using Python or Jython::
+4. Run one of the following depending are you using Python or Jython::
 
      python setup.py install
      jython setup.py install
