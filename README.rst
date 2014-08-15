@@ -5,12 +5,13 @@ Introduction
 ------------
 
 SSHLibrary is a `Robot Framework <http://robotframework.org>`__ test
-library for testing SSH and SFTP. It works both with Python and Jython.
+library for testing SSH and SFTP. It is operating system independent
+and works both with Python and Jython.
 
 The library has the following main usages:
 
 - Executing commands on the remote machine, either with blocking or
-  non-blocking behaviour.
+  non-blocking behavior.
 - Writing and reading in an interactive shell.
 - Transferring files and directories over SFTP.
 - Ensuring that files and directories exist on the remote machine.
@@ -21,13 +22,28 @@ SSHLibrary is open source software licensed under `Apache License 2.0
 Installation
 ------------
 
-SSHLibrary itself can be installed using `pip <http://pip-installer.org>`__::
+When installing SSHLibrary on UNIX-like machines with Python, the easiest
+approach is using `pip <http://pip-installer.org>`__::
 
     pip install robotframework-sshlibrary
 
-If you use SSHLibrary on Python, you will also need to install `paramiko
-<http://paramiko.org>`__ SSH module. Similarly with Jython you need Trilead
-SSH JAR distribution. See `INSTALL.rst`__ for more details.
+Alternatively you can download the source distribution from `PyPI
+<https://pypi.python.org/pypi/robotframework-sshlibrary>`__, extract
+it, and install it using one of the following depending are you using
+Python or Jython::
+
+    python setup.py install
+    jython setup.py install
+
+A benefit of using pip is that it automatically installs `paramiko
+<http://paramiko.org>`__ and `PyCrypto <http://pycrypto.org>`__
+modules that SSHLibrary requires on Python. Using pip on Windows with
+Python works too, but you need to first install PyCrypto module
+manually.
+
+On Jython SSHLibrary requires Trilead SSH JAR distribution.
+
+For more detailed installation instructions see `INSTALL.rst`__.
 
 .. Using full URL here to make it work also on PyPI
 __ https://github.com/robotframework/SSHLibrary/blob/master/INSTALL.rst
