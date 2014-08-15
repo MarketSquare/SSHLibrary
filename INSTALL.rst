@@ -2,90 +2,102 @@
   Installation instructions
 =============================
 
-This guide explains how to install Robot Framework SSHLibrary on Linux and Windows. The Linux parts likely work for other Unix-like operating systems (like OS X) as well.
+This guide explains how to install Robot Framework SSHLibrary on Linux
+and Windows. The Linux parts likely work also on OSX and other
+UNIX-like operating systems.
 
 The guide is divided as following:
 
 .. contents::
   :local:
-  :depth: 3
+  :depth: 2
 
-Dependencies
-============
+Installing dependencies
+=======================
 
-Python
-------
+On Python
+---------
 
-To use SSHLibrary with Python, a module named `Paramiko <http://www.lag.net/paramiko>`__ is required, and additionally Paramiko requires `PyCrypto <http://www.pycrypto.org>`__ module as its dependency.
+To use SSHLibrary with Python, you will need to have `paramiko
+<http://paramiko.org>`__ SSH module and its dependency `PyCrypto
+<http://pycrypto.org>`__ intalled. How to install them depends on
+are you on Linux or Windows.
 
-Linux
------
+On Linux
+~~~~~~~~
 
-Depending on the installation installation approaches discussed further below, Paramiko and PyCrypto may be installed automatically by SSHLibrary.
+If you are `using pip`_ to intall SSHLibrary itself, you should get both
+Paramiko and PyCrypto installed automatically.
 
-If not automatically installed, you may use your distribution's package manager. For example on Debian variants, running `sudo apt-get install python-paramiko` should install them.
+Alternatively you can use your distribution's package manager. For
+example, on Debian based systems ``sudo apt-get install
+python-paramiko`` should install both Paramiko and PyCrypto.
 
-Alternatively, you can always install them using the source distributions from PyPI:
-  * PyCrypto: https://pypi.python.org/pypi/pycrypto
-  * Paramiko: https://pypi.python.org/pypi/paramiko
+The last alternative is downloading and installing source distributions:
 
-Windows
--------
+- Paramiko: https://pypi.python.org/pypi/paramiko
+- PyCrypto: https://pypi.python.org/pypi/pycrypto
 
-On Windows, you should always install PyCrypto using the `binary installer <http://www.voidspace.org.uk/python/modules.shtml#pycrypto>`__ *before* installing Paramiko. This is because installing PyCrypto automatically would require a C compiler. Make sure you pick the correct Paramiko installer depending on your Python version and CPU architecture.
+On Windows
+~~~~~~~~~~
 
-Like on Linux, Paramiko may be installed automatically by SSHLibrary, but you can also install it yourself using the `source distribution <https://pypi.python.org/pypi/paramiko>`__ .
+On Windows, you should always install PyCrypto using the `binary
+installer <http://www.voidspace.org.uk/python/modules.shtml#pycrypto>`__
+*before* installing Paramiko or SSHLibrary. This is because installing
+PyCrypto automatically would require a C compiler. Make sure you pick
+the correct Paramiko installer depending on your Python version and
+CPU architecture.
 
-Jython
-------
+Like `on Linux`_, Paramiko can be installed automatically if `using
+pip`_ to install SSHLibrary itself. Alternatively you can download and
+install the `source distribution <https://pypi.python.org/pypi/paramiko>`__.
+
+On Jython
+---------
 
 To use SSHLibrary with Jython, Trilead SSH library is required.
 
-Regardless of the operating system, you need to download `Trilead SSH JAR distribution <http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build217/trilead-ssh2-1.0.0-build217.jar>`__ and append its path to your CLASSPATH.
+Regardless of the operating system, you need to download `Trilead SSH
+JAR distribution`__ and add it to CLASSPATH.
 
+__ http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build217/trilead-ssh2-1.0.0-build217.jar
 
-Installation
-============
-
-The easiest way to install SSHLibrary is using `pip package manager <http://www.pip-installer.org>`__ .
-
-If you do not want to install pip, or are using Jython which does not support it, you can always install SSHLibrary using the source distribution.
-
-If you have `setuptools <http://pythonhosted.org/setuptools/>`__ (or its fork `distribute <http://pythonhosted.org/distribute/>`__ ) installed, the dependencies should be installed automatically by both of the following approaches. However, on Windows you still need to install PyCrypto binaries first.
+Installing SSHLibrary
+=====================
 
 Using pip
 ---------
 
-With `pip`, all you need to do is run the following command:
-::
+The easiest way to install SSHLibrary is using `pip package manager
+<http://pip-installer.org>`__::
 
     pip install robotframework-sshlibrary
 
+A benefit of pip is that it installs dependencies automatically. Notice that
+`on Windows`_ you should still install PyCrypto manually first.
 
 Using source distribution
 -------------------------
 
-- Download the source tar.gz at https://pypi.python.org/pypi/robotframework-sshlibrary.
-- Extract the package to a temporary location.
-- Open a terminal / command prompt.
-- `cd` to the extracted directory.
-- Run `python setup.py install` or `jython setup.py install`, depending on which interpreter you are using.
+If you do not want or cannot install pip, you can always install
+SSHLibrary using the source distribution:
 
+1. Download the source distribution from
+   https://pypi.python.org/pypi/robotframework-sshlibrary.
+2. Extract the package to a temporary location.
+3. Open command prompt and navigate to the extracted directory.
+4. Run on of the following depending are you using Python or Jython::
 
-Verifying the installation
-==========================
+     python setup.py install
+     jython setup.py install
 
-To test that the installation of SSHLibrary and its dependencies was successful, run in a terminal / command prompt:
+Verifying installation
+======================
 
-::
+To test that installing SSHLibrary and its dependencies was successful,
+run one of the commads depending on the interpreter you use::
 
     python -c "import SSHLibrary"
-
-or
-
-::
-
     jython -c "import SSHLibrary"
-
 
 If you get no error messages, SSHLibrary is installed correctly.
