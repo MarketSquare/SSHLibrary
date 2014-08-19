@@ -28,7 +28,7 @@ Releasing a new version
 
 7. Upload the source distribution to PyPi
 
-    python setup.py sdist upload
+    python setup.py sdist register upload
 
 
 8. Tweet (or re-tweet) about the release as @robotframework to get it into
