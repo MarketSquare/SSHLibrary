@@ -37,7 +37,7 @@ setup(
     long_description=README,
     author='Robot Framework Developers',
     author_email='robotframework@gmail.com',
-    url='http://code.google.com/p/robotframework-sshlibrary/',
+    url='https://github.com/robotframework/SSHLibrary',
     license='Apache License 2.0',
     keywords='robotframework testing testautomation ssh sftp',
     platforms='any',
