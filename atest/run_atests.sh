@@ -44,3 +44,5 @@ fi
 
 python -m robotstatuschecker $OUTPUT_DIR/output.xml
 rebot -d $OUTPUT_DIR $OUTPUT_DIR/output.xml
+echo
+echo "$? tests failed after status check."
