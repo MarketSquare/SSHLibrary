@@ -12,3 +12,10 @@ class TestClienAPI(unittest.TestCase):
         s.close()
         s.login('test', 'test')
         s.execute_command('ls')
+
+    def test_read_until_regexp_with_prefix(self):
+        s = SSHClient('localhost', prompt='$ ')
+        s.login('test', 'test')
+        s.write('faa')
+        s.read_until_regexp_with_prefix(r'foo\sfaa', 'foo ')
+        s.close()

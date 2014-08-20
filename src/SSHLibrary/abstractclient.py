@@ -410,6 +410,31 @@ class AbstractSSHClient(object):
             regexp = re.compile(regexp)
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
+    def read_until_regexp_with_prefix(self, regexp, prefix):
+        """
+        Read and return from output until regexp matches prefix + output.
+
+        :param regexp: a pattern or a compiled regexp object used for matching
+        :raises SSHClientException: if match is not found in prefix+output when
+            timeout expires.
+
+        timeout is defined with :py:meth:`open_connection()`
+        """
+        if isinstance(regexp, basestring):
+            regexp = re.compile(regexp)
+        matcher = regexp.search
+        expected = regexp.pattern
+        ret = ""
+        timeout = self.config.get('timeout')
+        start_time = time.time()
+        while time.time() < float(timeout.value) + start_time:
+            ret += self.read_char()
+            if matcher(prefix + ret):
+                return ret
+        raise SSHClientException(
+            "No match found for '%s' in %s\nOutput:\n%s"
+            % (expected, timeout, ret))
+
     def write_until_expected(self, text, expected, timeout, interval):
         """Writes `text` repeatedly in the current shell until the `expected`
         appears in the output or the `timeout` expires.
