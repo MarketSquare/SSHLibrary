@@ -17,6 +17,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
                 (['myfile'], '\\tmp\\', ['/tmp/myfile'])]
         for src, dest, exp in data:
             client = abstractclient.AbstractSFTPClient()
+            client.is_dir = lambda x: False
             remote = client._get_put_file_destinations(src, dest, '/')[0]
             self.assertEquals(remote, exp)
 
