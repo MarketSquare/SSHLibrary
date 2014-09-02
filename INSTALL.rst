@@ -20,13 +20,13 @@ On Python
 
 To use SSHLibrary with Python, you will need to have `paramiko
 <http://paramiko.org>`__ SSH module and its dependency `PyCrypto
-<http://pycrypto.org>`__ intalled. How to install them depends on
+<http://pycrypto.org>`__ installed. How to install them depends on
 are you on Linux or Windows.
 
 On Linux
 ~~~~~~~~
 
-If you are `using pip`_ to intall SSHLibrary itself, you should get both
+If you are `using pip`_ to install SSHLibrary itself, you should get both
 Paramiko and PyCrypto installed automatically.
 
 Alternatively you can use your distribution's package manager. For
@@ -95,7 +95,7 @@ Verifying installation
 ======================
 
 To test that installing SSHLibrary and its dependencies was successful,
-run one of the commads depending on the interpreter you use::
+run one of the commands depending on the interpreter you use::
 
     python -c "import SSHLibrary"
     jython -c "import SSHLibrary"
