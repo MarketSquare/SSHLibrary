@@ -110,6 +110,7 @@ class AbstractSSHClient(object):
 
     def close(self):
         """Closes the connection."""
+        self._sftp_client = None
         self._shell = None
         self.client.close()
 
