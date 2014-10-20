@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from SSHLibrary import abstractclient
+from SSHLibrary import abstractclient, SSHClient
 
 abstractclient.AbstractSFTPClient._absolute_path = lambda obj, path: '/home'
 
@@ -32,6 +32,55 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
             client = abstractclient.AbstractSFTPClient()
             local = client._get_get_file_destinations(src, dest)
             self.assertEquals(local, exp)
+
+
+class TestSSHClientGetMethod(unittest.TestCase):
+
+    SRC_DIR = '/tmp/src'
+    DST_DIR = '/tmp/dst'
+    TEST_FILE = 'touch /tmp/src/test_file.txt'
+
+    def setUp(self):
+        self._prepare_environment()
+
+    def tearDown(self):
+        self._clean_enrvironment()
+
+    def test_get_file_downloads_file_via_second_ssh_session(self):
+        client = self._create_ssh_client()
+        client.get_file(self.TEST_FILE, self.DST_DIR)
+        client.close()
+        self._login_client(client)
+        client.get_file(self.TEST_FILE, self.DST_DIR)
+        client.close()
+
+    def _prepare_environment(self):
+        client = self._create_ssh_client()
+        self._create_test_dirs(client)
+        self._create_test_file(client)
+        client.close()
+
+    def _create_ssh_client(self):
+        client = SSHClient('localhost', prompt='$ ')
+        self._login_client(client)
+        return client
+
+    def _login_client(self, client):
+        client.login('test', 'test')
+
+    def _create_test_dirs(self, client):
+        client.execute_command("mkdir -p {}".format(self.SRC_DIR))
+
+    def _create_test_file(self, client):
+        client.execute_command("touch {}".format(self.TEST_FILE))
+
+    def _remove_test_dirs(self, client):
+        client.execute_command("rm -rf {}".format(self.SRC_DIR))
+
+    def _clean_enrvironment(self):
+        client = self._create_ssh_client()
+        self._remove_test_dirs(client)
+        client.close()
 
 
 if __name__ == '__main__':
