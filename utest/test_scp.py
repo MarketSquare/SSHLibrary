@@ -38,7 +38,7 @@ class TestSSHClientGetMethod(unittest.TestCase):
 
     SRC_DIR = '/tmp/src'
     DST_DIR = '/tmp/dst'
-    TEST_FILE = 'touch /tmp/src/test_file.txt'
+    TEST_FILE = '/tmp/src/test_file.txt'
 
     def setUp(self):
         self._prepare_environment()
@@ -69,13 +69,13 @@ class TestSSHClientGetMethod(unittest.TestCase):
         client.login('test', 'test')
 
     def _create_test_dirs(self, client):
-        client.execute_command("mkdir -p {}".format(self.SRC_DIR))
+        client.execute_command("mkdir -p %s" % self.SRC_DIR)
 
     def _create_test_file(self, client):
-        client.execute_command("touch {}".format(self.TEST_FILE))
+        client.execute_command("touch %s" % self.TEST_FILE)
 
     def _remove_test_dirs(self, client):
-        client.execute_command("rm -rf {}".format(self.SRC_DIR))
+        client.execute_command("rm -rf %s" % self.SRC_DIR)
 
     def _clean_enrvironment(self):
         client = self._create_ssh_client()
