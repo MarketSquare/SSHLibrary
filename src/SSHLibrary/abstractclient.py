@@ -1002,7 +1002,10 @@ class AbstractSFTPClient(object):
             current_dir = self._absolute_path('.')
         for dir_name in path.split('/'):
             if dir_name:
-                current_dir = '%s/%s' % (current_dir, dir_name)
+                if current_dir.startswith('/'):
+                    current_dir = '%s%s' % (current_dir, dir_name)
+                else:
+                    current_dir = '%s/%s' % (current_dir, dir_name)
             try:
                 self._client.stat(current_dir)
             except:
