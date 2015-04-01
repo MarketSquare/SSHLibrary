@@ -30,8 +30,11 @@ Releasing a new version
 
     python setup.py sdist register upload
 
+8. Update the docs from gh-pages directory. You can generate the docs with this command:
+    
+    PYTHONPATH=src python -m robot.libdoc SSHLibrary SSHLibrary.html
 
-8. Tweet (or re-tweet) about the release as @robotframework to get it into
+9. Tweet (or re-tweet) about the release as @robotframework to get it into
    News at http://robotframework.org.
 
-9. Send release mails.
+10. Send release mails.
