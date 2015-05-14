@@ -181,8 +181,8 @@ class RemoteCommand(AbstractCommand):
         while self._shell_open():
             self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts)
             time.sleep(0.01) # lets not be so busy
-        stdout = (''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
-        stderr = (''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
+        stdout = (''.join(stdouts) + stdout_filebuffer.read())#.decode(self._encoding)
+        stderr = (''.join(stderrs) + stderr_filebuffer.read())#.decode(self._encoding)
         return stderr, stdout
 
     def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts):
