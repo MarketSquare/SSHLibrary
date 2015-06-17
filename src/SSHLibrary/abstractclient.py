@@ -20,6 +20,7 @@ import re
 import stat
 import time
 import glob
+import posixpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
@@ -1003,7 +1004,7 @@ class AbstractSFTPClient(object):
             current_dir = self._absolute_path('.')
         for dir_name in path.split('/'):
             if dir_name:
-                current_dir = '%s/%s' % (current_dir, dir_name)
+                current_dir = posixpath.join(current_dir, dir_name)
             try:
                 self._client.stat(current_dir)
             except:
