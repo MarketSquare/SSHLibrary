@@ -19,3 +19,6 @@ class TestClienAPI(unittest.TestCase):
         s.write('faa')
         s.read_until_regexp_with_prefix(r'foo\sfaa', 'foo ')
         s.close()
+
+if __name__ == "__main__":
+    unittest.main()
