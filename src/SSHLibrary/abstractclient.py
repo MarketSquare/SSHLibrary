@@ -1018,8 +1018,8 @@ class AbstractSFTPClient(object):
                 data = local_file.read(4096)
                 if not data:
                     break
-                if newline and '\n' in data:
-                    data = data.replace('\n', newline)
+                if newline:
+                    data = re.sub(r'(\r\n|\r|\n)', newline, data)
                 self._write_to_remote_file(remote_file, data, position)
                 position += len(data)
             self._close_remote_file(remote_file)

@@ -1,4 +1,4 @@
-*** Settings ***
+﻿*** Settings ***
 Resource    common.txt
 
 *** Variables ***
@@ -20,5 +20,5 @@ ${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${SUBDIRECTORY NAME}${/}$
 Login And Upload Test Files
     Login As Valid User
     Put Directory  ${LOCAL TEXTFILES}  ${REMOTE TEST ROOT}  recursive=True
-    Execute command   mkdir ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}
-    Execute command   mkdir ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}
+    Execute command   mkdir ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${DIRECTORY WITH EMPTY SUBDIRECTORY}
+    Execute command   mkdir ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${DIRECTORY WITH EMPTY SUBDIRECTORY}/${EMPTY SUB DIR}
