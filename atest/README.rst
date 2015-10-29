@@ -87,6 +87,12 @@ Setup on Linux
 
 - Change the rights for that file so that you can read it.
 
+Setup in Windows
+================
+The acceptance tests can also be run on windows against a ssh server running on Cygwin.
+
+You will need to install Cygwin with SSH server. Then add users test and testkey and follow the same steps as in linux to setup their bash accounts on Cygwin. After that you can execute the acceptance tests on Windows. 
+
 Running the acceptance tests
 ============================
 
@@ -96,4 +102,4 @@ Tests also require robotstatuschecker:
 
     pip install robotstatuschecker
  
-Tests are ran using Bash script `atest/run_atests.sh`. The script prints help when ran without parameters.
+Tests are ran using Bash script `python atest/run.py`. The script prints help when ran without parameters.
