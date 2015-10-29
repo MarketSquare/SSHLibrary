@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import time
+import ntpath
 
 try:
     import paramiko
@@ -159,11 +160,14 @@ class SFTPClient(AbstractSFTPClient):
 
     def _absolute_path(self, path):
         path = path.encode(self._encoding)
-        normalized_path = self._client.normalize(path)
-        if not isinstance(normalized_path, unicode):
-            normalized_path = unicode(normalized_path, self._encoding)
-        return normalized_path
+        if not self._is_windows_path(path):
+            path = self._client.normalize(path)
+        if not isinstance(path, unicode):
+            path = unicode(path, self._encoding)
+        return path
 
+    def _is_windows_path(self, path):
+        return bool(ntpath.splitdrive(path)[0])
 
 class RemoteCommand(AbstractCommand):
 

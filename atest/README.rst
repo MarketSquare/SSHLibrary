@@ -91,7 +91,9 @@ Setup in Windows
 ================
 The acceptance tests can also be run on windows against a ssh server running on Cygwin.
 
-You will need to install Cygwin with SSH server. Then add users test and testkey and follow the same steps as in linux to setup their bash accounts on Cygwin. After that you can execute the acceptance tests on Windows. 
+You will need to install Cygwin with SSH server. Then add users test and testkey and follow the same steps as in linux to setup their bash accounts on Cygwin. After that you can execute the acceptance tests on Windows.
+
+The tests assume that Cygwin is installed to c:/cygwin64. If the installation irectory is different, it can be overridden with commadnline option `--variable CYGWIN_HOME:<the real path>`
 
 Running the acceptance tests
 ============================

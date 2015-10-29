@@ -36,10 +36,13 @@ def atests(*opts):
         jython(*opts)
         process_output(join(OUTPUT_JYTHON, 'output.xml'))
         return rebot(join(OUTPUT_JYTHON, 'output.xml'), outputdir=OUTPUT_JYTHON)
+    elif os.name == 'nt':
+        os_includes = ('--include', 'windows')
     else:
-        python(*opts)
-        process_output(join(OUTPUT_PYTHON, 'output.xml'))
-        return rebot(join(OUTPUT_PYTHON, 'output.xml'), outputdir=OUTPUT_PYTHON)
+        os_includes = ('--exclude', 'windows')
+    python(*(os_includes+opts))
+    process_output(join(OUTPUT_PYTHON, 'output.xml'))
+    return rebot(join(OUTPUT_PYTHON, 'output.xml'), outputdir=OUTPUT_PYTHON)
 
 def python(*opts):
     try:
