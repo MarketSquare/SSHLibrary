@@ -61,10 +61,11 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
-    def _login(self, username, password):
+    def _login(self, username, password, look_for_keys=False):
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, look_for_keys=False, allow_agent=False,
+                                password, look_for_keys=look_for_keys,
+                                allow_agent=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException

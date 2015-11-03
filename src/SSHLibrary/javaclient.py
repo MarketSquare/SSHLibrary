@@ -41,7 +41,7 @@ class JavaSSHClient(AbstractSSHClient):
     def enable_logging(logfile):
         return False
 
-    def _login(self, username, password):
+    def _login(self, username, password, look_for_keys='ignored'):
         if not self.client.authenticateWithPassword(username, password):
             raise SSHClientException
 

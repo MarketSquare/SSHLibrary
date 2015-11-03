@@ -115,7 +115,7 @@ class AbstractSSHClient(object):
         self._shell = None
         self.client.close()
 
-    def login(self, username, password, delay=None):
+    def login(self, username, password, delay=None, look_for_keys=False):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -132,6 +132,10 @@ class AbstractSSHClient(object):
             the output after logging in. The delay is only effective if
             the prompt is not set.
 
+        :param bool look_for_keys: Whether the login method should look for
+            available public keys for login. This will also enable ssh agent.
+            This option in ignored in Jython.
+
         :raises SSHClientException: If logging in failed.
 
         :returns: The read output from the server.
@@ -139,7 +143,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password)
+            self._login(username, password, look_for_keys=look_for_keys)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % username)
@@ -152,7 +156,7 @@ class AbstractSSHClient(object):
             text = unicode(text)
         return text.encode(self.config.encoding)
 
-    def _login(self, username, password):
+    def _login(self, username, password, look_for_keys=False):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
