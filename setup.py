@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import with_statement
+from __future__ import absolute_import, division, print_function
 from sys import platform
 
 requires = {}
@@ -10,7 +10,7 @@ try:
 
     if not platform.startswith('java'):
         requires = {
-            'install_requires': ['robotframework', 'paramiko >= 1.8.0'],
+            'install_requires': ['robotframework', 'paramiko >= 1.8.0', 'future'],
         }
 except ImportError:
     from distutils.core import setup
@@ -19,7 +19,7 @@ except ImportError:
 from os.path import abspath, dirname, join
 
 CURDIR = dirname(abspath(__file__))
-execfile(join(CURDIR, 'src', 'SSHLibrary', 'version.py'))
+exec(compile(open(join(CURDIR, 'src', 'SSHLibrary', 'version.py')).read(), 'version.py', 'exec'))
 with open(join(CURDIR, 'README.rst')) as readme:
     README = readme.read()
 CLASSIFIERS = """

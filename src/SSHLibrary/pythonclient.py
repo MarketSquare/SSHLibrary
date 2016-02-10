@@ -11,6 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from __future__ import absolute_import, division, print_function, with_statement
+from builtins import str
+from past.builtins import basestring
+
 import time
 import ntpath
 
@@ -101,7 +106,7 @@ class Shell(AbstractShell):
         self._shell = client.invoke_shell(term_type, term_width, term_height)
 
     def read(self):
-        data = ''
+        data = bytes()
         while self._output_available():
             data += self._shell.recv(4096)
         return data
@@ -109,7 +114,7 @@ class Shell(AbstractShell):
     def read_byte(self):
          if self._output_available():
             return self._shell.recv(1)
-         return ''
+         return bytes()
 
     def _output_available(self):
         return self._shell.recv_ready()
@@ -129,8 +134,8 @@ class SFTPClient(AbstractSFTPClient):
         path = path.encode(self._encoding)
         for item in self._client.listdir_attr(path):
             filename = item.filename
-            if not isinstance(filename, unicode):
-                filename = unicode(filename, self._encoding)
+            if not isinstance(filename, str):
+                filename = str(filename, self._encoding)
             yield SFTPFileInfo(filename, item.st_mode)
 
     def _stat(self, path):
@@ -163,8 +168,8 @@ class SFTPClient(AbstractSFTPClient):
         path = path.encode(self._encoding)
         if not self._is_windows_path(path):
             path = self._client.normalize(path)
-        if not isinstance(path, unicode):
-            path = unicode(path, self._encoding)
+        if not isinstance(path, str):
+            path = str(path, self._encoding)
         return path
 
     def _is_windows_path(self, path):
@@ -186,8 +191,8 @@ class RemoteCommand(AbstractCommand):
         while self._shell_open():
             self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts)
             time.sleep(0.01) # lets not be so busy
-        stdout = (''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
-        stderr = (''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
+        stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
+        stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
         return stderr, stdout
 
     def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts):

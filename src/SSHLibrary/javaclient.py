@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import absolute_import, division, print_function, with_statement
+from builtins import chr
+
 try:
     from com.trilead.ssh2 import (Connection, SFTPException, SFTPv3Client,
                                   SFTPv3DirectoryEntry, StreamGobbler)
@@ -89,7 +92,7 @@ class Shell(AbstractShell):
     def read_byte(self):
          if self._output_available():
              return chr(self._stdout.read())
-         return ''
+         return bytes()
 
     def _output_available(self):
         return self._stdout.available()

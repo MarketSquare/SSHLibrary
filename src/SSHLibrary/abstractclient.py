@@ -12,7 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from __future__ import with_statement
+from __future__ import absolute_import, division, print_function, with_statement
+from builtins import str
+from builtins import zip
+from past.builtins import basestring
+from builtins import object
+
 from fnmatch import fnmatchcase
 
 import os
@@ -152,8 +157,10 @@ class AbstractSSHClient(object):
     def _encode(self, text):
         if isinstance(text, str):
             return text
+        if isinstance(text, int):
+            return "%d" % text
         if not isinstance(text, basestring):
-            text = unicode(text)
+            text = str(text)
         return text.encode(self.config.encoding)
 
     def _login(self, username, password, look_for_keys=False):
@@ -304,7 +311,7 @@ class AbstractSSHClient(object):
     def _delayed_read(self, delay):
         delay = TimeEntry(delay).value
         max_time = time.time() + self.config.get('timeout').value
-        output = ''
+        output = bytes()
         while time.time() < max_time:
             time.sleep(delay)
             read = self.shell.read()
@@ -321,7 +328,7 @@ class AbstractSSHClient(object):
 
         :returns: A single char read from the output.
         """
-        server_output = ''
+        server_output = bytes()
         while True:
             try:
                 server_output += self.shell.read_byte()
@@ -827,7 +834,7 @@ class AbstractSFTPClient(object):
             msg = "There were no source files matching '%s'." % source
             raise SSHClientException(msg)
         local_files = self._get_get_file_destinations(remote_files, destination)
-        files = zip(remote_files, local_files)
+        files = list(zip(remote_files, local_files))
         for src, dst in files:
             self._get_file(src, dst)
         return files
@@ -959,7 +966,7 @@ class AbstractSFTPClient(object):
                                                                    destination,
                                                                    path_separator)
         self._create_missing_remote_path(remote_dir)
-        files = zip(local_files, remote_files)
+        files = list(zip(local_files, remote_files))
         for source, destination in files:
             self._put_file(source, destination, mode, newline)
         return files
@@ -1002,21 +1009,21 @@ class AbstractSFTPClient(object):
         return destination.rsplit(path_separator, 1)
 
     def _create_missing_remote_path(self, path):
-        if path.startswith('/'):
-            current_dir = '/'
+        if path.startswith(b'/'):
+            current_dir = b'/'
         else:
-            current_dir = self._absolute_path('.')
-        for dir_name in path.split('/'):
+            current_dir = self._absolute_path('.').encode()
+        for dir_name in path.split(b'/'):
             if dir_name:
                 current_dir = posixpath.join(current_dir, dir_name)
             try:
                 self._client.stat(current_dir)
             except:
-                self._client.mkdir(current_dir, 0744)
+                self._client.mkdir(current_dir, 0o744)
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
-        with open(source, 'rb') as local_file:
+        with open(source, 'r') as local_file:
             position = 0
             while True:
                 data = local_file.read(4096)
