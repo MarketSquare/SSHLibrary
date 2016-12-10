@@ -28,9 +28,9 @@ from .abstractclient import (AbstractShell, AbstractSFTPClient,
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
-def _custom_start_client(self, event=None):
+def _custom_start_client(self, *args, **kwargs):
     self.banner_timeout = 45
-    self._orig_start_client(event)
+    self._orig_start_client(*args, **kwargs)
 
 paramiko.transport.Transport._orig_start_client = \
     paramiko.transport.Transport.start_client
