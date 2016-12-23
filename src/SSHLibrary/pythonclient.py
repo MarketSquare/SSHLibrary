@@ -28,13 +28,14 @@ from .abstractclient import (AbstractShell, AbstractSFTPClient,
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
-def _custom_start_client(self, event=None):
+def _custom_start_client(self, *arg, **kwargs):
     self.banner_timeout = 45
-    self._orig_start_client(event)
+    self._orig_start_client(*arg, **kwargs)
 
 paramiko.transport.Transport._orig_start_client = \
     paramiko.transport.Transport.start_client
 paramiko.transport.Transport.start_client = _custom_start_client
+
 
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
 def _custom_log(self, level, msg, *args):
@@ -169,6 +170,7 @@ class SFTPClient(AbstractSFTPClient):
 
     def _is_windows_path(self, path):
         return bool(ntpath.splitdrive(path)[0])
+
 
 class RemoteCommand(AbstractCommand):
 
