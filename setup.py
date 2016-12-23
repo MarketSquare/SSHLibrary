@@ -10,7 +10,7 @@ try:
 
     if not platform.startswith('java'):
         requires = {
-            'install_requires': ['robotframework', 'paramiko >= 1.8.0, <=2.0.4'],
+            'install_requires': ['robotframework', 'paramiko >= 1.8.0'],
         }
 except ImportError:
     from distutils.core import setup
