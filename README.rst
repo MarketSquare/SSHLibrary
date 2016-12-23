@@ -1,6 +1,14 @@
 SSHLibrary for Robot Framework
 ==============================
 
+Paramiko compatibility notice
+------------
+
+SSHLibrary does not currently support Paramiko 2.1+. If required please
+downgrade with `pip install -U paramiko==2.0.4`.
+
+This library supports "paramiko>=1.8.0,<=2.0.4".
+
 Introduction
 ------------
 
