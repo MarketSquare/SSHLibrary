@@ -1,3 +1,7 @@
+from __future__ import absolute_import, division, print_function, with_statement
+from builtins import str
+from builtins import object
+
 from robot import utils
 
 
@@ -27,7 +31,7 @@ class Configuration(object):
         self._config = entries
 
     def __str__(self):
-        return '\n'.join(['%s=%s' % (k, v) for k, v in self._config.items()])
+        return '\n'.join(['%s=%s' % (k, v) for k, v in list(self._config.items())])
 
     def update(self, **entries):
         """Update configuration entries.
@@ -38,7 +42,7 @@ class Configuration(object):
 
         See `__init__` for an example.
         """
-        for name, value in entries.items():
+        for name, value in list(entries.items()):
             if value is not None:
                 self._config[name].set(value)
 

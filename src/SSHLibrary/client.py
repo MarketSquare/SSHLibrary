@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import absolute_import, division, print_function, with_statement
+
 import sys
 
 if sys.platform.startswith('java'):
-    from javaclient import JavaSSHClient as SSHClient
+    from SSHLibrary.javaclient import JavaSSHClient as SSHClient
 else:
-    from pythonclient import PythonSSHClient as SSHClient
+    from SSHLibrary.pythonclient import PythonSSHClient as SSHClient
