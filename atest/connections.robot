@@ -1,6 +1,6 @@
 *** Settings ***
 Default Tags   pybot   jybot
-Resource       resources/common.txt
+Resource       resources/common.robot
 Test Teardown  Close All Connections
 Library        OperatingSystem
 

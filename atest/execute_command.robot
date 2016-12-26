@@ -1,6 +1,6 @@
 *** Settings ***
 Default Tags      pybot   jybot
-Resource        resources/shell.txt
+Resource        resources/shell.robot
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files And Close Connections
 Library         OperatingSystem  WITH NAME  OS

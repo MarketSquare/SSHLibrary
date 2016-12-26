@@ -1,5 +1,5 @@
 ﻿*** Settings ***
-Resource    common.txt
+Resource    common.robot
 
 *** Variables ***
 ${LOCAL TMPDIR}                  ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir

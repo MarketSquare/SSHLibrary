@@ -1,6 +1,6 @@
 *** Settings ***
 Force Tags     pybot   jybot
-Resource       resources/common.txt
+Resource       resources/common.robot
 Test Setup     Open Connection  ${HOST}
 Test Teardown  Close All Connections
 
