@@ -1,6 +1,6 @@
 *** Settings ***
 Force Tags      pybot   jybot
-Resource        resources/sftp.txt
+Resource        resources/sftp.robot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
 Library         OperatingSystem  WITH NAME  OS
