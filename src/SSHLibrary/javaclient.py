@@ -12,9 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# from __future__ import absolute_import, division, print_function, with_statement
-# from builtins import chr
-
 try:
     from com.trilead.ssh2 import (Connection, SFTPException, SFTPv3Client,
                                   SFTPv3DirectoryEntry, StreamGobbler)
