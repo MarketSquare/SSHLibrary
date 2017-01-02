@@ -1,7 +1,3 @@
-# from __future__ import absolute_import, division, print_function, with_statement
-# from builtins import str
-# from builtins import object
-
 from robot import utils
 
 
