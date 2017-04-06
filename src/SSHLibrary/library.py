@@ -835,6 +835,29 @@ class SSHLibrary(object):
         except SSHClientException, e:
             raise RuntimeError(e)
 
+    def get_pre_login_banner(self, host=None, port=None):
+        """
+         Returns the banner supplied by the server upon connect.
+         *Note:* This keyword only works with Python, i.e. when executing tests
+         with `pybot`.
+         
+         There are 2 ways of getting banner information:
+         - independent of any connection:
+         | ${banner} =     | Get Pre Login Banner | ${HOST}                   |
+         | Should Be Equal | ${banner}            | Testing pre-login banner  |
+         The argument 'host' is mandatory for getting banner key without open connection. 
+         
+         - from current connection:
+         | Open Connection  | ${HOST}              | prompt=${PROMPT}         |
+         | Login            | ${USERNAME}          | ${PASSWORD}              |
+         | ${banner} =      | Get Pre Login Banner |
+         | Should Be Equal  | ${banner}            | Testing pre-login banner |
++        """
+        if self.current:
+            if host == self.current.config.host or not host:
+                return self.current._get_banner()
+        return SSHClient._get_pre_login_banner(host, port)
+
     def execute_command(self, command, return_stdout=True, return_stderr=False,
                         return_rc=False):
         """Executes `command` on the remote machine and returns its outputs.

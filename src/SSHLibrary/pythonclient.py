@@ -69,6 +69,7 @@ class PythonSSHClient(AbstractSSHClient):
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
+        self.banner = self.client.get_transport().get_banner()
 
     def _login_with_public_key(self, username, key_file, password):
         try:
@@ -77,6 +78,26 @@ class PythonSSHClient(AbstractSSHClient):
                                 allow_agent=False, timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
+        self.banner = self.client.get_transport().get_banner()
+
+    def _get_banner(self):
+        return self.banner
+
+    @staticmethod
+    def _get_pre_login_banner(host, port=None):
+        if not port:
+            port = 22
+        if host:
+            client = paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            try:
+                client.connect(host, int(port), username="bad-username", password="bad-password")
+            except paramiko.AuthenticationException:
+                return client.get_transport().get_banner()
+            except Exception:
+                raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
+        else:
+            raise SSHClientException("Missing value for argument 'host'!")
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)

@@ -67,6 +67,7 @@ class AbstractSSHClient(object):
         self._shell = None
         self._started_commands = []
         self.client = self._get_client()
+        self.banner = None
 
     def _get_client(self):
       raise NotImplementedError('This should be implemented in the subclass.')
@@ -103,6 +104,9 @@ class AbstractSSHClient(object):
             self._shell = self._create_shell()
         return self._shell
 
+    def banner(self):
+        return self.banner
+
     def _create_sftp_client(self):
         raise NotImplementedError
 
@@ -113,6 +117,7 @@ class AbstractSSHClient(object):
         """Closes the connection."""
         self._sftp_client = None
         self._shell = None
+        self.banner = None
         self.client.close()
 
     def login(self, username, password, delay=None, look_for_keys=False):
@@ -206,6 +211,9 @@ class AbstractSSHClient(object):
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
     def _login_with_public_key(self, username, keyfile, password):
+        raise NotImplementedError
+
+    def _get_pre_login_banner(self, host, port):
         raise NotImplementedError
 
     def execute_command(self, command):
