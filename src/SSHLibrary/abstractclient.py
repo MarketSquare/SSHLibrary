@@ -152,7 +152,7 @@ class AbstractSSHClient(object):
         return self._read_login_output(delay)
 
     def _encode(self, text):
-        if is_string(text):
+        if isinstance(text, str):
             return text
         if is_integer(text):
             return "%d" % text
