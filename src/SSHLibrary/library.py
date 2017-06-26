@@ -300,7 +300,6 @@ class SSHLibrary(object):
     DEFAULT_TERM_HEIGHT = 24
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
-    proxy = None
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
