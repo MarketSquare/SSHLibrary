@@ -300,6 +300,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_HEIGHT = 24
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
+    proxy = None
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -461,9 +462,13 @@ class SSHLibrary(object):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
+    def proxy_through(self, proxy_host, proxy_user, key_file, host, port=22):
+        self.proxy = SSHClient.proxy_through(proxy_host, proxy_user, key_file, host, port)
+        self.open_connection(self, host, sock=self.proxy)
+
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None):
+                        height=None, path_separator=None, encoding=None, sock=None):
         """Opens a new SSH connection to the given `host` and `port`.
 
         The new connection is made active. Possible existing connections
@@ -526,8 +531,9 @@ class SSHLibrary(object):
         height = height or self._config.height
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
+        sock = sock or self._config.sock
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, path_separator, encoding)
+                           term_type, width, height, path_separator, encoding, sock)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -717,7 +723,7 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'." % level)
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
-                           newline, prompt, term_type, width, height, encoding):
+                           newline, prompt, term_type, width, height, encoding, sock):
         if self._output_wanted(index):
             yield config.index
         if self._output_wanted(host):
@@ -740,6 +746,8 @@ class SSHLibrary(object):
             yield config.height
         if self._output_wanted(encoding):
             yield config.encoding
+        if self._output_wanted(sock):
+            yield config.sock
 
     def _output_wanted(self, value):
         return value and str(value).lower() != 'false'
@@ -789,7 +797,7 @@ class SSHLibrary(object):
 
         Argument `delay` was added in SSHLibrary 2.0.
         """
-        return self._login(self.current.login, username, password, delay)
+        return self._login(self.current.login, username, password, delay, sock=self.proxy)
 
     def login_with_public_key(self, username, keyfile, password='',
                               delay='0.5 seconds'):
@@ -824,12 +832,12 @@ class SSHLibrary(object):
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, delay)
 
-    def _login(self, login_method, username, *args):
+    def _login(self, login_method, username, *args, **kwargs):
         self._info("Logging into '%s:%s' as '%s'."
                    % (self.current.config.host, self.current.config.port,
                       username))
         try:
-            login_output = login_method(username, *args)
+            login_output = login_method(username, *args, **kwargs)
             self._log('Read output: %s' % login_output)
             return login_output
         except SSHClientException, e:
