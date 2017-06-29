@@ -23,7 +23,7 @@ import glob
 import posixpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
-                     TimeEntry)
+                     TimeEntry, SockEntry)
 
 
 class SSHClientException(RuntimeError):
@@ -47,7 +47,7 @@ class _ClientConfiguration(Configuration):
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
-            sock=StringEntry(sock)
+            sock=SockEntry(sock)
         )
 
 
@@ -165,7 +165,7 @@ class AbstractSSHClient(object):
             return self.read_until_prompt()
         return self.read(delay)
 
-    def login_with_public_key(self, username, keyfile, password, delay=None):
+    def login_with_public_key(self, username, keyfile, password, delay=None, sock=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -191,7 +191,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         self._verify_key_file(keyfile)
         try:
-            self._login_with_public_key(username, keyfile, password)
+            self._login_with_public_key(username, keyfile, password, sock=sock)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
                                      "'%s'." % username)
@@ -206,7 +206,7 @@ class AbstractSSHClient(object):
         except IOError:
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
-    def _login_with_public_key(self, username, keyfile, password):
+    def _login_with_public_key(self, username, keyfile, password, sock=None):
         raise NotImplementedError
 
     def execute_command(self, command):
