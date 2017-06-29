@@ -21,7 +21,7 @@ from robot.utils import ConnectionCache
 from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
-                     StringEntry, TimeEntry)
+                     StringEntry, TimeEntry, SockEntry)
 from .version import VERSION
 
 __version__ = VERSION
@@ -300,6 +300,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_HEIGHT = 24
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
+    DEFAULT_SOCK = None
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -310,7 +311,8 @@ class SSHLibrary(object):
                  width=DEFAULT_TERM_WIDTH,
                  height=DEFAULT_TERM_HEIGHT,
                  path_separator=DEFAULT_PATH_SEPARATOR,
-                 encoding=DEFAULT_ENCODING):
+                 encoding=DEFAULT_ENCODING,
+                 sock=DEFAULT_SOCK):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -349,7 +351,8 @@ class SSHLibrary(object):
             width or self.DEFAULT_TERM_WIDTH,
             height or self.DEFAULT_TERM_HEIGHT,
             path_separator or self.DEFAULT_PATH_SEPARATOR,
-            encoding or self.DEFAULT_ENCODING
+            encoding or self.DEFAULT_ENCODING,
+            sock or self.DEFAULT_SOCK
         )
 
     @property
@@ -359,7 +362,7 @@ class SSHLibrary(object):
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
-                                  encoding=None):
+                                  encoding=None, sock=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -397,11 +400,11 @@ class SSHLibrary(object):
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
-                            encoding=encoding)
+                            encoding=encoding, sock=sock)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None):
+                                 path_separator=None, encoding=None, sock=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than `None` are updated.
@@ -435,7 +438,7 @@ class SSHLibrary(object):
                                    prompt=prompt, term_type=term_type,
                                    width=width, height=height,
                                    path_separator=path_separator,
-                                   encoding=encoding)
+                                   encoding=encoding, sock=sock)
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given `logfile`.
@@ -461,9 +464,9 @@ class SSHLibrary(object):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
-    def proxy_through(self, proxy_host, proxy_user, key_file, host, port=22):
-        self.proxy = SSHClient.proxy_through(proxy_host, proxy_user, key_file, host, port)
-        self.open_connection(self, host, sock=self.proxy)
+    def proxy_through(self, proxy_host, proxy_user, key_file, host, proxy_port=22, port=22):
+        self.DEFAULT_SOCK = SSHClient.proxy_through(proxy_host, proxy_user, key_file, host, proxy_port)
+        self.open_connection(self, host, port, sock=self.DEFAULT_SOCK)
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
@@ -604,7 +607,7 @@ class SSHLibrary(object):
     def get_connection(self, index_or_alias=None, index=False, host=False,
                        alias=False, port=False, timeout=False, newline=False,
                        prompt=False, term_type=False, width=False, height=False,
-                       encoding=False):
+                       encoding=False, sock=None):
         """Return information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -693,7 +696,7 @@ class SSHLibrary(object):
                                                       alias, port, timeout,
                                                       newline, prompt,
                                                       term_type, width, height,
-                                                      encoding))
+                                                      encoding, sock))
         if not return_values:
             return config
         if len(return_values) == 1:
@@ -796,7 +799,7 @@ class SSHLibrary(object):
 
         Argument `delay` was added in SSHLibrary 2.0.
         """
-        return self._login(self.current.login, username, password, delay, sock=self.proxy)
+        return self._login(self.current.login, username, password, delay, sock=self.DEFAULT_SOCK)
 
     def login_with_public_key(self, username, keyfile, password='',
                               delay='0.5 seconds'):
@@ -829,7 +832,7 @@ class SSHLibrary(object):
         Argument `delay` was added in SSHLibrary 2.0.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password, delay)
+                           keyfile, password, delay, sock=self.DEFAULT_SOCK)
 
     def _login(self, login_method, username, *args, **kwargs):
         self._info("Logging into '%s:%s' as '%s'."
@@ -1543,7 +1546,7 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, path_separator, encoding):
+                 height, path_separator, encoding, sock):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1553,5 +1556,6 @@ class _DefaultConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            sock=SockEntry(sock)
         )

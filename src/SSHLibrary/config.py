@@ -131,3 +131,8 @@ class NewlineEntry(Entry):
     def _parse_value(self, value):
         value = str(value).upper()
         return value.replace('LF', '\n').replace('CR', '\r')
+
+
+class SockEntry(Entry):
+    def _parse_value(self, value):
+        return value
