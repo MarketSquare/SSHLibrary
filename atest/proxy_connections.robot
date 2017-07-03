@@ -4,23 +4,23 @@ Resource       resources/common.robot
 Test Teardown  Close All Connections
 
 *** Variables ***
-${PWD_COMMAND}      pwd
-${HOME_DIR}         /home/test
-${KEY DIR}          ${LOCAL TESTDATA}${/}keyfiles${/}proxy
-${KEY}              ${KEY DIR}${/}id_rsa
-${KEY USERNAME}     testkey
+${PWD_COMMAND}       pwd
+${HOME_DIR}          /home/test
+${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
+${KEY}               ${KEY DIR}${/}id_rsa
+${KEY USERNAME}      testkey
 
 *** Test Cases ***
 Login Through Proxy Machine
-    ${sock}  Proxy Through  10.181.50.232  testkey  ${KEY}  10.255.11.71
-    open connection  10.255.11.71  sock=${sock}
-    Login  test  test  sock=${sock}
+    ${sock}  Proxy Through  ${HOST}  testkey  ${KEY}  ${HOST}
+    Open Connection  ${HOST}  sock=${sock}
+    Login  ${USERNAME}  ${PASSWORD}  sock=${sock}
     ${result}  Execute Command  ${PWD_COMMAND}
     Should Be Equal  ${result}  ${HOME_DIR}
 
 Switch Proxy Connection
-    ${sock}  Proxy Through  10.181.50.232  testkey  ${KEY}  10.255.11.71
-    ${conn1_id} =  Open Connection  10.255.11.71  sock=${sock}  alias=one  prompt=${PROMPT}
+    ${sock}  Proxy Through  ${HOST}  testkey  ${KEY}  ${HOST}
+    ${conn1_id} =  Open Connection  ${HOST}  sock=${sock}  alias=one  prompt=${PROMPT}
     Login  ${USERNAME}  ${PASSWORD}  sock=${sock}
     Write  cd /tmp
     Read Until Prompt
