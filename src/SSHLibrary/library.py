@@ -464,9 +464,9 @@ class SSHLibrary(object):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
-    def proxy_through(self, proxy_host, proxy_user, key_file, host, proxy_port=22, port=22):
+    def proxy_through(self, proxy_host, proxy_user, key_file, host, proxy_port=22):
         self.DEFAULT_SOCK = SSHClient.proxy_through(proxy_host, proxy_user, key_file, host, proxy_port)
-        self.open_connection(self, host, port, sock=self.DEFAULT_SOCK)
+        return self.DEFAULT_SOCK
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
@@ -783,7 +783,7 @@ class SSHLibrary(object):
             self._info(str(c))
         return configs
 
-    def login(self, username, password, delay='0.5 seconds'):
+    def login(self, username, password, delay='0.5 seconds', sock=None):
         """Logs into the SSH server with the given `username` and `password`.
 
         Connection must be opened before using this keyword.
@@ -806,10 +806,10 @@ class SSHLibrary(object):
 
         Argument `delay` was added in SSHLibrary 2.0.
         """
-        return self._login(self.current.login, username, password, delay, sock=self.DEFAULT_SOCK)
+        return self._login(self.current.login, username, password, delay, sock=sock)
 
     def login_with_public_key(self, username, keyfile, password='',
-                              delay='0.5 seconds'):
+                              delay='0.5 seconds', sock=None):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -839,7 +839,7 @@ class SSHLibrary(object):
         Argument `delay` was added in SSHLibrary 2.0.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password, delay, sock=self.DEFAULT_SOCK)
+                           keyfile, password, delay, sock=sock)
 
     def _login(self, login_method, username, *args, **kwargs):
         self._info("Logging into '%s:%s' as '%s'."
