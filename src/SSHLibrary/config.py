@@ -1,5 +1,5 @@
 from robot import utils
-
+from paramiko import ProxyCommand
 
 class ConfigurationException(Exception):
     """Raised when creating, updating or accessing a Configuration entry fails.
@@ -135,4 +135,6 @@ class NewlineEntry(Entry):
 
 class SockEntry(Entry):
     def _parse_value(self, value):
+        if not isinstance(value, ProxyCommand):
+            raise ConfigurationException("Invalid ProxyCommand")
         return value

@@ -585,6 +585,7 @@ class SSHLibrary(object):
         """
         self.current.close()
         self._connections.current = self._connections._no_current
+        self._close_proxy()
 
     def close_all_connections(self):
         """Closes all open connections.
@@ -603,6 +604,12 @@ class SSHLibrary(object):
         | [Teardown]      | Close all connections |
         """
         self._connections.close_all()
+        self._close_proxy()
+
+    def _close_proxy(self):
+        if self.DEFAULT_SOCK:
+            self.DEFAULT_SOCK.close()
+            self.DEFAULT_SOCK = None
 
     def get_connection(self, index_or_alias=None, index=False, host=False,
                        alias=False, port=False, timeout=False, newline=False,
