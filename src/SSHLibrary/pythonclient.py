@@ -80,7 +80,7 @@ class PythonSSHClient(AbstractSSHClient):
 
     @staticmethod
     def proxy_through(proxy_host, proxy_user, key_file, host, proxy_port=22):
-        proxy_command = 'ssh -i %s %s@%s nc %s %s' % (key_file, proxy_user, proxy_host, host, proxy_port)
+        proxy_command = 'ssh -q -i %s %s@%s nc %s %s' % (key_file, proxy_user, proxy_host, host, proxy_port)
         return paramiko.ProxyCommand(proxy_command)
 
     def _start_command(self, command):

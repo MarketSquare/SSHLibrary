@@ -1,6 +1,7 @@
 *** Settings ***
 Force Tags          pybot   jybot
 Resource       resources/common.robot
+Test Teardown  Close All Connections
 
 *** Variables ***
 ${PWD_COMMAND}      pwd
