@@ -4,6 +4,7 @@ Resource        resources/sftp.robot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
 Library         OperatingSystem  WITH NAME  OS
+Library         Collections
 
 *** Test Cases ***
 Put Directory To Existing Remote Path
@@ -46,6 +47,14 @@ Put Directory Should Fail When Source Does Not Exists
     Run Keyword And Expect Error  There was no source path matching 'non-existing'.
     ...                           Put Directory  non-existing
 
+Put Directory Containing A File With Colon In Its Name
+     [Tags]  linux
+     [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
+     Create File With Colon Char In Its Name
+     Put Directory  ${CURDIR}${/}testdata${/}textfiles  ${REMOTE TEST ROOT}
+     Check And Remove Local Added Directory   ${REMOTE TEST ROOT}
+     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
     OS.Remove Directory  ${LOCAL TEXTFILES}${/}empty
@@ -66,3 +75,14 @@ Remote Directory Should Exist With Subdirectories
     SSH.File Should Exist  ${destination}/${FILE WITH SPECIAL CHARS NAME}
     SSH.File Should Not Exist  ${destination}/${FILE WITH NON-ASCII NAME}
     SSH.File Should Exist  ${destination}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}
+
+Create File With Colon Char In Its Name
+    SSH.File Should Not Exist   ${COLON CHAR FILE}
+    OS.Create File  ${COLON CHAR FILE}
+
+Check And Remove Local Added Directory
+    [Arguments]  ${destination}
+    ${files_list} =  SSH.List Files In Directory  ${destination}
+    List should contain value  ${files_list}  ${COLON CHAR FILE_NAME}
+    [Teardown]  OS.Remove File  ${COLON CHAR FILE}
+
