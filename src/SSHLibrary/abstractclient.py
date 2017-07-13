@@ -617,7 +617,8 @@ class AbstractSFTPClient(object):
     directories.
     """
 
-    def __init__(self):
+    def __init__(self, encoding):
+        self._encoding = encoding
         self._homedir = self._absolute_path('.')
 
     def _absolute_path(self, path):
@@ -1020,13 +1021,14 @@ class AbstractSFTPClient(object):
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
-        with open(source, 'r') as local_file:
+        with open(source, 'rb') as local_file:
             position = 0
             while True:
                 data = local_file.read(4096)
                 if not data:
                     break
                 if newline:
+                    data = data.decode(self._encoding)
                     data = re.sub(r'(\r\n|\r|\n)', newline, data)
                 self._write_to_remote_file(remote_file, data, position)
                 position += len(data)

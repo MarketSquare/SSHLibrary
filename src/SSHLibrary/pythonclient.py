@@ -126,8 +126,7 @@ class SFTPClient(AbstractSFTPClient):
 
     def __init__(self, ssh_client, encoding):
         self._client = ssh_client.open_sftp()
-        self._encoding = encoding
-        super(SFTPClient, self).__init__()
+        super(SFTPClient, self).__init__(encoding)
 
     def _list(self, path):
         path = path.encode(self._encoding)
