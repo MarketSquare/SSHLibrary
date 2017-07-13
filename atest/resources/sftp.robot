@@ -15,6 +15,9 @@ ${FILE WITH NON-ASCII NAME}      aaääöö.txt
 ${DIRECTORY WITH EMPTY SUBDIRECTORY}     contains_only_empty_subdir
 ${EMPTY SUB DIR}                 empty
 ${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
+${COMPRESSED FILE NAME}          compressed.txt.gz
+${COMPRESSED DIR}                compressed
+${COMPRESSED FILE}               ${LOCAL TEXTFILES}${/}${COMPRESSED DIR}${/}${COMPRESSED FILE NAME}
 
 *** Keywords ***
 Login And Upload Test Files

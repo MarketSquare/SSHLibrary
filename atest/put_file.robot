@@ -52,6 +52,12 @@ Put File With Special Characters In Filename
     SSH.File Should Exist  ${target}
     [Teardown]  Execute Command  rm -f ${target}
 
+Put Compressed File To Absolute Destination
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${COMPRESSED FILE NAME}
+    Put File  ${COMPRESSED FILE}  ${REMOTE TEST ROOT}/
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${COMPRESSED FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 Put File Should Fail When There Are No Source Files
     Run Keyword And Expect Error  There are no source files matching 'nonexisting'.
     ...                           SSH.Put File  nonexisting
