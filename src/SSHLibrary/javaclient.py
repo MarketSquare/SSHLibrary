@@ -41,11 +41,11 @@ class JavaSSHClient(AbstractSSHClient):
     def enable_logging(logfile):
         return False
 
-    def _login(self, username, password, look_for_keys='ignored'):
+    def _login(self, username, password, look_for_keys='ignored', sock=None):
         if not self.client.authenticateWithPassword(username, password):
             raise SSHClientException
 
-    def _login_with_public_key(self, username, key_file, password):
+    def _login_with_public_key(self, username, key_file, password, sock=None):
         try:
             success = self.client.authenticateWithPublicKey(username,
                                                             File(key_file),
