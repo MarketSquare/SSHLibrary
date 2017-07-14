@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags          pybot   jybot
+Force Tags          pybot
 Resource            resources/common.robot
 Test Teardown       Close All Connections
 
