@@ -82,6 +82,10 @@ class AbstractSSHClient(object):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def proxy_through(proxy_host, proxy_user, key_file, host, proxy_port=22):
+        raise NotImplementedError
+
     @property
     def sftp_client(self):
         """Gets the SSH client for the connection.

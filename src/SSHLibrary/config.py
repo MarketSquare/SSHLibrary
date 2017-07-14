@@ -1,5 +1,8 @@
 from robot import utils
-from paramiko import ProxyCommand
+try:
+    from paramiko import ProxyCommand
+except ImportError:
+    pass
 
 class ConfigurationException(Exception):
     """Raised when creating, updating or accessing a Configuration entry fails.
