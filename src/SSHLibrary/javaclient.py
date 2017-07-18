@@ -153,7 +153,10 @@ class SFTPClient(AbstractSFTPClient):
         local_file.close()
 
     def _absolute_path(self, path):
-        return self._client.canonicalPath(path)
+        try:
+            return self._client.canonicalPath(path)
+        except SFTPException:
+            return path
 
 
 class RemoteCommand(AbstractCommand):
