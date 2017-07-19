@@ -812,7 +812,7 @@ class SSHLibrary(object):
         the given `delay`. The output is logged using the [#Default loglevel|
         default log level].
 
-        The 'sock' is used for connection through a middle host.
+        The `sock` is used for connection through a middle host.
 
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
@@ -824,7 +824,7 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
 
-        Arguments `delay` and 'sock' were added in SSHLibrary 2.0.
+        Arguments `delay` and `sock` were added in SSHLibrary 2.0.
         """
         return self._login(self.current.login, username, password, delay, sock=sock)
 
@@ -847,7 +847,7 @@ class SSHLibrary(object):
         the given `delay`. The output is logged using the [#Default loglevel|
         default log level].
 
-        The 'sock' is used for connection through a middle host.
+        The `sock` is used for connection through a middle host.
 
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.server.com      |
@@ -858,7 +858,7 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
-        Arguments `delay` and 'sock' were added in SSHLibrary 2.0.
+        Arguments `delay` and `sock` were added in SSHLibrary 2.0.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, delay, sock=sock)
