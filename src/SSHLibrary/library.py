@@ -341,8 +341,8 @@ class SSHLibrary(object):
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
         [#Default terminal settings|`height`],
-        [#Default path separator|`path separator`] and
-        [#Default encoding|`encoding`]
+        [#Default path separator|`path separator`],
+        [#Default encoding|`encoding`] and
         [#Default sock|`sock`]
         were added in SSHLibrary 2.0.
         """
@@ -398,8 +398,8 @@ class SSHLibrary(object):
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
         [#Default terminal settings|`height`],
-        [#Default path separator|`path_separator`] and
-        [#Default encoding|`encoding`]
+        [#Default path separator|`path_separator`],
+        [#Default encoding|`encoding`] and
         [#Default sock|`sock`]
         were added in SSHLibrary 2.0.
         """
