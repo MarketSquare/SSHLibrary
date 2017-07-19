@@ -148,8 +148,8 @@ class SSHLibrary(object):
     `width` and `height` can be used to control its  virtual size.
 
     === Default sock ===
-    Argument `sock` is used when connecting through a middle host. It is a
-    ProxyCommand object and its default value is None.
+    Argument `sock` is a socket or socket-like object to create the session over.
+    It is used when connecting through a middle host. Its default value is None.
 
     == Not configurable per connection ==
 
@@ -471,7 +471,7 @@ class SSHLibrary(object):
                       'HTML')
 
     def proxy_through(self, proxy_host, proxy_user, key_file, host, proxy_port=22):
-        """ Creates a SOCKS proxy to allow connection through a middle host.
+        """ Creates a socket to allow connection through a middle host.
         The middle host must authenticate using a private key.
 
         Example:
@@ -654,7 +654,7 @@ class SSHLibrary(object):
         | height         | integer      | Height of the [#Default terminal settings|virtual terminal]. |
         | path_separator | string       | [#Default path separator|The path separator] used on the remote host. |
         | encoding       | string       | [#Default encoding|The encoding] used for inputs and outputs. |
-        | sock           | ProxyCommand | Proxy command for multi hop connections. |
+        | sock           | ProxyCommand | [#Default sock|The socket] used to socket in connection. |
 
         If there is no connection, an object having `index` and `host` as `None`
         is returned, rest of its attributes having their values as configuration
@@ -812,6 +812,8 @@ class SSHLibrary(object):
         the given `delay`. The output is logged using the [#Default loglevel|
         default log level].
 
+        The 'sock' is used for connection through a middle host.
+
         Example that logs in and returns the output:
         | Open Connection | linux.server.com |
         | ${output}=      | Login            | johndoe       | secretpasswd |
@@ -822,7 +824,7 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
 
-        Argument `delay` was added in SSHLibrary 2.0.
+        Arguments `delay` and 'sock' were added in SSHLibrary 2.0.
         """
         return self._login(self.current.login, username, password, delay, sock=sock)
 
@@ -845,6 +847,8 @@ class SSHLibrary(object):
         the given `delay`. The output is logged using the [#Default loglevel|
         default log level].
 
+        The 'sock' is used for connection through a middle host.
+
         Example that logs in using a private key and returns the output:
         | Open Connection | linux.server.com      |
         | ${output}=      | Login With Public Key | johndoe       | /home/johndoe/.ssh/id_rsa |
@@ -854,7 +858,7 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
-        Argument `delay` was added in SSHLibrary 2.0.
+        Arguments `delay` and 'sock' were added in SSHLibrary 2.0.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, delay, sock=sock)
