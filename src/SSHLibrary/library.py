@@ -147,6 +147,10 @@ class SSHLibrary(object):
     Argument `term_type` defines the virtual terminal type, and arguments
     `width` and `height` can be used to control its  virtual size.
 
+    === Default sock ===
+    Argument `sock` is used when connecting through a middle host. It is a
+    ProxyCommand object and its default value is None.
+
     == Not configurable per connection ==
 
     === Default loglevel ===
@@ -339,6 +343,7 @@ class SSHLibrary(object):
         [#Default terminal settings|`height`],
         [#Default path separator|`path separator`] and
         [#Default encoding|`encoding`]
+        [#Default sock|`sock`]
         were added in SSHLibrary 2.0.
         """
         self._connections = ConnectionCache()
@@ -395,6 +400,7 @@ class SSHLibrary(object):
         [#Default terminal settings|`height`],
         [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`]
+        [#Default sock|`sock`]
         were added in SSHLibrary 2.0.
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
@@ -430,8 +436,8 @@ class SSHLibrary(object):
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
 
-        Arguments [#Default path separator|`path_separator`] and
-        [#Default encoding|`encoding`]
+        Arguments [#Default path separator|`path_separator`],
+        [#Default encoding|`encoding`] and [#Default sock|`sock`]
         were added in SSHLibrary 2.0.
         """
         self.current.config.update(timeout=timeout, newline=newline,
@@ -465,6 +471,17 @@ class SSHLibrary(object):
                       'HTML')
 
     def proxy_through(self, proxy_host, proxy_user, key_file, host, proxy_port=22):
+        """ Creates a SOCKS proxy to allow connection through a middle host.
+        The middle host must authenticate using a private key.
+
+        Example:
+        | ${sock}         | Proxy Through | my.middle-server.com |  middle_user | middle_key | my.server.com |
+        | Open Connection | my.server.com | sock=${sock}         |
+        | Login           | johndoe       | secretpasswd         | sock=${sock} |
+
+         *Note:* This keyword only works with Python, i.e. when executing tests
+        with `pybot` under Linux only.
+        """
         self.DEFAULT_SOCK = SSHClient.proxy_through(proxy_host, proxy_user, key_file, host, proxy_port)
         return self.DEFAULT_SOCK
 
@@ -521,8 +538,8 @@ class SSHLibrary(object):
         per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
 
-        Arguments [#Default path separator|`path_separator`] and
-        [#Default encoding|`encoding`]
+        Arguments [#Default path separator|`path_separator`],
+        [#Default encoding|`encoding`] and [#Default sock|`sock`]
         were added in SSHLibrary 2.0.
         """
         timeout = timeout or self._config.timeout
@@ -624,19 +641,20 @@ class SSHLibrary(object):
         connection is returned.
 
         This keyword returns an object that has the following attributes:
-        | = Name =       | = Type = | = Explanation = |
-        | index          | integer  | Number of the connection. Numbering starts from `1`. |
-        | host           | string   | Destination hostname. |
-        | alias          | string   | An optional alias given when creating the connection.  |
-        | port           | integer  | Destination port. |
-        | timeout        | string   | [#Default timeout|Timeout] length in textual representation. |
-        | newline        | string   | [#Default newline|The line break sequence] used by `Write` keyword. |
-        | prompt         | string   | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
-        | term_type      | string   | Type of the [#Default terminal settings|virtual terminal]. |
-        | width          | integer  | Width of the [#Default terminal settings|virtual terminal]. |
-        | height         | integer  | Height of the [#Default terminal settings|virtual terminal]. |
-        | path_separator | string   | [#Default path separator|The path separator] used on the remote host. |
-        | encoding       | string   | [#Default encoding|The encoding] used for inputs and outputs. |
+        | = Name =       | = Type =     | = Explanation = |
+        | index          | integer      | Number of the connection. Numbering starts from `1`. |
+        | host           | string       | Destination hostname. |
+        | alias          | string       | An optional alias given when creating the connection.  |
+        | port           | integer      | Destination port. |
+        | timeout        | string       | [#Default timeout|Timeout] length in textual representation. |
+        | newline        | string       | [#Default newline|The line break sequence] used by `Write` keyword. |
+        | prompt         | string       | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
+        | term_type      | string       | Type of the [#Default terminal settings|virtual terminal]. |
+        | width          | integer      | Width of the [#Default terminal settings|virtual terminal]. |
+        | height         | integer      | Height of the [#Default terminal settings|virtual terminal]. |
+        | path_separator | string       | [#Default path separator|The path separator] used on the remote host. |
+        | encoding       | string       | [#Default encoding|The encoding] used for inputs and outputs. |
+        | sock           | ProxyCommand | Proxy command for multi hop connections. |
 
         If there is no connection, an object having `index` and `host` as `None`
         is returned, rest of its attributes having their values as configuration
