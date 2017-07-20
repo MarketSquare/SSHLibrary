@@ -341,10 +341,10 @@ class SSHLibrary(object):
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
         [#Default terminal settings|`height`],
-        [#Default path separator|`path separator`],
-        [#Default encoding|`encoding`] and
-        [#Default sock|`sock`]
+        [#Default path separator|`path separator`] and
+        [#Default encoding|`encoding`]
         were added in SSHLibrary 2.0.
+        [#Default sock|`sock`]
         """
         self._connections = ConnectionCache()
         self._config = _DefaultConfiguration(
@@ -398,10 +398,10 @@ class SSHLibrary(object):
         Arguments [#Default terminal settings|`term_type`],
         [#Default terminal settings|`width`],
         [#Default terminal settings|`height`],
-        [#Default path separator|`path_separator`],
-        [#Default encoding|`encoding`] and
-        [#Default sock|`sock`]
+        [#Default path separator|`path_separator`] and
+        [#Default encoding|`encoding`]
         were added in SSHLibrary 2.0.
+        [#Default sock|`sock`]
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
@@ -436,9 +436,10 @@ class SSHLibrary(object):
         | Open Connection          | 192.168.1.1    |
         | Set Client Configuration | term_type=ansi | width=40 |
 
-        Arguments [#Default path separator|`path_separator`],
-        [#Default encoding|`encoding`] and [#Default sock|`sock`]
-        were added in SSHLibrary 2.0.
+        Arguments [#Default path separator|`path_separator`] and
+        [#Default encoding|`encoding`] were added in SSHLibrary 2.0.
+        [#Default sock|`sock`]
+
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
@@ -538,9 +539,9 @@ class SSHLibrary(object):
         per connection:
         | Open Connection | 192.168.1.1  | term_type=ansi | width=40 |
 
-        Arguments [#Default path separator|`path_separator`],
-        [#Default encoding|`encoding`] and [#Default sock|`sock`]
-        were added in SSHLibrary 2.0.
+        Arguments [#Default path separator|`path_separator`] and
+        [#Default encoding|`encoding`] were added in SSHLibrary 2.0.
+        [#Default sock|`sock`]
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -824,7 +825,8 @@ class SSHLibrary(object):
         | ${output}=      | Login            | johndoe          | secretpasswd |
         | Should Contain  | ${output}        | johndoe@linux:~$ |
 
-        Arguments `delay` and `sock` were added in SSHLibrary 2.0.
+        Argument `delay` was added in SSHLibrary 2.0.
+        Argument `sock` was added later.
         """
         return self._login(self.current.login, username, password, delay, sock=sock)
 
@@ -858,7 +860,8 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
-        Arguments `delay` and `sock` were added in SSHLibrary 2.0.
+        Argument `delay` was added in SSHLibrary 2.0.
+        Argument `sock` was added later.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, delay, sock=sock)
