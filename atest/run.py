@@ -26,6 +26,9 @@ OUTPUT_ROOT = join(CURDIR, 'results')
 OUTPUT_PYTHON = join(OUTPUT_ROOT, 'python')
 OUTPUT_JYTHON = join(OUTPUT_ROOT, 'jython')
 JAR_PATH = join(CURDIR, '..', 'lib')
+RESOURCES_PATH = join(CURDIR, 'resources')
+VARIABLE_FILE_IPV4 = join(RESOURCES_PATH, 'getHostVariable.py:ipv4')
+VARIABLE_FILE_IPV6 = join(RESOURCES_PATH, 'getHostVariable.py:ipv6')
 
 sys.path.append(join(CURDIR, '..', 'src'))
 
@@ -46,17 +49,21 @@ def atests(*opts):
 
 def python(*opts):
     try:
+        variable_file = (VARIABLE_FILE_IPV6 if 'ipv6' in opts else VARIABLE_FILE_IPV4)
         run_cli(['--outputdir', OUTPUT_PYTHON,
-                '--include', 'pybot']
-                + list(COMMON_OPTS + opts))
+             '--include', 'pybot',
+             '--variablefile', variable_file]
+            + list(COMMON_OPTS + opts))
     except SystemExit:
         pass
 
 def jython(*opts):
     try:
+        variable_file = (VARIABLE_FILE_IPV6 if 'ipv6' in opts else VARIABLE_FILE_IPV4)
         run_cli(['--outputdir', OUTPUT_JYTHON,
                 '--pythonpath', JAR_PATH,
-                '--include', 'jybot']
+                '--include', 'jybot',
+                '--variablefile', variable_file]
                 + list(COMMON_OPTS + opts))
     except SystemExit:
         pass
