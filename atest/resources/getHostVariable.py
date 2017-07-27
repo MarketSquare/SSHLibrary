@@ -5,6 +5,3 @@ def get_variables(arg) :
     else:
         variables = {'HOST': 'localhost'}
     return variables
-
-
-
