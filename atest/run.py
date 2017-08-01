@@ -12,6 +12,10 @@
     jython atest/run.py atest
 
     Jybot results are found in path 'atest/results/jython/
+
+    To run tests on ipv6, '--variable ipv6' option is needed.
+    Example:
+        python atest/run.py --variable ipv6 atest
 """
 import sys
 import os
@@ -33,6 +37,7 @@ VARIABLE_FILE_IPV6 = join(RESOURCES_PATH, 'getHostVariable.py:ipv6')
 sys.path.append(join(CURDIR, '..', 'src'))
 
 COMMON_OPTS = ('--log', 'NONE', '--report', 'NONE')
+variable_file = VARIABLE_FILE_IPV4
 
 def atests(*opts):
     if os.name == 'java':
@@ -49,7 +54,6 @@ def atests(*opts):
 
 def python(*opts):
     try:
-        variable_file = (VARIABLE_FILE_IPV6 if 'ipv6' in opts else VARIABLE_FILE_IPV4)
         run_cli(['--outputdir', OUTPUT_PYTHON,
              '--include', 'pybot',
              '--variablefile', variable_file]
@@ -59,7 +63,6 @@ def python(*opts):
 
 def jython(*opts):
     try:
-        variable_file = (VARIABLE_FILE_IPV6 if 'ipv6' in opts else VARIABLE_FILE_IPV4)
         run_cli(['--outputdir', OUTPUT_JYTHON,
                 '--pythonpath', JAR_PATH,
                 '--include', 'jybot',
@@ -72,6 +75,9 @@ if __name__ == '__main__':
     if len(sys.argv) == 1 or '--help' in sys.argv:
         print(__doc__)
         rc = 251
+    elif 'ipv6' in sys.argv:
+        variable_file = VARIABLE_FILE_IPV6
+        rc = atests(*sys.argv[2:])
     else:
         rc = atests(*sys.argv[1:])
     print "\nAfter status check there were %s failures." % rc
