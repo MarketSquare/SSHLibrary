@@ -344,7 +344,7 @@ class SSHLibrary(object):
         [#Default path separator|`path separator`] and
         [#Default encoding|`encoding`]
         were added in SSHLibrary 2.0.
-        [#Default sock|`sock`]
+        [#Default sock|`sock`] was added later.
         """
         self._connections = ConnectionCache()
         self._config = _DefaultConfiguration(
@@ -401,7 +401,7 @@ class SSHLibrary(object):
         [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`]
         were added in SSHLibrary 2.0.
-        [#Default sock|`sock`]
+        [#Default sock|`sock`] was added later.
         """
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
@@ -438,7 +438,7 @@ class SSHLibrary(object):
 
         Arguments [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`] were added in SSHLibrary 2.0.
-        [#Default sock|`sock`]
+        [#Default sock|`sock`] was added later.
 
         """
         self.current.config.update(timeout=timeout, newline=newline,
@@ -541,7 +541,7 @@ class SSHLibrary(object):
 
         Arguments [#Default path separator|`path_separator`] and
         [#Default encoding|`encoding`] were added in SSHLibrary 2.0.
-        [#Default sock|`sock`]
+        [#Default sock|`sock`] was added later.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
