@@ -13,9 +13,11 @@
 
     Jybot results are found in path 'atest/results/jython/
 
-    To run tests on ipv6, '--variable ipv6' option is needed.
+    Running tests with ipv6:
     Example:
-        python atest/run.py --variable ipv6 atest
+        python atest/run.py ipv6 atest
+        or
+        jython atest/run.py ipv6 atest
 """
 import sys
 import os

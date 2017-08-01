@@ -106,7 +106,7 @@ Tests also require robotstatuschecker:
  
 Tests are ran using Bash script `python atest/run.py`. The script prints help when ran without parameters.
 
-In order to run the tests with IPv6, command line option ``ipv6`` is used with ``atest/run.py`` script.
+In order to run the tests with IPv6, ``ipv6`` has to be the first command line option used with ``atest/run.py`` script.
 
 Example:
 ::
