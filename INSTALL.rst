@@ -19,34 +19,27 @@ On Python
 ---------
 
 To use SSHLibrary with Python, you will need to have `paramiko
-<http://paramiko.org>`__ SSH module and its dependency `PyCrypto
-<http://pycrypto.org>`__ installed. How to install them depends on
+<http://paramiko.org>`__ SSH module and its dependency `Cryptography
+<https://cryptography.io>`__ installed. How to install them depends on
 are you on Linux or Windows.
 
 On Linux
 ~~~~~~~~
 
 If you are `using pip`_ to install SSHLibrary itself, you should get both
-Paramiko and PyCrypto installed automatically.
+Paramiko and Cryptography installed automatically.
 
 Alternatively you can use your distribution's package manager. For
 example, on Debian based systems ``sudo apt-get install
-python-paramiko`` should install both Paramiko and PyCrypto.
+python-paramiko`` should install both Paramiko and Cryptography.
 
 The last alternative is downloading and installing source distributions:
 
 - Paramiko: https://pypi.python.org/pypi/paramiko
-- PyCrypto: https://pypi.python.org/pypi/pycrypto
+- PyCrypto: https://pypi.python.org/pypi/cryptography
 
 On Windows
 ~~~~~~~~~~
-
-On Windows, you should always install PyCrypto using the `binary
-installer <http://www.voidspace.org.uk/python/modules.shtml#pycrypto>`__
-*before* installing Paramiko or SSHLibrary. This is because installing
-PyCrypto automatically would require a C compiler. Make sure you pick
-the correct Paramiko installer depending on your Python version and
-CPU architecture.
 
 Like `on Linux`_, Paramiko can be installed automatically if `using
 pip`_ to install SSHLibrary itself. Alternatively you can download and
@@ -73,8 +66,7 @@ The easiest way to install SSHLibrary is using `pip package manager
 
     pip install robotframework-sshlibrary
 
-A benefit of pip is that it installs dependencies automatically. Notice that
-`on Windows`_ you should still install PyCrypto manually first.
+A benefit of pip is that it installs dependencies automatically.
 
 Using source distribution
 -------------------------

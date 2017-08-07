@@ -36,10 +36,8 @@ Python or Jython::
     jython setup.py install
 
 A benefit of using pip is that it automatically installs `paramiko
-<http://paramiko.org>`__ and `PyCrypto <http://pycrypto.org>`__
-modules that SSHLibrary requires on Python. Using pip on Windows with
-Python works too, but you need to first install PyCrypto module
-manually.
+<http://paramiko.org>`__ and `Cryptography <https://cryptography.io>`__
+modules that SSHLibrary requires on Python.
 
 On Jython SSHLibrary requires Trilead SSH JAR distribution.
 
