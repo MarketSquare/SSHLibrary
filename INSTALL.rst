@@ -36,7 +36,7 @@ python-paramiko`` should install both Paramiko and Cryptography.
 The last alternative is downloading and installing source distributions:
 
 - Paramiko: https://pypi.python.org/pypi/paramiko
-- PyCrypto: https://pypi.python.org/pypi/cryptography
+- Cryptography: https://pypi.python.org/pypi/cryptography
 
 On Windows
 ~~~~~~~~~~
