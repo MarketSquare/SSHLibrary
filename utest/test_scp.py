@@ -2,6 +2,8 @@ import os
 import unittest
 
 from SSHLibrary import abstractclient, SSHClient
+from test_client_api import TEST_USERNAME
+from test_client_api import TEST_PASSWORD
 
 abstractclient.AbstractSFTPClient._absolute_path = lambda obj, path: '/home'
 
@@ -66,7 +68,7 @@ class TestSSHClientGetMethod(unittest.TestCase):
         return client
 
     def _login_client(self, client):
-        client.login('test', 'test')
+        client.login(TEST_USERNAME, TEST_PASSWORD)
 
     def _create_test_dirs(self, client):
         client.execute_command("mkdir -p %s" % self.SRC_DIR)

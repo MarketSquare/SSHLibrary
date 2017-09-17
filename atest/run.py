@@ -17,6 +17,7 @@ import sys
 import os
 
 from os.path import abspath, dirname, exists, join, normpath
+from os import environ
 from robot import run_cli, rebot
 from robotstatuschecker import process_output
 
@@ -30,6 +31,20 @@ JAR_PATH = join(CURDIR, '..', 'lib')
 sys.path.append(join(CURDIR, '..', 'src'))
 
 COMMON_OPTS = ('--log', 'NONE', '--report', 'NONE')
+
+USERNAME = environ.get('RFSL_TEST_USERNAME')
+PASSWORD = environ.get('RFSL_TEST_PASSWORD')
+if USERNAME and PASSWORD:
+    COMMON_OPTS += (
+        '--variable', 'USERNAME:' + USERNAME,
+        '--variable', 'PASSWORD:' + PASSWORD
+    )
+
+KEY_USERNAME = environ.get('RFSL_TESTKEY_USERNAME')
+if KEY_USERNAME:
+    COMMON_OPTS += (
+        '--variable', 'KEY_USERNAME:' + KEY_USERNAME
+    )
 
 def atests(*opts):
     if os.name == 'java':
