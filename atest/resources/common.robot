@@ -7,7 +7,7 @@ ${PASSWORD}               test
 ${HOST}                   localhost
 ${PROMPT}                 $
 ${REMOTE TEST ROOT NAME}  robot-testdir
-${REMOTE TEST ROOT}       /home/test/${REMOTE TEST ROOT NAME}
+${REMOTE TEST ROOT}       /home/${USERNAME}/${REMOTE TEST ROOT NAME}
 ${CYGWIN HOME}            c:/cygwin64
 ${REMOTE WINDOWS TEST ROOT}  ${CYGWIN HOME}${REMOTE TEST ROOT}
 ${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
