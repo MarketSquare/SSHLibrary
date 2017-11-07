@@ -208,7 +208,7 @@ class AbstractSSHClient(object):
     def _login_with_public_key(self, username, keyfile, password):
         raise NotImplementedError
 
-    def execute_command(self, command):
+    def execute_command(self, command, sudo=False,  pswd=None):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -222,10 +222,10 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        self.start_command(command)
+        self.start_command(command, sudo, pswd)
         return self.read_command_output()
 
-    def start_command(self, command):
+    def start_command(self, command, sudo=False,  pswd=None):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -240,9 +240,9 @@ class AbstractSSHClient(object):
         :param str command: The command to be started on the remote host.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command))
+        self._started_commands.append(self._start_command(command, sudo, pswd))
 
-    def _start_command(self, command):
+    def _start_command(self, command, sudo=False,  pswd=None):
         raise NotImplementedError
 
     def read_command_output(self):
@@ -1052,15 +1052,15 @@ class AbstractCommand(object):
         self._encoding = encoding
         self._shell = None
 
-    def run_in(self, shell):
+    def run_in(self, shell, sudo=False,  pswd=None):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
         """
         self._shell = shell
-        self._execute()
+        self._execute(sudo, pswd)
 
-    def _execute(self):
+    def _execute(self, sudo=False,  pswd=None):
         raise NotImplementedError
 
     def read_outputs(self):

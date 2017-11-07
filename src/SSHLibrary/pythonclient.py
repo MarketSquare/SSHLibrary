@@ -78,13 +78,13 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _start_command(self, command):
+    def _start_command(self, command, sudo=False,  pswd=None):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session()
-        cmd.run_in(new_shell)
+        cmd.run_in(new_shell, sudo, pswd)
         return cmd
 
     def _create_sftp_client(self):
@@ -202,5 +202,18 @@ class RemoteCommand(AbstractCommand):
                 self._shell.eof_sent or
                 not self._shell.active)
 
-    def _execute(self):
+    def _execute(self, sudo=False, pswd=None):
+        if sudo:
+            self._execute_with_sudo(self._command, pswd)
+        else:
+            self._shell.exec_command(self._command)
+
+    def _execute_with_sudo(self, command, pswd=None):
+        self._command = 'sudo ' + command
+        self._shell.set_combine_stderr(True)
+        self._shell.get_pty()
         self._shell.exec_command(self._command)
+        if pswd is not None and len(pswd) > 0:
+           stdin = self._shell.makefile('wb', -1)
+           stdin.write(pswd +'\n')
+           stdin.flush()

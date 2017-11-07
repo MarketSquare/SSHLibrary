@@ -835,7 +835,7 @@ class SSHLibrary(object):
         except SSHClientException, e:
             raise RuntimeError(e)
 
-    def execute_command(self, command, return_stdout=True, return_stderr=False,
+    def execute_command(self, command, sudo=False,  pswd=None, return_stdout=True, return_stderr=False,
                         return_rc=False):
         """Executes `command` on the remote machine and returns its outputs.
 
@@ -878,10 +878,10 @@ class SSHLibrary(object):
         self._info("Executing command '%s'." % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, pswd)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command):
+    def start_command(self, command, sudo=False,  pswd=None):
         """Starts execution of the `command` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the `command`
@@ -912,7 +912,7 @@ class SSHLibrary(object):
         """
         self._info("Starting command '%s'." % command)
         self._last_command = command
-        self.current.start_command(command)
+        self.current.start_command(command, sudo, pswd)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
