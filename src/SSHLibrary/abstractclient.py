@@ -179,6 +179,8 @@ class AbstractSSHClient(object):
 
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
+        :param boolean allow_agent: enables the usage of the ssh-agent.
+
         :param str delay: The `delay` passed to :py:meth:`read` for reading
             the output after logging in. The delay is only effective if
             the prompt is not set.

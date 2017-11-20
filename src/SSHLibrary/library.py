@@ -820,6 +820,7 @@ class SSHLibrary(object):
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
         Argument `delay` was added in SSHLibrary 2.0.
+        Argument `allow_agent` was added later to enable the usage of ssh-agent.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, allow_agent, delay)
