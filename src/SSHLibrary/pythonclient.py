@@ -26,7 +26,6 @@ from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
 
-
 # There doesn't seem to be a simpler way to increase banner timeout
 def _custom_start_client(self, *args, **kwargs):
     self.banner_timeout = 45
@@ -217,3 +216,13 @@ class RemoteCommand(AbstractCommand):
            stdin = self._shell.makefile('wb', -1)
            stdin.write(pswd +'\n')
            stdin.flush()
+           time.sleep(1)
+           while self._shell_open():
+              self.try_again_password(pswd, stdin)
+
+    def try_again_password(self, pswd, stdin):
+        stdin.write(pswd +'\n')
+        stdin.flush()
+        time.sleep(1)
+        while self._shell_open():
+           self.try_again_password(pswd, stdin)

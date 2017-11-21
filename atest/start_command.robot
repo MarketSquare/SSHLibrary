@@ -42,3 +42,13 @@ Reading Command Output Without Command Started
     Run Keyword And Expect Error
     ...  No started commands to read output from.
     ...  Read Command Output
+
+Sudo Start Command With Correct Password
+    Start Command  -k pwd   sudo=True  pswd=test
+    ${stdout} =  Read Command Output
+    Should Contain  ${stdout}  ${HOME_TEST}
+
+Sudo Start Command With Incorrect Password
+    Start Command  -k pwd   sudo=True  pswd=test123
+    ${stdout} =  Read Command Output
+    Should Contain  ${stdout}  Sorry, try again.
