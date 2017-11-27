@@ -164,7 +164,7 @@ class AbstractSSHClient(object):
             return self.read_until_prompt()
         return self.read(delay)
 
-    def login_with_public_key(self, username, keyfile, password, delay=None):
+    def login_with_public_key(self, username, keyfile, password, allow_agent=False, delay=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -179,6 +179,8 @@ class AbstractSSHClient(object):
 
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
+        :param boolean allow_agent: enables the usage of the ssh-agent.
+
         :param str delay: The `delay` passed to :py:meth:`read` for reading
             the output after logging in. The delay is only effective if
             the prompt is not set.
@@ -190,7 +192,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         self._verify_key_file(keyfile)
         try:
-            self._login_with_public_key(username, keyfile, password)
+            self._login_with_public_key(username, keyfile, password, allow_agent)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
                                      "'%s'." % username)
@@ -205,7 +207,7 @@ class AbstractSSHClient(object):
         except IOError:
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
-    def _login_with_public_key(self, username, keyfile, password):
+    def _login_with_public_key(self, username, keyfile, password, allow_agent):
         raise NotImplementedError
 
     def execute_command(self, command):

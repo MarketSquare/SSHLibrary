@@ -792,7 +792,7 @@ class SSHLibrary(object):
         return self._login(self.current.login, username, password, delay)
 
     def login_with_public_key(self, username, keyfile, password='',
-                              delay='0.5 seconds'):
+                              allow_agent=False, delay='0.5 seconds'):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -820,9 +820,10 @@ class SSHLibrary(object):
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
         Argument `delay` was added in SSHLibrary 2.0.
+        Argument `allow_agent` was added later to enable the usage of ssh-agent.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password, delay)
+                           keyfile, password, allow_agent, delay)
 
     def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."
