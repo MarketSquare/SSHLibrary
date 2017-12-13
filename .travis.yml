@@ -11,19 +11,13 @@ before_install:
         ant;
         cd ..;
         chmod +x "$(pwd)/jython/dist/bin/jython";
-    fi
-  - if [ "$JYTHON" == "true" ]; then
         export PYTHON_EXE="$(pwd)/jython/dist/bin/jython";
-    else
-        export PYTHON_EXE=python;
-    fi
-  - if [ "$JYTHON" == "true" ]; then
         alias jython="$(pwd)/jython/dist/bin/jython";
         export PATH="$(pwd)/jython/dist/bin:$PATH";
-    fi
-  - if [ "$JYTHON" == "true" ]; then
         wget https://bootstrap.pypa.io/get-pip.py;
         $PYTHON_EXE get-pip.py;
+    else
+        export PYTHON_EXE=python;
     fi
   - sudo useradd test -m -s /bin/bash
   - (echo 'test'; echo 'test') | sudo passwd test
