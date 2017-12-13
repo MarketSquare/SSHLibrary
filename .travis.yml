@@ -49,8 +49,4 @@ before_script:
         pip install paramiko==$PARAMIKO;
     fi
 script:
-  - if [ "$JYTHON" == "true" ]; then
-        jython atest/run.py atest;
-    else
-        python atest/run.py atest;
-    fi
+  - $PYTHON_EXE atest/run.py atest
