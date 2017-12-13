@@ -32,7 +32,7 @@ Setup on Linux
 
 ::
 
-    sudo adduser test
+    sudo adduser test sudo
     (input `test` as UNIX password)
 
 - Log in as `test`
