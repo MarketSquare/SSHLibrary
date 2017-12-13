@@ -31,18 +31,27 @@ sys.path.append(join(CURDIR, '..', 'src'))
 
 COMMON_OPTS = ('--log', 'NONE', '--report', 'NONE')
 
+
 def atests(*opts):
     if os.name == 'java':
-        jython(*opts)
+        os_includes = get_os_includes(os._name)
+        jython(*(os_includes+opts))
         process_output(join(OUTPUT_JYTHON, 'output.xml'))
         return rebot(join(OUTPUT_JYTHON, 'output.xml'), outputdir=OUTPUT_JYTHON)
-    elif os.name == 'nt':
-        os_includes = ('--include', 'windows')
     else:
-        os_includes = ('--exclude', 'windows')
-    python(*(os_includes+opts))
-    process_output(join(OUTPUT_PYTHON, 'output.xml'))
-    return rebot(join(OUTPUT_PYTHON, 'output.xml'), outputdir=OUTPUT_PYTHON)
+        os_includes = get_os_includes(os.name)
+        python(*(os_includes+opts))
+        process_output(join(OUTPUT_PYTHON, 'output.xml'))
+        return rebot(join(OUTPUT_PYTHON, 'output.xml'), outputdir=OUTPUT_PYTHON)
+
+
+def get_os_includes(operating_system):
+        if operating_system == 'nt':
+            return ('--include', 'windows',
+                    '--exclude', 'linux')
+        return ('--include', 'linux',
+                '--exclude', 'windows')
+
 
 def python(*opts):
     try:

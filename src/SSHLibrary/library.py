@@ -835,8 +835,8 @@ class SSHLibrary(object):
         except SSHClientException, e:
             raise RuntimeError(e)
 
-    def execute_command(self, command, sudo=False,  pswd=None, return_stdout=True, return_stderr=False,
-                        return_rc=False):
+    def execute_command(self, command, return_stdout=True, return_stderr=False,
+                        return_rc=False, sudo=False,  pswd=None):
         """Executes `command` on the remote machine and returns its outputs.
 
         This keyword executes the `command` and returns after the execution
@@ -859,6 +859,9 @@ class SSHLibrary(object):
         Often checking the return code is enough:
         | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
+
+        Arguments sudo and pswd are used for executing commands within a sudo session.
+        | Execute Command  | pwd      | sudo=True       |  pswd=test
 
         The `command` is always executed in a new shell. Thus possible changes
         to the environment (e.g. changing working directory) are not visible
@@ -904,6 +907,9 @@ class SSHLibrary(object):
         | Start Command   | pwd                 |
         | ${pwd}=         | Read Command Output |
         | Should Be Equal | ${pwd}              | /home/johndoe |
+
+        Arguments sudo and pswd are used for executing commands within a sudo session.
+        | Start Command   | pwd                 | sudo=True     |  pswd=test
 
         `Write` and `Read` can be used for
         [#Interactive shells|running multiple commands in the same shell].

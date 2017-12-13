@@ -1071,6 +1071,16 @@ class AbstractCommand(object):
         """
         raise NotImplementedError
 
+    def send_password(self, pswd, stdin):
+        """Sends password to the stdin stream for sudo commands.
+
+       :param pswd: The password of the user.
+       :param stdin: Standard input stream
+       """
+        stdin.write(pswd +'\n')
+        stdin.flush()
+        time.sleep(1)
+
 
 class SFTPFileInfo(object):
     """Wrapper class for the language specific file information objects.

@@ -69,9 +69,11 @@ Execute Command With Huge Output
    [Teardown]  Execute Command     rm file.txt
 
 Execute Sudo Command With Correct Password
+    [Tags]     linux
     ${stdout} =  Execute Command  -k pwd   sudo=True  pswd=test
-    Should Contain  ${stdout}  ${HOME_TEST}
+    Should Contain  ${stdout}   ${HOME_TEST}
 
 Execute Sudo Command With Incorrect Password
+    [Tags]     linux
     ${stdout} =  Execute Command  -k pwd   sudo=True  pswd=test123
     Should Contain  ${stdout}  Sorry, try again.

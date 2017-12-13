@@ -27,6 +27,7 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
+import time
 
 
 class JavaSSHClient(AbstractSSHClient):
@@ -56,10 +57,16 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def _start_command(self, command):
-        cmd = RemoteCommand(command, self.config.encoding)
+    def _start_command(self, command, sudo=False,  pswd=None):
         new_shell = self.client.openSession()
-        cmd.run_in(new_shell)
+        if sudo:
+            cmd = RemoteSudoCommand(command, self.config.encoding)
+            new_shell.requestPTY(self.config.term_type,
+                                 self.config.width, self.config.height, 0, 0, None)
+        else:
+            cmd = RemoteCommand(command, self.config.encoding)
+
+        cmd.run_in(new_shell, sudo,  pswd)
         return cmd
 
     def _create_sftp_client(self):
@@ -175,5 +182,54 @@ class RemoteCommand(AbstractCommand):
             line = reader.readLine()
         return result
 
-    def _execute(self):
+    def _execute(self, sudo=False,  pswd=None):
         self._shell.execCommand(self._command)
+
+
+class RemoteSudoCommand(RemoteCommand):
+    try_again_pswd_msg = 'Sorry, try again.'
+    incorrect_pswd_msg = '3 incorrect password attempts'
+
+    def __init__(self, command, encoding):
+        super(RemoteSudoCommand, self).__init__(command, encoding)
+        self._stdout = ''
+
+    def read_outputs(self):
+        stderr = self._read_from_stream(self._shell.getStderr())
+        rc = self._shell.getExitStatus() or 0
+        self._shell.close()
+        return self._stdout, stderr, rc
+
+    def _execute(self, sudo=False, pswd=None):
+        self._command = 'sudo ' + self._command
+        self._shell.execCommand(self._command)
+        if pswd is not None and len(pswd) > 0:
+            stdin = self._shell.getStdin()
+            self.send_password(pswd, stdin)
+            stdout = self._shell.getStdout()
+            reader = BufferedReader(InputStreamReader(StreamGobbler(stdout),
+                                                      self._encoding))
+            if self.new_password_needed(reader):
+                self.try_again_password(pswd, stdin, reader)
+
+    def new_password_needed(self, reader):
+        line = reader.readLine()
+        while self.is_invalid_password_text(line):
+            self._stdout += line + '\n'
+            line = reader.readLine()
+        else:
+            if line is not None and self.try_again_pswd_msg in line:
+                self._stdout += line + '\n'
+                return True
+            if line is not None and self.incorrect_pswd_msg in line:
+                self._stdout += line + '\n'
+                return False
+        return False
+
+    def is_invalid_password_text(self, line):
+        return line is not None and self.try_again_pswd_msg not in line and self.incorrect_pswd_msg not in line
+
+    def try_again_password(self, pswd, stdin, reader):
+        self.send_password(pswd, stdin)
+        if self.new_password_needed(reader):
+            self.try_again_password(pswd, stdin, reader)

@@ -43,12 +43,14 @@ Reading Command Output Without Command Started
     ...  No started commands to read output from.
     ...  Read Command Output
 
-Sudo Start Command With Correct Password
+Start Sudo Command With Correct Password
+    [Tags]  linux
     Start Command  -k pwd   sudo=True  pswd=test
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  ${HOME_TEST}
 
-Sudo Start Command With Incorrect Password
+Start Sudo Command With Incorrect Password
+    [Tags]  linux
     Start Command  -k pwd   sudo=True  pswd=test123
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  Sorry, try again.
