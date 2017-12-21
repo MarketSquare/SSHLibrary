@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import print_function
 try:
     from robot.api import logger
 except ImportError:
@@ -706,7 +707,7 @@ class SSHLibrary(object):
         if logger:
             logger.write(msg, level)
         else:
-            print '*%s* %s' % (level, msg)
+            print('*%s* %s' % (level, msg))
 
     def _active_loglevel(self, level):
         if level is None:
@@ -832,7 +833,7 @@ class SSHLibrary(object):
             login_output = login_method(username, *args)
             self._log('Read output: %s' % login_output)
             return login_output
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
@@ -963,7 +964,7 @@ class SSHLibrary(object):
                                            return_rc)
         try:
             stdout, stderr, rc = self.current.read_command_output()
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
@@ -1039,7 +1040,7 @@ class SSHLibrary(object):
     def _write(self, text, add_newline=False):
         try:
             self.current.write(text, add_newline)
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
 
     def write_until_expected_output(self, text, expected, timeout,
@@ -1210,7 +1211,7 @@ class SSHLibrary(object):
     def _read_and_log(self, loglevel, reader, *args):
         try:
             output = reader(*args)
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
         self._log(output, loglevel)
         return output
@@ -1405,7 +1406,7 @@ class SSHLibrary(object):
     def _run_sftp_command(self, command, *args):
         try:
             files = command(*args)
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
         for src, dst in files:
             self._info("'%s' -> '%s'" % (src, dst))
@@ -1498,7 +1499,7 @@ class SSHLibrary(object):
         """
         try:
             items = self.current.list_dir(path, pattern, absolute)
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
                                        '\n'.join(items)))
@@ -1511,7 +1512,7 @@ class SSHLibrary(object):
         """
         try:
             files = self.current.list_files_in_dir(path, pattern, absolute)
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         files = self.current.list_files_in_dir(path, pattern, absolute)
         self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
@@ -1525,7 +1526,7 @@ class SSHLibrary(object):
         """
         try:
             dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         self._info('%d director%s:\n%s' % (len(dirs),
                                           'y' if len(dirs) == 1 else 'ies',
