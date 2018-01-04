@@ -22,6 +22,9 @@ import time
 import glob
 import posixpath
 
+from robot.utils.robottypes import is_string, is_bytes
+from robot.utils.unic import unic
+
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 
@@ -152,8 +155,10 @@ class AbstractSSHClient(object):
     def _encode(self, text):
         if isinstance(text, str):
             return text
-        if not isinstance(text, basestring):
-            text = unicode(text)
+        #if not isinstance(text, basestring):
+        #   text = unicode(text)
+        if (not is_string(text)) and (not is_bytes(text)) :
+            text = unic(text)
         return text.encode(self.config.encoding)
 
     def _login(self, username, password, look_for_keys=False):
@@ -304,7 +309,7 @@ class AbstractSSHClient(object):
     def _delayed_read(self, delay):
         delay = TimeEntry(delay).value
         max_time = time.time() + self.config.get('timeout').value
-        output = ''
+        output = bytes()
         while time.time() < max_time:
             time.sleep(delay)
             read = self.shell.read()
@@ -321,7 +326,7 @@ class AbstractSSHClient(object):
 
         :returns: A single char read from the output.
         """
-        server_output = ''
+        server_output = b''
         while True:
             try:
                 server_output += self.shell.read_byte()
@@ -412,7 +417,8 @@ class AbstractSSHClient(object):
         :returns: The read output up and until the `regexp` matches.
         """
         regexp = self._encode(regexp)
-        if isinstance(regexp, basestring):
+        # if isinstance(regexp, basestring):
+        if is_string(regexp) or is_bytes(regexp):
             regexp = re.compile(regexp)
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
@@ -426,7 +432,8 @@ class AbstractSSHClient(object):
 
         timeout is defined with :py:meth:`open_connection()`
         """
-        if isinstance(regexp, basestring):
+        # if isinstance(regexp, basestring):
+        if is_string(regexp) or is_bytes(regexp):
             regexp = re.compile(regexp)
         matcher = regexp.search
         expected = regexp.pattern
@@ -477,7 +484,7 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s."
                                  % (expected, timeout))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+    def put_file(self, source, destination='.', mode='0o744', newline=''):
         """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
         arguments.
 
@@ -486,7 +493,7 @@ class AbstractSSHClient(object):
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          self.config.path_separator)
 
-    def put_directory(self, source, destination='.', mode='0744', newline='',
+    def put_directory(self, source, destination='.', mode='0o744', newline='',
                       recursive=False):
         """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
@@ -1002,17 +1009,17 @@ class AbstractSFTPClient(object):
         return destination.rsplit(path_separator, 1)
 
     def _create_missing_remote_path(self, path):
-        if path.startswith('/'):
-            current_dir = '/'
+        if path.startswith(b'/'):
+            current_dir = b'/'
         else:
-            current_dir = self._absolute_path('.')
-        for dir_name in path.split('/'):
+            current_dir = self._absolute_path(b'.')
+        for dir_name in path.split(b'/'):
             if dir_name:
                 current_dir = posixpath.join(current_dir, dir_name)
             try:
                 self._client.stat(current_dir)
             except:
-                self._client.mkdir(current_dir, 0744)
+                self._client.mkdir(current_dir, 0o744)
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
