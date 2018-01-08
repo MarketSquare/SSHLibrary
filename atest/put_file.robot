@@ -65,7 +65,9 @@ Put File And Specify Remote Newlines
     ${expected} =  OS.Get Binary File  ${FILE WITH NEWLINES}
     SSH.Get File  ${target}  ${LOCAL TMPDIR}${/}
     ${content} =  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
-    ${content}=  Replace String  ${content}  \r\n  ${\n}
+    ${win_rn}=   Encode String To Bytes  \r\n  UTF-8
+    ${linux_n}=   Encode String To Bytes  ${\n}  UTF-8
+    ${content}=  Replace String  ${content}  ${win_rn}  ${linux_n}
     Should Be Equal  ${content}  ${expected}
     [Teardown]  Remove Local Temp Dir And Remote File  ${target}
 

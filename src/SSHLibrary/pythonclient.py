@@ -135,8 +135,9 @@ class SFTPClient(AbstractSFTPClient):
         path = path.encode(self._encoding)
         for item in self._client.listdir_attr(path):
             filename = item.filename
-            if not isinstance(filename, unicode):
-                filename = unicode(filename, self._encoding)
+            # if not isinstance(filename, unicode):
+            if not is_string(filename):
+                filename = unic(filename)
             yield SFTPFileInfo(filename, item.st_mode)
 
     def _stat(self, path):
@@ -145,7 +146,8 @@ class SFTPClient(AbstractSFTPClient):
         return SFTPFileInfo('', attributes.st_mode)
 
     def _create_missing_remote_path(self, path):
-        path = path.encode(self._encoding)
+        if is_string(path):
+            path = path.encode(self._encoding)
         return super(SFTPClient, self)._create_missing_remote_path(path)
 
     def _create_remote_file(self, destination, mode):
@@ -166,7 +168,7 @@ class SFTPClient(AbstractSFTPClient):
         self._client.get(remote_path, local_path)
 
     def _absolute_path(self, path):
-        path = path.encode(self._encoding)
+        # path = path.encode(self._encoding)
         if not self._is_windows_path(path):
             path = self._client.normalize(path)
         # if not isinstance(path, unicode):

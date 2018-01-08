@@ -278,8 +278,13 @@ class AbstractSSHClient(object):
             The newline is set when calling :py:meth:`open_connection`
         """
         text = self._encode(text)
+        if is_string(text):
+            text = text.encode(self.config.encoding)
         if add_newline:
-            text += self.config.newline
+            if not is_string(self.config.newline):
+                text += self.config.newline
+            else:
+                text += self.config.newline.encode(self.config.encoding)
         self.shell.write(text)
 
     def read(self, delay=None):
@@ -621,7 +626,7 @@ class AbstractSFTPClient(object):
     """
 
     def __init__(self):
-        self._homedir = self._absolute_path('.')
+        self._homedir = self._absolute_path(b'.')
 
     def _absolute_path(self, path):
         raise NotImplementedError
@@ -1012,7 +1017,7 @@ class AbstractSFTPClient(object):
         if path.startswith(b'/'):
             current_dir = b'/'
         else:
-            current_dir = self._absolute_path(b'.')
+            current_dir = self._absolute_path(b'.').encode(self._encoding)
         for dir_name in path.split(b'/'):
             if dir_name:
                 current_dir = posixpath.join(current_dir, dir_name)
