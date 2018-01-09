@@ -42,7 +42,6 @@ paramiko.transport.Transport.start_client = _custom_start_client
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
 def _custom_log(self, level, msg, *args):
     escape = lambda s: s.replace('%', '%%')
-    # if isinstance(msg, basestring):
     if is_string(msg) or is_bytes(msg):
         msg = escape(msg)
     else:
@@ -105,7 +104,6 @@ class Shell(AbstractShell):
         self._shell = client.invoke_shell(term_type, term_width, term_height)
 
     def read(self):
-        # data = ''
         data = bytes()
         while self._output_available():
             data += self._shell.recv(4096)
@@ -114,7 +112,6 @@ class Shell(AbstractShell):
     def read_byte(self):
          if self._output_available():
             return self._shell.recv(1)
-         #return ''
          return bytes()
 
     def _output_available(self):
@@ -135,7 +132,6 @@ class SFTPClient(AbstractSFTPClient):
         path = path.encode(self._encoding)
         for item in self._client.listdir_attr(path):
             filename = item.filename
-            # if not isinstance(filename, unicode):
             if not is_string(filename):
                 filename = unic(filename)
             yield SFTPFileInfo(filename, item.st_mode)
@@ -168,11 +164,8 @@ class SFTPClient(AbstractSFTPClient):
         self._client.get(remote_path, local_path)
 
     def _absolute_path(self, path):
-        # path = path.encode(self._encoding)
         if not self._is_windows_path(path):
             path = self._client.normalize(path)
-        # if not isinstance(path, unicode):
-        #    path = unicode(path, self._encoding)
         if not is_string(path):
             path = unic(path)
         return path

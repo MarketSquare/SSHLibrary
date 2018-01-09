@@ -714,7 +714,6 @@ class SSHLibrary(object):
     def _active_loglevel(self, level):
         if level is None:
             return self._config.loglevel
-        # if isinstance(level, basestring) and \
         if is_string(level) and \
                 level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
             return level.upper()
@@ -972,7 +971,6 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):
-        # if not isinstance(stdout, basestring):
         if (not is_string(stdout)) and (not is_bytes(stdout)):
             return stdout, stderr, rc
         stdout = stdout.lower()

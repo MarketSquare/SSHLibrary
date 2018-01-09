@@ -153,11 +153,9 @@ class AbstractSSHClient(object):
         return self._read_login_output(delay)
 
     def _encode(self, text):
-        if isinstance(text, str):
+        if is_string(text) or is_bytes(text):
             return text
-        #if not isinstance(text, basestring):
-        #   text = unicode(text)
-        if (not is_string(text)) and (not is_bytes(text)) :
+        else:
             text = unic(text)
         return text.encode(self.config.encoding)
 
