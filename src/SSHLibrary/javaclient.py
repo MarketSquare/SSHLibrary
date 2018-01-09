@@ -104,6 +104,7 @@ class SFTPClient(AbstractSFTPClient):
     def __init__(self, ssh_client, encoding):
         self._client = SFTPv3Client(ssh_client)
         self._client.setCharset(encoding)
+        self._encoding = encoding
         super(SFTPClient, self).__init__()
 
     def _list(self, path):

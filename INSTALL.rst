@@ -60,7 +60,7 @@ To use SSHLibrary with Jython, Trilead SSH library is required.
 Regardless of the operating system, you need to download `Trilead SSH
 JAR distribution`__ and add it to CLASSPATH.
 
-__ http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build217/trilead-ssh2-1.0.0-build217.jar
+__ http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar
 
 Installing SSHLibrary
 =====================
