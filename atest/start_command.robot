@@ -45,12 +45,12 @@ Reading Command Output Without Command Started
 
 Start Sudo Command With Correct Password
     [Tags]  linux
-    Start Command  -k pwd   sudo=True  pswd=test
+    Start Command  -k pwd   sudo=True  pwd_sudo=test
     ${stdout} =  Read Command Output
-    Should Contain  ${stdout}  ${HOME_TEST}
+    Should Contain  ${stdout}  ${REMOTE HOME TEST}
 
 Start Sudo Command With Incorrect Password
     [Tags]  linux
-    Start Command  -k pwd   sudo=True  pswd=test123
+    Start Command  -k pwd   sudo=True  pwd_sudo=test123
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  Sorry, try again.

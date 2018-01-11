@@ -7,8 +7,8 @@ ${PASSWORD}               test
 ${HOST}                   localhost
 ${PROMPT}                 $
 ${REMOTE TEST ROOT NAME}  robot-testdir
-${HOME_TEST}              /home/test
-${REMOTE TEST ROOT}       ${HOME_TEST}${/}${REMOTE TEST ROOT NAME}
+${REMOTE HOME TEST}       /home/test
+${REMOTE TEST ROOT}       ${REMOTE HOME TEST}${/}${REMOTE TEST ROOT NAME}
 ${CYGWIN HOME}            c:/cygwin64
 ${REMOTE WINDOWS TEST ROOT}  ${CYGWIN HOME}${REMOTE TEST ROOT}
 ${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
@@ -20,10 +20,6 @@ ${KEY}               ${KEY DIR}${/}id_rsa
 Login As Valid User
     Open Connection  ${HOST}  prompt=${PROMPT}
     Login  ${USERNAME}  ${PASSWORD}
-
-#Login As Valid User
-#    Open Connection  ${HOST}  prompt=${PROMPT}
-#    Login With Public Key  ${KEY USERNAME}  ${KEY}
 
 Remove Test Files And Close Connections
     Execute Command  rm -rf ${REMOTE TEST ROOT}

@@ -70,10 +70,10 @@ Execute Command With Huge Output
 
 Execute Sudo Command With Correct Password
     [Tags]     linux
-    ${stdout} =  Execute Command  -k pwd   sudo=True  pswd=test
-    Should Contain  ${stdout}   ${HOME_TEST}
+    ${stdout} =  Execute Command  -k pwd   sudo=True  pwd_sudo=test
+    Should Contain  ${stdout}   ${REMOTE HOME TEST}
 
 Execute Sudo Command With Incorrect Password
     [Tags]     linux
-    ${stdout} =  Execute Command  -k pwd   sudo=True  pswd=test123
+    ${stdout} =  Execute Command  -k pwd   sudo=True  pwd_sudo=test123
     Should Contain  ${stdout}  Sorry, try again.

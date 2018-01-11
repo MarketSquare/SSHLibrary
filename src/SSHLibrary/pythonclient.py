@@ -78,13 +78,13 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _start_command(self, command, sudo=False,  pswd=None):
+    def _start_command(self, command, sudo=False,  pwd_sudo=None):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session()
-        cmd.run_in(new_shell, sudo, pswd)
+        cmd.run_in(new_shell, sudo, pwd_sudo)
         return cmd
 
     def _create_sftp_client(self):
@@ -202,23 +202,23 @@ class RemoteCommand(AbstractCommand):
                 self._shell.eof_sent or
                 not self._shell.active)
 
-    def _execute(self, sudo=False, pswd=None):
+    def _execute(self, sudo=False, pwd_sudo=None):
         if sudo:
-            self._execute_with_sudo(self._command, pswd)
+            self._execute_with_sudo(self._command, pwd_sudo)
         else:
             self._shell.exec_command(self._command)
 
-    def _execute_with_sudo(self, command, pswd=None):
+    def _execute_with_sudo(self, command, pwd_sudo=None):
         self._command = 'sudo ' + command
         self._shell.get_pty()
         self._shell.exec_command(self._command)
-        if pswd is not None and len(pswd) > 0:
+        if pwd_sudo is not None:
            stdin = self._shell.makefile('wb', -1)
-           self.send_password(pswd, stdin)
+           self.send_password(pwd_sudo, stdin)
            while self._shell_open():
-              self.try_again_password(pswd, stdin)
+              self.try_again_password(pwd_sudo, stdin)
 
-    def try_again_password(self, pswd, stdin):
-        self.send_password(pswd, stdin)
+    def try_again_password(self, pwd_sudo, stdin):
+        self.send_password(pwd_sudo, stdin)
         while self._shell_open():
-           self.try_again_password(pswd, stdin)
+           self.try_again_password(pwd_sudo, stdin)
