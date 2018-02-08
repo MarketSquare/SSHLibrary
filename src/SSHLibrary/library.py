@@ -99,6 +99,13 @@ class SSHLibrary(object):
     that, `Login` and `Login With Public Key` can read the server output more
     efficiently when the prompt is set.
 
+    === Prompt is regexp ==
+
+    Prompt can be specified either as a normal string or a regular expression.
+    The latter is especially useful if the prompt changes as a result of
+    the executed commands. Prompt can be set to be a regular expression
+    by giving ``prompt_is_regexp`` argument a true value.
+
     === Default encoding ===
 
     Argument `encoding` defines the
@@ -294,6 +301,7 @@ class SSHLibrary(object):
     DEFAULT_TIMEOUT = '3 seconds'
     DEFAULT_NEWLINE = 'LF'
     DEFAULT_PROMPT = None
+    DEFAULT_PROMPT_IS_REGEXP = 'no'
     DEFAULT_LOGLEVEL = 'INFO'
     DEFAULT_TERM_TYPE = 'vt100'
     DEFAULT_TERM_WIDTH = 80
@@ -305,6 +313,7 @@ class SSHLibrary(object):
                  timeout=DEFAULT_TIMEOUT,
                  newline=DEFAULT_NEWLINE,
                  prompt=DEFAULT_PROMPT,
+                 prompt_is_regexp=DEFAULT_PROMPT_IS_REGEXP,
                  loglevel=DEFAULT_LOGLEVEL,
                  term_type=DEFAULT_TERM_TYPE,
                  width=DEFAULT_TERM_WIDTH,
@@ -327,6 +336,9 @@ class SSHLibrary(object):
         In this example, the prompt is set to `$`:
         | Library | SSHLibrary | prompt=$ |
 
+        Prompt can also be a regular expression:
+        | `Open Connection` | my.server.com | prompt=[$|#] | prompt_is_regexp=true |
+
         Multiple settings are possible. In this example, the library is brought
         into use with [#Default newline|newline] and [#Default path separator|
         path_separator] known by Windows:
@@ -344,6 +356,7 @@ class SSHLibrary(object):
             timeout or self.DEFAULT_TIMEOUT,
             newline or self.DEFAULT_NEWLINE,
             prompt or self.DEFAULT_PROMPT,
+            prompt_is_regexp or self.DEFAULT_PROMPT_IS_REGEXP,
             loglevel or self.DEFAULT_LOGLEVEL,
             term_type or self.DEFAULT_TERM_TYPE,
             width or self.DEFAULT_TERM_WIDTH,
@@ -356,7 +369,7 @@ class SSHLibrary(object):
     def current(self):
         return self._connections.current
 
-    def set_default_configuration(self, timeout=None, newline=None, prompt=None,
+    def set_default_configuration(self, timeout=None, newline=None, prompt=None, prompt_is_regexp=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
                                   encoding=None):
@@ -394,12 +407,12 @@ class SSHLibrary(object):
         [#Default encoding|`encoding`]
         were added in SSHLibrary 2.0.
         """
-        self._config.update(timeout=timeout, newline=newline, prompt=prompt,
+        self._config.update(timeout=timeout, newline=newline, prompt=prompt, prompt_is_regexp=prompt_is_regexp,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
                             encoding=encoding)
 
-    def set_client_configuration(self, timeout=None, newline=None, prompt=None,
+    def set_client_configuration(self, timeout=None, newline=None, prompt=None, prompt_is_regexp=None,
                                  term_type=None, width=None, height=None,
                                  path_separator=None, encoding=None):
         """Update the `configuration` of the current connection.
@@ -432,7 +445,9 @@ class SSHLibrary(object):
         were added in SSHLibrary 2.0.
         """
         self.current.config.update(timeout=timeout, newline=newline,
-                                   prompt=prompt, term_type=term_type,
+                                   prompt=prompt,
+                                   prompt_is_regexp=prompt_is_regexp,
+                                   term_type=term_type,
                                    width=width, height=height,
                                    path_separator=path_separator,
                                    encoding=encoding)
@@ -462,7 +477,7 @@ class SSHLibrary(object):
                       'HTML')
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
-                        newline=None, prompt=None, term_type=None, width=None,
+                        newline=None, prompt=None, prompt_is_regexp=None, term_type=None, width=None,
                         height=None, path_separator=None, encoding=None):
         """Opens a new SSH connection to the given `host` and `port`.
 
@@ -521,12 +536,13 @@ class SSHLibrary(object):
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
         prompt = prompt or self._config.prompt
+        prompt_is_regexp = prompt_is_regexp or self._config.prompt_is_regexp
         term_type = term_type or self._config.term_type
         width = width or self._config.width
         height = height or self._config.height
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
-        client = SSHClient(host, alias, port, timeout, newline, prompt,
+        client = SSHClient(host, alias, port, timeout, newline, prompt, prompt_is_regexp,
                            term_type, width, height, path_separator, encoding)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
@@ -598,8 +614,8 @@ class SSHLibrary(object):
 
     def get_connection(self, index_or_alias=None, index=False, host=False,
                        alias=False, port=False, timeout=False, newline=False,
-                       prompt=False, term_type=False, width=False, height=False,
-                       encoding=False):
+                       prompt=False, prompt_is_regexp=False, term_type=False,
+                       width=False, height=False, encoding=False):
         """Return information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -609,19 +625,20 @@ class SSHLibrary(object):
         connection is returned.
 
         This keyword returns an object that has the following attributes:
-        | = Name =       | = Type = | = Explanation = |
-        | index          | integer  | Number of the connection. Numbering starts from `1`. |
-        | host           | string   | Destination hostname. |
-        | alias          | string   | An optional alias given when creating the connection.  |
-        | port           | integer  | Destination port. |
-        | timeout        | string   | [#Default timeout|Timeout] length in textual representation. |
-        | newline        | string   | [#Default newline|The line break sequence] used by `Write` keyword. |
-        | prompt         | string   | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
-        | term_type      | string   | Type of the [#Default terminal settings|virtual terminal]. |
-        | width          | integer  | Width of the [#Default terminal settings|virtual terminal]. |
-        | height         | integer  | Height of the [#Default terminal settings|virtual terminal]. |
-        | path_separator | string   | [#Default path separator|The path separator] used on the remote host. |
-        | encoding       | string   | [#Default encoding|The encoding] used for inputs and outputs. |
+        | = Name =         | = Type = | = Explanation = |
+        | index            | integer  | Number of the connection. Numbering starts from `1`. |
+        | host             | string   | Destination hostname. |
+        | alias            | string   | An optional alias given when creating the connection.  |
+        | port             | integer  | Destination port. |
+        | timeout          | string   | [#Default timeout|Timeout] length in textual representation. |
+        | newline          | string   | [#Default newline|The line break sequence] used by `Write` keyword. |
+        | prompt           | string   | [#Default prompt|Prompt character sequence] for `Read Until Prompt`. |
+        | prompt_is_regexp | string   | Must be set to true if the prompt is a regular expression. |
+        | term_type        | string   | Type of the [#Default terminal settings|virtual terminal]. |
+        | width            | integer  | Width of the [#Default terminal settings|virtual terminal]. |
+        | height           | integer  | Height of the [#Default terminal settings|virtual terminal]. |
+        | path_separator   | string   | [#Default path separator|The path separator] used on the remote host. |
+        | encoding         | string   | [#Default encoding|The encoding] used for inputs and outputs. |
 
         If there is no connection, an object having `index` and `host` as `None`
         is returned, rest of its attributes having their values as configuration
@@ -686,7 +703,7 @@ class SSHLibrary(object):
         self._info(str(config))
         return_values = tuple(self._get_config_values(config, index, host,
                                                       alias, port, timeout,
-                                                      newline, prompt,
+                                                      newline, prompt, prompt_is_regexp,
                                                       term_type, width, height,
                                                       encoding))
         if not return_values:
@@ -717,7 +734,7 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'." % level)
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
-                           newline, prompt, term_type, width, height, encoding):
+                           newline, prompt, prompt_is_regexp, term_type, width, height, encoding):
         if self._output_wanted(index):
             yield config.index
         if self._output_wanted(host):
@@ -732,6 +749,8 @@ class SSHLibrary(object):
             yield config.newline
         if self._output_wanted(prompt):
             yield config.prompt
+        if self._output_wanted(prompt_is_regexp):
+            yield config.prompt_is_regexp
         if self._output_wanted(term_type):
             yield config.term_type
         if self._output_wanted(width):
@@ -1535,12 +1554,13 @@ class SSHLibrary(object):
 
 class _DefaultConfiguration(Configuration):
 
-    def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
+    def __init__(self, timeout, newline, prompt, prompt_is_regexp, loglevel, term_type, width,
                  height, path_separator, encoding):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
             prompt=StringEntry(prompt),
+            prompt_is_regexp=StringEntry(prompt_is_regexp),
             loglevel=LogLevelEntry(loglevel),
             term_type=StringEntry(term_type),
             width=IntegerEntry(width),
