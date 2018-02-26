@@ -369,10 +369,10 @@ class SSHLibrary(object):
     def current(self):
         return self._connections.current
 
-    def set_default_configuration(self, timeout=None, newline=None, prompt=None, prompt_is_regexp=None,
-                                  loglevel=None, term_type=None, width=None,
-                                  height=None, path_separator=None,
-                                  encoding=None):
+    def set_default_configuration(self, timeout=None, newline=None, prompt=None,
+                                  prompt_is_regexp=None, loglevel=None,
+                                  term_type=None, width=None, height=None,
+                                  path_separator=None, encoding=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -407,14 +407,14 @@ class SSHLibrary(object):
         [#Default encoding|`encoding`]
         were added in SSHLibrary 2.0.
         """
-        self._config.update(timeout=timeout, newline=newline, prompt=prompt, prompt_is_regexp=prompt_is_regexp,
-                            loglevel=loglevel, term_type=term_type, width=width,
-                            height=height, path_separator=path_separator,
-                            encoding=encoding)
+        self._config.update(timeout=timeout, newline=newline, prompt=prompt,
+                            prompt_is_regexp=prompt_is_regexp, loglevel=loglevel,
+                            term_type=term_type, width=width, height=height,
+                            path_separator=path_separator, encoding=encoding)
 
-    def set_client_configuration(self, timeout=None, newline=None, prompt=None, prompt_is_regexp=None,
-                                 term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None):
+    def set_client_configuration(self, timeout=None, newline=None, prompt=None,
+                                 prompt_is_regexp=None, term_type=None, width=None,
+                                 height=None, path_separator=None, encoding=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than `None` are updated.
@@ -477,8 +477,9 @@ class SSHLibrary(object):
                       'HTML')
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
-                        newline=None, prompt=None, prompt_is_regexp=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None):
+                        newline=None, prompt=None, prompt_is_regexp=None,
+                        term_type=None, width=None, height=None,
+                        path_separator=None, encoding=None):
         """Opens a new SSH connection to the given `host` and `port`.
 
         The new connection is made active. Possible existing connections
@@ -542,8 +543,9 @@ class SSHLibrary(object):
         height = height or self._config.height
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
-        client = SSHClient(host, alias, port, timeout, newline, prompt, prompt_is_regexp,
-                           term_type, width, height, path_separator, encoding)
+        client = SSHClient(host, alias, port, timeout, newline, prompt,
+                           prompt_is_regexp, term_type, width, height,
+                           path_separator, encoding)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -703,9 +705,10 @@ class SSHLibrary(object):
         self._info(str(config))
         return_values = tuple(self._get_config_values(config, index, host,
                                                       alias, port, timeout,
-                                                      newline, prompt, prompt_is_regexp,
-                                                      term_type, width, height,
-                                                      encoding))
+                                                      newline, prompt,
+                                                      prompt_is_regexp,
+                                                      term_type, width,
+                                                      height, encoding))
         if not return_values:
             return config
         if len(return_values) == 1:
@@ -734,7 +737,8 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'." % level)
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
-                           newline, prompt, prompt_is_regexp, term_type, width, height, encoding):
+                           newline, prompt, prompt_is_regexp, term_type,
+                           width, height, encoding):
         if self._output_wanted(index):
             yield config.index
         if self._output_wanted(host):
@@ -1554,8 +1558,8 @@ class SSHLibrary(object):
 
 class _DefaultConfiguration(Configuration):
 
-    def __init__(self, timeout, newline, prompt, prompt_is_regexp, loglevel, term_type, width,
-                 height, path_separator, encoding):
+    def __init__(self, timeout, newline, prompt, prompt_is_regexp, loglevel,
+                 term_type, width, height, path_separator, encoding):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),

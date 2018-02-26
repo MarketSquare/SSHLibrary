@@ -22,10 +22,8 @@ import time
 import glob
 import posixpath
 
-from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
+from .config import (Configuration, BooleanEntry, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
-
-from robot.utils import is_truthy
 
 
 class SSHClientException(RuntimeError):
@@ -34,8 +32,9 @@ class SSHClientException(RuntimeError):
 
 class _ClientConfiguration(Configuration):
 
-    def __init__(self, host, alias, port, timeout, newline, prompt, prompt_is_regexp,
-                 term_type, width, height, path_separator, encoding):
+    def __init__(self, host, alias, port, timeout, newline, prompt,
+                 prompt_is_regexp, term_type, width, height,
+                 path_separator, encoding):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -44,7 +43,7 @@ class _ClientConfiguration(Configuration):
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
             prompt=StringEntry(prompt),
-            prompt_is_regexp=StringEntry(prompt_is_regexp),
+            prompt_is_regexp=BooleanEntry(prompt_is_regexp),
             term_type=StringEntry(term_type),
             width=IntegerEntry(width),
             height=IntegerEntry(height),
@@ -61,8 +60,8 @@ class AbstractSSHClient(object):
     language specific concrete implementations.
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
-                 prompt=None, prompt_is_regexp='no', term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8'):
+                 prompt=None, prompt_is_regexp=False, term_type='vt100',
+                 width=80, height=24, path_separator='/', encoding='utf8'):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, prompt_is_regexp, term_type,
                                            width, height, path_separator, encoding)
@@ -163,7 +162,7 @@ class AbstractSSHClient(object):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
-        if is_truthy(self.config.prompt_is_regexp):
+        if self.config.prompt_is_regexp:
             return self.read_until_regexp(self.config.prompt)
         elif self.config.prompt:
             return self.read_until_prompt()
@@ -398,10 +397,9 @@ class AbstractSSHClient(object):
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
-        if is_truthy(self.config.prompt_is_regexp):
+        if self.config.prompt_is_regexp:
             return self.read_until_regexp(self.config.prompt)
-        else:
-            return self.read_until(self.config.prompt)
+        return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):
         """Reads output from the current shell until the `regexp` matches or
