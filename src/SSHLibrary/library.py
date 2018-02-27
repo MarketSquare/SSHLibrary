@@ -20,7 +20,7 @@ from robot.utils import ConnectionCache
 
 from .abstractclient import SSHClientException
 from .client import SSHClient
-from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
+from .config import (Configuration, BooleanEntry, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
 from .version import VERSION
 
@@ -1564,7 +1564,7 @@ class _DefaultConfiguration(Configuration):
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
             prompt=StringEntry(prompt),
-            prompt_is_regexp=StringEntry(prompt_is_regexp),
+            prompt_is_regexp=BooleanEntry(prompt_is_regexp),
             loglevel=LogLevelEntry(loglevel),
             term_type=StringEntry(term_type),
             width=IntegerEntry(width),
