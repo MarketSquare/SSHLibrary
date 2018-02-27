@@ -87,33 +87,6 @@ Setup on Linux
 
 - Change the rights for that file so that you can read it.
 
-- Create a new user `test_prompt`:
-
-::
-
-    sudo useradd test_prompt -m -s /bin/bash
-
-- With password `test`:
-
-::
-
-    sudo passwd test
-    (input `test` as the new password)
-
-- Log in as `test_prompt`
-
-::
-
-    sudo su test_prompt
-
-- Set prompt in .bashrc
-
-::
-
-    export PS1='\u@\h \W \# '
-
-- exit
-
 Setup in Windows
 ================
 The acceptance tests can also be run on windows against a ssh server running on Cygwin.
