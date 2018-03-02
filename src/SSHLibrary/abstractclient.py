@@ -22,8 +22,7 @@ import time
 import glob
 import posixpath
 
-from robot.utils.robottypes import is_string, is_bytes
-from robot.utils.unic import unic
+from robot.utils import is_string, is_bytes, unic
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
@@ -149,13 +148,13 @@ class AbstractSSHClient(object):
             self._login(username, password, look_for_keys=look_for_keys)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
-                                     % username)
+                                     % self._decode(username))
         return self._read_login_output(delay)
 
     def _encode(self, text):
-        if is_string(text) or is_bytes(text):
+        if is_bytes(text):
             return text
-        else:
+        if not is_string(text):
             text = unic(text)
         return text.encode(self.config.encoding)
 
@@ -196,7 +195,7 @@ class AbstractSSHClient(object):
             self._login_with_public_key(username, keyfile, password)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
-                                     "'%s'." % username)
+                                     "'%s'." % self._decode(username))
         return self._read_login_output(delay)
 
     def _verify_key_file(self, keyfile):
@@ -276,13 +275,8 @@ class AbstractSSHClient(object):
             The newline is set when calling :py:meth:`open_connection`
         """
         text = self._encode(text)
-        if is_string(text):
-            text = text.encode(self.config.encoding)
         if add_newline:
-            if not is_string(self.config.newline):
-                text += self.config.newline
-            else:
-                text += self.config.newline.encode(self.config.encoding)
+            text += self.config.newline.encode(self.config.encoding)
         self.shell.write(text)
 
     def read(self, delay=None):
@@ -312,7 +306,7 @@ class AbstractSSHClient(object):
     def _delayed_read(self, delay):
         delay = TimeEntry(delay).value
         max_time = time.time() + self.config.get('timeout').value
-        output = bytes()
+        output = b''
         while time.time() < max_time:
             time.sleep(delay)
             read = self.shell.read()
@@ -354,7 +348,7 @@ class AbstractSSHClient(object):
         :returns: The read output, including the encountered `expected` text.
         """
         expected = self._encode(expected)
-        return self._read_until(lambda s: expected in s, expected)
+        return self._read_until(lambda s: expected in s.encode(self.config.encoding), expected)
 
     def _read_until(self, matcher, expected, timeout=None):
         output = ''
@@ -365,7 +359,7 @@ class AbstractSSHClient(object):
             if matcher(output):
                 return output
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
-                                 % (expected, timeout, output))
+                                 % (self._decode(expected), timeout, output))
 
     def read_until_newline(self):
         """Reads output from the current shell until a newline character is
@@ -420,10 +414,8 @@ class AbstractSSHClient(object):
         :returns: The read output up and until the `regexp` matches.
         """
         regexp = self._encode(regexp)
-        # if isinstance(regexp, basestring):
-        if is_string(regexp) or is_bytes(regexp):
-            regexp = re.compile(regexp)
-        return self._read_until(lambda s: regexp.search(s), regexp.pattern)
+        regexp = re.compile(regexp)
+        return self._read_until(lambda s: regexp.search(self._encode(s)), regexp.pattern)
 
     def read_until_regexp_with_prefix(self, regexp, prefix):
         """
@@ -445,7 +437,7 @@ class AbstractSSHClient(object):
         start_time = time.time()
         while time.time() < float(timeout.value) + start_time:
             ret += self.read_char()
-            if matcher(prefix + ret):
+            if matcher(prefix + self._encode(ret)):
                 return ret
         raise SSHClientException(
             "No match found for '%s' in %s\nOutput:\n%s"
@@ -480,12 +472,12 @@ class AbstractSSHClient(object):
         while time.time() < max_time:
             self.write(text)
             try:
-                return self._read_until(lambda s: expected in s, expected,
+                return self._read_until(lambda s: expected in self._encode(s), expected,
                                         timeout=interval.value)
             except SSHClientException:
                 pass
         raise SSHClientException("No match found for '%s' in %s."
-                                 % (expected, timeout))
+                                 % (self._decode(expected), timeout))
 
     def put_file(self, source, destination='.', mode='0o744', newline=''):
         """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
@@ -623,7 +615,8 @@ class AbstractSFTPClient(object):
     directories.
     """
 
-    def __init__(self):
+    def __init__(self, encoding):
+        self._encoding = encoding
         self._homedir = self._absolute_path(b'.')
 
     def _absolute_path(self, path):
@@ -1033,7 +1026,7 @@ class AbstractSFTPClient(object):
                 if not data:
                     break
                 if newline:
-                    data = re.sub(b'(\r\n|\r|\n)', newline.encode('UTF8'), data)
+                    data = re.sub(br'(\r\n|\r|\n)', newline.encode(self._encoding), data)
                 self._write_to_remote_file(remote_file, data, position)
                 position += len(data)
             self._close_remote_file(remote_file)

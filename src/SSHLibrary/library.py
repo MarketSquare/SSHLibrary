@@ -11,15 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from __future__ import print_function
 try:
     from robot.api import logger
 except ImportError:
     logger = None
 from robot.utils import ConnectionCache
-from robot.utils.robottypes import is_string, is_bytes
-from robot.utils.unic import unic
+from robot.utils import is_string, is_bytes
 
 from .abstractclient import SSHClientException
 from .client import SSHClient
@@ -971,7 +969,7 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):
-        if (not is_string(stdout)) and (not is_bytes(stdout)):
+        if not(is_string(stdout) or is_bytes(stdout)):
             return stdout, stderr, rc
         stdout = stdout.lower()
         if stdout == 'stderr':
