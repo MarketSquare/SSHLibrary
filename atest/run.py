@@ -37,7 +37,7 @@ def atests(*opts):
     else:
         os_includes = ('--exclude', 'windows')
     if os.name == 'java':
-        jython(*opts)
+        jython(*(os_includes + opts))
         process_output(join(OUTPUT_JYTHON, 'output.xml'))
         return rebot(join(OUTPUT_JYTHON, 'output.xml'), outputdir=OUTPUT_JYTHON)
     python(*(os_includes+opts))
