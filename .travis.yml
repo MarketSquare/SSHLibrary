@@ -1,0 +1,52 @@
+language: python
+sudo: required
+dist: trusty
+env:
+  global:
+    -JYTHON=false
+before_install:
+  - if [ "$JYTHON" == "true" ]; then
+        hg clone http://hg.python.org/jython;
+        cd jython;
+        ant;
+        cd ..;
+        chmod +x "$(pwd)/jython/dist/bin/jython";
+        export PYTHON_EXE="$(pwd)/jython/dist/bin/jython";
+        alias jython="$(pwd)/jython/dist/bin/jython";
+        export PATH="$(pwd)/jython/dist/bin:$PATH";
+        wget https://bootstrap.pypa.io/get-pip.py;
+        $PYTHON_EXE get-pip.py;
+    else
+        export PYTHON_EXE=python;
+    fi
+  - sudo useradd test -m -s /bin/bash
+  - (echo 'test'; echo 'test') | sudo passwd test
+  - sudo -E su test -c "echo $'export PS1=\'\u@travis \W \$ \'' >> /home/test/.bashrc"
+  - sudo useradd -m testkey -s /bin/bash
+  - sudo -E su testkey -c "echo $'export PS1=\'\u@travis \W \$ \'' >> /home/testkey/.bashrc"
+  - sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"
+  - sudo -E su testkey -c "ssh-keygen -f /home/testkey/.ssh/id_rsa -t rsa -N ''"
+  - sudo -E su testkey -c "cp /home/testkey/.ssh/id_rsa.pub /home/testkey/.ssh/authorized_keys"
+  - sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
+  - cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/
+install:
+  - pip install -r requirements.txt
+matrix:
+  include:
+    - python: "2.7"
+      env:
+        - ROBOTFRAMEWORK=3.0.2
+        - PARAMIKO=2.4.0
+    - python: "2.7"
+      env:
+        - JYTHON=true
+        - ROBOTFRAMEWORK=3.0.2
+before_script:
+  - pip install robotframework==$ROBOTFRAMEWORK
+  - if [ "$JYTHON" == "true" ]; then
+        export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/trilead-ssh2-1.0.0-build217.jar;
+    else
+        pip install paramiko==$PARAMIKO;
+    fi
+script:
+  - $PYTHON_EXE atest/run.py atest
