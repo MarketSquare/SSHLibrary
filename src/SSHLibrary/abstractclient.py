@@ -276,7 +276,7 @@ class AbstractSSHClient(object):
         """
         text = self._encode(text)
         if add_newline:
-            text += self.config.newline.encode(self.config.encoding)
+            text += self.config.newline
         self.shell.write(text)
 
     def read(self, delay=None):
@@ -347,8 +347,7 @@ class AbstractSSHClient(object):
 
         :returns: The read output, including the encountered `expected` text.
         """
-        expected = self._encode(expected)
-        return self._read_until(lambda s: expected in s.encode(self.config.encoding), expected)
+        return self._read_until(lambda s: expected in s, expected)
 
     def _read_until(self, matcher, expected, timeout=None):
         output = ''
@@ -359,7 +358,7 @@ class AbstractSSHClient(object):
             if matcher(output):
                 return output
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
-                                 % (self._decode(expected), timeout, output))
+                                 % (expected, timeout, output))
 
     def read_until_newline(self):
         """Reads output from the current shell until a newline character is
@@ -376,7 +375,7 @@ class AbstractSSHClient(object):
 
         :returns: The read output, including the encountered newline character.
         """
-        return self.read_until(self.config.newline)
+        return self.read_until(self._decode(self.config.newline))
 
     def read_until_prompt(self):
         """Reads output from the current shell until the prompt is encountered
@@ -413,9 +412,9 @@ class AbstractSSHClient(object):
 
         :returns: The read output up and until the `regexp` matches.
         """
-        regexp = self._encode(regexp)
-        regexp = re.compile(regexp)
-        return self._read_until(lambda s: regexp.search(self._encode(s)), regexp.pattern)
+        if is_string(regexp):
+            regexp = re.compile(regexp)
+        return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
     def read_until_regexp_with_prefix(self, regexp, prefix):
         """
@@ -833,7 +832,7 @@ class AbstractSFTPClient(object):
         files = zip(remote_files, local_files)
         for src, dst in files:
             self._get_file(src, dst)
-        return files
+        return list(files)
 
     def _get_get_file_sources(self, source, path_separator):
         if path_separator in source:

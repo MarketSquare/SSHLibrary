@@ -730,7 +730,7 @@ class SSHLibrary(object):
         if self._output_wanted(timeout):
             yield config.timeout
         if self._output_wanted(newline):
-            yield config.newline
+            yield config.newline.decode()
         if self._output_wanted(prompt):
             yield config.prompt
         if self._output_wanted(term_type):

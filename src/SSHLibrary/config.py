@@ -129,5 +129,10 @@ class NewlineEntry(Entry):
         * 'CR' -> '\r'
     """
     def _parse_value(self, value):
+        if utils.is_bytes(value) and not utils.is_string(value):
+            return value
         value = str(value).upper()
-        return value.replace('LF', '\n').replace('CR', '\r')
+        return value.replace('LF', '\n').replace('CR', '\r').encode()
+
+    def __str__(self):
+        return self._value.decode()
