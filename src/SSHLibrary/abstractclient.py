@@ -477,7 +477,7 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s."
                                  % (expected, timeout))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+    def put_file(self, source, destination='.', mode='0o744', newline=''):
         """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
         arguments.
 
@@ -486,7 +486,7 @@ class AbstractSSHClient(object):
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          self.config.path_separator)
 
-    def put_directory(self, source, destination='.', mode='0744', newline='',
+    def put_directory(self, source, destination='.', mode='0o744', newline='',
                       recursive=False):
         """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
@@ -1012,7 +1012,7 @@ class AbstractSFTPClient(object):
             try:
                 self._client.stat(current_dir)
             except:
-                self._client.mkdir(current_dir, 0744)
+                self._client.mkdir(current_dir, 0o744)
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
