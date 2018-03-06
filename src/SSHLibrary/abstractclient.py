@@ -829,10 +829,10 @@ class AbstractSFTPClient(object):
             msg = "There were no source files matching '%s'." % source
             raise SSHClientException(msg)
         local_files = self._get_get_file_destinations(remote_files, destination)
-        files = zip(remote_files, local_files)
+        files = list(zip(remote_files, local_files))
         for src, dst in files:
             self._get_file(src, dst)
-        return list(files)
+        return files
 
     def _get_get_file_sources(self, source, path_separator):
         if path_separator in source:
@@ -961,10 +961,10 @@ class AbstractSFTPClient(object):
                                                                    destination,
                                                                    path_separator)
         self._create_missing_remote_path(remote_dir)
-        files = zip(local_files, remote_files)
+        files = list(zip(local_files, remote_files))
         for source, destination in files:
             self._put_file(source, destination, mode, newline)
-        return list(files)
+        return files
 
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep))

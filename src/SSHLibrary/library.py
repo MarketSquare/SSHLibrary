@@ -969,7 +969,7 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):
-        if not(is_string(stdout) or is_bytes(stdout)):
+        if not (is_string(stdout) or is_bytes(stdout)):
             return stdout, stderr, rc
         stdout = stdout.lower()
         if stdout == 'stderr':
