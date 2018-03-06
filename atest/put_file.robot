@@ -52,6 +52,12 @@ Put File With Special Characters In Filename
     SSH.File Should Exist  ${target}
     [Teardown]  Execute Command  rm -f ${target}
 
+Put Compressed File To Absolute Destination
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${COMPRESSED FILE NAME}
+    Put File  ${COMPRESSED FILE}  ${REMOTE TEST ROOT}/
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${COMPRESSED FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 Put File Should Fail When There Are No Source Files
     Run Keyword And Expect Error  There are no source files matching 'nonexisting'.
     ...                           SSH.Put File  nonexisting
@@ -65,7 +71,9 @@ Put File And Specify Remote Newlines
     ${expected} =  OS.Get Binary File  ${FILE WITH NEWLINES}
     SSH.Get File  ${target}  ${LOCAL TMPDIR}${/}
     ${content} =  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
-    ${content}=  Replace String  ${content}  \r\n  ${\n}
+    ${crlf}=  Encode String To Bytes  \r\n  UTF-8
+    ${\n}=  Encode String To Bytes  ${\n}  UTF-8
+    ${content}=  Replace String  ${content}  ${crlf}  ${\n}
     Should Be Equal  ${content}  ${expected}
     [Teardown]  Remove Local Temp Dir And Remote File  ${target}
 

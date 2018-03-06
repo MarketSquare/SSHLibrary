@@ -8,11 +8,13 @@ Library         Collections
 *** Test Cases ***
 List Directories Using Absolute Path
     ${expected} =  Create List  ${SUBDIRECTORY NAME}
+    ...                         ${COMPRESSED DIR}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories Using Relative Path
     ${expected} =  Create List  ${SUBDIRECTORY NAME}
+    ...                         ${COMPRESSED DIR}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
@@ -28,6 +30,7 @@ List Directories Using Current Working Directory
 List Directories Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
     ${expected} =  Create List  ${SUBDIRECTORY NAME}
+    ...                         ${COMPRESSED DIR}
     ${listing} =  List Directories In Directory  symlink
     Lists Should Be Equal  ${listing}  ${expected}
     [Teardown]  Execute Command  rm -f symlink
@@ -39,11 +42,13 @@ List Directories Using Non-ASCII Characters In Path
 
 List Directories With Absolute Paths Using Absolute Path
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ...                         ${REMOTE TEST ROOT}/${COMPRESSED DIR}
     ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Relative Path
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ...                         ${REMOTE TEST ROOT}/${COMPRESSED DIR}
     ${target} =  Set Variable  ${REMOTE TEST ROOT NAME}
     ${listing} =  List Directories In Directory  ${target}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
@@ -61,6 +66,7 @@ List Directories With Absolute Paths Using Pattern
 List Directories With Absolute Paths Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
     ${expected} =  Create List  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ...                         ${REMOTE TEST ROOT}/${COMPRESSED DIR}
     ${listing} =  List Directories In Directory  symlink  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
     [Teardown]  Execute Command  rm -f symlink

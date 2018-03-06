@@ -89,7 +89,7 @@ class Shell(AbstractShell):
     def read_byte(self):
          if self._output_available():
              return chr(self._stdout.read())
-         return ''
+         return bytes()
 
     def _output_available(self):
         return self._stdout.available()
@@ -104,7 +104,7 @@ class SFTPClient(AbstractSFTPClient):
     def __init__(self, ssh_client, encoding):
         self._client = SFTPv3Client(ssh_client)
         self._client.setCharset(encoding)
-        super(SFTPClient, self).__init__()
+        super(SFTPClient, self).__init__(encoding)
 
     def _list(self, path):
         for item in self._client.ls(path):
