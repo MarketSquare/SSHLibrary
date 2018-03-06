@@ -19,6 +19,9 @@ The library has the following main usages:
 SSHLibrary is open source software licensed under `Apache License 2.0
 <http://www.apache.org/licenses/LICENSE-2.0.html>`__.
 
+.. image:: https://api.travis-ci.org/robotframework/SSHLibrary.png
+   :target: http://travis-ci.org/robotframework/SSHLibrary
+
 Installation
 ------------
 
