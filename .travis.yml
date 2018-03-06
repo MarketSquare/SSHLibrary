@@ -44,7 +44,7 @@ matrix:
 before_script:
   - pip install robotframework==$ROBOTFRAMEWORK
   - if [ "$JYTHON" == "true" ]; then
-        export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/trilead-ssh2-1.0.0-build217.jar;
+        export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/trilead-ssh2-1.0.0-build221.jar;
     else
         pip install paramiko==$PARAMIKO;
     fi
