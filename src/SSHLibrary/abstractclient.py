@@ -964,7 +964,7 @@ class AbstractSFTPClient(object):
         files = zip(local_files, remote_files)
         for source, destination in files:
             self._put_file(source, destination, mode, newline)
-        return files
+        return list(files)
 
     def _get_put_file_sources(self, source):
         sources = [f for f in glob.glob(source.replace('/', os.sep))
