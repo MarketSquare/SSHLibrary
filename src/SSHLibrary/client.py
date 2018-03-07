@@ -15,6 +15,6 @@
 import sys
 
 if sys.platform.startswith('java'):
-    from javaclient import JavaSSHClient as SSHClient
+    from SSHLibrary.javaclient import JavaSSHClient as SSHClient
 else:
-    from pythonclient import PythonSSHClient as SSHClient
+    from SSHLibrary.pythonclient import PythonSSHClient as SSHClient

@@ -89,7 +89,7 @@ class Shell(AbstractShell):
     def read_byte(self):
          if self._output_available():
              return chr(self._stdout.read())
-         return ''
+         return bytes()
 
     def _output_available(self):
         return self._stdout.available()
