@@ -61,22 +61,27 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, look_for_keys=False, sock=None):
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, look_for_keys=look_for_keys,
+                                password, sock=sock, look_for_keys=look_for_keys,
                                 allow_agent=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _login_with_public_key(self, username, key_file, password):
+    def _login_with_public_key(self, username, key_file, password, sock=None):
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, key_filename=key_file,
+                                password, sock=sock, key_filename=key_file,
                                 allow_agent=False, timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
+
+    @staticmethod
+    def proxy_through(proxy_host, proxy_user, key_file, host, proxy_port=22):
+        proxy_command = 'ssh -q -i %s %s@%s nc %s %s' % (key_file, proxy_user, proxy_host, host, proxy_port)
+        return paramiko.ProxyCommand(proxy_command)
 
     def _start_command(self, command):
         cmd = RemoteCommand(command, self.config.encoding)

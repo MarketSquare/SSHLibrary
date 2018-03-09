@@ -23,7 +23,7 @@ import glob
 import posixpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
-                     TimeEntry)
+                     TimeEntry, SockEntry)
 
 
 class SSHClientException(RuntimeError):
@@ -33,7 +33,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding):
+                 width, height, path_separator, encoding, sock):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -46,7 +46,8 @@ class _ClientConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            sock=SockEntry(sock)
         )
 
 
@@ -59,10 +60,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8'):
+                 path_separator='/', encoding='utf8', sock=None):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding)
+                                           path_separator, encoding, sock)
         self._sftp_client = None
         self._shell = None
         self._started_commands = []
@@ -79,6 +80,10 @@ class AbstractSSHClient(object):
 
         :returns: `True`, if logging was successfully enabled. False otherwise.
         """
+        raise NotImplementedError
+
+    @staticmethod
+    def proxy_through(proxy_host, proxy_user, key_file, host, proxy_port=22):
         raise NotImplementedError
 
     @property
@@ -115,7 +120,7 @@ class AbstractSSHClient(object):
         self._shell = None
         self.client.close()
 
-    def login(self, username, password, delay=None, look_for_keys=False):
+    def login(self, username, password, delay=None, look_for_keys=False, sock=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -143,7 +148,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, look_for_keys=look_for_keys)
+            self._login(username, password, look_for_keys=look_for_keys, sock=sock)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % username)
@@ -156,7 +161,7 @@ class AbstractSSHClient(object):
             text = unicode(text)
         return text.encode(self.config.encoding)
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, look_for_keys=False, sock=None):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -164,7 +169,7 @@ class AbstractSSHClient(object):
             return self.read_until_prompt()
         return self.read(delay)
 
-    def login_with_public_key(self, username, keyfile, password, delay=None):
+    def login_with_public_key(self, username, keyfile, password, delay=None, sock=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -190,7 +195,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         self._verify_key_file(keyfile)
         try:
-            self._login_with_public_key(username, keyfile, password)
+            self._login_with_public_key(username, keyfile, password, sock=sock)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
                                      "'%s'." % username)
@@ -205,7 +210,7 @@ class AbstractSSHClient(object):
         except IOError:
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
-    def _login_with_public_key(self, username, keyfile, password):
+    def _login_with_public_key(self, username, keyfile, password, sock=None):
         raise NotImplementedError
 
     def execute_command(self, command):
