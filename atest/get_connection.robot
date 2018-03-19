@@ -23,7 +23,7 @@ Get Connection When No Connection Is Open
     Should Be Equal   ${conn.alias}              ${None}
     Should Be Equal   ${conn.prompt}             ${None}
     Should Be Equal As Integers  ${conn.port}    22
-    Should Be Equal   ${conn.newline}            \n
+    Should Be Equal As Strings   ${conn.newline}   \n
     Should Be Equal   ${conn.encoding}           utf8
     Should Be Equal   ${conn.term_type}          vt100
     Should Be Equal As Integers  ${conn.width}   80
