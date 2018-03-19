@@ -12,10 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import time
 import ntpath
-
-from robot.utils import is_string, is_bytes, is_unicode
 
 try:
     import paramiko
@@ -28,6 +27,7 @@ except ImportError:
 from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
+from .utils import is_bytes, is_list_like, is_unicode
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -42,10 +42,10 @@ paramiko.transport.Transport.start_client = _custom_start_client
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
 def _custom_log(self, level, msg, *args):
     escape = lambda s: s.replace('%', '%%')
-    if is_string(msg) or is_bytes(msg):
-        msg = escape(msg)
-    else:
+    if is_list_like(msg):
         msg = [escape(m) for m in msg]
+    else:
+        msg = escape(msg)
     return self._orig_log(level, msg, *args)
 
 paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log

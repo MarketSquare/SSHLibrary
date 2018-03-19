@@ -12,23 +12,23 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from __future__ import print_function
+
 try:
     from robot.api import logger
 except ImportError:
     logger = None
-from robot.utils import ConnectionCache
-from robot.utils import is_string, is_bytes
 
 from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
+from .utils import ConnectionCache, is_string, plural_or_not
 from .version import VERSION
 
-__version__ = VERSION
 
-plural_or_not = lambda count: '' if count == 1 else 's'
+__version__ = VERSION
 
 
 class SSHLibrary(object):
@@ -731,7 +731,7 @@ class SSHLibrary(object):
         if self._output_wanted(timeout):
             yield config.timeout
         if self._output_wanted(newline):
-            yield config.newline.decode()
+            yield config.newline
         if self._output_wanted(prompt):
             yield config.prompt
         if self._output_wanted(term_type):
@@ -970,7 +970,7 @@ class SSHLibrary(object):
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):
-        if not (is_string(stdout) or is_bytes(stdout)):
+        if not is_string(stdout):
             return stdout, stderr, rc
         stdout = stdout.lower()
         if stdout == 'stderr':

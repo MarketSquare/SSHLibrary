@@ -28,7 +28,6 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
-from robot.utils import is_string
 
 
 class JavaSSHClient(AbstractSSHClient):
@@ -178,7 +177,5 @@ class RemoteCommand(AbstractCommand):
         return result
 
     def _execute(self):
-        command = self._command
-        if is_string(self._command):
-            command = self._command.decode(self._encoding)
+        command = self._command.decode(self._encoding)
         self._shell.execCommand(command)

@@ -13,9 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from __future__ import with_statement
 from fnmatch import fnmatchcase
-
 import os
 import re
 import stat
@@ -23,10 +21,9 @@ import time
 import glob
 import posixpath
 
-from robot.utils import is_string, is_bytes, unic
-
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
+from .utils import is_bytes, is_string, unicode
 
 
 class SSHClientException(RuntimeError):
@@ -156,8 +153,11 @@ class AbstractSSHClient(object):
         if is_bytes(text):
             return text
         if not is_string(text):
-            text = unic(text)
+            text = unicode(text)
         return text.encode(self.config.encoding)
+
+    def _decode(self, bytes):
+        return bytes.decode(self.config.encoding)
 
     def _login(self, username, password, look_for_keys=False):
         raise NotImplementedError
@@ -277,7 +277,7 @@ class AbstractSSHClient(object):
         """
         text = self._encode(text)
         if add_newline:
-            text += self.config.newline
+            text += self._encode(self.config.newline)
         self.shell.write(text)
 
     def read(self, delay=None):
@@ -301,9 +301,6 @@ class AbstractSSHClient(object):
             output += self._delayed_read(delay)
         return self._decode(output)
 
-    def _decode(self, output):
-        return output.decode(self.config.encoding)
-
     def _delayed_read(self, delay):
         delay = TimeEntry(delay).value
         max_time = time.time() + self.config.get('timeout').value
@@ -317,7 +314,7 @@ class AbstractSSHClient(object):
         return output
 
     def read_char(self):
-        """Reads a single char from the current shell.
+        """Reads a single Unicode character from the current shell.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
@@ -376,7 +373,7 @@ class AbstractSSHClient(object):
 
         :returns: The read output, including the encountered newline character.
         """
-        return self.read_until(self._decode(self.config.newline))
+        return self.read_until(self.config.newline)
 
     def read_until_prompt(self):
         """Reads output from the current shell until the prompt is encountered
@@ -427,8 +424,7 @@ class AbstractSSHClient(object):
 
         timeout is defined with :py:meth:`open_connection()`
         """
-        # if isinstance(regexp, basestring):
-        if is_string(regexp) or is_bytes(regexp):
+        if is_string(regexp):
             regexp = re.compile(regexp)
         matcher = regexp.search
         expected = regexp.pattern
@@ -904,7 +900,7 @@ class AbstractSFTPClient(object):
                                    path_separator, recursive)
 
     def _put_directory(self, source, destination, mode, newline,
-                      path_separator, recursive):
+                       path_separator, recursive):
         files = []
         items = os.listdir(source)
         if items:
@@ -915,9 +911,9 @@ class AbstractSFTPClient(object):
                     files += self.put_file(local_path, remote_path, mode,
                                            newline, path_separator)
                 elif recursive and os.path.isdir(local_path):
-                    files += self._put_directory(local_path, remote_path, mode,
-                                                newline, path_separator,
-                                                recursive)
+                    files += self._put_directory(local_path, remote_path,
+                                                 mode, newline,
+                                                 path_separator, recursive)
         else:
             self._create_missing_remote_path(destination)
             files.append((source, destination))
