@@ -30,7 +30,7 @@ before_install:
   - sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
   - cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
 matrix:
   include:
     - python: "2.7"
