@@ -39,62 +39,16 @@ matrix:
         - PARAMIKO=2.4.1
     - python: "2.7"
       env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.3.2
-    - python: "2.7"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.1.5
-    - python: "2.7"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=1.18.5
-    - python: "2.7"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=1.16.3
-    - python: "2.7"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=1.15.0
-    - python: "2.7"
-      env:
         - JYTHON=true
         - ROBOTFRAMEWORK=3.0.2
     - python: "3.4"
       env:
         - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.4.1
-    - python: "3.4"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=1.15.0
+        - PARAMIKO=2.1.5
     - python: "3.5"
       env:
         - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.4.1
-
-    - python: "3.5"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=1.15.0
-
-    - python: "3.6"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.4.1
-    - python: "3.6"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.2.3
-    - python: "3.6"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.0.8
-    - python: "3.6"
-      env:
-        - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=1.17.6
+        - PARAMIKO=1.18.5
     - python: "3.6"
       env:
         - ROBOTFRAMEWORK=3.0.2
