@@ -11,13 +11,13 @@ before_install:
         ant;
         cd ..;
         chmod +x "$(pwd)/jython/dist/bin/jython";
-        export PYTHON_EXE="$(pwd)/jython/dist/bin/jython";
+        export INTERPRETER="$(pwd)/jython/dist/bin/jython";
         alias jython="$(pwd)/jython/dist/bin/jython";
         export PATH="$(pwd)/jython/dist/bin:$PATH";
-        wget https://bootstrap.pypa.io/get-pip.py;
-        $PYTHON_EXE get-pip.py;
+        wget --no-verbose https://bootstrap.pypa.io/3.2/get-pip.py;
+        $INTERPRETER get-pip.py;
     else
-        export PYTHON_EXE=python;
+        export INTERPRETER=python;
     fi
   - sudo useradd test -m -s /bin/bash
   - (echo 'test'; echo 'test') | sudo passwd test
@@ -30,23 +30,35 @@ before_install:
   - sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
   - cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
 matrix:
   include:
     - python: "2.7"
       env:
         - ROBOTFRAMEWORK=3.0.2
-        - PARAMIKO=2.4.0
+        - PARAMIKO=2.4.1
     - python: "2.7"
       env:
         - JYTHON=true
         - ROBOTFRAMEWORK=3.0.2
+    - python: "3.4"
+      env:
+        - ROBOTFRAMEWORK=3.0.2
+        - PARAMIKO=2.1.5
+    - python: "3.5"
+      env:
+        - ROBOTFRAMEWORK=3.0.2
+        - PARAMIKO=1.18.5
+    - python: "3.6"
+      env:
+        - ROBOTFRAMEWORK=3.0.2
+        - PARAMIKO=1.15.0
 before_script:
   - pip install robotframework==$ROBOTFRAMEWORK
   - if [ "$JYTHON" == "true" ]; then
-        export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/trilead-ssh2-1.0.0-build221.jar;
+        export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/*;
     else
         pip install paramiko==$PARAMIKO;
     fi
 script:
-  - $PYTHON_EXE atest/run.py atest
+  - $INTERPRETER atest/run.py atest
