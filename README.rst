@@ -7,7 +7,7 @@ Introduction
 ------------
 
 SSHLibrary_ is a `Robot Framework`_ test
-library for testing SSH and SFTP.  The project is hosted on GitHub_
+library for SSH and SFTP.  The project is hosted on GitHub_
 and downloads can be found from PyPI_.
 
 SSHLibrary is operating system independent and supports Python 2.7 as well
@@ -63,10 +63,10 @@ Python or Jython::
     jython setup.py install
 
 A benefit of using pip is that it automatically installs paramiko
-and Cryptography_ modules(or PyCrypto_ if paramiko version < 2.0)
+and Cryptography_ modules (or PyCrypto_ if paramiko version < 2.0)
 that SSHLibrary requires on Python.
 
-On Jython SSHLibrary requires Trilead SSH JAR distribution. You need to download
+On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
 `Trilead SSH JAR distribution`_ and add it to CLASSPATH.
 
 Usage
@@ -103,15 +103,15 @@ together in a higher level keyword like ``Open Connection And Log In``.
 
     *** Test Cases ***
     Execute Command And Verify Output
-        [Documentation]    Execute Command can be used to ran commands on the remote machine.
+        [Documentation]    Execute Command can be used to run commands on the remote machine.
         ...                The keyword returns the standard output by default.
         ${output}=         Execute Command    echo Hello SSHLibrary!
-        Should Be Equal    ${output}    Hello SSHLibrary!
+        Should Be Equal    ${output}          Hello SSHLibrary!
 
     *** Keywords ***
     Open Connection And Log In
        Open Connection     ${HOST}
-       Login               ${USERNAME}    ${PASSWORD}
+       Login               ${USERNAME}        ${PASSWORD}
 
 Support
 -------
