@@ -12,7 +12,7 @@ and downloads can be found from PyPI_.
 
 SSHLibrary is operating system independent and supports Python 2.7 as well
 as Python 3.4 or newer. In addition to the normal Python_ interpreter,
-it works also with and `Jython 2.7`_. It works with paramiko_ 1.15.0 or newer.
+it also works with `Jython 2.7`_.
 
 The library has the following main usages:
 
@@ -44,8 +44,9 @@ The recommended installation method is using pip_::
 
     pip install --upgrade robotframework-sshlibrary
 
-Running this command installs also the latest Robot Framework and paramiko
-versions. The ``--upgrade`` option can be omitted when installing the library for the
+Running this command installs also the latest Robot Framework and paramiko_
+versions. The minimum supported paramiko version is ``1.15.0``.
+The ``--upgrade`` option can be omitted when installing the library for the
 first time.
 
 With recent versions of ``pip`` it is possible to install directly from the
@@ -61,8 +62,8 @@ Python or Jython::
     python setup.py install
     jython setup.py install
 
-A benefit of using pip is that it automatically installs paramiko_
-and Cryptography_ (or PyCrypto_ if paramiko version < 2.0) modules
+A benefit of using pip is that it automatically installs paramiko
+and Cryptography_ modules(or PyCrypto_ if paramiko version < 2.0)
 that SSHLibrary requires on Python.
 
 On Jython SSHLibrary requires Trilead SSH JAR distribution. You need to download
@@ -72,9 +73,7 @@ Usage
 -----
 
 To use SSHLibrary in Robot Framework tests, the library needs to first be
-imported using the Library setting as any other library. The library accepts
-some import time arguments, which are documented in the keyword documentation
-along with all the keywords provided by the library.
+imported using the Library setting as any other library.
 
 When using Robot Framework, it is generally recommended to write as
 easy-to-understand tests as possible. The keywords provided by
@@ -106,13 +105,13 @@ together in a higher level keyword like ``Open Connection And Log In``.
     Execute Command And Verify Output
         [Documentation]    Execute Command can be used to ran commands on the remote machine.
         ...                The keyword returns the standard output by default.
-        ${output}=    Execute Command    echo Hello SSHLibrary!
+        ${output}=         Execute Command    echo Hello SSHLibrary!
         Should Be Equal    ${output}    Hello SSHLibrary!
 
     *** Keywords ***
     Open Connection And Log In
-       Open Connection    ${HOST}
-       Login    ${USERNAME}    ${PASSWORD}
+       Open Connection     ${HOST}
+       Login               ${USERNAME}    ${PASSWORD}
 
 Support
 -------
@@ -128,10 +127,12 @@ available:
 - `Other support forums`_ including paid support
 
 .. _Robot Framework: http://robotframework.org
+.. _Robot Framework User Guide: http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries
 .. _SSHLibrary: https://github.com/robotframework/SSHLibrary
 .. _GitHub: https://github.com/robotframework/SSHLibrary
+.. _Python: http://python.org
+.. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _Robot Framework User Guide: http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries
 .. _Keyword Documentation: http://robotframework.org/SSHLibrary/SSHLibrary.html
 .. _Jython 2.7: http://jython.org
 .. _paramiko: http://www.paramiko.org
