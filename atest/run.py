@@ -17,6 +17,7 @@ import sys
 import os
 
 from os.path import abspath, dirname, exists, join, normpath
+from os import environ
 from robot import run_cli, rebot
 from robotstatuschecker import process_output
 
@@ -30,6 +31,25 @@ JAR_PATH = join(CURDIR, '..', 'lib')
 sys.path.append(join(CURDIR, '..', 'src'))
 
 COMMON_OPTS = ('--log', 'NONE', '--report', 'NONE')
+
+def check_environment():
+    global COMMON_OPTS
+    env_prefix = 'RFSL_'
+
+    var_list = [
+        'CYGWIN_HOME',
+        'KEY_USERNAME',
+        'PASSWORD',
+        'USERHOME',
+        'USERNAME',
+    ]
+
+    for var_name in var_list:
+        value = environ.get(env_prefix + var_name)
+        if value:
+            COMMON_OPTS += (
+                '--variable', var_name + ':' + value.strip()
+            )
 
 def atests(*opts):
     if os.name == 'nt':
@@ -66,6 +86,7 @@ if __name__ == '__main__':
         print(__doc__)
         rc = 251
     else:
+        check_environment()
         rc = atests(*sys.argv[1:])
     print("\nAfter status check there were %s failures." % rc)
     sys.exit(rc)
