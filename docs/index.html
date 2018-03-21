@@ -3,19 +3,32 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
-<title>SSHLibrary for Robot Framework</title>
+<title>SSHLibrary</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 <link rel="stylesheet" href="extra.css" type="text/css" />
 </head>
 <body>
-<div class="document" id="sshlibrary-for-robot-framework">
-<h1 class="title">SSHLibrary for Robot Framework</h1>
+<div class="document" id="sshlibrary">
+<h1 class="title">SSHLibrary</h1>
 
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction" id="id2">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#documentation" id="id3">Documentation</a></p></li>
+<li><p><a class="reference internal" href="#installation" id="id4">Installation</a></p></li>
+<li><p><a class="reference internal" href="#usage" id="id5">Usage</a></p></li>
+<li><p><a class="reference internal" href="#support" id="id6">Support</a></p></li>
+</ul>
+</div>
 <div class="section" id="introduction">
-<h1>Introduction</h1>
-<p>SSHLibrary is a <a class="reference external" href="http://robotframework.org">Robot Framework</a> test
-library for testing SSH and SFTP. It is operating system independent
-and works both with Python and Jython.</p>
+<h1><a class="toc-backref" href="#id2">Introduction</a></h1>
+<p><a class="reference external" href="https://github.com/robotframework/SSHLibrary">SSHLibrary</a> is a <a class="reference external" href="http://robotframework.org">Robot Framework</a> test
+library for SSH and SFTP.  The project is hosted on <a class="reference external" href="https://github.com/robotframework/SSHLibrary">GitHub</a>
+and downloads can be found from <a class="reference external" href="https://pypi.python.org/pypi/robotframework-sshlibrary">PyPI</a>.</p>
+<p>SSHLibrary is operating system independent and supports Python 2.7 as well
+as Python 3.4 or newer. In addition to the normal <a class="reference external" href="http://python.org">Python</a> interpreter,
+it also works with <a class="reference external" href="http://jython.org">Jython 2.7</a>.</p>
 <p>The library has the following main usages:</p>
 <ul class="simple">
 <li><p>Executing commands on the remote machine, either with blocking or
@@ -24,31 +37,90 @@ non-blocking behavior.</p></li>
 <li><p>Transferring files and directories over SFTP.</p></li>
 <li><p>Ensuring that files and directories exist on the remote machine.</p></li>
 </ul>
-<p>SSHLibrary is open source software licensed under <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.</p>
+<a class="reference external image-reference" href="http://www.apache.org/licenses/LICENSE-2.0"><img alt="https://img.shields.io/pypi/l/robotframework-sshlibrary.svg" src="https://img.shields.io/pypi/l/robotframework-sshlibrary.svg" /></a>
 <a class="reference external image-reference" href="http://travis-ci.org/robotframework/SSHLibrary"><img alt="https://api.travis-ci.org/robotframework/SSHLibrary.png" src="https://api.travis-ci.org/robotframework/SSHLibrary.png" /></a>
 </div>
+<div class="section" id="documentation">
+<h1><a class="toc-backref" href="#id3">Documentation</a></h1>
+<p>See <a class="reference external" href="http://robotframework.org/SSHLibrary/SSHLibrary.html">keyword documentation</a> for available keywords and more information
+about the library in general.</p>
+<p>For general information about using test libraries with Robot Framework, see
+<a class="reference external" href="http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries">Robot Framework User Guide</a>.</p>
+</div>
 <div class="section" id="installation">
-<h1>Installation</h1>
-<p>When installing SSHLibrary on UNIX-like machines with Python, the easiest
-approach is using <a class="reference external" href="http://pip-installer.org">pip</a>:</p>
-<pre class="literal-block">pip install robotframework-sshlibrary</pre>
+<h1><a class="toc-backref" href="#id4">Installation</a></h1>
+<p>The recommended installation method is using <a class="reference external" href="http://pip-installer.org">pip</a>:</p>
+<pre class="literal-block">pip install --upgrade robotframework-sshlibrary</pre>
+<p>Running this command installs also the latest Robot Framework and <a class="reference external" href="http://www.paramiko.org">paramiko</a>
+versions. The minimum supported paramiko version is <span class="docutils literal">1.15.0</span>.
+The <span class="docutils literal"><span class="pre">--upgrade</span></span> option can be omitted when installing the library for the
+first time.</p>
+<p>With recent versions of <span class="docutils literal">pip</span> it is possible to install directly from the
+<a class="reference external" href="https://github.com/robotframework/SSHLibrary">GitHub</a> repository. To install latest source from the master branch, use
+this command:</p>
+<pre class="literal-block">pip install git+https://github.com/robotframework/SSHLibrary.git</pre>
 <p>Alternatively you can download the source distribution from <a class="reference external" href="https://pypi.python.org/pypi/robotframework-sshlibrary">PyPI</a>, extract
 it, and install it using one of the following depending are you using
 Python or Jython:</p>
 <pre class="literal-block">python setup.py install
 jython setup.py install</pre>
-<p>A benefit of using pip is that it automatically installs <a class="reference external" href="http://paramiko.org">paramiko</a> and <a class="reference external" href="https://cryptography.io">Cryptography</a>
-modules that SSHLibrary requires on Python.</p>
-<p>On Jython SSHLibrary requires Trilead SSH JAR distribution.</p>
-<p>For more detailed installation instructions see <a class="reference external" href="https://github.com/robotframework/SSHLibrary/blob/master/INSTALL.rst">INSTALL.rst</a>.</p>
-<!-- Using full URL here to make it work also on PyPI -->
+<p>A benefit of using pip is that it automatically installs paramiko
+and <a class="reference external" href="https://cryptography.io">Cryptography</a> modules (or <a class="reference external" href="http://www.pycrypto.org">PyCrypto</a> if paramiko version &lt; 2.0)
+that SSHLibrary requires on Python.</p>
+<p>On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
+<a class="reference external" href="http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar">Trilead SSH JAR distribution</a> and add it to CLASSPATH.</p>
 </div>
-<div class="section" id="documentation">
-<h1>Documentation</h1>
-<p>Keyword documentation by version can be found from
-<a class="reference external" href="http://robotframework.org/SSHLibrary/">http://robotframework.org/SSHLibrary/</a>.</p>
-<p>For general information about using test libraries with Robot Framework, see
-<a class="reference external" href="http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries">Robot Framework User Guide</a>.</p>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#id5">Usage</a></h1>
+<p>To use SSHLibrary in Robot Framework tests, the library needs to first be
+imported using the Library setting as any other library.</p>
+<p>When using Robot Framework, it is generally recommended to write as
+easy-to-understand tests as possible. The keywords provided by
+SSHLibrary are pretty low level and it is typically a good idea to
+write tests using Robot Framework's higher level keywords that utilize
+SSHLibrary keywords internally. This is illustrated by the following example
+where SSHLibrary keywords like <span class="docutils literal">Open Connection</span> and <span class="docutils literal">Login</span> are grouped
+together in a higher level keyword like <span class="docutils literal">Open Connection And Log In</span>.</p>
+<pre class="code robotframework literal-block"><code><span class="generic heading">*** Settings ***</span><span class="punctuation">
+</span><span class="keyword namespace">Documentation</span><span class="punctuation">          </span><span class="literal string">This example demonstrates executing a command on a remote machine</span><span class="punctuation">
+...                    </span><span class="literal string">and getting its output.</span><span class="punctuation">
+...
+...                    </span><span class="literal string">Notice how connections are handled as part of the suite setup and</span><span class="punctuation">
+...                    </span><span class="literal string">teardown. This saves some time when executing several test cases.</span><span class="punctuation">
+
+</span><span class="keyword namespace">Library</span><span class="punctuation">                </span><span class="name namespace">SSHLibrary</span><span class="punctuation">
+</span><span class="keyword namespace">Suite Setup</span><span class="punctuation">            </span><span class="name function">Open Connection And Log In</span><span class="punctuation">
+</span><span class="keyword namespace">Suite Teardown</span><span class="punctuation">         </span><span class="name function">Close All Connections</span><span class="punctuation">
+
+</span><span class="generic heading">*** Variables ***</span><span class="punctuation">
+${</span><span class="name variable">HOST</span><span class="punctuation">}                </span><span class="literal string">localhost</span><span class="punctuation">
+${</span><span class="name variable">USERNAME</span><span class="punctuation">}            </span><span class="literal string">test</span><span class="punctuation">
+${</span><span class="name variable">PASSWORD</span><span class="punctuation">}            </span><span class="literal string">test</span><span class="punctuation">
+
+</span><span class="generic heading">*** Test Cases ***</span><span class="punctuation">
+</span><span class="generic subheading">Execute Command And Verify Output</span><span class="punctuation">
+    [</span><span class="keyword namespace">Documentation</span><span class="punctuation">]    </span><span class="literal string">Execute Command can be used to run commands on the remote machine.</span><span class="punctuation">
+    ...                </span><span class="literal string">The keyword returns the standard output by default.</span><span class="punctuation">
+    ${</span><span class="name variable">output</span><span class="punctuation">}=         </span><span class="name function">Execute Command</span><span class="punctuation">    </span><span class="literal string">echo Hello SSHLibrary!</span><span class="punctuation">
+    </span><span class="name function">Should Be Equal</span><span class="punctuation">    ${</span><span class="name variable">output</span><span class="punctuation">}          </span><span class="literal string">Hello SSHLibrary!</span><span class="punctuation">
+
+</span><span class="generic heading">*** Keywords ***</span><span class="punctuation">
+</span><span class="generic subheading">Open Connection And Log In</span><span class="punctuation">
+   </span><span class="name function">Open Connection</span><span class="punctuation">     ${</span><span class="name variable">HOST</span><span class="punctuation">}
+   </span><span class="name function">Login</span><span class="punctuation">               ${</span><span class="name variable">USERNAME</span><span class="punctuation">}        ${</span><span class="name variable">PASSWORD</span><span class="punctuation">}</span></code></pre>
+</div>
+<div class="section" id="support">
+<h1><a class="toc-backref" href="#id6">Support</a></h1>
+<p>If the provided documentation is not enough, there are various support forums
+available:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://groups.google.com/group/robotframework-users">robotframework-users</a> mailing list</p></li>
+<li><p><span class="docutils literal">#sshlibrary</span> and <span class="docutils literal"><span class="pre">#sshlibrary-dev</span></span> channels in
+Robot Framework <a class="reference external" href="https://robotframework-slack-invite.herokuapp.com">Slack community</a></p></li>
+<li><p>SSHLibrary <a class="reference external" href="https://github.com/robotframework/SSHLibrary/issues">issue tracker</a> for bug reports and concrete enhancement
+requests</p></li>
+<li><p><a class="reference external" href="http://robotframework.org/#support">Other support forums</a> including paid support</p></li>
+</ul>
 </div>
 </div>
 </body>
