@@ -69,7 +69,7 @@ class AbstractSSHClient(object):
         self.client = self._get_client()
 
     def _get_client(self):
-      raise NotImplementedError('This should be implemented in the subclass.')
+        raise NotImplementedError('This should be implemented in the subclass.')
 
     @staticmethod
     def enable_logging(path):
@@ -163,9 +163,11 @@ class AbstractSSHClient(object):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
-        if self.config.prompt:
-            return self.read_until_prompt()
-        return self.read(delay)
+        if not self.config.prompt:
+            return self.read(delay)
+        elif self.config.prompt.startswith('REGEXP:'):
+            return self.read_until_regexp(self.config.prompt[7:])
+        return self.read_until_prompt()
 
     def login_with_public_key(self, username, keyfile, password, delay=None):
         """Logs into the remote host using the public key authentication.
@@ -391,6 +393,8 @@ class AbstractSSHClient(object):
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
+        if self.config.prompt.startswith('REGEXP:'):
+            return self.read_until_regexp(self.config.prompt[7:])
         return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):

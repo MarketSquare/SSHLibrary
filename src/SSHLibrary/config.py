@@ -156,3 +156,4 @@ class NewlineEntry(Entry):
             value = value.decode('ASCII')
         value = value.upper()
         return value.replace('LF', '\n').replace('CR', '\r')
+
