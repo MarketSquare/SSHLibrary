@@ -105,7 +105,8 @@ class SSHLibrary(object):
     The latter is especially useful if the prompt changes as a result of
     the executed commands. Prompt can be set to be a regular expression
     by giving `prompt` argument a value starting with `REGEXP` and
-    the regexp inside square brackets after. e.g. `prompt=REGEXP[$|#]`.
+    the regexp inside square brackets after. e.g. `prompt=REGEXP:[$#]`.
+    The support for regular expressions is new in SSHLibrary 3.0.0.
 
     === Default encoding ===
 
@@ -335,8 +336,8 @@ class SSHLibrary(object):
         In this example, the prompt is set to `$`:
         | Library | SSHLibrary | prompt=$ |
 
-        Prompt can also be a regular expression:
-        | `Open Connection` | my.server.com | prompt=REGEXP[$|#] |
+        Prompt can also be a regular expression (since SSHLibrary 3.0.0):
+        | `Open Connection` | my.server.com | prompt=REGEXP:[$#] |
 
         Multiple settings are possible. In this example, the library is brought
         into use with [#Default newline|newline] and [#Default path separator|

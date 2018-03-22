@@ -165,8 +165,8 @@ class AbstractSSHClient(object):
     def _read_login_output(self, delay):
         if not self.config.prompt:
             return self.read(delay)
-        elif self.config.prompt.startswith('REGEXP'):
-            return self.read_until_regexp(self.config.prompt[6:])
+        elif self.config.prompt.startswith('REGEXP:'):
+            return self.read_until_regexp(self.config.prompt[7:])
         return self.read_until_prompt()
 
     def login_with_public_key(self, username, keyfile, password, delay=None):
@@ -393,8 +393,8 @@ class AbstractSSHClient(object):
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
-        if self.config.prompt.startswith('REGEXP'):
-            return self.read_until_regexp(self.config.prompt[6:])
+        if self.config.prompt.startswith('REGEXP:'):
+            return self.read_until_regexp(self.config.prompt[7:])
         return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):

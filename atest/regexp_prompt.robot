@@ -5,7 +5,7 @@ Test Teardown  Close All Connections
 
 *** Test Cases ***
 Read Until Prompt With Regexp Prompt
-    Open Connection  localhost  prompt=REGEXP[$|#]
+    Open Connection  localhost  prompt=REGEXP:[$#]
     Login  test  test
     Write  pwd
     ${output}=	Read Until Prompt
@@ -21,7 +21,7 @@ Set Client Configuration With Regexp Prompt
     Write  pwd
     ${output}=	Read Until Prompt
     Should Contain	${output}  $
-    Set Client Configuration  prompt=REGEXP[$|#]
+    Set Client Configuration  prompt=REGEXP:[$#]
     Write  export PS1\='\\u\@\\h \\W # '
     ${output1}=	Read Until Prompt
     Should Contain	${output1}  \#
