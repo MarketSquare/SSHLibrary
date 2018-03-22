@@ -157,12 +157,3 @@ class NewlineEntry(Entry):
         value = value.upper()
         return value.replace('LF', '\n').replace('CR', '\r')
 
-
-class BooleanEntry(Entry):
-    """Boolean value to be stored in :py:class:`Configuration`.
-
-    Given string will be converted to boolean using
-    :py:func:`robot.utils.is_truthy`.
-    """
-    def _parse_value(self, value):
-        return utils.is_truthy(str(value))
