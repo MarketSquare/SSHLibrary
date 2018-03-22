@@ -158,7 +158,7 @@ Documentation
       git commit -m "Generated docs for version $VERSION" docs/SSHLibrary.html
       git push
 
-   Note that this *must* be done after`setting version <Set version>`_ above
+   Note that this *must* be done after `setting version <Set version>`_ above
    or docs will have wrong version number.
 
 2. If README.rst has changed, generate project documentation based on it::
