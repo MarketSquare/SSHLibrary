@@ -1,4 +1,5 @@
-#  Copyright 2008-2013 Nokia Siemens Networks Oyj
+#  Copyright 2008-2015 Nokia Networks
+#  Copyright 2016-     Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,9 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from __future__ import with_statement
 from fnmatch import fnmatchcase
-
 import os
 import re
 import stat
@@ -25,6 +24,7 @@ import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
+from .utils import is_bytes, is_string, unicode
 
 
 class SSHClientException(RuntimeError):
@@ -70,7 +70,7 @@ class AbstractSSHClient(object):
         self.client = self._get_client()
 
     def _get_client(self):
-      raise NotImplementedError('This should be implemented in the subclass.')
+        raise NotImplementedError('This should be implemented in the subclass.')
 
     @staticmethod
     def enable_logging(path):
@@ -147,23 +147,28 @@ class AbstractSSHClient(object):
             self._login(username, password, look_for_keys=look_for_keys)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
-                                     % username)
+                                     % self._decode(username))
         return self._read_login_output(delay)
 
     def _encode(self, text):
-        if isinstance(text, str):
+        if is_bytes(text):
             return text
-        if not isinstance(text, basestring):
+        if not is_string(text):
             text = unicode(text)
         return text.encode(self.config.encoding)
+
+    def _decode(self, bytes):
+        return bytes.decode(self.config.encoding)
 
     def _login(self, username, password, look_for_keys=False):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
-        if self.config.prompt:
-            return self.read_until_prompt()
-        return self.read(delay)
+        if not self.config.prompt:
+            return self.read(delay)
+        elif self.config.prompt.startswith('REGEXP:'):
+            return self.read_until_regexp(self.config.prompt[7:])
+        return self.read_until_prompt()
 
     def login_with_public_key(self, username, keyfile, password, delay=None):
         """Logs into the remote host using the public key authentication.
@@ -194,7 +199,7 @@ class AbstractSSHClient(object):
             self._login_with_public_key(username, keyfile, password)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
-                                     "'%s'." % username)
+                                     "'%s'." % self._decode(username))
         return self._read_login_output(delay)
 
     def _verify_key_file(self, keyfile):
@@ -275,7 +280,7 @@ class AbstractSSHClient(object):
         """
         text = self._encode(text)
         if add_newline:
-            text += self.config.newline
+            text += self._encode(self.config.newline)
         self.shell.write(text)
 
     def read(self, delay=None):
@@ -299,13 +304,10 @@ class AbstractSSHClient(object):
             output += self._delayed_read(delay)
         return self._decode(output)
 
-    def _decode(self, output):
-        return output.decode(self.config.encoding)
-
     def _delayed_read(self, delay):
         delay = TimeEntry(delay).value
         max_time = time.time() + self.config.get('timeout').value
-        output = ''
+        output = b''
         while time.time() < max_time:
             time.sleep(delay)
             read = self.shell.read()
@@ -315,14 +317,14 @@ class AbstractSSHClient(object):
         return output
 
     def read_char(self):
-        """Reads a single char from the current shell.
+        """Reads a single Unicode character from the current shell.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
 
         :returns: A single char read from the output.
         """
-        server_output = ''
+        server_output = b''
         while True:
             try:
                 server_output += self.shell.read_byte()
@@ -346,7 +348,6 @@ class AbstractSSHClient(object):
 
         :returns: The read output, including the encountered `expected` text.
         """
-        expected = self._encode(expected)
         return self._read_until(lambda s: expected in s, expected)
 
     def _read_until(self, matcher, expected, timeout=None):
@@ -393,6 +394,8 @@ class AbstractSSHClient(object):
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
+        if self.config.prompt.startswith('REGEXP:'):
+            return self.read_until_regexp(self.config.prompt[7:])
         return self.read_until(self.config.prompt)
 
     def read_until_regexp(self, regexp):
@@ -412,8 +415,7 @@ class AbstractSSHClient(object):
 
         :returns: The read output up and until the `regexp` matches.
         """
-        regexp = self._encode(regexp)
-        if isinstance(regexp, basestring):
+        if is_string(regexp):
             regexp = re.compile(regexp)
         return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
@@ -427,7 +429,7 @@ class AbstractSSHClient(object):
 
         timeout is defined with :py:meth:`open_connection()`
         """
-        if isinstance(regexp, basestring):
+        if is_string(regexp):
             regexp = re.compile(regexp)
         matcher = regexp.search
         expected = regexp.pattern
@@ -436,7 +438,7 @@ class AbstractSSHClient(object):
         start_time = time.time()
         while time.time() < float(timeout.value) + start_time:
             ret += self.read_char()
-            if matcher(prefix + ret):
+            if matcher(prefix + self._encode(ret)):
                 return ret
         raise SSHClientException(
             "No match found for '%s' in %s\nOutput:\n%s"
@@ -471,14 +473,14 @@ class AbstractSSHClient(object):
         while time.time() < max_time:
             self.write(text)
             try:
-                return self._read_until(lambda s: expected in s, expected,
+                return self._read_until(lambda s: expected in self._encode(s), expected,
                                         timeout=interval.value)
             except SSHClientException:
                 pass
         raise SSHClientException("No match found for '%s' in %s."
-                                 % (expected, timeout))
+                                 % (self._decode(expected), timeout))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+    def put_file(self, source, destination='.', mode='0o744', newline=''):
         """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
         arguments.
 
@@ -487,7 +489,7 @@ class AbstractSSHClient(object):
         return self.sftp_client.put_file(source, destination, mode, newline,
                                          self.config.path_separator)
 
-    def put_directory(self, source, destination='.', mode='0744', newline='',
+    def put_directory(self, source, destination='.', mode='0o744', newline='',
                       recursive=False):
         """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
@@ -614,8 +616,9 @@ class AbstractSFTPClient(object):
     directories.
     """
 
-    def __init__(self):
-        self._homedir = self._absolute_path('.')
+    def __init__(self, encoding):
+        self._encoding = encoding
+        self._homedir = self._absolute_path(b'.')
 
     def _absolute_path(self, path):
         raise NotImplementedError
@@ -828,7 +831,7 @@ class AbstractSFTPClient(object):
             msg = "There were no source files matching '%s'." % source
             raise SSHClientException(msg)
         local_files = self._get_get_file_destinations(remote_files, destination)
-        files = zip(remote_files, local_files)
+        files = list(zip(remote_files, local_files))
         for src, dst in files:
             self._get_file(src, dst)
         return files
@@ -902,7 +905,7 @@ class AbstractSFTPClient(object):
                                    path_separator, recursive)
 
     def _put_directory(self, source, destination, mode, newline,
-                      path_separator, recursive):
+                       path_separator, recursive):
         files = []
         items = os.listdir(source)
         if items:
@@ -913,9 +916,9 @@ class AbstractSFTPClient(object):
                     files += self.put_file(local_path, remote_path, mode,
                                            newline, path_separator)
                 elif recursive and os.path.isdir(local_path):
-                    files += self._put_directory(local_path, remote_path, mode,
-                                                newline, path_separator,
-                                                recursive)
+                    files += self._put_directory(local_path, remote_path,
+                                                 mode, newline,
+                                                 path_separator, recursive)
         else:
             self._create_missing_remote_path(destination)
             files.append((source, destination))
@@ -960,7 +963,7 @@ class AbstractSFTPClient(object):
                                                                    destination,
                                                                    path_separator)
         self._create_missing_remote_path(remote_dir)
-        files = zip(local_files, remote_files)
+        files = list(zip(local_files, remote_files))
         for source, destination in files:
             self._put_file(source, destination, mode, newline)
         return files
@@ -1008,17 +1011,17 @@ class AbstractSFTPClient(object):
         return destination.rsplit(path_separator, 1)
 
     def _create_missing_remote_path(self, path):
-        if path.startswith('/'):
-            current_dir = '/'
+        if path.startswith(b'/'):
+            current_dir = b'/'
         else:
-            current_dir = self._absolute_path('.')
-        for dir_name in path.split('/'):
+            current_dir = self._absolute_path(b'.').encode(self._encoding)
+        for dir_name in path.split(b'/'):
             if dir_name:
                 current_dir = posixpath.join(current_dir, dir_name)
             try:
                 self._client.stat(current_dir)
             except:
-                self._client.mkdir(current_dir, 0744)
+                self._client.mkdir(current_dir, 0o744)
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
@@ -1029,7 +1032,7 @@ class AbstractSFTPClient(object):
                 if not data:
                     break
                 if newline:
-                    data = re.sub(r'(\r\n|\r|\n)', newline, data)
+                    data = re.sub(br'(\r\n|\r|\n)', newline.encode(self._encoding), data)
                 self._write_to_remote_file(remote_file, data, position)
                 position += len(data)
             self._close_remote_file(remote_file)

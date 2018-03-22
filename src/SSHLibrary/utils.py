@@ -13,4 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-VERSION = '3.0.dev1'
+from robot.utils import (is_bytes, is_list_like, is_string, is_unicode,
+                         plural_or_not, secs_to_timestr, timestr_to_secs,
+                         ConnectionCache)
+
+
+try:
+    unicode = unicode
+except NameError:
+    unicode = str

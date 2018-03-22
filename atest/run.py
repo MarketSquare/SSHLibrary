@@ -73,5 +73,5 @@ if __name__ == '__main__':
         rc = 251
     else:
         rc = atests(*sys.argv[1:])
-    print "\nAfter status check there were %s failures." % rc
+    print("\nAfter status check there were %s failures." % rc)
     sys.exit(rc)
