@@ -21,6 +21,7 @@ import stat
 import time
 import glob
 import posixpath
+import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
@@ -990,9 +991,7 @@ class AbstractSFTPClient(object):
 
     def _format_destination_path(self, destination):
         destination = destination.replace('\\', '/')
-        colon_mark = ':/'
-        if colon_mark in destination:
-                destination = '/' + destination.split(colon_mark)[-1]
+        destination = ntpath.splitdrive(destination)[-1]
         return destination
 
     def _parse_path_elements(self, destination, path_separator):
