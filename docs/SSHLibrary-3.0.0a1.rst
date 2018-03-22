@@ -1,23 +1,16 @@
-==================
-SSHLibrary 3.0.0a1
-==================
+========================
+SSHLibrary 3.0.0 alpha 1
+========================
 
 
 .. default-role:: code
 
 
 SSHLibrary_ is a `Robot Framework`_ test library for SSH and SFTP.
-SSHLibrary 3.0.0a1 is a new release with
-**UPDATE** enhancements and bug fixes.
+SSHLibrary 3.0.0 alpha 1 is a new release with Python 3 support and
+few smaller fixes and enhancements.
 All issues targeted for SSHLibrary v3.0.0 can be found from
 the `issue tracker`_.
-
-**REMOVE the previous note about all issues in the tracker with final
-releases or otherwise if release notes contain all issues.**
-
-**ADD more intro stuff if needed...**
-
-**REMOVE ``--pre`` from the next command with final releases.**
 
 If you have pip_ installed, just run
 
@@ -50,14 +43,21 @@ SSHLibrary 3.0.0a1 was released on Thursday March 22, 2018.
 Most important enhancements
 ===========================
 
-**EXPLAIN** or remove these.
-
-- Python 3 compatibility (`#219`_, alpha 1)
+The main new feature in SSHLibrary 3.0 is the support for Python 3 (`#219`_).
 
 Acknowledgements
 ================
 
-**UPDATE** based on AUTHORS.txt or similar.
+Thanks to `@rainmanwy <https://github.com/rainmanwy>`_ for the Python 3
+pull request (`#207`_) and also others who provided earlier PRs related
+to it.
+
+Big thanks also to `Mihai Pârvu <https://github.com/mihaiparvu>`_,
+`Oana Brinzan <https://github.com/oanab11>`_ and
+`@andreeakovacs <https://github.com/andreeakovacs>`_ for their work and
+especially for promising to work as SSHLibrary maintainers!
+
+.. _#207: https://github.com/robotframework/SSHLibrary/pull/207
 
 Full list of fixes and enhancements
 ===================================
