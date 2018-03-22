@@ -1,4 +1,19 @@
-from robot import utils
+#  Copyright 2008-2015 Nokia Networks
+#  Copyright 2016-     Robot Framework Foundation
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from .utils import is_bytes, secs_to_timestr, timestr_to_secs
 
 
 class ConfigurationException(Exception):
@@ -27,7 +42,7 @@ class Configuration(object):
         self._config = entries
 
     def __str__(self):
-        return '\n'.join(['%s=%s' % (k, v) for k, v in self._config.items()])
+        return '\n'.join('%s=%s' % (k, v) for k, v in self._config.items())
 
     def update(self, **entries):
         """Update configuration entries.
@@ -58,6 +73,7 @@ class Entry(object):
 
     :param:`initial` the initial value of this entry.
     """
+
     def __init__(self, initial=None):
         self._value = self._create_value(initial)
 
@@ -71,6 +87,9 @@ class Entry(object):
     def set(self, value):
         self._value = self._parse_value(value)
 
+    def _parse_value(self, value):
+        raise NotImplementedError
+
     def _create_value(self, value):
         if value is None:
             return None
@@ -79,6 +98,7 @@ class Entry(object):
 
 class StringEntry(Entry):
     """String value to be stored in :py:class:`Configuration`."""
+
     def _parse_value(self, value):
         return str(value)
 
@@ -87,6 +107,7 @@ class IntegerEntry(Entry):
     """Integer value to be stored in stored in :py:class:`Configuration`.
 
     Given value is converted to string using `int()`.
+
     """
     def _parse_value(self, value):
         return int(value)
@@ -97,13 +118,14 @@ class TimeEntry(Entry):
 
     Given time string will be converted to seconds using
     :py:func:`robot.utils.timestr_to_secs`.
+
     """
     def _parse_value(self, value):
         value = str(value)
-        return utils.timestr_to_secs(value) if value else None
+        return timestr_to_secs(value) if value else None
 
     def __str__(self):
-        return utils.secs_to_timestr(self._value)
+        return secs_to_timestr(self._value)
 
 
 class LogLevelEntry(Entry):
@@ -128,8 +150,11 @@ class NewlineEntry(Entry):
         * 'LF' -> '\n'
         * 'CR' -> '\r'
     """
+
     def _parse_value(self, value):
-        value = str(value).upper()
+        if is_bytes(value):
+            value = value.decode('ASCII')
+        value = value.upper()
         return value.replace('LF', '\n').replace('CR', '\r')
 
 
