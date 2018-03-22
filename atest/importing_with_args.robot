@@ -1,6 +1,6 @@
 *** Settings ***
 Force Tags  pybot   jybot
-Library     SSHLibrary  3 minutes 30 seconds  ${NONE}  >>  ${NONE}  ${NONE}  ${NONE}
+Library     SSHLibrary  3 minutes 30 seconds  ${NONE}  >>       ${NONE}  ${NONE}
 ...                                           ${NONE}  ${NONE}  \\
 
 *** Test Cases ***
