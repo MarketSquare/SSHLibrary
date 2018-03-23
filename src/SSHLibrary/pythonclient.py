@@ -77,7 +77,9 @@ class PythonSSHClient(AbstractSSHClient):
         try:
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
-                                allow_agent=allow_agent, look_for_keys=look_for_keys, timeout=float(self.config.timeout))
+                                allow_agent=allow_agent,
+                                look_for_keys=look_for_keys,
+                                timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
 
