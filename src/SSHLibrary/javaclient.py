@@ -1,4 +1,5 @@
-#  Copyright 2008-2013 Nokia Siemens Networks Oyj
+#  Copyright 2008-2015 Nokia Networks
+#  Copyright 2016-     Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -104,7 +105,7 @@ class SFTPClient(AbstractSFTPClient):
     def __init__(self, ssh_client, encoding):
         self._client = SFTPv3Client(ssh_client)
         self._client.setCharset(encoding)
-        super(SFTPClient, self).__init__()
+        super(SFTPClient, self).__init__(encoding)
 
     def _list(self, path):
         for item in self._client.ls(path):
@@ -176,4 +177,5 @@ class RemoteCommand(AbstractCommand):
         return result
 
     def _execute(self):
-        self._shell.execCommand(self._command)
+        command = self._command.decode(self._encoding)
+        self._shell.execCommand(command)
