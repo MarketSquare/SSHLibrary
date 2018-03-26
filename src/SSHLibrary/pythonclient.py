@@ -216,12 +216,12 @@ class RemoteCommand(AbstractCommand):
         self._shell.get_pty()
         self._shell.exec_command(self._command)
         if sudo_password is not None:
-           stdin = self._shell.makefile('wb', -1)
-           self.send_password(sudo_password, stdin)
-           while self._shell_open():
-              self.try_again_password(sudo_password, stdin)
+            stdin = self._shell.makefile('wb', -1)
+            self.send_password(sudo_password, stdin)
+            while self._shell_open():
+                self.try_again_password(sudo_password, stdin)
 
     def try_again_password(self, sudo_password, stdin):
         self.send_password(sudo_password, stdin)
         while self._shell_open():
-           self.try_again_password(sudo_password, stdin)
+            self.try_again_password(sudo_password, stdin)
