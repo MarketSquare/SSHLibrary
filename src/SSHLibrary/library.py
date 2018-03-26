@@ -848,7 +848,7 @@ class SSHLibrary(object):
             raise RuntimeError(e)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  pwd_sudo=None):
+                        return_rc=False, sudo=False,  sudo_password=None):
         """Executes `command` on the remote machine and returns its outputs.
 
         This keyword executes the `command` and returns after the execution
@@ -872,8 +872,8 @@ class SSHLibrary(object):
         | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
 
-        Arguments sudo and pwd_sudo are used for executing commands within a sudo session.
-        | Execute Command  | pwd      | sudo=True       |  pwd_sudo=test
+        Arguments `sudo` and `sudo_password` are used for executing commands within a sudo session.
+        | Execute Command  | pwd      | sudo=True       |  sudo_password=test
 
         The `command` is always executed in a new shell. Thus possible changes
         to the environment (e.g. changing working directory) are not visible
@@ -889,16 +889,16 @@ class SSHLibrary(object):
 
         This keyword logs the executed command and its exit status with
         log level `INFO`.
+
+        `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
         """
         self._info("Executing command '%s'." % command)
-        if sudo and pwd_sudo is None:
-            raise AssertionError("Password needed for sudo session!")
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, pwd_sudo)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command, sudo=False,  pwd_sudo=None):
+    def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts execution of the `command` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the `command`
@@ -922,19 +922,19 @@ class SSHLibrary(object):
         | ${pwd}=         | Read Command Output |
         | Should Be Equal | ${pwd}              | /home/johndoe |
 
-        Arguments sudo and pwd_sudo are used for executing commands within a sudo session.
-        | Start Command   | pwd                 | sudo=True     |  pwd_sudo=test
+        Arguments `sudo` and `sudo_password` are used for executing commands within a sudo session.
+        | Start Command   | pwd                 | sudo=True     |  sudo_password=test
 
         `Write` and `Read` can be used for
         [#Interactive shells|running multiple commands in the same shell].
 
         This keyword logs the started command with log level `INFO`.
+
+        `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
         """
         self._info("Starting command '%s'." % command)
         self._last_command = command
-        if sudo and pwd_sudo is None:
-            raise AssertionError("Password needed for sudo session!")
-        self.current.start_command(command, sudo, pwd_sudo)
+        self.current.start_command(command, sudo, sudo_password)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):

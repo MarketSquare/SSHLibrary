@@ -2,19 +2,19 @@
 Library     SSHLibrary  WITH NAME  SSH
 
 *** Variables ***
-${USERNAME}               test
-${PASSWORD}               test
-${HOST}                   localhost
-${PROMPT}                 $
-${REMOTE TEST ROOT NAME}  robot-testdir
-${REMOTE HOME TEST}       /home/test
-${REMOTE TEST ROOT}       ${REMOTE HOME TEST}${/}${REMOTE TEST ROOT NAME}
-${CYGWIN HOME}            c:/cygwin64
+${USERNAME}                  test
+${PASSWORD}                  test
+${HOST}                      localhost
+${PROMPT}                    $
+${REMOTE TEST ROOT NAME}     robot-testdir
+${REMOTE HOME TEST}          /home/test/
+${REMOTE TEST ROOT}          ${REMOTE HOME TEST}${REMOTE TEST ROOT NAME}
+${CYGWIN HOME}               c:/cygwin64
 ${REMOTE WINDOWS TEST ROOT}  ${CYGWIN HOME}${REMOTE TEST ROOT}
-${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
-${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
-${KEY USERNAME}      testkey
-${KEY}               ${KEY DIR}${/}id_rsa
+${LOCAL TESTDATA}            ${CURDIR}${/}..${/}testdata
+${KEY DIR}                   ${LOCAL TESTDATA}${/}keyfiles
+${KEY USERNAME}              testkey
+${KEY}                       ${KEY DIR}${/}id_rsa
 
 *** Keywords ***
 Login As Valid User

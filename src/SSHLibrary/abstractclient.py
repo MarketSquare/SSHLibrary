@@ -214,7 +214,7 @@ class AbstractSSHClient(object):
     def _login_with_public_key(self, username, keyfile, password):
         raise NotImplementedError
 
-    def execute_command(self, command, sudo=False,  pwd_sudo=None):
+    def execute_command(self, command, sudo=False,  sudo_password=None):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -225,13 +225,17 @@ class AbstractSSHClient(object):
 
         :param str command: The command to be executed on the remote host.
 
+        :param sudo
+         and
+        :param sudo_password are used for executing commands within a sudo session.
+
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        self.start_command(command, sudo, pwd_sudo)
+        self.start_command(command, sudo, sudo_password)
         return self.read_command_output()
 
-    def start_command(self, command, sudo=False,  pwd_sudo=None):
+    def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -244,11 +248,15 @@ class AbstractSSHClient(object):
         to get the output of the previous started command.
 
         :param str command: The command to be started on the remote host.
+
+        :param sudo
+         and
+        :param sudo_password are used for executing commands within a sudo session.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command, sudo, pwd_sudo))
+        self._started_commands.append(self._start_command(command, sudo, sudo_password))
 
-    def _start_command(self, command, sudo=False,  pwd_sudo=None):
+    def _start_command(self, command, sudo=False, sudo_password=None):
         raise NotImplementedError
 
     def read_command_output(self):
@@ -1061,15 +1069,15 @@ class AbstractCommand(object):
         self._encoding = encoding
         self._shell = None
 
-    def run_in(self, shell, sudo=False,  pwd_sudo=None):
+    def run_in(self, shell, sudo=False,  sudo_password=None):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
         """
         self._shell = shell
-        self._execute(sudo, pwd_sudo)
+        self._execute(sudo, sudo_password)
 
-    def _execute(self, sudo=False,  pwd_sudo=None):
+    def _execute(self, sudo=False,  sudo_password=None):
         raise NotImplementedError
 
     def read_outputs(self):
@@ -1080,13 +1088,13 @@ class AbstractCommand(object):
         """
         raise NotImplementedError
 
-    def send_password(self, pwd_sudo, stdin):
+    def send_password(self, sudo_password, stdin):
         """Sends password to the stdin stream for sudo commands.
 
-       :param pwd_sudo: The password of the user.
+       :param sudo_password: The password of the user.
        :param stdin: Standard input stream
        """
-        stdin.write(pwd_sudo +'\n')
+        stdin.write(sudo_password + '\n')
         stdin.flush()
         time.sleep(1)
 

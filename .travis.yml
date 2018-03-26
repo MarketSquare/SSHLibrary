@@ -22,6 +22,7 @@ before_install:
   - sudo useradd test -m -s /bin/bash
   - (echo 'test'; echo 'test') | sudo passwd test
   - sudo -E su test -c "echo $'export PS1=\'\u@travis \W \$ \'' >> /home/test/.bashrc"
+  - sudo adduser test sudo
   - sudo useradd -m testkey -s /bin/bash
   - sudo -E su testkey -c "echo $'export PS1=\'\u@travis \W \$ \'' >> /home/testkey/.bashrc"
   - sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"

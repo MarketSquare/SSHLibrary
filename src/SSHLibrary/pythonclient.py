@@ -28,6 +28,7 @@ from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
 from .utils import is_bytes, is_list_like, is_unicode
+from robot.utils import is_truthy
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -81,13 +82,13 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _start_command(self, command, sudo=False,  pwd_sudo=None):
+    def _start_command(self, command, sudo=False,  sudo_password=None):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session()
-        cmd.run_in(new_shell, sudo, pwd_sudo)
+        cmd.run_in(new_shell, sudo, sudo_password)
         return cmd
 
     def _create_sftp_client(self):
@@ -204,23 +205,23 @@ class RemoteCommand(AbstractCommand):
                 self._shell.eof_sent or
                 not self._shell.active)
 
-    def _execute(self, sudo=False, pwd_sudo=None):
-        if sudo:
-            self._execute_with_sudo(self._command, pwd_sudo)
+    def _execute(self, sudo=False, sudo_password=None):
+        if is_truthy(sudo):
+            self._execute_with_sudo(self._command, sudo_password)
         else:
             self._shell.exec_command(self._command)
 
-    def _execute_with_sudo(self, command, pwd_sudo=None):
+    def _execute_with_sudo(self, command, sudo_password=None):
         self._command = 'sudo ' + command
         self._shell.get_pty()
         self._shell.exec_command(self._command)
-        if pwd_sudo is not None:
+        if sudo_password is not None:
            stdin = self._shell.makefile('wb', -1)
-           self.send_password(pwd_sudo, stdin)
+           self.send_password(sudo_password, stdin)
            while self._shell_open():
-              self.try_again_password(pwd_sudo, stdin)
+              self.try_again_password(sudo_password, stdin)
 
-    def try_again_password(self, pwd_sudo, stdin):
-        self.send_password(pwd_sudo, stdin)
+    def try_again_password(self, sudo_password, stdin):
+        self.send_password(sudo_password, stdin)
         while self._shell_open():
-           self.try_again_password(pwd_sudo, stdin)
+           self.try_again_password(sudo_password, stdin)
