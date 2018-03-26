@@ -31,7 +31,6 @@ sys.path.append(join(CURDIR, '..', 'src'))
 
 COMMON_OPTS = ('--log', 'NONE', '--report', 'NONE')
 
-
 def atests(*opts):
     if os.name == 'java':
         os_includes = get_os_includes(os._name)
@@ -44,14 +43,12 @@ def atests(*opts):
         process_output(join(OUTPUT_PYTHON, 'output.xml'))
         return rebot(join(OUTPUT_PYTHON, 'output.xml'), outputdir=OUTPUT_PYTHON)
 
-
 def get_os_includes(operating_system):
-        if operating_system == 'nt':
-            return ('--include', 'windows',
-                    '--exclude', 'linux')
-        return ('--include', 'linux',
-                '--exclude', 'windows')
-
+    if operating_system == 'nt':
+        return ('--include', 'windows',
+                '--exclude', 'linux')
+    return ('--include', 'linux',
+            '--exclude', 'windows')
 
 def python(*opts):
     try:
@@ -76,5 +73,5 @@ if __name__ == '__main__':
         rc = 251
     else:
         rc = atests(*sys.argv[1:])
-    print "\nAfter status check there were %s failures." % rc
+    print("\nAfter status check there were %s failures." % rc)
     sys.exit(rc)

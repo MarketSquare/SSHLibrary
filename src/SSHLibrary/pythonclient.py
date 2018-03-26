@@ -1,4 +1,5 @@
-#  Copyright 2008-2013 Nokia Siemens Networks Oyj
+#  Copyright 2008-2015 Nokia Networks
+#  Copyright 2016-     Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -11,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import time
 import ntpath
 
@@ -25,6 +27,7 @@ except ImportError:
 from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
+from .utils import is_bytes, is_list_like, is_unicode
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -39,10 +42,10 @@ paramiko.transport.Transport.start_client = _custom_start_client
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
 def _custom_log(self, level, msg, *args):
     escape = lambda s: s.replace('%', '%%')
-    if isinstance(msg, basestring):
-        msg = escape(msg)
-    else:
+    if is_list_like(msg):
         msg = [escape(m) for m in msg]
+    else:
+        msg = escape(msg)
     return self._orig_log(level, msg, *args)
 
 paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
@@ -101,7 +104,7 @@ class Shell(AbstractShell):
         self._shell = client.invoke_shell(term_type, term_width, term_height)
 
     def read(self):
-        data = ''
+        data = b''
         while self._output_available():
             data += self._shell.recv(4096)
         return data
@@ -109,7 +112,7 @@ class Shell(AbstractShell):
     def read_byte(self):
          if self._output_available():
             return self._shell.recv(1)
-         return ''
+         return b''
 
     def _output_available(self):
         return self._shell.recv_ready()
@@ -122,15 +125,14 @@ class SFTPClient(AbstractSFTPClient):
 
     def __init__(self, ssh_client, encoding):
         self._client = ssh_client.open_sftp()
-        self._encoding = encoding
-        super(SFTPClient, self).__init__()
+        super(SFTPClient, self).__init__(encoding)
 
     def _list(self, path):
         path = path.encode(self._encoding)
         for item in self._client.listdir_attr(path):
             filename = item.filename
-            if not isinstance(filename, unicode):
-                filename = unicode(filename, self._encoding)
+            if is_bytes(filename):
+                filename = filename.decode(self._encoding)
             yield SFTPFileInfo(filename, item.st_mode)
 
     def _stat(self, path):
@@ -139,7 +141,8 @@ class SFTPClient(AbstractSFTPClient):
         return SFTPFileInfo('', attributes.st_mode)
 
     def _create_missing_remote_path(self, path):
-        path = path.encode(self._encoding)
+        if is_unicode(path):
+            path = path.encode(self._encoding)
         return super(SFTPClient, self)._create_missing_remote_path(path)
 
     def _create_remote_file(self, destination, mode):
@@ -160,11 +163,10 @@ class SFTPClient(AbstractSFTPClient):
         self._client.get(remote_path, local_path)
 
     def _absolute_path(self, path):
-        path = path.encode(self._encoding)
         if not self._is_windows_path(path):
             path = self._client.normalize(path)
-        if not isinstance(path, unicode):
-            path = unicode(path, self._encoding)
+        if is_bytes(path):
+            path = path.decode(self._encoding)
         return path
 
     def _is_windows_path(self, path):
@@ -186,8 +188,8 @@ class RemoteCommand(AbstractCommand):
         while self._shell_open():
             self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts)
             time.sleep(0.01) # lets not be so busy
-        stdout = (''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
-        stderr = (''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
+        stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
+        stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
         return stderr, stdout
 
     def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts):

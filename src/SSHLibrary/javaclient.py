@@ -1,4 +1,5 @@
-#  Copyright 2008-2013 Nokia Siemens Networks Oyj
+#  Copyright 2008-2015 Nokia Networks
+#  Copyright 2016-     Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -27,14 +28,14 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
-import time
+from robot.utils import is_truthy
 
 
 class JavaSSHClient(AbstractSSHClient):
 
     def _get_client(self):
         client = Connection(self.config.host, self.config.port)
-        timeout = int(float(self.config.timeout)*1000)
+        timeout = int(float(self.config.timeout) * 1000)
         client.connect(None, timeout, timeout)
         return client
 
@@ -57,16 +58,16 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def _start_command(self, command, sudo=False,  pwd_sudo=None):
+    def _start_command(self, command, sudo=False, sudo_password=None):
         new_shell = self.client.openSession()
-        if sudo:
+        if is_truthy(sudo):
             cmd = RemoteSudoCommand(command, self.config.encoding)
             new_shell.requestPTY(self.config.term_type,
                                  self.config.width, self.config.height, 0, 0, None)
         else:
             cmd = RemoteCommand(command, self.config.encoding)
 
-        cmd.run_in(new_shell, sudo,  pwd_sudo)
+        cmd.run_in(new_shell, sudo, sudo_password)
         return cmd
 
     def _create_sftp_client(self):
@@ -94,9 +95,9 @@ class Shell(AbstractShell):
         return ''
 
     def read_byte(self):
-         if self._output_available():
-             return chr(self._stdout.read())
-         return ''
+        if self._output_available():
+            return chr(self._stdout.read())
+        return ''
 
     def _output_available(self):
         return self._stdout.available()
@@ -111,7 +112,7 @@ class SFTPClient(AbstractSFTPClient):
     def __init__(self, ssh_client, encoding):
         self._client = SFTPv3Client(ssh_client)
         self._client.setCharset(encoding)
-        super(SFTPClient, self).__init__()
+        super(SFTPClient, self).__init__(encoding)
 
     def _list(self, path):
         for item in self._client.ls(path):
@@ -182,13 +183,14 @@ class RemoteCommand(AbstractCommand):
             line = reader.readLine()
         return result
 
-    def _execute(self, sudo=False,  pwd_sudo=None):
-        self._shell.execCommand(self._command)
+    def _execute(self, sudo=False, sudo_password=None):
+        command = self._command.decode(self._encoding)
+        self._shell.execCommand(command)
 
 
 class RemoteSudoCommand(RemoteCommand):
-    try_again_pswd_msg = 'Sorry, try again.'
-    incorrect_pswd_msg = '3 incorrect password attempts'
+    try_again_msg = 'Sorry, try again.'
+    incorrect_password_msg = '3 incorrect password attempts'
 
     def __init__(self, command, encoding):
         super(RemoteSudoCommand, self).__init__(command, encoding)
@@ -200,17 +202,17 @@ class RemoteSudoCommand(RemoteCommand):
         self._shell.close()
         return self._stdout, stderr, rc
 
-    def _execute(self, sudo=False, pwd_sudo=None):
-        self._command = 'sudo ' + self._command
-        self._shell.execCommand(self._command)
-        if pwd_sudo is not None:
+    def _execute(self, sudo=False, sudo_password=None):
+        command = 'sudo ' + self._command.decode(self._encoding)
+        self._shell.execCommand(command)
+        if sudo_password is not None:
             stdin = self._shell.getStdin()
-            self.send_password(pwd_sudo, stdin)
+            self.send_password(sudo_password, stdin)
             stdout = self._shell.getStdout()
             reader = BufferedReader(InputStreamReader(StreamGobbler(stdout),
                                                       self._encoding))
             if self.new_password_needed(reader):
-                self.try_again_password(pwd_sudo, stdin, reader)
+                self.try_again_password(sudo_password, stdin, reader)
 
     def new_password_needed(self, reader):
         line = reader.readLine()
@@ -221,21 +223,21 @@ class RemoteSudoCommand(RemoteCommand):
             if self.is_try_again_msg(line):
                 self._stdout += line + '\n'
                 return True
-            if self.is_incorrect_pwd_msg(line):
+            if self.is_incorrect_password_msg(line):
                 self._stdout += line + '\n'
                 return False
         return False
 
     def is_password_needed_text(self, line):
-        return line is not None and self.try_again_pswd_msg not in line and self.incorrect_pswd_msg not in line
+        return line is not None and self.try_again_msg not in line and self.incorrect_password_msg not in line
 
-    def try_again_password(self, pwd_sudo, stdin, reader):
-        self.send_password(pwd_sudo, stdin)
+    def try_again_password(self, sudo_password, stdin, reader):
+        self.send_password(sudo_password, stdin)
         if self.new_password_needed(reader):
-            self.try_again_password(pwd_sudo, stdin, reader)
+            self.try_again_password(sudo_password, stdin, reader)
 
     def is_try_again_msg(self, line):
-        return line is not None and self.try_again_pswd_msg in line
+        return line is not None and self.try_again_msg in line
 
-    def is_incorrect_pwd_msg(self, line):
-        return line is not None and self.incorrect_pswd_msg in line
+    def is_incorrect_password_msg(self, line):
+        return line is not None and self.incorrect_password_msg in line
