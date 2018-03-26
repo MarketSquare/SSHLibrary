@@ -19,10 +19,10 @@ before_install:
     else
         export INTERPRETER=python;
     fi
-  - sudo useradd test -m -s /bin/bash
+  - sudo useradd test -m -s /bin/bash -G travis
   - (echo 'test'; echo 'test') | sudo passwd test
   - sudo -E su test -c "echo $'export PS1=\'\u@travis \W \$ \'' >> /home/test/.bashrc"
-  - sudo adduser test sudo
+  - sudo sh -c "echo 'test   ALL=(ALL:ALL) PASSWD:ALL' > /etc/sudoers.d/passworded"
   - sudo useradd -m testkey -s /bin/bash
   - sudo -E su testkey -c "echo $'export PS1=\'\u@travis \W \$ \'' >> /home/testkey/.bashrc"
   - sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"
