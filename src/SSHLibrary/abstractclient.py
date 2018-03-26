@@ -1073,6 +1073,10 @@ class AbstractCommand(object):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
+
+        :param sudo
+         and
+        :param sudo_password are used for executing commands within a sudo session.
         """
         self._shell = shell
         self._execute(sudo, sudo_password)

@@ -212,7 +212,7 @@ class RemoteCommand(AbstractCommand):
             self._shell.exec_command(self._command)
 
     def _execute_with_sudo(self, command, sudo_password=None):
-        self._command = 'sudo ' + command
+        self._command = 'sudo ' + command.decode(self._encoding)
         self._shell.get_pty()
         self._shell.exec_command(self._command)
         if sudo_password is not None:

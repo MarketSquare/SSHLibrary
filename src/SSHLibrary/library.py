@@ -930,7 +930,8 @@ class SSHLibrary(object):
 
         This keyword logs the started command with log level `INFO`.
 
-        `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
+        `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0. Due to different
+        permission elevation in Cygwin, these two arguments will not work under Windows.
         """
         self._info("Starting command '%s'." % command)
         self._last_command = command
