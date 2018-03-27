@@ -30,6 +30,10 @@ from .abstractclient import (AbstractShell, AbstractSSHClient,
                              SSHClientException, SFTPFileInfo)
 
 
+class JavaSSHClientException(Exception):
+    pass
+
+
 class JavaSSHClient(AbstractSSHClient):
 
     def _get_client(self):
@@ -48,6 +52,9 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _login_with_public_key(self, username, key_file, password,
                                allow_agent='ignored', look_for_keys='ignored'):
+        if allow_agent or look_for_keys:
+            raise JavaSSHClientException("Arguments 'allow_agent' and "
+                                         "'look_for_keys' do not work with Jython.")
         try:
             success = self.client.authenticateWithPublicKey(username,
                                                             File(key_file),

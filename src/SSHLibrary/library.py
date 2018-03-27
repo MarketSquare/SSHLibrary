@@ -25,6 +25,7 @@ from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
 from .utils import ConnectionCache, is_string, plural_or_not
+from robot.utils import is_truthy
 from .version import VERSION
 
 
@@ -832,17 +833,16 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
-        Argument `delay` was added in SSHLibrary 2.0.
-
-        To provide SSH agent support, `allow_agent` and `look_for_keys` were introduced in
-        SSHLibrary 3.0.0.
         `allow_agent` enables the connection to the SSH agent.
         `look_for_keys` enables the searching for discoverable private key files in `~/.ssh/`.
-        `allow_agent` and `look_for_keys` were not available prior to SSHLibrary 3.0.0 and are
-         ignored by Jython.
+
+        Argument `delay` was added in SSHLibrary 2.0.
+        Arguments `allow_agent` and `look_for_keys` were added in SSHLibrary 3.0.0 and
+        do not work when using Jython.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password, allow_agent, look_for_keys, delay)
+                           keyfile, password, is_truthy(allow_agent),
+                           is_truthy(look_for_keys), delay)
 
     def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."

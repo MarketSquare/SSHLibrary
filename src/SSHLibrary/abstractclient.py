@@ -135,7 +135,7 @@ class AbstractSSHClient(object):
 
         :param bool look_for_keys: Whether the login method should look for
             available public keys for login. This will also enable ssh agent.
-            This option is ignored by Jython.
+            This option is ignored when using Jython.
 
         :raises SSHClientException: If logging in failed.
 
@@ -187,10 +187,11 @@ class AbstractSSHClient(object):
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
         :param boolean allow_agent: enables the connection to the SSH agent.
-            This option is ignored by Jython.
+            This option does not work when using Jython.
 
         :param boolean look_for_keys: enables the searching for discoverable
-            private key files in ~/.ssh/. This option is also ignored by Jython.
+            private key files in ~/.ssh/. This option also does not work when
+            using Jython.
 
         :param str delay: The `delay` passed to :py:meth:`read` for reading
             the output after logging in. The delay is only effective if
