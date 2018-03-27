@@ -850,8 +850,6 @@ class SSHLibrary(object):
     def get_pre_login_banner(self, host=None, port=None):
         """
          Returns the banner supplied by the server upon connect.
-         *Note:* This keyword only works with Python, i.e. when executing tests
-         with `pybot`.
          
          There are 2 ways of getting banner information:
          - independent of any connection:
@@ -864,6 +862,8 @@ class SSHLibrary(object):
          | Login            | ${USERNAME}          | ${PASSWORD}              |
          | ${banner} =      | Get Pre Login Banner |
          | Should Be Equal  | ${banner}            | Testing pre-login banner |
+
+         New in SSHLibrary 3.0.0. This keyword does not work with Jython.
 +        """
         if self.current:
             if host == self.current.config.host or not host:
