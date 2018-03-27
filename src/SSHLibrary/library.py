@@ -1,4 +1,5 @@
-#  Copyright 2008-2013 Nokia Siemens Networks Oyj
+#  Copyright 2008-2015 Nokia Networks
+#  Copyright 2016-     Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,21 +13,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import print_function
+
 try:
     from robot.api import logger
 except ImportError:
     logger = None
-from robot.utils import ConnectionCache
 
 from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
+from .utils import ConnectionCache, is_string, plural_or_not
 from .version import VERSION
 
-__version__ = VERSION
 
-plural_or_not = lambda count: '' if count == 1 else 's'
+__version__ = VERSION
 
 
 class SSHLibrary(object):
@@ -98,6 +100,13 @@ class SSHLibrary(object):
     to ease reading output from the server after using `Write`. In addition to
     that, `Login` and `Login With Public Key` can read the server output more
     efficiently when the prompt is set.
+
+    Prompt can be specified either as a normal string or a regular expression.
+    The latter is especially useful if the prompt changes as a result of
+    the executed commands. Prompt can be set to be a regular expression
+    by giving `prompt` argument a value starting with `REGEXP` and
+    the regexp inside square brackets after. e.g. `prompt=REGEXP:[$#]`.
+    The support for regular expressions is new in SSHLibrary 3.0.0.
 
     === Default encoding ===
 
@@ -326,6 +335,9 @@ class SSHLibrary(object):
         must be explicitly set to use `Read Until Prompt`.
         In this example, the prompt is set to `$`:
         | Library | SSHLibrary | prompt=$ |
+
+        Prompt can also be a regular expression (since SSHLibrary 3.0.0):
+        | `Open Connection` | my.server.com | prompt=REGEXP:[$#] |
 
         Multiple settings are possible. In this example, the library is brought
         into use with [#Default newline|newline] and [#Default path separator|
@@ -706,12 +718,12 @@ class SSHLibrary(object):
         if logger:
             logger.write(msg, level)
         else:
-            print '*%s* %s' % (level, msg)
+            print('*%s* %s' % (level, msg))
 
     def _active_loglevel(self, level):
         if level is None:
             return self._config.loglevel
-        if isinstance(level, basestring) and \
+        if is_string(level) and \
                 level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
             return level.upper()
         raise AssertionError("Invalid log level '%s'." % level)
@@ -832,7 +844,7 @@ class SSHLibrary(object):
             login_output = login_method(username, *args)
             self._log('Read output: %s' % login_output)
             return login_output
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
 
     def get_pre_login_banner(self, host=None, port=None):
@@ -986,12 +998,12 @@ class SSHLibrary(object):
                                            return_rc)
         try:
             stdout, stderr, rc = self.current.read_command_output()
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def _legacy_output_options(self, stdout, stderr, rc):
-        if not isinstance(stdout, basestring):
+        if not is_string(stdout):
             return stdout, stderr, rc
         stdout = stdout.lower()
         if stdout == 'stderr':
@@ -1062,7 +1074,7 @@ class SSHLibrary(object):
     def _write(self, text, add_newline=False):
         try:
             self.current.write(text, add_newline)
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
 
     def write_until_expected_output(self, text, expected, timeout,
@@ -1233,7 +1245,7 @@ class SSHLibrary(object):
     def _read_and_log(self, loglevel, reader, *args):
         try:
             output = reader(*args)
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
         self._log(output, loglevel)
         return output
@@ -1428,7 +1440,7 @@ class SSHLibrary(object):
     def _run_sftp_command(self, command, *args):
         try:
             files = command(*args)
-        except SSHClientException, e:
+        except SSHClientException as e:
             raise RuntimeError(e)
         for src, dst in files:
             self._info("'%s' -> '%s'" % (src, dst))
@@ -1521,7 +1533,7 @@ class SSHLibrary(object):
         """
         try:
             items = self.current.list_dir(path, pattern, absolute)
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
                                        '\n'.join(items)))
@@ -1534,7 +1546,7 @@ class SSHLibrary(object):
         """
         try:
             files = self.current.list_files_in_dir(path, pattern, absolute)
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         files = self.current.list_files_in_dir(path, pattern, absolute)
         self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
@@ -1548,11 +1560,11 @@ class SSHLibrary(object):
         """
         try:
             dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
-        except SSHClientException, msg:
+        except SSHClientException as msg:
             raise RuntimeError(msg)
         self._info('%d director%s:\n%s' % (len(dirs),
-                                          'y' if len(dirs) == 1 else 'ies',
-                                          '\n'.join(dirs)))
+                                           'y' if len(dirs) == 1 else 'ies',
+                                           '\n'.join(dirs)))
         return dirs
 
 
