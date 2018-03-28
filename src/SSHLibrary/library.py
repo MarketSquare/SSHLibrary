@@ -849,26 +849,26 @@ class SSHLibrary(object):
 
     def get_pre_login_banner(self, host=None, port=None):
         """
-         Returns the banner supplied by the server upon connect.
-         
-         There are 2 ways of getting banner information:
-         - independent of any connection:
-         | ${banner} =     | Get Pre Login Banner | ${HOST}                   |
-         | Should Be Equal | ${banner}            | Testing pre-login banner  |
-         The argument 'host' is mandatory for getting banner key without open connection. 
-         
-         - from current connection:
-         | Open Connection  | ${HOST}              | prompt=${PROMPT}         |
-         | Login            | ${USERNAME}          | ${PASSWORD}              |
-         | ${banner} =      | Get Pre Login Banner |
-         | Should Be Equal  | ${banner}            | Testing pre-login banner |
+        Returns the banner supplied by the server upon connect.
 
-         New in SSHLibrary 3.0.0. This keyword does not work with Jython.
-+        """
+        There are 2 ways of getting banner information:
+        - independent of any connection:
+        | ${banner} =     | Get Pre Login Banner | ${HOST}                   |
+        | Should Be Equal | ${banner}            | Testing pre-login banner  |
+        The argument 'host' is mandatory for getting banner key without open connection.
+
+        - from current connection:
+        | Open Connection  | ${HOST}              | prompt=${PROMPT}         |
+        | Login            | ${USERNAME}          | ${PASSWORD}              |
+        | ${banner} =      | Get Pre Login Banner |
+        | Should Be Equal  | ${banner}            | Testing pre-login banner |
+
+        New in SSHLibrary 3.0.0. This keyword does not work with Jython.
+        """
         if self.current:
             if host == self.current.config.host or not host:
-                return self.current._get_banner()
-        return SSHClient._get_pre_login_banner(host, port)
+                return self.current.get_banner().decode(self.DEFAULT_ENCODING)
+        return SSHClient.get_pre_login_banner(host, port).decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
                         return_rc=False):

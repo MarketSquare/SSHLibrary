@@ -219,7 +219,8 @@ class AbstractSSHClient(object):
     def _login_with_public_key(self, username, keyfile, password):
         raise NotImplementedError
 
-    def _get_pre_login_banner(self, host, port):
+    @staticmethod
+    def get_pre_login_banner(host, port=None):
         raise NotImplementedError
 
     def execute_command(self, command):

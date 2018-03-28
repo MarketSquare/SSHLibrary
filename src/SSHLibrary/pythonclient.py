@@ -83,11 +83,11 @@ class PythonSSHClient(AbstractSSHClient):
             raise SSHClientException
         self.banner = self.client.get_transport().get_banner()
 
-    def _get_banner(self):
+    def get_banner(self):
         return self.banner
 
     @staticmethod
-    def _get_pre_login_banner(host, port=None):
+    def get_pre_login_banner(host, port=None):
         if not port:
             port = 22
         if host:
