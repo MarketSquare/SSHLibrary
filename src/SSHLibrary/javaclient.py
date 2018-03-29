@@ -28,7 +28,6 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
-from robot.utils import is_truthy
 
 
 class JavaSSHClient(AbstractSSHClient):
@@ -60,10 +59,9 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _start_command(self, command, sudo=False, sudo_password=None):
         new_shell = self.client.openSession()
-        if is_truthy(sudo):
+        if sudo:
+            new_shell.requestDumbPTY()
             cmd = RemoteSudoCommand(command, self.config.encoding)
-            new_shell.requestPTY(self.config.term_type,
-                                 self.config.width, self.config.height, 0, 0, None)
         else:
             cmd = RemoteCommand(command, self.config.encoding)
 
@@ -189,9 +187,6 @@ class RemoteCommand(AbstractCommand):
 
 
 class RemoteSudoCommand(RemoteCommand):
-    try_again_msg = 'Sorry, try again.'
-    incorrect_password_msg = '3 incorrect password attempts'
-
     def __init__(self, command, encoding):
         super(RemoteSudoCommand, self).__init__(command, encoding)
         self._stdout = ''
@@ -207,37 +202,9 @@ class RemoteSudoCommand(RemoteCommand):
         self._shell.execCommand(command)
         if sudo_password is not None:
             stdin = self._shell.getStdin()
-            self.send_password(sudo_password, stdin)
-            stdout = self._shell.getStdout()
-            reader = BufferedReader(InputStreamReader(StreamGobbler(stdout),
-                                                      self._encoding))
-            if self.new_password_needed(reader):
-                self.try_again_password(sudo_password, stdin, reader)
-
-    def new_password_needed(self, reader):
-        line = reader.readLine()
-        while self.is_password_needed_text(line):
-            self._stdout += line + '\n'
-            line = reader.readLine()
-        else:
-            if self.is_try_again_msg(line):
-                self._stdout += line + '\n'
-                return True
-            if self.is_incorrect_password_msg(line):
-                self._stdout += line + '\n'
-                return False
-        return False
-
-    def is_password_needed_text(self, line):
-        return line is not None and self.try_again_msg not in line and self.incorrect_password_msg not in line
-
-    def try_again_password(self, sudo_password, stdin, reader):
-        self.send_password(sudo_password, stdin)
-        if self.new_password_needed(reader):
-            self.try_again_password(sudo_password, stdin, reader)
-
-    def is_try_again_msg(self, line):
-        return line is not None and self.try_again_msg in line
-
-    def is_incorrect_password_msg(self, line):
-        return line is not None and self.incorrect_password_msg in line
+            try:
+                while True:
+                    self.send_password(sudo_password, stdin)
+            except IOException:
+                pass
+            self._stdout = self._read_from_stream(self._shell.getStdout())

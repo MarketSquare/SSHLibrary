@@ -28,7 +28,6 @@ from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
 from .utils import is_bytes, is_list_like, is_unicode
-from robot.utils import is_truthy
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -206,7 +205,7 @@ class RemoteCommand(AbstractCommand):
                 not self._shell.active)
 
     def _execute(self, sudo=False, sudo_password=None):
-        if is_truthy(sudo):
+        if sudo:
             self._execute_with_sudo(self._command, sudo_password)
         else:
             self._shell.exec_command(self._command)
@@ -217,11 +216,6 @@ class RemoteCommand(AbstractCommand):
         self._shell.exec_command(self._command)
         if sudo_password is not None:
             stdin = self._shell.makefile('wb', -1)
-            self.send_password(sudo_password, stdin)
             while self._shell_open():
-                self.try_again_password(sudo_password, stdin)
+                self.send_password(sudo_password, stdin)
 
-    def try_again_password(self, sudo_password, stdin):
-        self.send_password(sudo_password, stdin)
-        while self._shell_open():
-            self.try_again_password(sudo_password, stdin)
