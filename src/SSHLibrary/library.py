@@ -847,7 +847,7 @@ class SSHLibrary(object):
         except SSHClientException as e:
             raise RuntimeError(e)
 
-    def get_pre_login_banner(self, host=None, port=None):
+    def get_pre_login_banner(self, host=None, port=22):
         """
         Returns the banner supplied by the server upon connect.
 
@@ -865,10 +865,13 @@ class SSHLibrary(object):
 
         New in SSHLibrary 3.0.0. This keyword does not work with Jython.
         """
-        if self.current:
-            if host == self.current.config.host or not host:
-                return self.current.get_banner().decode(self.DEFAULT_ENCODING)
-        return SSHClient.get_pre_login_banner(host, port).decode(self.DEFAULT_ENCODING)
+        if host:
+            banner = SSHClient.get_banner_without_login(host, port)
+        elif self.current:
+            banner = self.current.get_banner()
+        else:
+            raise RuntimeError("'host' argument is mandatory if there is no open connection.")
+        return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
                         return_rc=False):

@@ -68,7 +68,6 @@ class AbstractSSHClient(object):
         self._shell = None
         self._started_commands = []
         self.client = self._get_client()
-        self.banner = None
 
     def _get_client(self):
         raise NotImplementedError('This should be implemented in the subclass.')
@@ -105,9 +104,6 @@ class AbstractSSHClient(object):
             self._shell = self._create_shell()
         return self._shell
 
-    def banner(self):
-        return self.banner
-
     def _create_sftp_client(self):
         raise NotImplementedError
 
@@ -118,7 +114,6 @@ class AbstractSSHClient(object):
         """Closes the connection."""
         self._sftp_client = None
         self._shell = None
-        self.banner = None
         self.client.close()
 
     def login(self, username, password, delay=None, look_for_keys=False):
@@ -220,7 +215,10 @@ class AbstractSSHClient(object):
         raise NotImplementedError
 
     @staticmethod
-    def get_pre_login_banner(host, port=None):
+    def get_banner_without_login(host, port=22):
+        raise NotImplementedError
+
+    def get_banner(self):
         raise NotImplementedError
 
     def execute_command(self, command):
