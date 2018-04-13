@@ -216,10 +216,10 @@ class AbstractSSHClient(object):
 
     @staticmethod
     def get_banner_without_login(host, port=22):
-        raise NotImplementedError
+        raise NotImplementedError('Not supported on this Python interpreter.')
 
     def get_banner(self):
-        raise NotImplementedError
+        raise NotImplementedError('Not supported on this Python interpreter.')
 
     def execute_command(self, command):
         """Executes the `command` on the remote host.
