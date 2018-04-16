@@ -59,7 +59,7 @@ def get_os_includes(operating_system):
 def python(*opts):
     try:
         run_cli(['--outputdir', OUTPUT_PYTHON,
-                 '--include', 'pybot']
+                '--include', 'pybot']
                 + list(COMMON_OPTS + opts))
     except SystemExit:
         pass
@@ -67,8 +67,8 @@ def python(*opts):
 def jython(*opts):
     try:
         run_cli(['--outputdir', OUTPUT_JYTHON,
-                 '--pythonpath', JAR_PATH,
-                 '--include', 'jybot']
+                '--pythonpath', JAR_PATH,
+                '--include', 'jybot']
                 + list(COMMON_OPTS + opts))
     except SystemExit:
         pass

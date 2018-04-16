@@ -93,7 +93,7 @@ The acceptance tests can also be run on windows against a ssh server running on 
 
 You will need to install Cygwin with SSH server. Then add users test and testkey and follow the same steps as in linux to setup their bash accounts on Cygwin. After that you can execute the acceptance tests on Windows.
 
-The tests assume that Cygwin is installed to c:/cygwin64. If the installation directory is different, it can be overridden with commandline option `--variable CYGWIN_HOME:<the real path>`
+The tests assume that Cygwin is installed to c:/cygwin64. If the installation directory is different, it can be overridden with commadnline option `--variable CYGWIN_HOME:<the real path>`
 
 Running the acceptance tests
 ============================
@@ -106,8 +106,6 @@ Tests also require robotstatuschecker:
  
 Tests are ran using Bash script `python atest/run.py`. The script prints help when ran without parameters.
 
-In order to run the tests with IPv6, the ``::1`` must be used as host variable when running ``atest/run.py`` script.
+In order to run the tests with IPv6, the ``::1`` must be used as host variable when running ``atest/run.py`` script::
 
-Example:
-::
     python atest/run.py --variable=HOST:::1 atest
