@@ -25,6 +25,7 @@ from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
 from .utils import ConnectionCache, is_string, plural_or_not
+from robot.utils import is_truthy
 from .version import VERSION
 from robot.utils import is_truthy
 
@@ -805,6 +806,7 @@ class SSHLibrary(object):
         return self._login(self.current.login, username, password, delay)
 
     def login_with_public_key(self, username, keyfile, password='',
+                              allow_agent=False, look_for_keys=False,
                               delay='0.5 seconds'):
         """Logs into the SSH server using key-based authentication.
 
@@ -832,10 +834,16 @@ class SSHLibrary(object):
         | Open Connection       | linux.server.com |
         | Login With Public Key | johndoe          | /home/johndoe/.ssh/id_dsa | keyringpasswd |
 
+        `allow_agent` enables the connection to the SSH agent.
+        `look_for_keys` enables the searching for discoverable private key files in `~/.ssh/`.
+
         Argument `delay` was added in SSHLibrary 2.0.
+        Arguments `allow_agent` and `look_for_keys` were added in SSHLibrary 3.0.0 and
+        do not work when using Jython.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password, delay)
+                           keyfile, password, is_truthy(allow_agent),
+                           is_truthy(look_for_keys), delay)
 
     def _login(self, login_method, username, *args):
         self._info("Logging into '%s:%s' as '%s'."

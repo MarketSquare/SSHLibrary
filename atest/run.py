@@ -12,6 +12,12 @@
     jython atest/run.py atest
 
     Jybot results are found in path 'atest/results/jython/
+
+    Running tests with IPv6:
+    Example:
+        python atest/run.py --variable=HOST:::1 atest
+        or
+        jython atest/run.py --variable=HOST:::1 atest
 """
 import sys
 import os
