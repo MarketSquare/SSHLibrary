@@ -53,4 +53,4 @@ Start Sudo Command With Incorrect Password
     [Tags]  linux
     Start Command  -k pwd   sudo=True  sudo_password=test123
     ${stdout} =  Read Command Output
-    Should Contain  ${stdout}  Sorry, try again.
+    Should Not Contain  ${stdout}  ${REMOTE HOME TEST}

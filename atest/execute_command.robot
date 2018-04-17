@@ -76,4 +76,4 @@ Execute Sudo Command With Correct Password
 Execute Sudo Command With Incorrect Password
     [Tags]     linux
     ${stdout} =  Execute Command  -k pwd   sudo=True  sudo_password=test123
-    Should Contain  ${stdout}  Sorry, try again.
+    Should Not Contain  ${stdout}  ${REMOTE HOME TEST}
