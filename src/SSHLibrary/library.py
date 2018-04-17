@@ -24,10 +24,8 @@ from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
-from .utils import ConnectionCache, is_string, plural_or_not
-from robot.utils import is_truthy
+from .utils import ConnectionCache, is_string, is_truthy, plural_or_not
 from .version import VERSION
-from robot.utils import is_truthy
 
 
 __version__ = VERSION
@@ -902,7 +900,10 @@ class SSHLibrary(object):
 
         `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
         """
-        self._info("Executing command '%s'." % command)
+        if not is_truthy(sudo):
+            self._info("Executing command '%s'." % command)
+        else:
+            self._info("Executing command 'sudo %s'." % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         stdout, stderr, rc = self.current.execute_command(command, is_truthy(sudo), sudo_password)
@@ -943,7 +944,10 @@ class SSHLibrary(object):
 
         `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
         """
-        self._info("Starting command '%s'." % command)
+        if not is_truthy(sudo):
+            self._info("Starting command '%s'." % command)
+        else:
+            self._info("Starting command 'sudo %s'." % command)
         self._last_command = command
         self.current.start_command(command, is_truthy(sudo), sudo_password)
 

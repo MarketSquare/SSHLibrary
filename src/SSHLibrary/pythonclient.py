@@ -206,18 +206,18 @@ class RemoteCommand(AbstractCommand):
                 self._shell.eof_sent or
                 not self._shell.active)
 
-    def _execute(self, sudo=False, sudo_password=None):
-        if sudo:
-            self._execute_with_sudo(self._command, sudo_password)
-        else:
-            self._shell.exec_command(self._command)
-
-    def _execute_with_sudo(self, command, sudo_password=None):
-        self._command = 'sudo ' + command.decode(self._encoding)
-        self._shell.get_pty()
+    def _execute(self):
         self._shell.exec_command(self._command)
+
+    def _execute_with_sudo(self, sudo_password=None):
+        command = 'sudo ' + self._command.decode(self._encoding)
+        self._shell.get_pty()
+        self._shell.exec_command(command)
         if sudo_password is not None:
             stdin = self._shell.makefile('wb', -1)
-            while self._shell_open():
-                self.send_password(sudo_password, stdin)
-
+            stdin.write(sudo_password + '\n')
+            stdin.flush()
+            time.sleep(0.01)  # flags from _shell_open() not updated without this sleep
+            # in case of incorrect password close the shell
+            if self._shell_open():
+                self._shell.close()

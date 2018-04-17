@@ -1089,9 +1089,15 @@ class AbstractCommand(object):
         :param sudo_password are used for executing commands within a sudo session.
         """
         self._shell = shell
-        self._execute(sudo, sudo_password)
+        if not sudo:
+            self._execute()
+        else:
+            self._execute_with_sudo(sudo_password)
 
-    def _execute(self, sudo=False,  sudo_password=None):
+    def _execute(self):
+        raise NotImplementedError
+
+    def _execute_with_sudo(self, sudo_password=None):
         raise NotImplementedError
 
     def read_outputs(self):
@@ -1101,16 +1107,6 @@ class AbstractCommand(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         raise NotImplementedError
-
-    def send_password(self, sudo_password, stdin):
-        """Sends password to the stdin stream for sudo commands.
-
-       :param sudo_password: The password of the user.
-       :param stdin: Standard input stream
-       """
-        stdin.write(sudo_password + '\n')
-        stdin.flush()
-        time.sleep(1)
 
 
 class SFTPFileInfo(object):
