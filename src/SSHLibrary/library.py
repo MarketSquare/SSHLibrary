@@ -907,7 +907,7 @@ class SSHLibrary(object):
 
         Arguments `sudo` and `sudo_password` are used for executing commands within a sudo session.
         Due to different permission elevation in Cygwin, these two arguments will not work under Windows.
-        | Execute Command  | pwd      | sudo=True       |  sudo_password=test
+        | Execute Command  | pwd      | sudo=True       |  sudo_password=test |
 
         The `command` is always executed in a new shell. Thus possible changes
         to the environment (e.g. changing working directory) are not visible
@@ -961,7 +961,7 @@ class SSHLibrary(object):
 
         Arguments `sudo` and `sudo_password` are used for executing commands within a sudo session.
         Due to different permission elevation in Cygwin, these two arguments will not work under Windows.
-        | Start Command   | pwd                 | sudo=True     |  sudo_password=test
+        | Start Command   | pwd                 | sudo=True     |  sudo_password=test |
 
         `Write` and `Read` can be used for
         [#Interactive shells|running multiple commands in the same shell].
