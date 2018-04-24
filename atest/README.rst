@@ -8,7 +8,7 @@ Because SSHLibrary is primary used on Linux, tests should be ran at least on it.
 
 Setup on Linux
 ==============
- 
+
 - Install `openSSH` server (using apt-get on Debian variants):
 
 ::
@@ -36,7 +36,7 @@ Setup on Linux
 - Log in as `test`
 
 ::
-    
+
     sudo su test
 
 - Set prompt in .bashrc
@@ -91,6 +91,25 @@ Setup on Linux
     sudo cp ~testkey/.ssh/id_rsa <path_to_sshlibrary>/atest/testdata/keyfiles/
 
 - Change the rights for that file so that you can read it.
+- Create your login banner file /etc/ssh/sshd-banner and append text:
+
+::
+
+    Testing pre-login banner
+
+- Open sshd configuration file /etc/ssh/sshd_config using a text editor
+
+- Add/edit the following line:
+
+::
+
+    Banner /etc/ssh/sshd-banner
+
+- Save file and restart the ssh server:
+
+::
+
+    sudo /etc/init.d/ssh restart
 
 Setup in Windows
 ================
@@ -108,7 +127,7 @@ Tests also require robotstatuschecker:
 ::
 
     pip install robotstatuschecker
- 
+
 Tests are ran using Bash script `python atest/run.py`. The script prints help when ran without parameters.
 
 In order to run the tests with IPv6, the ``::1`` must be used as host variable when running ``atest/run.py`` script::

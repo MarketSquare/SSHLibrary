@@ -30,6 +30,9 @@ before_install:
   - sudo -E su testkey -c "cp /home/testkey/.ssh/id_rsa.pub /home/testkey/.ssh/authorized_keys"
   - sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
   - cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/
+  - sudo bash -c "echo 'Testing pre-login banner' > /etc/ssh/sshd-banner"
+  - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
+  - sudo service ssh restart
 install:
   - pip install -r requirements-dev.txt
 matrix:

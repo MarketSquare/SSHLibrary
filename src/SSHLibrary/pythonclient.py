@@ -83,6 +83,20 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
+    def get_banner(self):
+        return self.client.get_transport().get_banner()
+
+    @staticmethod
+    def get_banner_without_login(host, port=22):
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            client.connect(str(host), int(port), username="bad-username", password="bad-password")
+        except paramiko.AuthenticationException:
+            return client.get_transport().get_banner()
+        except Exception:
+            raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
+
     def _start_command(self, command, sudo=False,  sudo_password=None):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()

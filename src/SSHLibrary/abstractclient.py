@@ -224,6 +224,13 @@ class AbstractSSHClient(object):
                                allow_agent, look_for_keys):
         raise NotImplementedError
 
+    @staticmethod
+    def get_banner_without_login(host, port=22):
+        raise NotImplementedError('Not supported on this Python interpreter.')
+
+    def get_banner(self):
+        raise NotImplementedError('Not supported on this Python interpreter.')
+
     def execute_command(self, command, sudo=False,  sudo_password=None):
         """Executes the `command` on the remote host.
 
