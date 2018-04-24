@@ -63,6 +63,18 @@ Switch to closed connection jybot
     switch connection   SUT
     Run keyword and expect error  IllegalStateException: Cannot open session*   Execute command   ls
 
+Get pre-login banner without open connection
+    [Tags]   pybot
+    ${banner} =  Get Pre Login Banner  ${HOST}
+    Should Be Equal  ${banner}  Testing pre-login banner\n
+
+Get pre-login banner from current connection
+    [Tags]   pybot
+    Open Connection  ${HOST}  prompt=${PROMPT}
+    Login  ${USERNAME}  ${PASSWORD}
+    ${banner} =  Get Pre Login Banner
+    Should Be Equal  ${banner}  Testing pre-login banner\n
+
 *** Keywords ***
 Connection Should Be Closed
     Run Keyword And Expect Error  No open connection.  Write  pwd

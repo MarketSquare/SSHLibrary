@@ -855,6 +855,32 @@ class SSHLibrary(object):
         except SSHClientException as e:
             raise RuntimeError(e)
 
+    def get_pre_login_banner(self, host=None, port=22):
+        """
+        Returns the banner supplied by the server upon connect.
+
+        There are 2 ways of getting banner information:
+        - independent of any connection:
+        | ${banner} =     | Get Pre Login Banner | ${HOST}                   |
+        | Should Be Equal | ${banner}            | Testing pre-login banner  |
+        The argument 'host' is mandatory for getting banner key without open connection.
+
+        - from current connection:
+        | Open Connection  | ${HOST}              | prompt=${PROMPT}         |
+        | Login            | ${USERNAME}          | ${PASSWORD}              |
+        | ${banner} =      | Get Pre Login Banner |
+        | Should Be Equal  | ${banner}            | Testing pre-login banner |
+
+        New in SSHLibrary 3.0.0. This keyword does not work with Jython.
+        """
+        if host:
+            banner = SSHClient.get_banner_without_login(host, port)
+        elif self.current:
+            banner = self.current.get_banner()
+        else:
+            raise RuntimeError("'host' argument is mandatory if there is no open connection.")
+        return banner.decode(self.DEFAULT_ENCODING)
+
     def execute_command(self, command, return_stdout=True, return_stderr=False,
                         return_rc=False):
         """Executes `command` on the remote machine and returns its outputs.
