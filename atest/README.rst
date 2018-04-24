@@ -28,6 +28,11 @@ Setup on Linux
     sudo passwd test
     (input `test` as the new password)
 
+- Add `test` user to the sudoers list::
+
+    sudo adduser test sudo
+    (input `test` as UNIX password)
+
 - Log in as `test`
 
 ::

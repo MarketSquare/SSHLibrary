@@ -14,8 +14,8 @@
 #  limitations under the License.
 
 try:
-    from com.trilead.ssh2 import (Connection, SFTPException, SFTPv3Client,
-                                  SFTPv3DirectoryEntry, StreamGobbler)
+    from com.trilead.ssh2 import (ChannelCondition, Connection, SFTPException,
+                                  SFTPv3Client, SFTPv3DirectoryEntry, StreamGobbler)
 except ImportError:
     raise ImportError(
         'Importing Trilead SSH library failed. '
@@ -65,10 +65,12 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def _start_command(self, command):
-        cmd = RemoteCommand(command, self.config.encoding)
+    def _start_command(self, command, sudo=False, sudo_password=None):
         new_shell = self.client.openSession()
-        cmd.run_in(new_shell)
+        if sudo:
+            new_shell.requestDumbPTY()
+        cmd = RemoteCommand(command, self.config.encoding)
+        cmd.run_in(new_shell, sudo, sudo_password)
         return cmd
 
     def _create_sftp_client(self):
@@ -187,3 +189,16 @@ class RemoteCommand(AbstractCommand):
     def _execute(self):
         command = self._command.decode(self._encoding)
         self._shell.execCommand(command)
+
+    def _execute_with_sudo(self, sudo_password=None):
+        command = 'sudo ' + self._command.decode(self._encoding)
+        self._shell.execCommand(command)
+        if sudo_password is not None:
+            self._shell.getStdin().write(sudo_password + '\n')
+            # in case of incorrect password close the shell
+            if self._shell_open():
+                self._shell.close()
+
+    def _shell_open(self):
+        condition = self._shell.waitForCondition(ChannelCondition.EOF, 100)
+        return not (condition & ChannelCondition.EOF != 0 or condition & ChannelCondition.CLOSED != 0)

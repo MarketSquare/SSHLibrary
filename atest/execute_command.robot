@@ -67,3 +67,13 @@ Execute Command With Huge Output
    Execute Command     for i in {1..20}; do cat file.txt file.txt > file2.txt && mv file2.txt file.txt; done
    Execute Command     cat file.txt
    [Teardown]  Execute Command     rm file.txt
+
+Execute Sudo Command With Correct Password
+    [Tags]     linux
+    ${stdout} =  Execute Command  -k pwd   sudo=True  sudo_password=test
+    Should Contain  ${stdout}   ${REMOTE HOME TEST}
+
+Execute Sudo Command With Incorrect Password
+    [Tags]     linux
+    ${stdout} =  Execute Command  -k pwd   sudo=True  sudo_password=test123
+    Should Not Contain  ${stdout}  ${REMOTE HOME TEST}

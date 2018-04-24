@@ -24,8 +24,7 @@ from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
                      StringEntry, TimeEntry)
-from .utils import ConnectionCache, is_string, plural_or_not
-from robot.utils import is_truthy
+from .utils import ConnectionCache, is_string, is_truthy, plural_or_not
 from .version import VERSION
 
 
@@ -882,7 +881,7 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False):
+                        return_rc=False, sudo=False,  sudo_password=None):
         """Executes `command` on the remote machine and returns its outputs.
 
         This keyword executes the `command` and returns after the execution
@@ -906,6 +905,10 @@ class SSHLibrary(object):
         | ${rc}=                      | Execute Command | echo 'Hello John!' | return_stdout=False | return_rc=True |
         | Should Be Equal As Integers | ${rc}           | 0                  | # succeeded         |
 
+        Arguments `sudo` and `sudo_password` are used for executing commands within a sudo session.
+        Due to different permission elevation in Cygwin, these two arguments will not work under Windows.
+        | Execute Command  | pwd      | sudo=True       |  sudo_password=test
+
         The `command` is always executed in a new shell. Thus possible changes
         to the environment (e.g. changing working directory) are not visible
         to the later keywords:
@@ -920,14 +923,19 @@ class SSHLibrary(object):
 
         This keyword logs the executed command and its exit status with
         log level `INFO`.
+
+        `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
         """
-        self._info("Executing command '%s'." % command)
+        if not is_truthy(sudo):
+            self._info("Executing command '%s'." % command)
+        else:
+            self._info("Executing command 'sudo %s'." % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command)
+        stdout, stderr, rc = self.current.execute_command(command, is_truthy(sudo), sudo_password)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command):
+    def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts execution of the `command` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the `command`
@@ -951,14 +959,23 @@ class SSHLibrary(object):
         | ${pwd}=         | Read Command Output |
         | Should Be Equal | ${pwd}              | /home/johndoe |
 
+        Arguments `sudo` and `sudo_password` are used for executing commands within a sudo session.
+        Due to different permission elevation in Cygwin, these two arguments will not work under Windows.
+        | Start Command   | pwd                 | sudo=True     |  sudo_password=test
+
         `Write` and `Read` can be used for
         [#Interactive shells|running multiple commands in the same shell].
 
         This keyword logs the started command with log level `INFO`.
+
+        `sudo` and `sudo_password` arguments are new in SSHLibrary 3.0.0.
         """
-        self._info("Starting command '%s'." % command)
+        if not is_truthy(sudo):
+            self._info("Starting command '%s'." % command)
+        else:
+            self._info("Starting command 'sudo %s'." % command)
         self._last_command = command
-        self.current.start_command(command)
+        self.current.start_command(command, is_truthy(sudo), sudo_password)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):

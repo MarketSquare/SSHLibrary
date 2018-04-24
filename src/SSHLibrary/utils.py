@@ -13,9 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from robot.utils import (is_bytes, is_list_like, is_string, is_unicode,
-                         plural_or_not, secs_to_timestr, timestr_to_secs,
-                         ConnectionCache)
+from robot.utils import (is_bytes, is_list_like, is_string, is_truthy,
+                         is_unicode, plural_or_not, secs_to_timestr,
+                         timestr_to_secs, ConnectionCache)
 
 
 try:

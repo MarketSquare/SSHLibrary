@@ -42,3 +42,15 @@ Reading Command Output Without Command Started
     Run Keyword And Expect Error
     ...  No started commands to read output from.
     ...  Read Command Output
+
+Start Sudo Command With Correct Password
+    [Tags]  linux
+    Start Command  -k pwd   sudo=True  sudo_password=test
+    ${stdout} =  Read Command Output
+    Should Contain  ${stdout}  ${REMOTE HOME TEST}
+
+Start Sudo Command With Incorrect Password
+    [Tags]  linux
+    Start Command  -k pwd   sudo=True  sudo_password=test123
+    ${stdout} =  Read Command Output
+    Should Not Contain  ${stdout}  ${REMOTE HOME TEST}

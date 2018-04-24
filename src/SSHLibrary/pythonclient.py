@@ -97,13 +97,13 @@ class PythonSSHClient(AbstractSSHClient):
         except Exception:
             raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
 
-    def _start_command(self, command):
+    def _start_command(self, command, sudo=False,  sudo_password=None):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session()
-        cmd.run_in(new_shell)
+        cmd.run_in(new_shell, sudo, sudo_password)
         return cmd
 
     def _create_sftp_client(self):
@@ -222,3 +222,16 @@ class RemoteCommand(AbstractCommand):
 
     def _execute(self):
         self._shell.exec_command(self._command)
+
+    def _execute_with_sudo(self, sudo_password=None):
+        command = 'sudo ' + self._command.decode(self._encoding)
+        self._shell.get_pty()
+        self._shell.exec_command(command)
+        if sudo_password is not None:
+            stdin = self._shell.makefile('wb', -1)
+            stdin.write(sudo_password + '\n')
+            stdin.flush()
+            time.sleep(0.1)  # flags from _shell_open() not updated without this sleep
+            # in case of incorrect password close the shell
+            if self._shell_open():
+                self._shell.close()

@@ -231,7 +231,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command):
+    def execute_command(self, command, sudo=False,  sudo_password=None):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -242,13 +242,17 @@ class AbstractSSHClient(object):
 
         :param str command: The command to be executed on the remote host.
 
+        :param sudo
+         and
+        :param sudo_password are used for executing commands within a sudo session.
+
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        self.start_command(command)
+        self.start_command(command, sudo, sudo_password)
         return self.read_command_output()
 
-    def start_command(self, command):
+    def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -261,11 +265,15 @@ class AbstractSSHClient(object):
         to get the output of the previous started command.
 
         :param str command: The command to be started on the remote host.
+
+        :param sudo
+         and
+        :param sudo_password are used for executing commands within a sudo session.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command))
+        self._started_commands.append(self._start_command(command, sudo, sudo_password))
 
-    def _start_command(self, command):
+    def _start_command(self, command, sudo=False, sudo_password=None):
         raise NotImplementedError
 
     def read_command_output(self):
@@ -1078,15 +1086,25 @@ class AbstractCommand(object):
         self._encoding = encoding
         self._shell = None
 
-    def run_in(self, shell):
+    def run_in(self, shell, sudo=False,  sudo_password=None):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
+
+        :param sudo
+         and
+        :param sudo_password are used for executing commands within a sudo session.
         """
         self._shell = shell
-        self._execute()
+        if not sudo:
+            self._execute()
+        else:
+            self._execute_with_sudo(sudo_password)
 
     def _execute(self):
+        raise NotImplementedError
+
+    def _execute_with_sudo(self, sudo_password=None):
         raise NotImplementedError
 
     def read_outputs(self):
