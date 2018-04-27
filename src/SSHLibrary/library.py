@@ -52,7 +52,7 @@ class SSHLibrary(object):
     This library works both with Python and Jython, but uses different
     SSH modules internally depending on the interpreter. See
     [http://robotframework.org/SSHLibrary/#installation|installation instructions]
-    for more details about the dependencies. IronPython is not unfortunately
+    for more details about the dependencies. IronPython is unfortunately
     not supported. Python 3 is supported starting from SSHLibrary 3.0.0.
 
     == Table of contents ==
@@ -1124,8 +1124,8 @@ class SSHLibrary(object):
     def write_bare(self, text):
         """Writes the given ``text`` on the remote machine without appending a newline.
 
-        Unlike `Write`, this keyword returns and consumes nothing. See more
-        information on the `Interactive shells` section.
+        Unlike `Write`, this keyword returns and consumes nothing. See the
+        `Interactive shells` section for more information.
 
         Example:
         | `Write Bare`     | su\\n            |
@@ -1254,7 +1254,7 @@ class SSHLibrary(object):
         Example:
         | `Open Connection`          | my.server.com       | prompt=$         |
         | `Login`                    | johndoe             | ${PASSWORD}      |
-        | `Write`                    | sudo su -           |                   |
+        | `Write`                    | sudo su -           |                  |
         | `Write`                    | ${PASSWORD}         |                  |
         | `Set Client Configuration` | prompt=#            | # For root, the prompt is # |
         | ${output}=                 | `Read Until Prompt` |                  |
