@@ -45,7 +45,7 @@ The recommended installation method is using pip_::
     pip install --upgrade robotframework-sshlibrary
 
 Running this command installs also the latest Robot Framework and paramiko_
-versions. The minimum supported paramiko version is ``1.15.0``.
+versions. The minimum supported paramiko version is ``1.15.3``.
 The ``--upgrade`` option can be omitted when installing the library for the
 first time.
 
