@@ -1071,6 +1071,9 @@ class AbstractSFTPClient(object):
     def _close_remote_file(self, remote_file):
         raise NotImplementedError
 
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, client):
+        raise NotImplementedError
+
 
 class AbstractCommand(object):
     """Base class for the remote command.

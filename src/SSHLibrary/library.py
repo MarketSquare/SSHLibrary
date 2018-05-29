@@ -1070,6 +1070,27 @@ class SSHLibrary(object):
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port):
+        """
+        The keyword uses the existing connection to set up local port forwarding
+        (the openssh -L option) from a local port through a tunneled
+        connection to a destination reachable from the SSH server machine.
+
+        The example below illustrates the forwarding from the local machine, of
+        the connection on port 80 of an inaccessible server (secure.server.com)
+        by connecting to a remote SSH server (remote.server.com) that has access
+        to the secure server, and makes it available locally, on the port 9191:
+
+        | `Open Connection`         | remote.server.com | prompt=$          |
+        | `Login`                   | johndoe           | secretpasswd      |
+        | `Create Local SSH Tunnel` | 9191              | secure.server.com | 80
+
+        The tunnel is active as long as the connection is open.
+
+        New in SSHLibrary 3.0.1
+        """
+        self.current.create_local_ssh_tunnel(local_port, remote_host, remote_port)
+
     def _legacy_output_options(self, stdout, stderr, rc):
         if not is_string(stdout):
             return stdout, stderr, rc
