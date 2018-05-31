@@ -120,50 +120,14 @@ class PythonSSHClient(AbstractSSHClient):
         return Shell(self.client, self.config.term_type,
                      self.config.width, self.config.height)
 
-    @staticmethod
-    def _forward_tunnel(local_port, remote_host, remote_port, transport):
-        class SubHandler(Handler):
-            host = remote_host
-            port = remote_port
-            ssh_transport = transport
-
-        server = SocketServer.ThreadingTCPServer(('', local_port), SubHandler)
-        server.daemon_threads = True
-        server.allow_reuse_address = True
-        t = threading.Thread(target=server.serve_forever)
-        t.setDaemon(True)
-        t.start()
-
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port):
+        self._create_local_port_forwarder(local_port, remote_host, remote_port)
+
+    def _create_local_port_forwarder(self, local_port, remote_host, remote_port):
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
-        self._forward_tunnel(int(local_port), remote_host, int(remote_port), transport)
-
-
-class Handler(SocketServer.BaseRequestHandler):
-    def handle(self):
-        try:
-            chan = self.ssh_transport.open_channel('direct-tcpip', (self.host, self.port),
-                                                   self.request.getpeername())
-        except Exception:
-            return
-        if chan is None:
-            return
-        while True:
-            r, w, x = select.select([self.request, chan], [], [])
-            if self.request in r:
-                data = self.request.recv(1024)
-                if len(data) == 0:
-                    break
-                chan.send(data)
-            if chan in r:
-                data = chan.recv(1024)
-                if len(data) == 0:
-                    break
-                self.request.send(data)
-        chan.close()
-        self.request.close()
+        LocalPortForwardingHandler.forward_tunnel(int(local_port), remote_host, int(remote_port), transport)
 
 
 class Shell(AbstractShell):
@@ -287,3 +251,44 @@ class RemoteCommand(AbstractCommand):
             # in case of incorrect password close the shell
             if self._shell_open():
                 self._shell.close()
+
+
+class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
+    host, port, ssh_transport = None, None, None
+
+    @staticmethod
+    def forward_tunnel(local_port, remote_host, remote_port, transport):
+        class SubHandler(LocalPortForwardingHandler):
+            host = remote_host
+            port = remote_port
+            ssh_transport = transport
+
+        server = SocketServer.ThreadingTCPServer(('', local_port), SubHandler)
+        server.daemon_threads = True
+        server.allow_reuse_address = True
+        t = threading.Thread(target=server.serve_forever)
+        t.setDaemon(True)
+        t.start()
+
+    def handle(self):
+        try:
+            chan = self.ssh_transport.open_channel('direct-tcpip', (self.host, self.port),
+                                                   self.request.getpeername())
+        except Exception:
+            return
+        if chan is None:
+            return
+        while True:
+            r, w, x = select.select([self.request, chan], [], [])
+            if self.request in r:
+                data = self.request.recv(1024)
+                if len(data) == 0:
+                    break
+                chan.send(data)
+            if chan in r:
+                data = chan.recv(1024)
+                if len(data) == 0:
+                    break
+                self.request.send(data)
+        chan.close()
+        self.request.close()
