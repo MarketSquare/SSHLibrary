@@ -30,3 +30,4 @@ Run Netstat
     ...  ELSE
     ...  Run  netstat -an
     [Return]  ${result}
+    
