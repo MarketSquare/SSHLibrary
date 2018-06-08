@@ -242,15 +242,10 @@ class RemoteCommand(AbstractCommand):
     def _execute_with_sudo(self, sudo_password=None):
         command = 'sudo ' + self._command.decode(self._encoding)
         self._shell.get_pty()
-        self._shell.exec_command(command)
-        if sudo_password is not None:
-            stdin = self._shell.makefile('wb', -1)
-            stdin.write(sudo_password + '\n')
-            stdin.flush()
-            time.sleep(0.1)  # flags from _shell_open() not updated without this sleep
-            # in case of incorrect password close the shell
-            if self._shell_open():
-                self._shell.close()
+        if sudo_password is None:
+            self._shell.exec_command(command)
+        else:
+            self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
 
 
 class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
