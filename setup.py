@@ -8,7 +8,7 @@ from setuptools import setup
 CURDIR = dirname(abspath(__file__))
 REQUIREMENTS = ['robotframework >= 3.0']
 if not sys.platform.startswith('java'):
-    REQUIREMENTS.append('paramiko >= 1.15.0')
+    REQUIREMENTS.append('paramiko >= 1.15.3')
 with open(join(CURDIR, 'src', 'SSHLibrary', 'version.py')) as f:
     VERSION = re.search("\nVERSION = '(.*)'", f.read()).group(1)
 with open(join(CURDIR, 'README.rst')) as f:

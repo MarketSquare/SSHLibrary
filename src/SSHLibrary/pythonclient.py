@@ -109,7 +109,7 @@ class PythonSSHClient(AbstractSSHClient):
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
-        new_shell = transport.open_session()
+        new_shell = transport.open_session(timeout=float(self.config.timeout))
         cmd.run_in(new_shell, sudo, sudo_password)
         return cmd
 
