@@ -15,6 +15,13 @@
 
 import time
 import ntpath
+import select
+import threading
+
+try:
+    import SocketServer
+except ImportError:
+    import socketserver as SocketServer
 
 try:
     import paramiko
@@ -112,6 +119,15 @@ class PythonSSHClient(AbstractSSHClient):
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
                      self.config.width, self.config.height)
+
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port):
+        self._create_local_port_forwarder(local_port, remote_host, remote_port)
+
+    def _create_local_port_forwarder(self, local_port, remote_host, remote_port):
+        transport = self.client.get_transport()
+        if not transport:
+            raise AssertionError("Connection not open")
+        LocalPortForwardingHandler.forward_tunnel(int(local_port), remote_host, int(remote_port), transport)
 
 
 class Shell(AbstractShell):
@@ -230,3 +246,44 @@ class RemoteCommand(AbstractCommand):
             self._shell.exec_command(command)
         else:
             self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
+
+
+class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
+    host, port, ssh_transport = None, None, None
+
+    @staticmethod
+    def forward_tunnel(local_port, remote_host, remote_port, transport):
+        class SubHandler(LocalPortForwardingHandler):
+            host = remote_host
+            port = remote_port
+            ssh_transport = transport
+
+        server = SocketServer.ThreadingTCPServer(('', local_port), SubHandler)
+        server.daemon_threads = True
+        server.allow_reuse_address = True
+        t = threading.Thread(target=server.serve_forever)
+        t.setDaemon(True)
+        t.start()
+
+    def handle(self):
+        try:
+            chan = self.ssh_transport.open_channel('direct-tcpip', (self.host, self.port),
+                                                   self.request.getpeername())
+        except Exception:
+            return
+        if chan is None:
+            return
+        while True:
+            r, w, x = select.select([self.request, chan], [], [])
+            if self.request in r:
+                data = self.request.recv(1024)
+                if len(data) == 0:
+                    break
+                chan.send(data)
+            if chan in r:
+                data = chan.recv(1024)
+                if len(data) == 0:
+                    break
+                self.request.send(data)
+        chan.close()
+        self.request.close()
