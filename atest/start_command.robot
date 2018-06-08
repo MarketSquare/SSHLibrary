@@ -44,13 +44,19 @@ Reading Command Output Without Command Started
     ...  Read Command Output
 
 Start Sudo Command With Correct Password
-    [Tags]  linux
+    [Tags]     linux
     Start Command  -k pwd   sudo=True  sudo_password=test
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  ${REMOTE HOME TEST}
 
 Start Sudo Command With Incorrect Password
-    [Tags]  linux
+    [Tags]     linux
     Start Command  -k pwd   sudo=True  sudo_password=test123
     ${stdout} =  Read Command Output
     Should Not Contain  ${stdout}  ${REMOTE HOME TEST}
+
+Start Time Consuming Sudo Command
+    [Tags]     linux
+    Start Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
+    ${stdout} =  Read Command Output
+    Should Contain  ${stdout}  cat
