@@ -348,7 +348,7 @@ class SSHLibrary(object):
     | `List Directory` | ${path} | recursive=${EMPTY} | # Empty string is false.       |
     | `List Directory` | ${path} | recursive=${FALSE} | # Python ``False`` is false.   |
 
-    Prior to SSHLibrary 3.1, all non-empty strings, including ``no`` and ``none``
+    Prior to SSHLibrary 3.1.0, all non-empty strings, including ``no`` and ``none``
     were considered to be true. Considering ``none`` false is new in Robot Framework 3.0.3.
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
