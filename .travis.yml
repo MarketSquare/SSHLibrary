@@ -6,16 +6,10 @@ env:
     -JYTHON=false
 before_install:
   - if [ "$JYTHON" == "true" ]; then
-        hg clone http://hg.python.org/jython;
-        cd jython;
-        ant;
-        cd ..;
-        chmod +x "$(pwd)/jython/dist/bin/jython";
-        export INTERPRETER="$(pwd)/jython/dist/bin/jython";
-        alias jython="$(pwd)/jython/dist/bin/jython";
-        export PATH="$(pwd)/jython/dist/bin:$PATH";
-        wget --no-verbose https://bootstrap.pypa.io/3.2/get-pip.py;
-        $INTERPRETER get-pip.py;
+        wget -O jython.jar http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar;
+        java -jar jython.jar -s -d ~/jython;
+        export PATH="~/jython/bin:$PATH";
+        export INTERPRETER=jython;
     else
         export INTERPRETER=python;
     fi
