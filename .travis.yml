@@ -6,8 +6,8 @@ env:
     -JYTHON=false
 before_install:
   - if [ "$JYTHON" == "true" ]; then
-        wget -O jython.jar http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar
-        java -jar jython.jar -s -d /usr/lib/jython
+        wget -O jython.jar http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar;
+        java -jar jython.jar -s -d /usr/lib/jython;
         export PATH="/usr/lib/jython/bin:$PATH";
         export INTERPRETER=jython;
     else
