@@ -1083,7 +1083,7 @@ class SSHLibrary(object):
 
         | `Open Connection`         | remote.server.com | prompt=$          |
         | `Login`                   | johndoe           | secretpasswd      |
-        | `Create Local SSH Tunnel` | 9191              | secure.server.com | 80
+        | `Create Local SSH Tunnel` | 9191              | secure.server.com | 80 |
 
         The tunnel is active as long as the connection is open.
 

@@ -6,28 +6,52 @@ Test Teardown  Close All Connections
 Library        OperatingSystem
 
 *** Variables ***
-${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
-${KEY USERNAME}      testkey
-${KEY}               ${KEY DIR}${/}id_rsa
+${LOCAL PORT}  9000
+${REMOTE HOST}  google.com
+${REMOTE PORT}  80
+${DEFAULT SSH PORT}  22
+${LOCAL SSH PORT}  2222
 
 *** Test Cases ***
-Local Tunnel
-    Login  test  test
-    Create Local SSH Tunnel  9192  google.com  80
-    ${result}  Run Netstat
-    Should Contain  ${result}  :9192
+Local Tunnel Should Be Closed
+    Login  ${USERNAME}  ${PASSWORD}
+    Create Local SSH Tunnel  ${LOCAL PORT}  ${REMOTE HOST}  ${REMOTE PORT}
+    Port Should Not Be Free  ${LOCAL PORT}
+    Close All Connections
+    Wait For Port To Be Closed  ${LOCAL PORT}
+    Port Should Be Free     ${LOCAL PORT}
 
 Local Tunnel With Public Key
     Login With Public Key  ${KEY USERNAME}  ${KEY}
-    Create Local SSH Tunnel  9193  google.com  80
-    ${result}  Run Netstat
-    Should Contain  ${result}  :9193
+    Create Local SSH Tunnel  ${LOCAL PORT}  ${REMOTE HOST}  ${REMOTE PORT}
+    Port Should Not Be Free  ${LOCAL PORT}
+
+Local Tunnel SSH
+    Login  ${USERNAME}  ${PASSWORD}
+    Create Local SSH Tunnel  ${LOCAL SSH PORT}  ${HOST}  ${DEFAULT SSH PORT}
+    Port Should Not Be Free  ${LOCAL SSH PORT}
+    Open Connection  ${HOST}  port=${LOCAL SSH PORT}
+    Login  ${USERNAME}  ${PASSWORD}
+    Execute Command   ls
 
 *** Keywords ***
-Run Netstat
+Port Should Not Be Free
+    [Arguments]  ${port}
     ${result}  Run Keyword If  os.sep == '/'
     ...  Run  netstat -tulpn
     ...  ELSE
     ...  Run  netstat -an
-    [Return]  ${result}
-    
+    Should Contain  ${result}  :${port}
+
+Port Should Be Free
+    [Arguments]  ${port}
+    ${result}  Run Keyword If  os.sep == '/'
+    ...  Run  netstat -tulpn
+    ...  ELSE
+    ...  Run  netstat -an
+    Should Not Contain  ${result}  :${port}
+
+Wait For Port To Be Closed
+    [Arguments]         ${port}
+    Wait Until Keyword Succeeds  2 min  10s  Port Should Be Free  ${port}
+

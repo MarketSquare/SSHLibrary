@@ -60,6 +60,7 @@ paramiko.sftp_client.SFTPClient._log = _custom_log
 
 
 class PythonSSHClient(AbstractSSHClient):
+    tunnel = None
 
     def _get_client(self):
         client = paramiko.SSHClient()
@@ -127,7 +128,13 @@ class PythonSSHClient(AbstractSSHClient):
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
-        LocalPortForwardingHandler.forward_tunnel(int(local_port), remote_host, int(remote_port), transport)
+        self.tunnel = LocalPortForwarding(int(remote_port), remote_host, transport)
+        self.tunnel.forward(int(local_port))
+
+    def close(self):
+        if self.tunnel:
+            self.tunnel.close()
+        return super(PythonSSHClient, self).close()
 
 
 class Shell(AbstractShell):
@@ -248,22 +255,33 @@ class RemoteCommand(AbstractCommand):
             self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
 
 
-class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
-    host, port, ssh_transport = None, None, None
+class LocalPortForwarding:
+    def __init__(self, port, host, transport):
+        self.server = None
+        self.port = port
+        self.host = host
+        self.transport = transport
 
-    @staticmethod
-    def forward_tunnel(local_port, remote_host, remote_port, transport):
+    def forward(self, local_port):
         class SubHandler(LocalPortForwardingHandler):
-            host = remote_host
-            port = remote_port
-            ssh_transport = transport
+            port = self.port
+            host = self.host
+            ssh_transport = self.transport
 
-        server = SocketServer.ThreadingTCPServer(('', local_port), SubHandler)
-        server.daemon_threads = True
-        server.allow_reuse_address = True
-        t = threading.Thread(target=server.serve_forever)
+        self.server = SocketServer.ThreadingTCPServer(('', local_port), SubHandler)
+        self.server.daemon_threads = True
+        self.server.allow_reuse_address = True
+        t = threading.Thread(target=self.server.serve_forever)
         t.setDaemon(True)
         t.start()
+
+    def close(self):
+        if self.server:
+            self.server.shutdown()
+
+
+class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
+    host, port, ssh_transport = None, None, None
 
     def handle(self):
         try:
