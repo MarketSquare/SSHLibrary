@@ -1110,7 +1110,7 @@ class SSHLibrary(object):
 
         The tunnel is active as long as the connection is open.
 
-        New in SSHLibrary 3.0.1
+        New in SSHLibrary 3.1.0
         """
         self.current.create_local_ssh_tunnel(local_port, remote_host, remote_port)
 
