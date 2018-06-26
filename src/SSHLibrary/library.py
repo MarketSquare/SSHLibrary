@@ -64,6 +64,7 @@ class SSHLibrary(object):
     - `Pattern matching`
     - `Example`
     - `Importing`
+    - `Boolean arguments`
     - `Shortcuts`
     - `Keywords`
 
@@ -325,6 +326,30 @@ class SSHLibrary(object):
     your remote machine:
 
     ``robot -v HOST:my.server.com -v USERNAME:johndoe -v PASSWORD:secretpasswd executing_commands.txt``
+
+    = Boolean arguments =
+
+    Some keywords accept arguments that are handled as Boolean values true or
+    false. If such an argument is given as a string, it is considered false if
+    it is either an empty string or case-insensitively equal to ``false``,
+    ``none`` or ``no``. Other strings are considered true regardless
+    their value, and other argument types are tested using the same
+    [http://docs.python.org/2/library/stdtypes.html#truth-value-testing|rules
+    as in Python].
+
+    True examples:
+    | `List Directory` | ${path} | recursive=True    | # Strings are generally true.    |
+    | `List Directory` | ${path} | recursive=yes     | # Same as the above.             |
+    | `List Directory` | ${path} | recursive=${TRUE} | # Python ``True`` is true.       |
+    | `List Directory` | ${path} | recursive=${42}   | # Numbers other than 0 are true. |
+    False examples:
+    | `List Directory` | ${path} | recursive=False    | # String ``false`` is false.   |
+    | `List Directory` | ${path} | recursive=no       | # Also string ``no`` is false. |
+    | `List Directory` | ${path} | recursive=${EMPTY} | # Empty string is false.       |
+    | `List Directory` | ${path} | recursive=${FALSE} | # Python ``False`` is false.   |
+
+    Prior to SSHLibrary 3.1.0, all non-empty strings, including ``no`` and ``none``
+    were considered to be true. Considering ``none`` false is new in Robot Framework 3.0.3.
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -685,10 +710,9 @@ class SSHLibrary(object):
         the whole connection object. This can be adjusted using the boolean
         arguments ``index``, ``host``, ``alias``, and so on, that correspond
         to the attribute names of the object. If such arguments are given, and
-        they evaluate to true (e.g. any non-empty string except ``false`` or
-        ``False``), only the respective connection attributes are returned.
-        Note that attributes are always returned in the same order arguments
-        are specified in the signature.
+        they evaluate to true (see `Boolean arguments`), only the respective
+        connection attributes are returned. Note that attributes are always
+        returned in the same order arguments are specified in the signature.
 
         | `Open Connection` | my.server.com    | alias=example    |
         | ${host}=          | `Get Connection` | host=True        |
@@ -745,31 +769,28 @@ class SSHLibrary(object):
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
                            newline, prompt, term_type, width, height, encoding):
-        if self._output_wanted(index):
+        if is_truthy(index):
             yield config.index
-        if self._output_wanted(host):
+        if is_truthy(host):
             yield config.host
-        if self._output_wanted(alias):
+        if is_truthy(alias):
             yield config.alias
-        if self._output_wanted(port):
+        if is_truthy(port):
             yield config.port
-        if self._output_wanted(timeout):
+        if is_truthy(timeout):
             yield config.timeout
-        if self._output_wanted(newline):
+        if is_truthy(newline):
             yield config.newline
-        if self._output_wanted(prompt):
+        if is_truthy(prompt):
             yield config.prompt
-        if self._output_wanted(term_type):
+        if is_truthy(term_type):
             yield config.term_type
-        if self._output_wanted(width):
+        if is_truthy(width):
             yield config.width
-        if self._output_wanted(height):
+        if is_truthy(height):
             yield config.height
-        if self._output_wanted(encoding):
+        if is_truthy(encoding):
             yield config.encoding
-
-    def _output_wanted(self, value):
-        return value and str(value).lower() != 'false'
 
     def get_connections(self):
         """Returns information about all the open connections.
@@ -919,8 +940,8 @@ class SSHLibrary(object):
 
         Arguments ``return_stdout``, ``return_stderr`` and ``return_rc`` are
         used to specify, what is returned by this keyword.
-        If several arguments evaluate to true, multiple values are returned.
-        Non-empty strings, except ``false`` and ``False``, evaluate to true.
+        If several arguments evaluate to a true value (see `Boolean arguments`),
+        multiple values are returned.
 
         If errors are needed as well, set the respective argument value to
         true:
@@ -957,13 +978,14 @@ class SSHLibrary(object):
 
         ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
         """
-        if not is_truthy(sudo):
+        sudo = is_truthy(sudo)
+        if not sudo:
             self._info("Executing command '%s'." % command)
         else:
             self._info("Executing command 'sudo %s'." % command)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, is_truthy(sudo), sudo_password)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command, sudo=False,  sudo_password=None):
@@ -1005,12 +1027,13 @@ class SSHLibrary(object):
 
         ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
         """
-        if not is_truthy(sudo):
+        sudo = is_truthy(sudo)
+        if not sudo:
             self._info("Starting command '%s'." % command)
         else:
             self._info("Starting command 'sudo %s'." % command)
         self._last_command = command
-        self.current.start_command(command, is_truthy(sudo), sudo_password)
+        self.current.start_command(command, sudo, sudo_password)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False):
@@ -1028,8 +1051,8 @@ class SSHLibrary(object):
 
         Arguments ``return_stdout``, ``return_stderr`` and ``return_rc`` are
         used to specify, what is returned by this keyword.
-        If several arguments evaluate to true, multiple values are returned.
-        Non-empty strings, except ``false`` and ``False``, evaluate to true.
+        If several arguments evaluate to a true value (see `Boolean arguments`),
+        multiple values are returned.
 
         If errors are needed as well, set the argument value to true:
 
@@ -1105,11 +1128,11 @@ class SSHLibrary(object):
                                return_stderr, return_rc):
         self._info("Command exited with return code %d." % rc)
         ret = []
-        if self._output_wanted(return_stdout):
+        if is_truthy(return_stdout):
             ret.append(stdout.rstrip('\n'))
-        if self._output_wanted(return_stderr):
+        if is_truthy(return_stderr):
             ret.append(stderr.rstrip('\n'))
-        if self._output_wanted(return_rc):
+        if is_truthy(return_rc):
             ret.append(rc)
         if len(ret) == 1:
             return ret[0]
@@ -1163,7 +1186,7 @@ class SSHLibrary(object):
 
     def _write(self, text, add_newline=False):
         try:
-            self.current.write(text, add_newline)
+            self.current.write(text, is_truthy(add_newline))
         except SSHClientException as e:
             raise RuntimeError(e)
 
@@ -1386,7 +1409,7 @@ class SSHLibrary(object):
 
         ``recursive`` specifies whether to recursively download all
         subdirectories inside ``source``. Subdirectories are downloaded if
-        the argument value evaluates to true.
+        the argument value evaluates to true (see `Boolean arguments`).
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1412,7 +1435,7 @@ class SSHLibrary(object):
         See also `Get File`.
         """
         return self._run_sftp_command(self.current.get_directory, source,
-                                      destination, recursive)
+                                      destination, is_truthy(recursive))
 
     def put_file(self, source, destination='.', mode='0744', newline=''):
         """Uploads file(s) from the local machine to the remote machine.
@@ -1484,7 +1507,7 @@ class SSHLibrary(object):
 
         ``recursive`` specifies whether to recursively upload all
         subdirectories inside ``source``. Subdirectories are uploaded if the
-        argument value evaluates to true.
+        argument value evaluates to true (see `Boolean arguments`).
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
@@ -1509,7 +1532,7 @@ class SSHLibrary(object):
         See also `Put File`.
         """
         return self._run_sftp_command(self.current.put_directory, source,
-                                      destination, mode, newline, recursive)
+                                      destination, mode, newline, is_truthy(recursive))
 
     def _run_sftp_command(self, command, *args):
         try:
@@ -1597,7 +1620,7 @@ class SSHLibrary(object):
         respectively.
         """
         try:
-            items = self.current.list_dir(path, pattern, absolute)
+            items = self.current.list_dir(path, pattern, is_truthy(absolute))
         except SSHClientException as msg:
             raise RuntimeError(msg)
         self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
@@ -1606,6 +1629,7 @@ class SSHLibrary(object):
 
     def list_files_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only files."""
+        absolute = is_truthy(absolute)
         try:
             files = self.current.list_files_in_dir(path, pattern, absolute)
         except SSHClientException as msg:
@@ -1618,7 +1642,7 @@ class SSHLibrary(object):
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only directories."""
         try:
-            dirs = self.current.list_dirs_in_dir(path, pattern, absolute)
+            dirs = self.current.list_dirs_in_dir(path, pattern, is_truthy(absolute))
         except SSHClientException as msg:
             raise RuntimeError(msg)
         self._info('%d director%s:\n%s' % (len(dirs),
