@@ -64,6 +64,7 @@ class SSHLibrary(object):
     - `Pattern matching`
     - `Example`
     - `Importing`
+    - `Time format`
     - `Boolean arguments`
     - `Shortcuts`
     - `Keywords`
@@ -143,13 +144,7 @@ class SSHLibrary(object):
     === Timeout ===
 
     Argument ``timeout`` is used by `Read Until` variants. The default value
-    is ``3 seconds``.
-
-    Value must be in Robot Framework's time format such as ``3``, ``4.5s``,
-    ``1 minute`` and ``2 min 3 s``.  For more information about the time
-    syntax see the
-    [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|
-    Robot Framework User Guide].
+    is ``3 seconds``. See `time format` below for supported timeout syntax.
 
     === Newline ===
 
@@ -326,6 +321,14 @@ class SSHLibrary(object):
     your remote machine:
 
     ``robot -v HOST:my.server.com -v USERNAME:johndoe -v PASSWORD:secretpasswd executing_commands.txt``
+
+    == Time format ==
+
+    All timeouts, delays or retry intervals can be given as numbers considered seconds
+    (e.g. ``0.5`` or ``42``) or in Robot Framework's time syntax
+    (e.g. ``1.5 seconds`` or ``1 min 30 s``). For more information about
+    the time syntax see the
+    [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|Robot Framework User Guide].
 
     = Boolean arguments =
 
@@ -1203,10 +1206,7 @@ class SSHLibrary(object):
         If ``expected`` does not appear in output within ``timeout``, this
         keyword fails. ``retry_interval`` defines the time before writing
         ``text`` again. Both ``timeout`` and ``retry_interval`` must be given
-        in Robot Framework's time format (e.g. ``5``, ``1 minute``,
-        ``2 min 3 s``, ``4.5``) that is explained in detail in the
-        [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|
-        User Guide].
+        in Robot Framework's `time format`.
 
         The written ``text`` is logged. ``loglevel`` can be used to override
         the default `log level`.
@@ -1227,11 +1227,7 @@ class SSHLibrary(object):
         If ``delay`` is given, this keyword waits that amount of time and
         reads output again. This wait-read cycle is repeated as long as
         further reads return more output or the default `timeout` expires.
-        ``delay`` must be given in Robot Framework's time format (e.g. ``5``,
-        ``4.5s``, ``3 minutes``, ``2 min 3 sec``) that is explained in detail
-        in the
-        [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|
-        User Guide].
+        ``delay`` must be given in Robot Framework's `time format`.
 
         This keyword is most useful for reading everything from
         the server output, thus clearing it.
