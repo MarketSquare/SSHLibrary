@@ -170,7 +170,8 @@ class SSHLibrary(object):
 
     ``loglevel`` is not configurable per connection but can be overridden by
     passing it as an argument to the most of the aforementioned keywords.
-    Possible argument values are ``TRACE``, ``DEBUG``, ``INFO`` and ``WARN``.
+    Possible argument values are ``TRACE``, ``DEBUG``, ``INFO``, ``WARN``
+    and ``NONE`` (no logging).
 
     = Executing commands =
 
@@ -737,7 +738,7 @@ class SSHLibrary(object):
             config = self._connections.get_connection(index_or_alias).config
         except RuntimeError:
             config = SSHClient(None).config
-        self._info(str(config))
+        self._log(str(config), self._config.loglevel)
         return_values = tuple(self._get_config_values(config, index, host,
                                                       alias, port, timeout,
                                                       newline, prompt,
@@ -749,24 +750,22 @@ class SSHLibrary(object):
             return return_values[0]
         return return_values
 
-    def _info(self, msg):
-        self._log(msg, 'INFO')
-
-    def _log(self, msg, level=None):
+    def _log(self, msg, level='INFO'):
         level = self._active_loglevel(level)
-        msg = msg.strip()
-        if not msg:
-            return
-        if logger:
-            logger.write(msg, level)
-        else:
-            print('*%s* %s' % (level, msg))
+        if level != 'NONE':
+            msg = msg.strip()
+            if not msg:
+                return
+            if logger:
+                logger.write(msg, level)
+            else:
+                print('*%s* %s' % (level, msg))
 
     def _active_loglevel(self, level):
         if level is None:
             return self._config.loglevel
         if is_string(level) and \
-                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML']:
+                level.upper() in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'HTML', 'NONE']:
             return level.upper()
         raise AssertionError("Invalid log level '%s'." % level)
 
@@ -815,7 +814,7 @@ class SSHLibrary(object):
         """
         configs = [c.config for c in self._connections._connections]
         for c in configs:
-            self._info(str(c))
+            self._log(str(c), self._config.loglevel)
         return configs
 
     def login(self, username, password, delay='0.5 seconds'):
@@ -886,12 +885,12 @@ class SSHLibrary(object):
                            is_truthy(look_for_keys), delay)
 
     def _login(self, login_method, username, *args):
-        self._info("Logging into '%s:%s' as '%s'."
+        self._log("Logging into '%s:%s' as '%s'."
                    % (self.current.config.host, self.current.config.port,
-                      username))
+                      username), self._config.loglevel)
         try:
             login_output = login_method(username, *args)
-            self._log('Read output: %s' % login_output)
+            self._log('Read output: %s' % login_output, self._config.loglevel)
             return login_output
         except SSHClientException as e:
             raise RuntimeError(e)
@@ -981,11 +980,10 @@ class SSHLibrary(object):
 
         ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
         """
-        sudo = is_truthy(sudo)
-        if not sudo:
-            self._info("Executing command '%s'." % command)
+        if not is_truthy(sudo):
+            self._log("Executing command '%s'." % command, self._config.loglevel)
         else:
-            self._info("Executing command 'sudo %s'." % command)
+            self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password)
@@ -1030,11 +1028,10 @@ class SSHLibrary(object):
 
         ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
         """
-        sudo = is_truthy(sudo)
-        if not sudo:
-            self._info("Starting command '%s'." % command)
+        if not is_truthy(sudo):
+            self._log("Starting command '%s'." % command, self._config.loglevel)
         else:
-            self._info("Starting command 'sudo %s'." % command)
+            self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
         self._last_command = command
         self.current.start_command(command, sudo, sudo_password)
 
@@ -1087,7 +1084,7 @@ class SSHLibrary(object):
 
         This keyword logs the read command with log level ``INFO``.
         """
-        self._info("Reading output of command '%s'." % self._last_command)
+        self._log("Reading output of command '%s'." % self._last_command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         try:
@@ -1129,7 +1126,7 @@ class SSHLibrary(object):
 
     def _return_command_output(self, stdout, stderr, rc, return_stdout,
                                return_stderr, return_rc):
-        self._info("Command exited with return code %d." % rc)
+        self._log("Command exited with return code %d." % rc, self._config.loglevel)
         ret = []
         if is_truthy(return_stdout):
             ret.append(stdout.rstrip('\n'))
@@ -1536,7 +1533,7 @@ class SSHLibrary(object):
         except SSHClientException as e:
             raise RuntimeError(e)
         for src, dst in files:
-            self._info("'%s' -> '%s'" % (src, dst))
+            self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
 
     def file_should_exist(self, path):
         """Fails if the given ``path`` does NOT point to an existing file.
@@ -1619,8 +1616,8 @@ class SSHLibrary(object):
             items = self.current.list_dir(path, pattern, is_truthy(absolute))
         except SSHClientException as msg:
             raise RuntimeError(msg)
-        self._info('%d item%s:\n%s' % (len(items), plural_or_not(items),
-                                       '\n'.join(items)))
+        self._log('%d item%s:\n%s' % (len(items), plural_or_not(items),
+                                       '\n'.join(items)), self._config.loglevel)
         return items
 
     def list_files_in_directory(self, path, pattern=None, absolute=False):
@@ -1631,8 +1628,8 @@ class SSHLibrary(object):
         except SSHClientException as msg:
             raise RuntimeError(msg)
         files = self.current.list_files_in_dir(path, pattern, absolute)
-        self._info('%d file%s:\n%s' % (len(files), plural_or_not(files),
-                                       '\n'.join(files)))
+        self._log('%d file%s:\n%s' % (len(files), plural_or_not(files),
+                                       '\n'.join(files)), self._config.loglevel)
         return files
 
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
@@ -1641,9 +1638,9 @@ class SSHLibrary(object):
             dirs = self.current.list_dirs_in_dir(path, pattern, is_truthy(absolute))
         except SSHClientException as msg:
             raise RuntimeError(msg)
-        self._info('%d director%s:\n%s' % (len(dirs),
+        self._log('%d director%s:\n%s' % (len(dirs),
                                            'y' if len(dirs) == 1 else 'ies',
-                                           '\n'.join(dirs)))
+                                           '\n'.join(dirs)), self._config.loglevel)
         return dirs
 
 

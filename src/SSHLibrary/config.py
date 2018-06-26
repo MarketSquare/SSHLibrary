@@ -131,10 +131,10 @@ class TimeEntry(Entry):
 class LogLevelEntry(Entry):
     """Log level to be stored in :py:class:`Configuration`.
 
-    Given string must be on of 'TRACE', 'DEBUG', 'INFO' or 'WARN', case
+    Given string must be one of 'TRACE', 'DEBUG', 'INFO', 'WARN' or 'NONE' case
     insensitively.
     """
-    LEVELS = ('TRACE', 'DEBUG', 'INFO', 'WARN')
+    LEVELS = ('TRACE', 'DEBUG', 'INFO', 'WARN', 'NONE')
 
     def _parse_value(self, value):
         value = str(value).upper()
