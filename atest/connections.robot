@@ -2,7 +2,6 @@
 Default Tags   pybot   jybot
 Resource       resources/common.robot
 Test Teardown  Close All Connections
-Library        OperatingSystem
 
 *** Test Cases ***
 Open Connection
@@ -37,13 +36,6 @@ Switch Connection To None
     [Setup]   Login As Valid User
     Switch Connection  ${NONE}
     Connection Should Be Closed
-
-Enable Logging
-    [Tags]   pybot
-    [Setup]  Remove File  ${OUTPUTDIR}${/}sshlog.txt
-    Enable SSH Logging  ${OUTPUTDIR}${/}sshlog.txt
-    Login As Valid User
-    File Should Not Be Empty  ${OUTPUTDIR}${/}sshlog.txt
 
 Switch to closed connection pybot
     [Tags]   pybot
