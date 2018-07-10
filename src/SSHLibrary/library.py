@@ -610,11 +610,13 @@ class SSHLibrary(object):
         | `Should Be Equal`   | ${username}       | jenkins       |
         """
         old_index = self._connections.current_index
-        if index_or_alias is None:
-            self.close_connection()
-        else:
-            self._connections.switch(index_or_alias)
-        return old_index
+        try:
+            if index_or_alias is None:
+                self.close_connection()
+            else:
+                self._connections.switch(index_or_alias)
+        except:
+            return old_index
 
     def close_connection(self):
         """Closes the current connection.
@@ -630,6 +632,7 @@ class SSHLibrary(object):
         | # Do something with /tmp/results.txt               |
         """
         self.current.close()
+        self._connections._connections.remove(self.current)
         self._connections.current = self._connections._no_current
 
     def close_all_connections(self):
