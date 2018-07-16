@@ -632,6 +632,8 @@ class SSHLibrary(object):
         | # Do something with /tmp/results.txt               |
         """
         self.current.close()
+        if not self.current.config.alias is None:
+            self._connections._aliases.pop(self.current.config.alias)
         self._connections._connections.remove(self.current)
         self._connections.current = self._connections._no_current
 
