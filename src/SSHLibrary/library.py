@@ -610,7 +610,7 @@ class SSHLibrary(object):
         | ${username}=        | `Execute Command` | whoami        | # Executed on build.local.net |
         | `Should Be Equal`   | ${username}       | jenkins       |
         """
-        old_index = self._connections.currenw_index
+        old_index = self._connections.current_index
         if index_or_alias is None:
             self.close_connection()
         else:
