@@ -20,6 +20,7 @@ try:
 except ImportError:
     logger = None
 
+from .sshconnectioncache import SSHConnectionCache
 from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
@@ -403,7 +404,7 @@ class SSHLibrary(object):
 
         | Library | SSHLibrary | newline=CRLF | path_separator=\\\\ |
         """
-        self._connections = ConnectionCache()
+        self._connections = SSHConnectionCache()
         self._config = _DefaultConfiguration(
             timeout or self.DEFAULT_TIMEOUT,
             newline or self.DEFAULT_NEWLINE,
@@ -609,14 +610,12 @@ class SSHLibrary(object):
         | ${username}=        | `Execute Command` | whoami        | # Executed on build.local.net |
         | `Should Be Equal`   | ${username}       | jenkins       |
         """
-        old_index = self._connections.current_index
-        try:
-            if index_or_alias is None:
-                self.close_connection()
-            else:
-                self._connections.switch(index_or_alias)
-        except:
-            return old_index
+        old_index = self._connections.currenw_index
+        if index_or_alias is None:
+            self.close_connection()
+        else:
+            self._connections.switch(index_or_alias)
+        return old_index
 
     def close_connection(self):
         """Closes the current connection.
@@ -631,11 +630,9 @@ class SSHLibrary(object):
         | `Close Connection` |
         | # Do something with /tmp/results.txt               |
         """
-        self.current.close()
-        if not self.current.config.alias is None:
-            self._connections._aliases.pop(self.current.config.alias)
-        self._connections._connections.remove(self.current)
-        self._connections.current = self._connections._no_current
+        connections = self._connections
+        connections.close_current_connection()
+
 
     def close_all_connections(self):
         """Closes all open connections.

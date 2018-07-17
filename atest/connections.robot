@@ -37,22 +37,13 @@ Switch Connection To None
     Switch Connection  ${NONE}
     Connection Should Be Closed
 
-Switch to Already Closed Connection
-    [Documentation]    FAIL GLOB: Non-existing index or alias '*'.
-    Open Connection    ${HOST}    alias=one
-    Login With Public Key    ${KEY USERNAME}    ${KEY}
-    Close Connection
-    Switch Connection    one
-    Connection Should Be Closed
-
 Switch to closed connection pybot
     [Tags]   pybot
     Open Connection  ${HOST}  alias=SUT
     Login  ${USERNAME}  ${PASSWORD}
     Execute command   ls
     close connection
-    switch connection   SUT
-    Run keyword and expect error  Connection not open   Execute command   ls
+    Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
 
 Switch to closed connection jybot
     [Tags]   jybot
