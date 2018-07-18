@@ -631,7 +631,7 @@ class SSHLibrary(object):
         | # Do something with /tmp/results.txt               |
         """
         connections = self._connections
-        connections.close_current_connection()
+        connections.close_current()
 
 
     def close_all_connections(self):

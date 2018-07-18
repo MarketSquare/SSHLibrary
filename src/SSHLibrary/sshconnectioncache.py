@@ -13,7 +13,7 @@ class SSHConnectionCache(ConnectionCache):
     def aliases(self):
         return self._aliases
 
-    def close_current_connection(self):
+    def close_current(self):
         connection = self.current
         connection.close()
         if connection.config.alias is not None:
