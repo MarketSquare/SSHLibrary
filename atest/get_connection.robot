@@ -12,7 +12,6 @@ Get Connection
     Should Be Equal  ${conn.index}  ${conn2_index}
     ${conn} =  Get Connection  one
     Should Be Equal  ${conn.index}  ${conn1_index}
-    Close Connection
     ${conn} =  Get Connection  2
     Should Be Equal  ${conn.index}  ${conn2_index}
 
