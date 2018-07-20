@@ -1048,7 +1048,7 @@ class AbstractSFTPClient(object):
             except:
                 if not isinstance(mode, int):
                     mode = int(mode, 8)
-                self._client.mkdir(current_dir, mode=mode)
+                self._client.mkdir(current_dir, mode)
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
