@@ -77,3 +77,17 @@ Write Until Expected Output In Case Of Timeout
     ...                           Write Until Expected Output  ${REMOTE TEST ROOT}/${REPEAT TEST SCRIPT NAME}\n
     ...                           11  2s  0.5s
     [Teardown]  Execute Command  rm -f ${COUNTER NAME}
+
+Read Until Prompt With Strip Prompt
+    Set Client Configuration      prompt=${PROMPT}
+    Write                         echo This is a test
+    ${output}=                    Read Until Prompt  strip_prompt=True
+    Should Contain                ${output}          This is a test
+    Should Not Contain            ${output}          ${PROMPT}
+
+Read Until REGEXP Prompt With Strip Prompt
+    Set Client Configuration        prompt=${REGEXP PROMPT}
+    Write                           echo This is a test
+    ${output}=                      Read Until Prompt  strip_prompt=True
+    Should Contain                  ${output}          This is a test
+    Should Not Match Regexp         ${output}          (#|\\$)

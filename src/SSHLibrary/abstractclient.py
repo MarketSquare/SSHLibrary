@@ -403,7 +403,7 @@ class AbstractSSHClient(object):
         """
         return self.read_until(self.config.newline)
 
-    def read_until_prompt(self):
+    def read_until_prompt(self, strip_prompt=False):
         """Reads output from the current shell until the prompt is encountered
         or the timeout expires.
 
@@ -419,9 +419,31 @@ class AbstractSSHClient(object):
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
+
+        if strip_prompt:
+            regexp = False
+            if self.config.prompt.startswith('REGEXP:'):
+                output = self.read_until_regexp(self.config.prompt[7:])
+                regexp = True
+                return self._strip_prompt(output, regexp)
+
+            output = self.read_until(self.config.prompt)
+            return self._strip_prompt(output, regexp)
+
         if self.config.prompt.startswith('REGEXP:'):
             return self.read_until_regexp(self.config.prompt[7:])
         return self.read_until(self.config.prompt)
+
+    def _strip_prompt(self, output, regexp):
+        if regexp:
+            pattern = re.compile(self.config.prompt[7:])
+            match = pattern.search(output)
+            length = match.end() - match.start()
+        else:
+            length = len(self.config.prompt)
+
+        output = output[:-length]
+        return output
 
     def read_until_regexp(self, regexp):
         """Reads output from the current shell until the `regexp` matches or
