@@ -61,7 +61,7 @@ Put Directory And Check For Proper Permissions
 	Should Contain     ${output}                  to_put
 	Check File Permissions
 	Check Folder Permissions
-	Execute Command    rm -r ${CURDIR}${/}testdata${/}to_put
+	[Teardown]         Execute Command            rm -r ${CURDIR}${/}testdata${/}to_put
 
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
