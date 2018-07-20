@@ -945,7 +945,7 @@ class AbstractSFTPClient(object):
                                                  mode, newline,
                                                  path_separator, recursive)
         else:
-            self._create_missing_remote_path(destination)
+            self._create_missing_remote_path(destination, mode)
             files.append((source, destination))
         return files
 
@@ -987,7 +987,7 @@ class AbstractSFTPClient(object):
         remote_files, remote_dir = self._get_put_file_destinations(local_files,
                                                                    destination,
                                                                    path_separator)
-        self._create_missing_remote_path(remote_dir)
+        self._create_missing_remote_path(remote_dir, mode)
         files = list(zip(local_files, remote_files))
         for source, destination in files:
             self._put_file(source, destination, mode, newline)
@@ -1035,7 +1035,7 @@ class AbstractSFTPClient(object):
             return destination, ''
         return destination.rsplit(path_separator, 1)
 
-    def _create_missing_remote_path(self, path):
+    def _create_missing_remote_path(self, path, mode):
         if path.startswith(b'/'):
             current_dir = b'/'
         else:
@@ -1046,7 +1046,7 @@ class AbstractSFTPClient(object):
             try:
                 self._client.stat(current_dir)
             except:
-                self._client.mkdir(current_dir, 0o744)
+                self._client.mkdir(current_dir, mode)
 
     def _put_file(self, source, destination, mode, newline):
         remote_file = self._create_remote_file(destination, mode)
