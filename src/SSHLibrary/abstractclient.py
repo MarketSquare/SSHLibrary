@@ -24,7 +24,7 @@ import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
-from .utils import is_bytes, is_string, unicode, is_truthy
+from .utils import is_bytes, is_string, unicode
 
 
 class SSHClientException(RuntimeError):
@@ -412,6 +412,9 @@ class AbstractSSHClient(object):
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
 
+        :param bool strip_prompt: If 'True' then the prompt is removed from
+            the resulting output
+
         :raises SSHClientException: If prompt is not set or is not found
             in the output when the timeout expires.
 
@@ -420,26 +423,21 @@ class AbstractSSHClient(object):
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
 
-        if is_truthy(strip_prompt):
-            if self.config.prompt.startswith('REGEXP:'):
-                output = self.read_until_regexp(self.config.prompt[7:])
-                return self._strip_prompt(output, True)
-
-            output = self.read_until(self.config.prompt)
-            return self._strip_prompt(output, False)
-
         if self.config.prompt.startswith('REGEXP:'):
-            return self.read_until_regexp(self.config.prompt[7:])
-        return self.read_until(self.config.prompt)
+            output = self.read_until_regexp(self.config.prompt[7:])
+        else:
+            output = self.read_until(self.config.prompt)
+        if strip_prompt:
+            output = self._strip_prompt(output)
+        return output
 
-    def _strip_prompt(self, output, regexp):
-        if regexp:
+    def _strip_prompt(self, output):
+        if self.config.prompt.startswith('REGEXP:'):
             pattern = re.compile(self.config.prompt[7:])
             match = pattern.search(output)
             length = match.end() - match.start()
         else:
             length = len(self.config.prompt)
-
         return output[:-length]
 
     def read_until_regexp(self, regexp):

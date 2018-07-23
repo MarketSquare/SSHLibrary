@@ -1301,7 +1301,7 @@ class SSHLibrary(object):
         details about reading and writing in general, see the `Interactive
         shells` section.
         """
-        return self._read_and_log(loglevel, self.current.read_until_prompt, strip_prompt)
+        return self._read_and_log(loglevel, self.current.read_until_prompt, is_truthy(strip_prompt))
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Consumes and returns the server output until a match to ``regexp`` is found.
