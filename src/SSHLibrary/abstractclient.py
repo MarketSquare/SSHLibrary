@@ -24,7 +24,7 @@ import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
-from .utils import is_bytes, is_string, unicode
+from .utils import is_bytes, is_string, unicode, is_truthy
 
 
 class SSHClientException(RuntimeError):
@@ -420,15 +420,13 @@ class AbstractSSHClient(object):
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
 
-        if strip_prompt:
-            regexp = False
+        if is_truthy(strip_prompt):
             if self.config.prompt.startswith('REGEXP:'):
                 output = self.read_until_regexp(self.config.prompt[7:])
-                regexp = True
-                return self._strip_prompt(output, regexp)
+                return self._strip_prompt(output, True)
 
             output = self.read_until(self.config.prompt)
-            return self._strip_prompt(output, regexp)
+            return self._strip_prompt(output, False)
 
         if self.config.prompt.startswith('REGEXP:'):
             return self.read_until_regexp(self.config.prompt[7:])
@@ -442,8 +440,7 @@ class AbstractSSHClient(object):
         else:
             length = len(self.config.prompt)
 
-        output = output[:-length]
-        return output
+        return output[:-length]
 
     def read_until_regexp(self, regexp):
         """Reads output from the current shell until the `regexp` matches or
