@@ -59,7 +59,7 @@ def get_os_includes(operating_system):
 def python(*opts):
     try:
         run_cli(['--outputdir', OUTPUT_PYTHON,
-                '--include', 'pybot']
+                '--include', 'ttest', '--loglevel', 'TRACE']
                 + list(COMMON_OPTS + opts))
     except SystemExit:
         pass

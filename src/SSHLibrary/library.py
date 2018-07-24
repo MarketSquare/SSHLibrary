@@ -928,7 +928,7 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -986,7 +986,7 @@ class SSHLibrary(object):
             self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password, timeout)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command, sudo=False,  sudo_password=None):

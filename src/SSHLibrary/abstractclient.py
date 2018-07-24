@@ -231,7 +231,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -249,8 +249,16 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
+        if timeout:
+            command = 'timeout ' + timeout + command
+
         self.start_command(command, sudo, sudo_password)
-        return self.read_command_output()
+        stdout, stderr, rc = self.read_command_output()
+
+        if rc >= 124 and timeout:
+            raise SSHClientException('Could not execute command in %s' % timeout)
+
+        return tuple([stdout, stderr, rc])
 
     def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts the execution of the `command` on the remote host.
