@@ -250,12 +250,12 @@ class AbstractSSHClient(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         if timeout:
-            command = 'timeout ' + timeout + command
+            command = 'timeout ' + timeout + ' ' + command
 
         self.start_command(command, sudo, sudo_password)
         stdout, stderr, rc = self.read_command_output()
 
-        if rc >= 124 and timeout:
+        if rc == 124 and timeout:
             raise SSHClientException('Could not execute command in %s' % timeout)
 
         return tuple([stdout, stderr, rc])
