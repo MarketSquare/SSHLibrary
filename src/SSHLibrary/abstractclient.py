@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 from fnmatch import fnmatchcase
+from paramiko.channel import Channel
 import os
 import re
 import stat
@@ -250,15 +251,11 @@ class AbstractSSHClient(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         if timeout:
-            command = 'timeout ' + timeout + ' ' + command
+            timeout = float(TimeEntry(timeout).value)
+
 
         self.start_command(command, sudo, sudo_password)
-        stdout, stderr, rc = self.read_command_output()
-
-        if rc == 124 and timeout:
-            raise SSHClientException('Could not execute command in %s' % timeout)
-
-        return tuple([stdout, stderr, rc])
+        return self.read_command_output(timeout)
 
     def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts the execution of the `command` on the remote host.
@@ -284,7 +281,7 @@ class AbstractSSHClient(object):
     def _start_command(self, command, sudo=False, sudo_password=None):
         raise NotImplementedError
 
-    def read_command_output(self):
+    def read_command_output(self, timeout=None):
         """Reads the output of the previous started command.
 
         The previous started command, started with :py:meth:`start_command`,
@@ -298,7 +295,7 @@ class AbstractSSHClient(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         try:
-            return self._started_commands.pop().read_outputs()
+            return self._started_commands.pop().read_outputs(timeout)
         except IndexError:
             raise SSHClientException('No started commands to read output from.')
 
