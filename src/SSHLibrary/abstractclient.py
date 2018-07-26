@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 from fnmatch import fnmatchcase
-from paramiko.channel import Channel
 import os
 import re
 import stat

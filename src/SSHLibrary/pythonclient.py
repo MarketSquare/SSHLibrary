@@ -17,7 +17,6 @@ import time
 import ntpath
 import select
 import threading
-import socket
 
 try:
     import SocketServer
@@ -43,9 +42,11 @@ def _custom_start_client(self, *args, **kwargs):
     self.banner_timeout = 45
     self._orig_start_client(*args, **kwargs)
 
+
 paramiko.transport.Transport._orig_start_client = \
     paramiko.transport.Transport.start_client
 paramiko.transport.Transport.start_client = _custom_start_client
+
 
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
 def _custom_log(self, level, msg, *args):
@@ -56,6 +57,7 @@ def _custom_log(self, level, msg, *args):
         msg = escape(msg)
     return self._orig_log(level, msg, *args)
 
+
 def _recv_exit_status_with_timeout(self, timeout=None):
     self.status_event.wait(timeout=timeout)
     if not self.status_event.is_set():
@@ -63,10 +65,10 @@ def _recv_exit_status_with_timeout(self, timeout=None):
     return self.exit_status
 
 
-
 paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
 paramiko.sftp_client.SFTPClient._log = _custom_log
 paramiko.channel.Channel.recv_exit_status = _recv_exit_status_with_timeout
+
 
 class PythonSSHClient(AbstractSSHClient):
     tunnel = None
@@ -223,8 +225,11 @@ class SFTPClient(AbstractSFTPClient):
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self, timeout=None):
-        rc = self._shell.recv_exit_status(timeout)
+        if timeout:
+            rc = self._shell.recv_exit_status(timeout)
         stderr, stdout = self._receive_stdout_and_stderr()
+        if not timeout:
+            rc = self._shell.recv_exit_status(None)
         self._shell.close()
         return stdout, stderr, rc
 

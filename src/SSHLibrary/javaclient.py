@@ -34,6 +34,15 @@ class JavaSSHClientException(Exception):
     pass
 
 
+def _wait_until_timeout(_shell, timeout):
+    timeout_condition = 1
+    rc = 32
+    condition = _shell.waitForCondition(rc , int(timeout) * 1000)
+
+    if condition & timeout_condition != 0:
+        raise SSHClientException("Timed out in %s seconds" % int(timeout))
+
+
 class JavaSSHClient(AbstractSSHClient):
 
     def _get_client(self):
@@ -172,10 +181,12 @@ class SFTPClient(AbstractSFTPClient):
 
 class RemoteCommand(AbstractCommand):
 
-    def read_outputs(self):
+    def read_outputs(self, timeout=None):
+        if timeout:
+            _wait_until_timeout(self._shell, timeout)
         stdout = self._read_from_stream(self._shell.getStdout())
         stderr = self._read_from_stream(self._shell.getStderr())
-        rc = self._shell.getExitStatus() or 0
+        rc = self._shell.getExitStatus()
         self._shell.close()
         return stdout, stderr, rc
 
