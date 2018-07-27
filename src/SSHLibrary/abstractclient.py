@@ -252,9 +252,8 @@ class AbstractSSHClient(object):
         if timeout:
             timeout = float(TimeEntry(timeout).value)
 
-
         self.start_command(command, sudo, sudo_password)
-        return self.read_command_output(timeout)
+        return self.read_command_output(timeout=timeout)
 
     def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts the execution of the `command` on the remote host.

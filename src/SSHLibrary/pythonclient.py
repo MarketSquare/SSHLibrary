@@ -47,7 +47,6 @@ paramiko.transport.Transport._orig_start_client = \
     paramiko.transport.Transport.start_client
 paramiko.transport.Transport.start_client = _custom_start_client
 
-
 # See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
 def _custom_log(self, level, msg, *args):
     escape = lambda s: s.replace('%', '%%')
@@ -57,18 +56,8 @@ def _custom_log(self, level, msg, *args):
         msg = escape(msg)
     return self._orig_log(level, msg, *args)
 
-
-def _recv_exit_status_with_timeout(self, timeout=None):
-    self.status_event.wait(timeout=timeout)
-    if not self.status_event.is_set():
-        raise SSHClientException('Timed out in %s seconds' % int(timeout))
-    return self.exit_status
-
-
 paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
 paramiko.sftp_client.SFTPClient._log = _custom_log
-paramiko.channel.Channel.recv_exit_status = _recv_exit_status_with_timeout
-
 
 class PythonSSHClient(AbstractSSHClient):
     tunnel = None
@@ -225,27 +214,29 @@ class SFTPClient(AbstractSFTPClient):
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self, timeout=None):
-        if timeout:
-            rc = self._shell.recv_exit_status(timeout)
-        stderr, stdout = self._receive_stdout_and_stderr()
-        if not timeout:
-            rc = self._shell.recv_exit_status(None)
+        stderr, stdout = self._receive_stdout_and_stderr(timeout)
+        rc = self._shell.recv_exit_status()
         self._shell.close()
         return stdout, stderr, rc
 
-    def _receive_stdout_and_stderr(self):
+    def _receive_stdout_and_stderr(self, timeout=None):
         stdout_filebuffer = self._shell.makefile('rb', -1)
         stderr_filebuffer = self._shell.makefile_stderr('rb', -1)
         stdouts = []
         stderrs = []
         while self._shell_open():
-            self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts)
+            self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout)
             time.sleep(0.01) # lets not be so busy
         stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
         stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
         return stderr, stdout
 
-    def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts):
+    def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout=None):
+        if timeout:
+            self._shell.status_event.wait(timeout)
+            if not self._shell.status_event.isSet():
+                raise SSHClientException('Timed out in %s seconds' % int(timeout))
+
         if self._shell.recv_ready():
             stdouts.append(stdout_filebuffer.read(len(self._shell.in_buffer)))
         if self._shell.recv_stderr_ready():

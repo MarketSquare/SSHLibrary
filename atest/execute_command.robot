@@ -50,8 +50,10 @@ Execute Command With Legacy Stderr Config
     Should Be Equal  ${stderr}  This is stderr
 
 Execute Command With Timeout Argument
-    Run Keyword And Expect Error     SSHClientException*   Execute Command    sleep 5s     timeout=1s
-    Run Keyword And Expect Error     SSHClientException*   Execute Command    cat          timeout=3s
+    Run Keyword And Expect Error     SSHClientException: Timed out in * seconds
+    ...                              Execute Command    cat               timeout=1s
+    Run Keyword And Expect Error     SSHClientException: Timed out in * seconds
+    ...                              Execute Command    ping localhost    timeout=2s
 
 Execute Command With Legacy Stdout And Stderr Config
     ${stdout}  ${stderr} =  Execute Command  ${REMOTE TEST ROOT}/${TEST SCRIPT NAME}
