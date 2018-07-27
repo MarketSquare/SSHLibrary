@@ -88,3 +88,4 @@ Execute Time Consuming Sudo Command
     [Tags]     linux
     ${stdout} =  Execute Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     Should Contain  ${stdout}  cat
+	
