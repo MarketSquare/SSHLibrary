@@ -42,7 +42,6 @@ def _wait_until_timeout(_shell, timeout):
     if condition & timeout_condition != 0:
         raise SSHClientException("Timed out in %s seconds" % int(timeout))
 
-
 class JavaSSHClient(AbstractSSHClient):
 
     def _get_client(self):
@@ -186,7 +185,7 @@ class RemoteCommand(AbstractCommand):
             _wait_until_timeout(self._shell, timeout)
         stdout = self._read_from_stream(self._shell.getStdout())
         stderr = self._read_from_stream(self._shell.getStderr())
-        rc = self._shell.getExitStatus()
+        rc = self._shell.getExitStatus() or 0
         self._shell.close()
         return stdout, stderr, rc
 
