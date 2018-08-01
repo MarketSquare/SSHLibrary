@@ -28,6 +28,7 @@ before_install:
   - sudo bash -c "echo 'Testing pre-login banner' > /etc/ssh/sshd-banner"
   - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
   - sudo service ssh restart
+  - sudo ifconfig lo add ::1/128
 install:
   - pip install -r requirements-dev.txt
 matrix:
