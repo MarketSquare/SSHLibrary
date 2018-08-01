@@ -74,3 +74,4 @@ script:
         $INTERPRETER atest/run.py --variable=HOST:::1 atest;
     else
         $INTERPRETER atest/run.py atest;
+    fi
