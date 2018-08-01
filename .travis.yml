@@ -71,6 +71,6 @@ before_script:
     fi
 script:
   - if [ "$IPV6" == "true" ]; then
-        $INTERPRETER atest/run.py --variable=HOST:::1 atest
+        $INTERPRETER atest/run.py --variable=HOST:::1 atest;
     else
-        $INTERPRETER atest/run.py atest
+        $INTERPRETER atest/run.py atest;
