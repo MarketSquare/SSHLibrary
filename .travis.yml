@@ -4,6 +4,7 @@ dist: trusty
 env:
   global:
     -JYTHON=false
+    -IPV6=false
 before_install:
   - if [ "$JYTHON" == "true" ]; then
         wget -O jython.jar http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar;
@@ -39,6 +40,11 @@ matrix:
       env:
         - JYTHON=true
         - ROBOTFRAMEWORK=3.0.4
+    - python: "2.7"
+      env:
+      - JYTHON=true
+      - IPV6=true
+      - ROBOTFRAMEWORK=3.0.4
     - python: "3.4"
       env:
         - ROBOTFRAMEWORK=3.0.4
@@ -51,6 +57,11 @@ matrix:
       env:
         - ROBOTFRAMEWORK=3.0.4
         - PARAMIKO=1.15.3
+    - python: "3.6"
+      env:
+        - IPV6=true
+        - ROBOTFRAMEWORK=3.0.4
+        - PARAMIKO=2.4.1
 before_script:
   - pip install robotframework==$ROBOTFRAMEWORK
   - if [ "$JYTHON" == "true" ]; then
@@ -59,4 +70,7 @@ before_script:
         pip install paramiko==$PARAMIKO;
     fi
 script:
-  - $INTERPRETER atest/run.py atest
+  - if [ "$IPV6" == "true" ]; then
+        $INTERPRETER atest/run.py --variable=HOST:::1 atest
+  else
+        $INTERPRETER atest/run.py atest
