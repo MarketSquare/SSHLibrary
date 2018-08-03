@@ -45,7 +45,7 @@ class ForwardServer(SocketServer.ThreadingTCPServer):
 
     def __init__(self, server_address, RequestHandlerClass, ipv6=False):
         if ipv6:
-            ForwardServer.address_family = 10
+            ForwardServer.address_family = socket.AF_INET6
         SocketServer.ThreadingTCPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate=True)
 
 
