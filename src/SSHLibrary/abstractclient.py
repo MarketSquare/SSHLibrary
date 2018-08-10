@@ -760,7 +760,7 @@ class AbstractSFTPClient(object):
                                    absolute)
 
     def _get_file_names(self, path):
-        return [item.name for item in self._list(path) if item.is_regular()]
+        return [item.name for item in self._list(path) if item.is_regular() or item.is_link()]
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
         """Gets the directory names, or optionally the absolute paths, on the
@@ -1142,3 +1142,10 @@ class SFTPFileInfo(object):
         :returns: `True`, if the file is a regular file. False otherwise.
         """
         return stat.S_ISDIR(self.mode)
+
+    def is_link(self):
+        """Checks if this file is a symbolic link.
+
+        :returns: `True`, if the file is a symlink file. False otherwise.
+        """
+        return stat.S_ISLNK(self.mode)

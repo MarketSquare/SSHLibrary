@@ -64,6 +64,12 @@ Get File Should Fail When There Are No Source Files
     ...  There were no source files matching 'non-existing'.
     ...  SSH.Get File  non-existing
 
+Get Symlink File
+  Execute Command  cd ${REMOTE TEST ROOT}; ln -s ${TEST FILE NAME} ${SYMLINK TO TEST FILE}
+  SSH.Get File  ${REMOTE TEST ROOT}/${SYMLINK TO TEST FILE}  .
+  OS.File Should Exist  ${SYMLINK TO TEST FILE}
+  [Teardown]  OS.Remove File  ${SYMLINK TO TEST FILE}
+
 *** Keywords ***
 Create Tmp Dir And Move File
     Put File  ${TEST FILE}  /tmp/
