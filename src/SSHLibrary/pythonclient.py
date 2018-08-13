@@ -15,13 +15,6 @@
 
 import time
 import ntpath
-import select
-import threading
-
-try:
-    import SocketServer
-except ImportError:
-    import socketserver as SocketServer
 
 try:
     import paramiko
@@ -34,6 +27,7 @@ except ImportError:
 from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
+from .pythonforward import LocalPortForwarding
 from .utils import is_bytes, is_list_like, is_unicode
 
 
@@ -253,55 +247,3 @@ class RemoteCommand(AbstractCommand):
             self._shell.exec_command(command)
         else:
             self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
-
-
-class LocalPortForwarding:
-    def __init__(self, port, host, transport):
-        self.server = None
-        self.port = port
-        self.host = host
-        self.transport = transport
-
-    def forward(self, local_port):
-        class SubHandler(LocalPortForwardingHandler):
-            port = self.port
-            host = self.host
-            ssh_transport = self.transport
-
-        self.server = SocketServer.ThreadingTCPServer(('', local_port), SubHandler)
-        self.server.daemon_threads = True
-        self.server.allow_reuse_address = True
-        t = threading.Thread(target=self.server.serve_forever)
-        t.setDaemon(True)
-        t.start()
-
-    def close(self):
-        if self.server:
-            self.server.shutdown()
-
-
-class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
-    host, port, ssh_transport = None, None, None
-
-    def handle(self):
-        try:
-            chan = self.ssh_transport.open_channel('direct-tcpip', (self.host, self.port),
-                                                   self.request.getpeername())
-        except Exception:
-            return
-        if chan is None:
-            return
-        while True:
-            r, w, x = select.select([self.request, chan], [], [])
-            if self.request in r:
-                data = self.request.recv(1024)
-                if len(data) == 0:
-                    break
-                chan.send(data)
-            if chan in r:
-                data = chan.recv(1024)
-                if len(data) == 0:
-                    break
-                self.request.send(data)
-        chan.close()
-        self.request.close()
