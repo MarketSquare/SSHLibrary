@@ -55,6 +55,14 @@ Put Directory Containing A File With Colon In Its Name
      Check And Remove Local Added Directory   ${REMOTE TEST ROOT}
      [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
+Put Directory And Check For Proper Permissions
+	Put Directory	   ${CURDIR}${/}testdata${/}to_put         recursive=True         mode=0755
+	${output}=         Execute Command            ls
+	Should Contain     ${output}                  to_put
+	Check File Permissions
+	Check Folder Permissions
+	[Teardown]         Execute Command            rm -r ${CURDIR}${/}testdata${/}to_put
+
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
     OS.Remove Directory  ${LOCAL TEXTFILES}${/}empty
@@ -85,4 +93,12 @@ Check And Remove Local Added Directory
     ${files_list} =  SSH.List Files In Directory  ${destination}
     List should contain value  ${files_list}  ${COLON CHAR FILE_NAME}
     [Teardown]  OS.Remove File  ${COLON CHAR FILE}
+
+Check Folder Permissions
+   ${folder}=          Execute Command      stat -c %a to_put${/}Folder3
+   Should Contain      ${folder}            755
+
+Check File Permissions
+   ${file}=            Execute Command      stat -c %a to_put${/}ExampleText3.txt
+   Should Contain      ${file}              755
 
