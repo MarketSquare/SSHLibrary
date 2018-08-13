@@ -63,6 +63,14 @@ Get Directory works if there are existing local directories
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
+Get Directory containing a symlink
+   [Setup]  Create Directory  ${LOCAL TMPDIR}
+   Execute Command  mkdir ${REMOTE TEST ROOT}/symlink
+   Execute Command  cd ${REMOTE TEST ROOT}/symlink; ln -s ../${TEST FILE NAME} ${SYMLINK TO TEST FILE}
+   Get Directory  ${REMOTE TEST ROOT}/symlink  ${LOCAL TMPDIR}
+   OS.File Should Exist  ${LOCAL TMPDIR}${/}${SYMLINK TO TEST FILE}
+   [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
 *** Keywords ***
 File content should be
     [Arguments]    ${file}    ${expected}

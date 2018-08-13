@@ -17,6 +17,7 @@ ${EMPTY SUB DIR}                 empty
 ${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
 ${COLON CHAR FILE NAME}          special:char.txt
 ${COLON CHAR FILE}               ${LOCAL TEXTFILES}${/}special:char.txt
+${SYMLINK TO TEST FILE}          symlink_to_text_file.txt
 
 *** Keywords ***
 Login And Upload Test Files
