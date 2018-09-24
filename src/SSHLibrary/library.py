@@ -817,7 +817,7 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, delay='0.5 seconds'):
+    def login(self, username, password, delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -839,7 +839,7 @@ class SSHLibrary(object):
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
         """
-        return self._login(self.current.login, username, password, delay)
+        return self._login(self.current.login, username, password, delay, False, proxy_cmd)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,
