@@ -66,9 +66,21 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, look_for_keys=False, proxy_cmd=None):
         try:
-            self.client.connect(self.config.host, self.config.port, username,
+    #        self.client.connect(self.config.host, self.config.port, username,
+    #                            password, look_for_keys=look_for_keys,
+    #                            allow_agent=look_for_keys,
+    #                            timeout=float(self.config.timeout))
+            if proxy_cmd:
+                proxy = paramiko.ProxyCommand(proxy_cmd)
+                self.client.connect(self.config.host, self.config.port, username,
+                                password,look_for_keys=look_for_keys,
+                                allow_agent=look_for_keys,
+                                timeout=float(self.config.timeout),
+                                sock=proxy)
+            else:
+                self.client.connect(self.config.host, self.config.port, username,
                                 password, look_for_keys=look_for_keys,
                                 allow_agent=look_for_keys,
                                 timeout=float(self.config.timeout))
