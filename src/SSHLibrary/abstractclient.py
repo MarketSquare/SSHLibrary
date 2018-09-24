@@ -116,7 +116,7 @@ class AbstractSSHClient(object):
         self._shell = None
         self.client.close()
 
-    def login(self, username, password, delay=None, look_for_keys=False, proxy_cmd=None):
+    def login(self, username, password, delay=None, look_for_keys=False):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -144,7 +144,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, look_for_keys=look_for_keys, proxy_cmd=proxy_cmd)
+            self._login(username, password, look_for_keys=look_for_keys)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
