@@ -66,18 +66,35 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, look_for_keys=False, proxy_cmd=None):
         try:
-            self.client.connect(self.config.host, self.config.port, username,
+            if proxy_cmd:
+                proxy = paramiko.ProxyCommand(proxy_cmd)
+                self.client.connect(self.config.host, self.config.port, username,
+                                password, look_for_keys=look_for_keys,
+                                allow_agent=look_for_keys,
+                                timeout=float(self.config.timeout),
+                                sock=proxy)
+            else: 
+                self.client.connect(self.config.host, self.config.port, username,
                                 password, look_for_keys=look_for_keys,
                                 allow_agent=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys):
+    def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None):
         try:
-            self.client.connect(self.config.host, self.config.port, username,
+            if proxy_cmd:
+                proxy = paramiko.ProxyCommand(proxy_cmd)
+                self.client.connect(self.config.host, self.config.port, username,
+                                password, key_filename=key_file,
+                                allow_agent=allow_agent,
+                                look_for_keys=look_for_keys,
+                                timeout=float(self.config.timeout),
+                                sock=proxy)
+            else:
+                self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,

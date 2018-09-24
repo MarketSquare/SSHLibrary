@@ -30,7 +30,6 @@ from .version import VERSION
 
 __version__ = VERSION
 
-
 class SSHLibrary(object):
     """SSHLibrary is a Robot Framework test library for SSH and SFTP.
 
@@ -817,7 +816,7 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, delay='0.5 seconds'):
+    def login(self, username, password, delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -825,7 +824,8 @@ class SSHLibrary(object):
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
         Otherwise the output is read using the `Read` keyword with the given
-        ``delay``. The output is logged using the default `log level`.
+        ``delay``. The output is logged using the default `log level`. The 
+        `proxy_cmd` is used to connect to a SSH proxy
 
         Example that logs in and returns the output:
 
@@ -839,11 +839,11 @@ class SSHLibrary(object):
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
         """
-        return self._login(self.current.login, username, password, delay)
+        return self._login(self.current.login, username, password, delay, False, proxy_cmd)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,
-                              delay='0.5 seconds'):
+                              delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -854,6 +854,8 @@ class SSHLibrary(object):
         filesystem.
 
         ``password`` is used to unlock the ``keyfile`` if needed.
+
+        `proxy_cmd` is used to connect to a SSH Proxy server.
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
