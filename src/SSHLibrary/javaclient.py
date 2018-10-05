@@ -50,7 +50,7 @@ class JavaSSHClient(AbstractSSHClient):
         if not self.client.authenticateWithPassword(username, password):
             raise SSHClientException
 
-    def _login_with_public_key(self, username, key_file, password,
+    def _login_with_public_key(self, username, key_file, passphrase,
                                allow_agent='ignored', look_for_keys='ignored'):
         if allow_agent or look_for_keys:
             raise JavaSSHClientException("Arguments 'allow_agent' and "
@@ -58,7 +58,7 @@ class JavaSSHClient(AbstractSSHClient):
         try:
             success = self.client.authenticateWithPublicKey(username,
                                                             File(key_file),
-                                                            password)
+                                                            passphrase)
             if not success:
                 raise SSHClientException
         except IOError:

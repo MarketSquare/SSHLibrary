@@ -11,6 +11,7 @@ ${KEY}               ${KEY DIR}${/}id_rsa
 ${INVALID USERNAME}  invalidusername
 ${INVALID PASSWORD}  invalidpassword
 ${INVALID KEY}       ${KEY DIR}${/}id_rsa_invalid
+${PASSPHRASE}        ${EMPTY}
 
 *** Test Cases ***
 Login With Valid Username And Password
@@ -21,9 +22,13 @@ Login With Invalid Username Or Password
     Run Keyword And Expect Error  Authentication failed for user '${INVALID USERNAME}'.
     ...                           Login  ${INVALID USERNAME}  ${PASSWORD}
 
-Login With Public Key When Valid Username And Key
+Login With Public Key When No Passphrase Provided
     [Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
     Login With Public Key  ${KEY USERNAME}  ${KEY}
+
+Login With Public Key When Valid Credentials
+    [Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
+    Login With Public Key  ${KEY USERNAME}  ${KEY}  ${PASSPHRASE}
 
 Login With Public Key When Invalid Username
     Run Keyword And Expect Error  Login with public key failed for user '${INVALID USERNAME}'.
@@ -31,7 +36,7 @@ Login With Public Key When Invalid Username
 
 Login With Public Key When Invalid Key
     Run Keyword And Expect Error  Login with public key failed for user '${KEY USERNAME}'.
-    ...    Login With Public Key  ${KEY USERNAME}  ${INVALID KEY}
+    ...    Login With Public Key  ${KEY USERNAME}  ${INVALID KEY}  ${PASSPHRASE}
 
 Login With Public Key When Non-Existing Key
     Run Keyword And Expect Error  Given key file 'not_existing_key' does not exist.
