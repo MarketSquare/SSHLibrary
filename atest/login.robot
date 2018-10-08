@@ -31,15 +31,15 @@ Login With Public Key When Valid Credentials
     Login With Public Key  ${KEY USERNAME}  ${KEY}  ${PASSPHRASE}
 
 Login With Public Key When Invalid Username
-    Run Keyword And Expect Error  SSHException: not a valid OPENSSH private key file
+    Run Keyword And Expect Error  Login with public key failed for user 'invalidusername'.
     ...    Login With Public Key  ${INVALID USERNAME}  ${KEY}
 
 Login With Public Key When Invalid Key
-    Run Keyword And Expect Error  SSHException: not a valid OPENSSH private key file
-    ...    Login With Public Key  ${KEY USERNAME}  ${INVALID KEY}  ${PASSPHRASE}
+    Run Keyword And Expect Error  Login with public key failed for user 'testkey'.
+    ...    Login With Public Key  ${KEY USERNAME}  ${INVALID KEY}
 
 Login With Public Key When Invalid Key And Valid Password
-    Run Keyword And Expect Error  SSHException: not a valid OPENSSH private key file
+    Run Keyword And Expect Error  Login with public key failed for user 'test'.
     ...    Login With Public Key  ${USERNAME}  ${INVALID KEY}  ${PASSWORD}
 
 Login With Public Key When Non-Existing Key

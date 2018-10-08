@@ -82,7 +82,7 @@ class PythonSSHClient(AbstractSSHClient):
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout))
-        except paramiko.AuthenticationException:
+        except (paramiko.AuthenticationException, paramiko.SSHException):
             raise SSHClientException
 
     def get_banner(self):
