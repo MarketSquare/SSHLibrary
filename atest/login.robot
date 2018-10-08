@@ -22,7 +22,7 @@ Login With Invalid Username Or Password
     Run Keyword And Expect Error  Authentication failed for user '${INVALID USERNAME}'.
     ...                           Login  ${INVALID USERNAME}  ${PASSWORD}
 
-Login With Public Key When No Passphrase Provided
+Login With Public Key When Valid Username And Key
     [Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
     Login With Public Key  ${KEY USERNAME}  ${KEY}
 
@@ -31,12 +31,16 @@ Login With Public Key When Valid Credentials
     Login With Public Key  ${KEY USERNAME}  ${KEY}  ${PASSPHRASE}
 
 Login With Public Key When Invalid Username
-    Run Keyword And Expect Error  Login with public key failed for user '${INVALID USERNAME}'.
+    Run Keyword And Expect Error  SSHException: not a valid OPENSSH private key file
     ...    Login With Public Key  ${INVALID USERNAME}  ${KEY}
 
 Login With Public Key When Invalid Key
-    Run Keyword And Expect Error  Login with public key failed for user '${KEY USERNAME}'.
+    Run Keyword And Expect Error  SSHException: not a valid OPENSSH private key file
     ...    Login With Public Key  ${KEY USERNAME}  ${INVALID KEY}  ${PASSPHRASE}
+
+Login With Public Key When Invalid Key And Valid Password
+    Run Keyword And Expect Error  SSHException: not a valid OPENSSH private key file
+    ...    Login With Public Key  ${USERNAME}  ${INVALID KEY}  ${PASSWORD}
 
 Login With Public Key When Non-Existing Key
     Run Keyword And Expect Error  Given key file 'not_existing_key' does not exist.

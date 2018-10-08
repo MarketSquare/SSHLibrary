@@ -184,7 +184,7 @@ class AbstractSSHClient(object):
 
         :param str keyfile: Path to the valid OpenSSH private key file.
 
-        :param str passphrase: Password (if needed) for unlocking the `keyfile`.
+        :param str passphrase: Passphrase (if needed) for unlocking the `keyfile`.
 
         :param boolean allow_agent: enables the connection to the SSH agent.
             This option does not work when using Jython.
