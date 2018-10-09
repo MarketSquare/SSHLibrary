@@ -841,7 +841,7 @@ class SSHLibrary(object):
         """
         return self._login(self.current.login, username, password, delay)
 
-    def login_with_public_key(self, username, keyfile, password='',
+    def login_with_public_key(self, username, keyfile, passphrase='',
                               allow_agent=False, look_for_keys=False,
                               delay='0.5 seconds'):
         """Logs into the SSH server using key-based authentication.
@@ -853,7 +853,7 @@ class SSHLibrary(object):
         ``keyfile`` is a path to a valid OpenSSH private key file on the local
         filesystem.
 
-        ``password`` is used to unlock the ``keyfile`` if needed.
+        ``passphrase`` is used to unlock the ``keyfile`` if needed.
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
@@ -881,7 +881,7 @@ class SSHLibrary(object):
         *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
         """
         return self._login(self.current.login_with_public_key, username,
-                           keyfile, password, is_truthy(allow_agent),
+                           keyfile, passphrase, is_truthy(allow_agent),
                            is_truthy(look_for_keys), delay)
 
     def _login(self, login_method, username, *args):

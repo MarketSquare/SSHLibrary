@@ -170,7 +170,7 @@ class AbstractSSHClient(object):
             return self.read_until_regexp(self.config.prompt[7:])
         return self.read_until_prompt()
 
-    def login_with_public_key(self, username, keyfile, password, allow_agent=False,
+    def login_with_public_key(self, username, keyfile, passphrase, allow_agent=False,
                               look_for_keys=False, delay=None):
         """Logs into the remote host using the public key authentication.
 
@@ -184,7 +184,7 @@ class AbstractSSHClient(object):
 
         :param str keyfile: Path to the valid OpenSSH private key file.
 
-        :param str password: Password (if needed) for unlocking the `keyfile`.
+        :param str passphrase: Passphrase (if needed) for unlocking the `keyfile`.
 
         :param boolean allow_agent: enables the connection to the SSH agent.
             This option does not work when using Jython.
@@ -204,7 +204,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         self._verify_key_file(keyfile)
         try:
-            self._login_with_public_key(username, keyfile, password,
+            self._login_with_public_key(username, keyfile, passphrase,
                                         allow_agent, look_for_keys)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
@@ -220,7 +220,7 @@ class AbstractSSHClient(object):
         except IOError:
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
-    def _login_with_public_key(self, username, keyfile, password,
+    def _login_with_public_key(self, username, keyfile, passphrase,
                                allow_agent, look_for_keys):
         raise NotImplementedError
 
