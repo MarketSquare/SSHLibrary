@@ -841,7 +841,7 @@ class SSHLibrary(object):
         """
         return self._login(self.current.login, username, password, delay)
 
-    def login_with_public_key(self, username, keyfile, passphrase='',
+    def login_with_public_key(self, username, keyfile, passphrase,
                               allow_agent=False, look_for_keys=False,
                               delay='0.5 seconds'):
         """Logs into the SSH server using key-based authentication.
