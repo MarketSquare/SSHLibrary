@@ -70,6 +70,14 @@ Get Symlink File
   OS.File Should Exist  ${SYMLINK TO TEST FILE}
   [Teardown]  OS.Remove File  ${SYMLINK TO TEST FILE}
 
+Get File That Is A Symlink Directory
+    Execute Command  mkdir -p ${REMOTE TEST ROOT}/dir/subdir
+    Execute Command  touch ${REMOTE TEST ROOT}/dir/${TEST FILE NAME}
+    Execute Command  cd ${REMOTE TEST ROOT};ln -s dir/subdir symlink_dir
+    SSH.Get File  ${REMOTE TEST ROOT}/dir/*
+    OS.File Should Not Exist  symlink_dir
+    [Teardown]  OS.Remove File  ${TEST FILE NAME}
+
 *** Keywords ***
 Create Tmp Dir And Move File
     Put File  ${TEST FILE}  /tmp/
