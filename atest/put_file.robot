@@ -38,6 +38,21 @@ Put File To Existing Directory Without Trailing Path Separator
     SSH.File Should Exist  robotdir/${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -rf robotdir
 
+
+#Put File With Square Brackets
+#    SSH.File Should Not Exist  ${FILE WITH SQUARE BRACKETS NAME}
+#    Put File  ${FILE WITH SQUARE BRACKETS}  robotdir/
+#    SSH.File should Exist  robotdir/${FILE WITH SQUARE BRACKETS NAME}
+#    [Teardown]  Execute command  rm -rf robotdir
+
+
+
+
+
+
+
+
+
 Put File To Home Directory
     SSH.File Should Not Exist  ${FILE WITH NON-ASCII NAME}
     Put File  ${FILE WITH NON-ASCII}  .

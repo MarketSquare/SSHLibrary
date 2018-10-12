@@ -11,8 +11,8 @@ List Content Using Absolute Path
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SUBDIRECTORY NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
+    ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
-
     ${listing} =  List Directory  ${REMOTE TEST ROOT}
     Lists Should Be Equal  ${listing}  ${expected}
 
@@ -21,6 +21,7 @@ List Content Using Relative Path
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SUBDIRECTORY NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
+    ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT NAME}
     Lists Should Be Equal  ${listing}  ${expected}
@@ -40,6 +41,7 @@ List Content Using Symlink As Path
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SUBDIRECTORY NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
+    ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
     ${listing} =  List Directory  symlink
     Lists Should Be Equal  ${listing}  ${expected}
@@ -56,6 +58,7 @@ List Content With Absolute Paths Using Absolute Path
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT}  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
@@ -65,6 +68,7 @@ List Content With Absolute Paths Using Relative Path
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT NAME}  absolute=True
     Lists Should Be Equal  ${listing}  ${EXPECTED}
@@ -72,6 +76,7 @@ List Content With Absolute Paths Using Relative Path
 List Content With Absolute Paths Using Pattern
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${listing} =  List Directory  ${REMOTE TEST ROOT}  pattern=?est*  absolute=True
     Lists Should Be Equal  ${listing}  ${expected}
@@ -86,6 +91,7 @@ List Content With Absolute Paths Using Symlink As Path
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
+    ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${listing} =  List Directory  symlink   absolute=True
     Lists Should Be Equal  ${listing}  ${expected}

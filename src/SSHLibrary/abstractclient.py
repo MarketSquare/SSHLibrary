@@ -994,8 +994,11 @@ class AbstractSFTPClient(object):
         return files
 
     def _get_put_file_sources(self, source):
-        sources = [f for f in glob.glob(source.replace('/', os.sep))
-                   if os.path.isfile(f)]
+        source = source.replace('/', os.sep)
+        if not os.path.exists(source):
+            sources = [f for f in glob.glob(source)]
+        else:
+            sources = [f for f in [source]]
         if not sources:
             msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)

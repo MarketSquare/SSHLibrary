@@ -18,6 +18,8 @@ ${FILE WITH NON-ASCII}           ${LOCAL TEXTFILES}${/}${SUBDIRECTORY NAME}${/}$
 ${COLON CHAR FILE NAME}          special:char.txt
 ${COLON CHAR FILE}               ${LOCAL TEXTFILES}${/}special:char.txt
 ${SYMLINK TO TEST FILE}          symlink_to_text_file.txt
+${FILE WITH SQUARE BRACKETS NAME}     test[1].txt
+${FILE WITH SQUARE BRACKETS}     ${LOCAL TEXTFILES}${/}${FILE WITH SQUARE BRACKETS NAME}
 
 *** Keywords ***
 Login And Upload Test Files

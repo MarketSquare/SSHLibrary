@@ -82,6 +82,7 @@ Directory Should Exist With Content
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SQUARE BRACKETS NAME}
     OS.File Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
     OS.Directory Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
 
