@@ -37,6 +37,12 @@ Put Directory Including Empty Subdirectories
     Remote Directory Should Exist With Subdirectories  textfiles
     [Teardown]  Remove Local Empty Directory And Remote Files
 
+Put Directory With Square Brackets In Name
+    [Setup]  OS.Create Directory  ${LOCAL TEXTFILES}${/}directory[1]
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True
+    SSH.Directory Should Exist  textfiles/directory[1]
+    [Teardown]  Remove Local And Remote Directory With Square Brackets
+
 Put Directory Using Relative Source
     [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
     Put Directory  ${CURDIR}${/}testdata${/}textfiles  ${REMOTE TEST ROOT}
@@ -66,6 +72,10 @@ Put Directory And Check For Proper Permissions
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
     OS.Remove Directory  ${LOCAL TEXTFILES}${/}empty
+    Execute Command  rm -rf ./textfiles
+
+Remove Local And Remote Directory With Square Brackets
+    OS.Remove Directory  ${LOCAL TEXTFILES}${/}directory[1]
     Execute Command  rm -rf ./textfiles
 
 Remote Directory Should Exist With Content
