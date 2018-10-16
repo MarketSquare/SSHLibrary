@@ -26,6 +26,7 @@ from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from .utils import is_bytes, is_string, unicode
 
+from robot.api import logger
 
 class SSHClientException(RuntimeError):
     pass
@@ -868,8 +869,11 @@ class AbstractSFTPClient(object):
             path, pattern = '', source
         if not path:
             path = '.'
-        return [filename for filename in
-                self.list_files_in_dir(path, pattern, absolute=True)]
+        if not self.is_file(source):
+            return [filename for filename in
+                    self.list_files_in_dir(path, pattern, absolute=True)]
+        else:
+            return [source]
 
     def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
