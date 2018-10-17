@@ -835,7 +835,8 @@ class AbstractSFTPClient(object):
     def get_file(self, source, destination, path_separator='/'):
         """Downloads file(s) from the remote host to the local machine.
 
-        :param str source: The path to the file on the remote machine.
+        :param str source: Must be the path to an existing file or a glob
+            pattern on the remote machine.
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are downloaded.
 
@@ -961,7 +962,8 @@ class AbstractSFTPClient(object):
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         """Uploads the file(s) from the local machine to the remote host.
 
-        :param str source: The path to the file on the local machine.
+        :param str sources: Must be the path to an existing file or a glob
+            pattern on the remote machine.
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are uploaded.
 
