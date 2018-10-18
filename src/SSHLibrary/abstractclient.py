@@ -26,7 +26,6 @@ from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from .utils import is_bytes, is_string, unicode
 
-from robot.api import logger
 
 class SSHClientException(RuntimeError):
     pass
@@ -835,8 +834,8 @@ class AbstractSFTPClient(object):
     def get_file(self, source, destination, path_separator='/'):
         """Downloads file(s) from the remote host to the local machine.
 
-        :param str source: Must be the path to an existing file or a glob
-            pattern on the remote machine.
+        :param str source: Must be the path to an existing file on the remote
+            machine or a glob pattern.
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are downloaded.
 
@@ -874,7 +873,7 @@ class AbstractSFTPClient(object):
             return [filename for filename in
                     self.list_files_in_dir(path, pattern, absolute=True)]
         else:
-            return [source]
+            return source
 
     def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
@@ -962,8 +961,8 @@ class AbstractSFTPClient(object):
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         """Uploads the file(s) from the local machine to the remote host.
 
-        :param str sources: Must be the path to an existing file or a glob
-            pattern on the remote machine.
+        :param str sources: Must be the path to an existing file on the remote
+            machine or a glob pattern .
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are uploaded.
 
@@ -1004,7 +1003,7 @@ class AbstractSFTPClient(object):
         if not os.path.exists(source):
             sources = [f for f in glob.glob(source)]
         else:
-            sources = [f for f in [source]]
+            sources = [f for f in source]
         if not sources:
             msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)
