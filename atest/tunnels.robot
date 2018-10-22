@@ -34,6 +34,11 @@ Local Tunnel SSH
     Login  ${USERNAME}  ${PASSWORD}
     Execute Command   ls
 
+Local Tunnel With Default Remote Port
+    Login With Public Key  ${KEY USERNAME}  ${KEY}
+    Create Local SSH Tunnel  ${LOCAL PORT}  ${REMOTE HOST}
+    Port Should Not Be Free  ${LOCAL PORT}
+
 *** Keywords ***
 Port Should Not Be Free
     [Arguments]  ${port}
