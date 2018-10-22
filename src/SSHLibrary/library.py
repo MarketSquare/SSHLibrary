@@ -1110,7 +1110,7 @@ class SSHLibrary(object):
 
         The tunnel is active as long as the connection is open.
 
-        By default the ``remote_port`` is 22.
+        The default ``remote_port`` is 22.
 
         New in SSHLibrary 3.1.0
         """
