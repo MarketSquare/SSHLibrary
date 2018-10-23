@@ -62,12 +62,12 @@ Put Directory Containing A File With Colon In Its Name
      [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put Directory And Check For Proper Permissions
-	Put Directory	   ${CURDIR}${/}testdata${/}to_put         recursive=True         mode=0755
-	${output}=         Execute Command            ls
-	Should Contain     ${output}                  to_put
+	Put Directory  ${CURDIR}${/}testdata${/}to_put  recursive=True  mode=0755
+	${output}=  Execute Command   ls
+	Should Contain  ${output}  to_put
 	Check File Permissions
 	Check Folder Permissions
-	[Teardown]         Execute Command            rm -r ${CURDIR}${/}testdata${/}to_put
+	[Teardown]  Execute Command  rm -rf ${CURDIR}${/}testdata${/}to_put
 
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
@@ -105,10 +105,9 @@ Check And Remove Local Added Directory
     [Teardown]  OS.Remove File  ${COLON CHAR FILE}
 
 Check Folder Permissions
-   ${folder}=          Execute Command      stat -c %a to_put${/}Folder3
-   Should Contain      ${folder}            755
+   ${folder}=  Execute Command  stat -c %a to_put${/}Folder3
+   Should Contain  ${folder}  755
 
 Check File Permissions
-   ${file}=            Execute Command      stat -c %a to_put${/}ExampleText3.txt
-   Should Contain      ${file}              755
-
+   ${file}=  Execute Command  stat -c %a to_put${/}ExampleText3.txt
+   Should Contain  ${file}  755
