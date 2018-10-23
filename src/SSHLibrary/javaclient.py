@@ -177,6 +177,9 @@ class SFTPClient(AbstractSFTPClient):
     def _absolute_path(self, path):
         return self._client.canonicalPath(path)
 
+    def _readlink(self, path):
+        return self._client.readLink(path)
+
 
 class RemoteCommand(AbstractCommand):
 

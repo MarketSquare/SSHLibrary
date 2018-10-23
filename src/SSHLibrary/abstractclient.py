@@ -780,7 +780,15 @@ class AbstractSFTPClient(object):
                                    absolute)
 
     def _get_file_names(self, path):
-        return [item.name for item in self._list(path) if item.is_regular() or item.is_link()]
+        return [item.name
+                for item in self._list(path)
+                if item.is_regular()
+                or (item.is_link()
+                    and not self._is_dir_symlink(path, item.name))]
+
+    def _is_dir_symlink(self, path, item):
+        resolved_link = self._readlink('%s/%s' % (path, item))
+        return self.is_dir('%s/%s' % (path, resolved_link))
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
         """Gets the directory names, or optionally the absolute paths, on the
@@ -1094,6 +1102,9 @@ class AbstractSFTPClient(object):
         raise NotImplementedError
 
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, client):
+        raise NotImplementedError
+
+    def _readlink(self, path):
         raise NotImplementedError
 
 

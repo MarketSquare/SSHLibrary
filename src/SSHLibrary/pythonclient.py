@@ -205,6 +205,10 @@ class SFTPClient(AbstractSFTPClient):
     def _is_windows_path(self, path):
         return bool(ntpath.splitdrive(path)[0])
 
+    def _readlink(self, path):
+        return self._client.readlink(path)
+
+
 class RemoteCommand(AbstractCommand):
 
     def read_outputs(self, timeout=None):
