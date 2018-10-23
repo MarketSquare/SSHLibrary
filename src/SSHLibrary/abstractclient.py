@@ -231,7 +231,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -249,8 +249,11 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
+        if timeout:
+            timeout = float(TimeEntry(timeout).value)
+
         self.start_command(command, sudo, sudo_password)
-        return self.read_command_output()
+        return self.read_command_output(timeout=timeout)
 
     def start_command(self, command, sudo=False,  sudo_password=None):
         """Starts the execution of the `command` on the remote host.
@@ -276,7 +279,7 @@ class AbstractSSHClient(object):
     def _start_command(self, command, sudo=False, sudo_password=None):
         raise NotImplementedError
 
-    def read_command_output(self):
+    def read_command_output(self, timeout=None):
         """Reads the output of the previous started command.
 
         The previous started command, started with :py:meth:`start_command`,
@@ -290,7 +293,7 @@ class AbstractSSHClient(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         try:
-            return self._started_commands.pop().read_outputs()
+            return self._started_commands.pop().read_outputs(timeout)
         except IndexError:
             raise SSHClientException('No started commands to read output from.')
 

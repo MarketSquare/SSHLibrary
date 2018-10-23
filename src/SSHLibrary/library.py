@@ -930,7 +930,7 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -988,7 +988,7 @@ class SSHLibrary(object):
             self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password, timeout)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command, sudo=False,  sudo_password=None):
@@ -1038,7 +1038,7 @@ class SSHLibrary(object):
         self.current.start_command(command, sudo, sudo_password)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
-                            return_rc=False):
+                            return_rc=False, timeout=None):
         """Returns outputs of the most recent started command.
 
         At least one command must have been started using `Start Command`
@@ -1090,7 +1090,7 @@ class SSHLibrary(object):
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         try:
-            stdout, stderr, rc = self.current.read_command_output()
+            stdout, stderr, rc = self.current.read_command_output(timeout=timeout)
         except SSHClientException as msg:
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
