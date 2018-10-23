@@ -873,7 +873,7 @@ class AbstractSFTPClient(object):
             return [filename for filename in
                     self.list_files_in_dir(path, pattern, absolute=True)]
         else:
-            return source
+            return [source]
 
     def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
@@ -1003,7 +1003,7 @@ class AbstractSFTPClient(object):
         if not os.path.exists(source):
             sources = [f for f in glob.glob(source)]
         else:
-            sources = [f for f in source]
+            sources = [f for f in [source]]
         if not sources:
             msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)
