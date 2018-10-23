@@ -43,8 +43,7 @@ Switch to closed connection pybot
     Login  ${USERNAME}  ${PASSWORD}
     Execute command   ls
     close connection
-    switch connection   SUT
-    Run keyword and expect error  Connection not open   Execute command   ls
+    Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
 
 Switch to closed connection jybot
     [Tags]   jybot
@@ -52,8 +51,7 @@ Switch to closed connection jybot
     Login  ${USERNAME}  ${PASSWORD}
     Execute command   ls
     close connection
-    switch connection   SUT
-    Run keyword and expect error  IllegalStateException: Cannot open session*   Execute command   ls
+    Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
 
 Get pre-login banner without open connection
     [Tags]   pybot
