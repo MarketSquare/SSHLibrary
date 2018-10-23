@@ -862,7 +862,8 @@ class AbstractSFTPClient(object):
     def get_file(self, source, destination, path_separator='/'):
         """Downloads file(s) from the remote host to the local machine.
 
-        :param str source: The path to the file on the remote machine.
+        :param str source: Must be the path to an existing file on the remote
+            machine or a glob pattern.
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are downloaded.
 
@@ -896,8 +897,11 @@ class AbstractSFTPClient(object):
             path, pattern = '', source
         if not path:
             path = '.'
-        return [filename for filename in
-                self.list_files_in_dir(path, pattern, absolute=True)]
+        if not self.is_file(source):
+            return [filename for filename in
+                    self.list_files_in_dir(path, pattern, absolute=True)]
+        else:
+            return [source]
 
     def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
@@ -985,7 +989,8 @@ class AbstractSFTPClient(object):
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         """Uploads the file(s) from the local machine to the remote host.
 
-        :param str source: The path to the file on the local machine.
+        :param str sources: Must be the path to an existing file on the remote
+            machine or a glob pattern .
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are uploaded.
 
@@ -1022,8 +1027,11 @@ class AbstractSFTPClient(object):
         return files
 
     def _get_put_file_sources(self, source):
-        sources = [f for f in glob.glob(source.replace('/', os.sep))
-                   if os.path.isfile(f)]
+        source = source.replace('/', os.sep)
+        if not os.path.exists(source):
+            sources = [f for f in glob.glob(source)]
+        else:
+            sources = [f for f in [source]]
         if not sources:
             msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)

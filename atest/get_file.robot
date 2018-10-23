@@ -53,6 +53,10 @@ Get File To Current Working Directory
     OS.File Should Exist  ${FILE WITH NON-ASCII NAME}
     [Teardown]  OS.Remove File  ${FILE WITH NON-ASCII NAME}
 
+Get File With Square Brackets In Name
+    SSH.Get File  ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}  ${LOCAL TMPDIR}${/}
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}${FILE WITH SQUARE BRACKETS NAME}
+
 Get File When Destination Path Does Not Exist
     ${target} =  Set Variable  ${LOCAL TMPDIR}/new/none.txt
     SSH.Get File  ${REMOTE TEST ROOT}/${TEST FILE NAME}  ${target}

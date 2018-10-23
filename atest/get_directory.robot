@@ -38,6 +38,13 @@ Get Directory Including Empty Subdirectories
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
+Get Directory With Square Brackets In Name
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Execute Command  mkdir ${REMOTE TEST ROOT}/directory[1]
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
+    OS.Directory Should Exist  ${LOCAL TMPDIR}/directory[1]
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
 Get Directory Using Relative Source
     [Setup]  OS.Directory Should Not Exist  my
     Get Directory  ${REMOTE TEST ROOT NAME}  my
@@ -82,6 +89,7 @@ Directory Should Exist With Content
     OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SQUARE BRACKETS NAME}
     OS.File Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
     OS.Directory Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
 
