@@ -855,7 +855,8 @@ class SSHLibrary(object):
         ``keyfile`` is a path to a valid OpenSSH private key file on the local
         filesystem.
 
-        ``password`` is used to unlock the ``keyfile`` if needed.
+        ``password`` is used to unlock the ``keyfile`` if needed. If the keyfile is
+        invalid a username-password authentication will be attempted.
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
