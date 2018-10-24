@@ -572,9 +572,9 @@ class AbstractSSHClient(object):
                                               recursive)
 
     def build_destination(self, source, destination):
-        """Add parent folder to destination path if destination is '.'
+        """Add parent directory from source to destination path if destination is '.'
         or if destination already exists.
-        If destination does not exist, it remains the same.
+        Otherwise the missing intermediate directories are created.
 
         :return: A new destination path.
         """
