@@ -34,7 +34,7 @@ Get Directory Including Empty Subdirectories
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Execute Command  mkdir ${REMOTE TEST ROOT}/empty
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    OS.Directory Should Exist  ${LOCAL TMPDIR}/empty
+    OS.Directory Should Exist  ${LOCAL TMPDIR}${/}robot-testdir/empty
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
@@ -42,7 +42,7 @@ Get Directory With Square Brackets In Name
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Execute Command  mkdir ${REMOTE TEST ROOT}/directory[1]
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    OS.Directory Should Exist  ${LOCAL TMPDIR}/directory[1]
+    OS.Directory Should Exist  ${LOCAL TMPDIR}${/}robot-testdir/directory[1]
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory Using Relative Source
@@ -89,6 +89,7 @@ Directory Should Exist With Content
     OS.File Should Exist  ${destination}${parent_folder}${/}${TEST FILE NAME}
     OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH NEWLINES NAME}
     OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH SQUARE BRACKETS NAME}
     OS.File Should Not Exist  ${destination}${parent_folder}${/}${SUBDIRECTORY NAME}
     OS.Directory Should Not Exist  ${destination}${parent_folder}${/}${SUBDIRECTORY NAME}
 
