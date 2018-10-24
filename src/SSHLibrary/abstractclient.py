@@ -574,7 +574,7 @@ class AbstractSSHClient(object):
     def build_destination(self, source, destination):
         """Add parent folder to destination path if destination is '.'
         or if destination already exists.
-        If destination does not exist, destination remains the same.
+        If destination does not exist, it remains the same.
 
         :return: A new destination path.
         """
