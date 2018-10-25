@@ -580,14 +580,12 @@ class AbstractSSHClient(object):
         """
         if os.path.exists(destination) or destination == '.':
             return destination + self.config.path_separator + self.get_parent_folder(source)
-        else:
-            return destination
+        return destination
 
     def get_parent_folder(self, source):
         if source.endswith(self.config.path_separator):
             return (source[:-len(self.config.path_separator)]).split(self.config.path_separator)[-1]
-        else:
-            return source.split(self.config.path_separator)[-1]
+        return source.split(self.config.path_separator)[-1]
 
     def list_dir(self, path, pattern=None, absolute=False):
         """Calls :py:meth:`.AbstractSFTPClient.list_dir` with the given
