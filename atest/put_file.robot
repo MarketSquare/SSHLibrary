@@ -102,7 +102,7 @@ Put File Overwrite If User In The Same Group
    Change User And Overwrite File
    Switch Connection  1
    SSH.File Should Exist  ${TEST FILE NAME}
-   [Teardown]  Remove testkey User To Group test And Cleanup
+   [Teardown]  Remove testkey User From Group test And Cleanup
 
 *** Keywords ***
 Change User And Overwrite File
@@ -115,7 +115,7 @@ Add testkey User To Group test And Set Permissions
     Execute Command  usermod -a -G test testkey  sudo=True  sudo_password=test
     Execute Command  chmod -R 660 ${TEST FILE NAME}
 
-Remove testkey User To Group test And Cleanup
+Remove testkey User From Group test And Cleanup
     Execute Command  gpasswd -d testkey test  sudo=True  sudo_password=test
     Execute Command  rm -rf ${TEST FILE NAME}
 
