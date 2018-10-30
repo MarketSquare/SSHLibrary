@@ -9,7 +9,7 @@ Library         OperatingSystem  WITH NAME  OS
 Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}
-    Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
+    Directory Should Exist With Content  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory To Non-Existing Local Path
@@ -21,7 +21,7 @@ Get Directory To Non-Existing Local Path
 Get Directory Including Subdirectories To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory Including Subdirectories To Non-Existing Local Path
@@ -34,15 +34,15 @@ Get Directory Including Empty Subdirectories
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Execute Command  mkdir ${REMOTE TEST ROOT}/empty
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    OS.Directory Should Exist  ${LOCAL TMPDIR}${/}robot-testdir/empty
-    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
+    OS.Directory Should Exist  ${LOCAL TMPDIR}/empty
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory With Square Brackets In Name
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Execute Command  mkdir ${REMOTE TEST ROOT}/directory[1]
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    OS.Directory Should Exist  ${LOCAL TMPDIR}${/}robot-testdir/directory[1]
+    OS.Directory Should Exist  ${LOCAL TMPDIR}/directory[1]
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory Using Relative Source
@@ -59,15 +59,15 @@ Get Directory overrrides existing files
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Create File   ${LOCAL TMPDIR}${/}${TEST FILE NAME}    foo
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
-    File content should be   ${LOCAL TMPDIR}${/}robot-testdir${/}${TEST FILE NAME}    This is a test file.\n
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
+    File content should be   ${LOCAL TMPDIR}${/}${TEST FILE NAME}    This is a test file.\n
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory works if there are existing local directories
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Create directory   ${LOCAL TMPDIR}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  recursive=True
-    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory containing a symlink
@@ -75,7 +75,7 @@ Get Directory containing a symlink
    Execute Command  mkdir ${REMOTE TEST ROOT}/symlink
    Execute Command  cd ${REMOTE TEST ROOT}/symlink; ln -s ../${TEST FILE NAME} ${SYMLINK TO TEST FILE}
    Get Directory  ${REMOTE TEST ROOT}/symlink  ${LOCAL TMPDIR}
-   OS.File Should Exist  ${LOCAL TMPDIR}${/}symlink${/}${SYMLINK TO TEST FILE}
+   OS.File Should Exist  ${LOCAL TMPDIR}${/}${SYMLINK TO TEST FILE}
    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 *** Keywords ***
@@ -85,18 +85,18 @@ File content should be
     Should be equal    ${actual}    ${expected}
 
 Directory Should Exist With Content
-    [Arguments]  ${destination}  ${parent_folder}=${EMPTY}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${TEST FILE NAME}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH NEWLINES NAME}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH SPECIAL CHARS NAME}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH SQUARE BRACKETS NAME}
-    OS.File Should Not Exist  ${destination}${parent_folder}${/}${SUBDIRECTORY NAME}
-    OS.Directory Should Not Exist  ${destination}${parent_folder}${/}${SUBDIRECTORY NAME}
+    [Arguments]  ${destination}
+    OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SQUARE BRACKETS NAME}
+    OS.File Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
+    OS.Directory Should Not Exist  ${destination}${/}${SUBDIRECTORY NAME}
 
 Directory Should Exist Including Subdirectories
-    [Arguments]  ${destination}  ${parent_folder}=${EMPTY}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${TEST FILE NAME}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH NEWLINES NAME}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${FILE WITH SPECIAL CHARS NAME}
-    OS.File Should Exist  ${destination}${parent_folder}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
-    OS.Directory Should Exist  ${destination}${parent_folder}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}
+    [Arguments]  ${destination}
+    OS.File Should Exist  ${destination}${/}${TEST FILE NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH NEWLINES NAME}
+    OS.File Should Exist  ${destination}${/}${FILE WITH SPECIAL CHARS NAME}
+    OS.File Should Exist  ${destination}${/}${SUBDIRECTORY NAME}${/}${FILE WITH NON-ASCII NAME}
+    OS.Directory Should Exist  ${destination}${/}${SUBDIRECTORY NAME}${/}${DIRECTORY WITH EMPTY SUBDIRECTORY}${/}${EMPTY SUB DIR}
