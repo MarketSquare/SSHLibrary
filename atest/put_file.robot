@@ -95,7 +95,30 @@ Putting Multiple Source Files To Single File Fails
     Run Keyword And Expect Error  ValueError: It is not possible to copy multiple source files to one destination file.
     ...                           Put File  ${LOCAL TEXTFILES}${/}?est*.txt  invalid.txt
 
+Put File Overwrite If User In The Same Group
+   Put File  ${LOCAL TEXTFILES}${/}${TEST FILE NAME}
+   SSH.File Should Exist  ${TEST FILE NAME}
+   Add testkey User To Group test And Set Permissions
+   Change User And Overwrite File
+   Switch Connection  1
+   SSH.File Should Exist  ${TEST FILE NAME}
+   [Teardown]  Remove testkey User From Group test And Cleanup
+
 *** Keywords ***
+Change User And Overwrite File
+    Open Connection  ${HOST}  prompt=${PROMPT}
+    Login With Public Key  ${KEY USERNAME}  ${KEY}
+    Put File  ${LOCAL TEXTFILES}${/}${TEST FILE NAME}  ${REMOTE HOME TEST}
+    [Teardown]  Close Connection
+
+Add testkey User To Group test And Set Permissions
+    Execute Command  usermod -a -G test testkey  sudo=True  sudo_password=test
+    Execute Command  chmod -R 660 ${TEST FILE NAME}
+
+Remove testkey User From Group test And Cleanup
+    Execute Command  gpasswd -d testkey test  sudo=True  sudo_password=test
+    Execute Command  rm -rf ${TEST FILE NAME}
+
 Remove Local Temp Dir And Remote File
     [Arguments]  ${path}
     Remove Directory  ${LOCAL TMPDIR}  yes

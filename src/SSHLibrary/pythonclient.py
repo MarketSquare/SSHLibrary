@@ -179,10 +179,12 @@ class SFTPClient(AbstractSFTPClient):
         return super(SFTPClient, self)._create_missing_remote_path(path, mode)
 
     def _create_remote_file(self, destination, mode):
+        file_exists = self.is_file(destination)
         destination = destination.encode(self._encoding)
         remote_file = self._client.file(destination, 'wb')
         remote_file.set_pipelined(True)
-        self._client.chmod(destination, mode)
+        if not file_exists:
+            self._client.chmod(destination, mode)
         return remote_file
 
     def _write_to_remote_file(self, remote_file, data, position):
