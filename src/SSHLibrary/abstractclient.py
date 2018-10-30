@@ -566,9 +566,26 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.get_directory` for more documentation.
         """
+        destination = self.build_destination(source, destination)
         return self.sftp_client.get_directory(source, destination,
                                               self.config.path_separator,
                                               recursive)
+
+    def build_destination(self, source, destination):
+        """Add parent directory from source to destination path if destination is '.'
+        or if destination already exists.
+        Otherwise the missing intermediate directories are created.
+
+        :return: A new destination path.
+        """
+        if os.path.exists(destination) or destination == '.':
+            return destination + self.config.path_separator + self.get_parent_folder(source)
+        return destination
+
+    def get_parent_folder(self, source):
+        if source.endswith(self.config.path_separator):
+            return (source[:-len(self.config.path_separator)]).split(self.config.path_separator)[-1]
+        return source.split(self.config.path_separator)[-1]
 
     def list_dir(self, path, pattern=None, absolute=False):
         """Calls :py:meth:`.AbstractSFTPClient.list_dir` with the given
