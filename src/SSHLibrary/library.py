@@ -981,7 +981,9 @@ class SSHLibrary(object):
         This keyword logs the executed command and its exit status with
         log level ``INFO``.
 
-        ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
+        If the `timeout` expires before the command is executed, this keyword fails.
+
+        ``timeout`` argument is new in SSHLibrary 3.2.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1305,6 +1307,13 @@ class SSHLibrary(object):
         See also `Read Until` and `Read Until Regexp` keywords. For more
         details about reading and writing in general, see the `Interactive
         shells` section.
+
+        If you want to exclude the prompt from the returned output, set ``strip_prompt``
+        to a true value (see `Boolean arguments`). If your prompt is a regular expression,
+        make sure that the expression spans the whole prompt, because only the part of the
+        output that matches the regular expression is stripped away.
+
+        ``strip_prompt`` argument is new in SSHLibrary 3.2.0.
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt, is_truthy(strip_prompt))
 
