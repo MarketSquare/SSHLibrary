@@ -62,6 +62,7 @@ Put Directory Containing A File With Colon In Its Name
      [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put Directory And Check For Proper Permissions
+    [Tags]  linux
 	Put Directory  ${CURDIR}${/}testdata${/}to_put  recursive=True  mode=0755
 	${output}=  Execute Command   ls
 	Should Contain  ${output}  to_put
