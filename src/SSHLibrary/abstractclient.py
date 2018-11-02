@@ -816,6 +816,11 @@ class AbstractSFTPClient(object):
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
+        destination = self.build_destination(source, destination, path_separator)
+        return self._get_directory(source, destination, path_separator,recursive)
+
+    def _get_directory(self, source, destination, path_separator='/',
+                       recursive=False):
         """Downloads directory(-ies) from the remote host to the local machine,
         optionally with subdirectories included.
 
@@ -853,6 +858,24 @@ class AbstractSFTPClient(object):
                 os.makedirs(destination)
             files.append((source, destination))
         return files
+
+    def build_destination(self, source, destination, path_separator):
+        """Add parent directory from source to destination path if destination is '.'
+        or if destination already exists.
+        Otherwise the missing intermediate directories are created.
+
+        :return: A new destination path.
+        """
+        if os.path.exists(destination) or destination == '.':
+            return destination + path_separator + self.get_parent_folder(source, path_separator)
+        else:
+            return destination
+
+    def get_parent_folder(self, source, path_separator):
+        if source.endswith(path_separator):
+            return (source[:-len(path_separator)]).split(path_separator)[-1]
+        else:
+            return source.split(path_separator)[-1]
 
     def _remove_ending_path_separator(self, path_separator, source):
         if source.endswith(path_separator):
