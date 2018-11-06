@@ -16,7 +16,7 @@ Get Connection
     Should Be Equal  ${conn.index}  ${conn2_index}
 
 Get Connection When No Connection Is Open
-    Run Keyword And Expect Error  Get Connection  1
+    Run Keyword And Expect Error  AttributeError: 'NoneType' object has no attribute 'config'  Get Connection Which Is Not Open
 
 Get Connection Index Only
     Open Connection  ${HOST}
@@ -46,3 +46,8 @@ Get Connections Returns Empty List When No Connections
     ${conns} =  Get Connections
     ${empty_list} =  Create List
     Should Be Equal  ${conns}  ${empty_list}
+
+
+*** Keywords ***
+Get Connection Which Is Not Open
+    Get Connection  1
