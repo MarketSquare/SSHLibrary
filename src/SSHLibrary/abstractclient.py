@@ -68,6 +68,8 @@ class AbstractSSHClient(object):
         self._shell = None
         self._started_commands = []
         self.client = self._get_client()
+        self.width = width
+        self.height = height
 
     def _get_client(self):
         raise NotImplementedError('This should be implemented in the subclass.')
@@ -102,6 +104,9 @@ class AbstractSSHClient(object):
         """
         if not self._shell:
             self._shell = self._create_shell()
+        if self.width != self.config.width or self.height != self.config.height:
+            self._shell.resize(self.config.width, self.config.height)
+            self.width, self.height = self.config.width, self.config.height
         return self._shell
 
     def _create_sftp_client(self):

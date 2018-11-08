@@ -1,6 +1,6 @@
 *** Settings ***
 Resource        ../resources/write_and_read_resource.robot
-Force Tags      pybot   jybot
+Default Tags      pybot   jybot
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files and Close Connections
 
@@ -91,3 +91,20 @@ Read Until REGEXP Prompt With Strip Prompt
     Should Contain                  ${output}                        This is a test
     Should Not Match Regexp         ${output}                        [#$]
     [Teardown]                      Set Client Configuration         prompt=${PROMPT}
+
+Configure Session Width And Height
+    [Tags]   pybot
+    Set Client Configuration  prompt=${PROMPT}  height=48  width=160
+    ${conn}  Get Connection  1
+    Should Be Equal As Integers  ${conn.height}  48
+    Should Be Equal As Integers  ${conn.width}   160
+    Write  stty size
+    ${output}=  Read Until Prompt
+    Should Contain  ${output}  48 160
+    [Teardown]  Set Client Configuration  height=24  width=80
+
+Configure Session Width And Height Not Supported
+    [Tags]   jybot
+    [Documentation]  WARN  1.1:1  Setting width or height is not supported with Jython.
+    Set Client Configuration  prompt=${PROMPT}  height=48  width=160
+    [Teardown]  Set Client Configuration  height=24  width=80

@@ -147,6 +147,9 @@ class Shell(AbstractShell):
             return self._shell.recv(1)
          return b''
 
+    def resize(self, width, height):
+        self._shell.resize_pty(width=width, height=height)
+
     def _output_available(self):
         return self._shell.recv_ready()
 
