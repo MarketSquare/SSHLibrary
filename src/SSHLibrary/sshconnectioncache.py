@@ -29,6 +29,5 @@ class SSHConnectionCache(ConnectionCache):
         try:
             index = self._resolve_alias_or_index(alias_or_index)
         except ValueError:
-            raise RuntimeError("Non-existing index or alias '%s'."
-                               % alias_or_index)
+            raise RuntimeError("Non-existing index or alias '%s'." % alias_or_index)
         return next((x for x in self._connections if x.config._config['index'].value == index), None)
