@@ -490,6 +490,8 @@ class SSHLibrary(object):
 
         | `Open Connection`          | 192.168.1.1    |
         | `Set Client Configuration` | term_type=ansi | width=40 |
+
+        *Note:* Setting ``width`` and ``height`` does not work when using Jython.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,

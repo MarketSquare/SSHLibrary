@@ -28,6 +28,10 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
+try:
+    from robot.api import logger
+except ImportError:
+    logger = None
 
 
 class JavaSSHClientException(Exception):
@@ -98,6 +102,7 @@ class Shell(AbstractShell):
         shell = client.openSession()
         shell.requestPTY(term_type, term_width, term_height, 0, 0, None)
         shell.startShell()
+        self.shell = shell
         self._stdout = shell.getStdout()
         self._stdin = shell.getStdin()
 
@@ -112,6 +117,10 @@ class Shell(AbstractShell):
          if self._output_available():
              return chr(self._stdout.read())
          return ''
+
+    @staticmethod
+    def resize(width, height):
+        logger.warn('Setting width or height is not supported with Jython.')
 
     def _output_available(self):
         return self._stdout.available()
