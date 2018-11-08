@@ -32,10 +32,3 @@ class SSHConnectionCache(ConnectionCache):
             raise RuntimeError("Non-existing index or alias '%s'."
                                % alias_or_index)
         return next((x for x in self._connections if x.config._config['index'].value == index), None)
-
-    def _resolve_index(self, index):
-        try:
-            index = int(index)
-        except TypeError:
-            raise ValueError
-        return index

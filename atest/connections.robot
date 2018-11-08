@@ -66,12 +66,11 @@ Get pre-login banner from current connection
     Should Be Equal  ${banner}  Testing pre-login banner\n
 
 Switch Connection Gets No Error When Prevoius Index Was Closed
-    ${item1}=  Open Connection  ${HOST}
-    ${item2}=  Open Connection  ${HOST}
-    ${item3}=  Open Connection  ${HOST}
-    Switch Connection  ${item1}
+    ${item1}=  Open Connection  ${HOST}  alias=alias1
+    ${item2}=  Open Connection  ${HOST}  alias=alias2
+    Switch Connection  alias1
     Close Connection
-    ${old_index}=  Switch Connection  ${item2}
+    ${old_index}=  Switch Connection  alias2
     Should Be Equal As Strings  ${old_index}  None
 
 *** Keywords ***
