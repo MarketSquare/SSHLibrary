@@ -65,13 +65,22 @@ Get pre-login banner from current connection
     ${banner} =  Get Pre Login Banner
     Should Be Equal  ${banner}  Testing pre-login banner\n
 
-Switch Connection Gets No Error When Prevoius Index Was Closed
+Switch Connection When Previous Connection Was Closed
     ${item1}=  Open Connection  ${HOST}  alias=alias1
     ${item2}=  Open Connection  ${HOST}  alias=alias2
     Switch Connection  alias1
     Close Connection
     ${old_index}=  Switch Connection  alias2
     Should Be Equal As Strings  ${old_index}  None
+
+Switch Connection Using Index When Previous Connection Was Closed
+    ${item1}=  Open Connection  ${HOST}  alias=alias1
+    ${item2}=  Open Connection  ${HOST}  alias=alias2
+    Switch Connection  1
+    Close Connection
+    Switch Connection  2
+    ${conn}=  Get Connection  2
+    Should Be Equal As Strings  ${conn.index}  2
 
 *** Keywords ***
 Connection Should Be Closed

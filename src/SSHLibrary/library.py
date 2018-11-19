@@ -742,6 +742,8 @@ class SSHLibrary(object):
             config = self._connections.get_connection(index_or_alias).config
         except RuntimeError:
             config = SSHClient(None).config
+        except AttributeError:
+            config = SSHClient(None).config
         self._log(str(config), self._config.loglevel)
         return_values = tuple(self._get_config_values(config, index, host,
                                                       alias, port, timeout,
