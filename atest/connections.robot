@@ -66,16 +66,16 @@ Get pre-login banner from current connection
     Should Be Equal  ${banner}  Testing pre-login banner\n
 
 Switch Connection When Previous Connection Was Closed
-    ${item1}=  Open Connection  ${HOST}  alias=alias1
-    ${item2}=  Open Connection  ${HOST}  alias=alias2
+    Open Connection  ${HOST}  alias=alias1
+    Open Connection  ${HOST}  alias=alias2
     Switch Connection  alias1
     Close Connection
     ${old_index}=  Switch Connection  alias2
     Should Be Equal As Strings  ${old_index}  None
 
 Switch Connection Using Index When Previous Connection Was Closed
-    ${item1}=  Open Connection  ${HOST}  alias=alias1
-    ${item2}=  Open Connection  ${HOST}  alias=alias2
+    Open Connection  ${HOST}
+    Open Connection  ${HOST}
     Switch Connection  1
     Close Connection
     Switch Connection  2
