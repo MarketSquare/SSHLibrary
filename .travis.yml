@@ -28,6 +28,7 @@ before_install:
   - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
   - sudo service ssh restart
 install:
+  - pip install docutils
   - pip install -r requirements-dev.txt
 matrix:
   include:
