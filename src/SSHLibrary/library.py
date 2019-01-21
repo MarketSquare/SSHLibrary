@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 from __future__ import print_function
+from .deco import keyword
 
 try:
     from robot.api import logger
@@ -421,6 +422,7 @@ class SSHLibrary(object):
     def current(self):
         return self._connections.current
 
+    @keyword(types=None)
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
@@ -460,6 +462,7 @@ class SSHLibrary(object):
                             height=height, path_separator=path_separator,
                             encoding=encoding)
 
+    @keyword(types=None)
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
                                  path_separator=None, encoding=None):
@@ -522,6 +525,7 @@ class SSHLibrary(object):
             self._log('SSH log is written to <a href="%s">file</a>.' % logfile,
                       'HTML')
 
+    @keyword(types=None)
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
                         height=None, path_separator=None, encoding=None):
