@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from __future__ import print_function
-
+from .deco import keyword
 try:
     from robot.api import logger
 except ImportError:
@@ -421,6 +421,7 @@ class SSHLibrary(object):
     def current(self):
         return self._connections.current
 
+    @keyword(types=None)
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
