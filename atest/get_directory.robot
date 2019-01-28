@@ -12,6 +12,12 @@ Get Directory To Existing Local Path
     Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
+Get Directory To Existing Local Path With SCP
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp_transfer=True
+    Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
 Get Directory To Non-Existing Local Path
     [Setup]  OS.Directory Should Not Exist  .${/}tmpdir
     SSH.Get Directory  ${REMOTE TEST ROOT}/  .${/}tmpdir

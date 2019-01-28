@@ -50,6 +50,12 @@ Put File To Home Directory
     SSH.File Should Exist  ${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
 
+Put File To Home Directory With SCP
+    SSH.File Should Not Exist  ${FILE WITH NON-ASCII NAME}
+    Put File  ${FILE WITH NON-ASCII}  .  scp_transfer=True
+    SSH.File Should Exist  ${FILE WITH NON-ASCII NAME}
+    [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
+
 Put File With Special Characters In Filename
     [Documentation]  http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
     ${target} =  Set Variable  ${FILE WITH SPECIAL CHARS NAME}

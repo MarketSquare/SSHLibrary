@@ -986,7 +986,7 @@ class SSHLibrary(object):
 
         If the `timeout` expires before the command is executed, this keyword fails.
 
-        ``timeout`` argument is new in SSHLibrary 3.2.0.
+        ``timeout`` argument is new in SSHLibrary 3.3.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1316,7 +1316,7 @@ class SSHLibrary(object):
         make sure that the expression spans the whole prompt, because only the part of the
         output that matches the regular expression is stripped away.
 
-        ``strip_prompt`` argument is new in SSHLibrary 3.2.0.
+        ``strip_prompt`` argument is new in SSHLibrary 3.3.0.
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt, is_truthy(strip_prompt))
 
@@ -1359,7 +1359,7 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', scp_transfer=False):
         """Downloads file(s) from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1371,6 +1371,11 @@ class SSHLibrary(object):
         ``destination`` is the target path on the local machine. Both
         absolute paths and paths relative to the current working directory
         are supported.
+
+        ``scp_transfer`` enables the use of scp (secure copy protocol) for
+        the file transfer. SFTP is still used for directory listings even
+        if this argument is enabled, but in terms of speed, the transfer
+        will be faster.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1403,11 +1408,17 @@ class SSHLibrary(object):
            accessible using built-in ``${EXECDIR}`` variable.
 
         See also `Get Directory`.
-        """
-        return self._run_sftp_command(self.current.get_file, source,
-                                      destination)
 
-    def get_directory(self, source, destination='.', recursive=False):
+        ``scp_transfer`` is new in SSHLibrary 3.3.0.
+
+        *Note:* Setting ``scp_transfer`` does not work when using Jython and
+        transferring files with non-ascii in filename.
+        """
+        return self._run_command(self.current.get_file, source,
+                                 destination, is_truthy(scp_transfer))
+
+    def get_directory(self, source, destination='.', recursive=False,
+                      scp_transfer=False):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1420,6 +1431,11 @@ class SSHLibrary(object):
         ``recursive`` specifies whether to recursively download all
         subdirectories inside ``source``. Subdirectories are downloaded if
         the argument value evaluates to true (see `Boolean arguments`).
+
+        ``scp_transfer`` enables the use of scp (secure copy protocol) for
+        the file transfer. SFTP is still used for directory listings even
+        if this argument is enabled, but in terms of speed, the transfer
+        will be faster.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1443,11 +1459,18 @@ class SSHLibrary(object):
            variable.
 
         See also `Get File`.
-        """
-        return self._run_sftp_command(self.current.get_directory, source,
-                                      destination, is_truthy(recursive))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+        ``scp_transfer`` is new in SSHLibrary 3.3.0.
+
+        *Note:* Setting ``scp_transfer`` does not work when using Jython and
+        transferring files with non-ascii in filename.
+        """
+        return self._run_command(self.current.get_directory, source,
+                                 destination, is_truthy(recursive),
+                                 is_truthy(scp_transfer))
+
+    def put_file(self, source, destination='.', mode='0744', newline='',
+                 scp_transfer=False):
         """Uploads file(s) from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1466,6 +1489,15 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
+        Does not work if ``scp_transfer`` is enabled.
+
+        ``scp_transfer`` enables the use of scp (secure copy protocol) for
+        the file transfer. SFTP is still used for directory listings even
+        if this argument is enabled, but in terms of speed, the transfer
+        will be faster. This protocol implementation different from SFTP
+        and as a result the ``newline`` argument does not work for this
+        keyword. Caution is advised when copying text files between different
+        platforms as the line separators are not updated.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
@@ -1493,12 +1525,18 @@ class SSHLibrary(object):
            on the remote machine is used as the destination.
 
         See also `Put Directory`.
+
+        ``scp_transfer`` is new in SSHLibrary 3.2.0.
+
+        *Note:* Setting ``scp_transfer`` does not work when using Jython and
+        transferring files with non-ascii in filename.
         """
-        return self._run_sftp_command(self.current.put_file, source,
-                                      destination, mode, newline)
+        return self._run_command(self.current.put_file, source,
+                                 destination, mode, newline,
+                                 is_truthy(scp_transfer))
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
-                      recursive=False):
+                      recursive=False, scp_transfer=False):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1514,10 +1552,19 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
+        Does not work if ``scp_transfer`` is enabled.
 
         ``recursive`` specifies whether to recursively upload all
         subdirectories inside ``source``. Subdirectories are uploaded if the
         argument value evaluates to true (see `Boolean arguments`).
+
+        ``scp_transfer`` enables the use of scp (secure copy protocol) for
+        the file transfer. SFTP is still used for directory listings even
+        if this argument is enabled, but in terms of speed the transfer will
+        be faster. This protocol implementation different from SFTP and as a
+        result the ``newline`` argument does not work for this keyword.
+        Caution is advised when copying text files between different platforms
+        as the line separators are not updated.
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
@@ -1540,11 +1587,18 @@ class SSHLibrary(object):
            uploaded to user's home directory on the remote machine.
 
         See also `Put File`.
-        """
-        return self._run_sftp_command(self.current.put_directory, source,
-                                      destination, mode, newline, is_truthy(recursive))
 
-    def _run_sftp_command(self, command, *args):
+        ``scp_transfer`` is new in SSHLibrary 3.2.0.
+
+        *Note:* Setting ``scp_transfer`` does not work when using Jython and
+        transferring files with non-ascii in filename.
+        """
+        return self._run_command(self.current.put_directory, source,
+                                 destination, mode, newline,
+                                 is_truthy(recursive),
+                                 is_truthy(scp_transfer))
+
+    def _run_command(self, command, *args):
         try:
             files = command(*args)
         except SSHClientException as e:

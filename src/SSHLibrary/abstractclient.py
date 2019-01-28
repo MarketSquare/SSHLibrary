@@ -65,6 +65,7 @@ class AbstractSSHClient(object):
                                            prompt, term_type, width, height,
                                            path_separator, encoding)
         self._sftp_client = None
+        self._scp_client = None
         self._shell = None
         self._started_commands = []
         self.client = self._get_client()
@@ -86,7 +87,7 @@ class AbstractSSHClient(object):
 
     @property
     def sftp_client(self):
-        """Gets the SSH client for the connection.
+        """Gets the SFTP client for the connection.
 
         :returns: An object of the class that inherits from
             :py:class:`AbstractSFTPClient`.
@@ -94,6 +95,17 @@ class AbstractSSHClient(object):
         if not self._sftp_client:
             self._sftp_client = self._create_sftp_client()
         return self._sftp_client
+
+    @property
+    def scp_client(self):
+        """Gets the SCP client for the file transfer.
+
+        :returns: An object of the class that inherits from
+            :py:class:`AbstractSFTPClient`.
+        """
+        if not self._scp_client:
+            self._scp_client = self._create_scp_client()
+        return self._scp_client
 
     @property
     def shell(self):
@@ -112,12 +124,16 @@ class AbstractSSHClient(object):
     def _create_sftp_client(self):
         raise NotImplementedError
 
+    def _create_scp_client(self):
+        raise NotImplementedError
+
     def _create_shell(self):
         raise NotImplementedError
 
     def close(self):
         """Closes the connection."""
         self._sftp_client = None
+        self._scp_client = None
         self._shell = None
         self.client.close()
 
@@ -530,17 +546,19 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s."
                                  % (self._decode(expected), timeout))
 
-    def put_file(self, source, destination='.', mode='0o744', newline=''):
+    def put_file(self, source, destination='.', mode='0o744', newline='',
+                 scp_transfer=False):
         """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
         arguments.
 
         See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
-        return self.sftp_client.put_file(source, destination, mode, newline,
-                                         self.config.path_separator)
+        client = self.sftp_client if not scp_transfer else self.scp_client
+        return client.put_file(source, destination, mode, newline,
+                               self.config.path_separator)
 
     def put_directory(self, source, destination='.', mode='0o744', newline='',
-                      recursive=False):
+                      recursive=False, scp_transfer=False):
         """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
 
@@ -549,20 +567,23 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.put_directory` for more documentation.
         """
-        return self.sftp_client.put_directory(source, destination, mode,
-                                              newline,
-                                              self.config.path_separator,
-                                              recursive)
+        client = self.sftp_client if not scp_transfer else self.scp_client
+        return client.put_directory(source, destination, mode,
+                                    newline,
+                                    self.config.path_separator,
+                                    recursive)
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', scp_transfer=False):
         """Calls :py:meth:`AbstractSFTPClient.get_file` with the given
         arguments.
 
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
-        return self.sftp_client.get_file(source, destination, self.config.path_separator)
+        client = self.sftp_client if not scp_transfer else self.scp_client
+        return client.get_file(source, destination, self.config.path_separator)
 
-    def get_directory(self, source, destination='.', recursive=False):
+    def get_directory(self, source, destination='.', recursive=False,
+                      scp_transfer=False):
         """Calls :py:meth:`AbstractSFTPClient.get_directory` with the given
         arguments and the connection specific path separator.
 
@@ -571,9 +592,10 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.get_directory` for more documentation.
         """
-        return self.sftp_client.get_directory(source, destination,
-                                              self.config.path_separator,
-                                              recursive)
+        client = self.sftp_client if not scp_transfer else self.scp_client
+        return client.get_directory(source, destination,
+                                    self.config.path_separator,
+                                    recursive)
 
     def list_dir(self, path, pattern=None, absolute=False):
         """Calls :py:meth:`.AbstractSFTPClient.list_dir` with the given
@@ -822,7 +844,7 @@ class AbstractSFTPClient(object):
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
         destination = self.build_destination(source, destination, path_separator)
-        return self._get_directory(source, destination, path_separator,recursive)
+        return self._get_directory(source, destination, path_separator, recursive)
 
     def _get_directory(self, source, destination, path_separator='/',
                        recursive=False):
@@ -1051,7 +1073,7 @@ class AbstractSFTPClient(object):
         self._create_missing_remote_path(remote_dir, mode)
         files = list(zip(local_files, remote_files))
         for source, destination in files:
-            self._put_file(source, destination, mode, newline)
+            self._put_file(source, destination, mode, newline, path_separator)
         return files
 
     def _get_put_file_sources(self, source):
@@ -1114,7 +1136,7 @@ class AbstractSFTPClient(object):
                     mode = int(mode, 8)
                 self._client.mkdir(current_dir, mode)
 
-    def _put_file(self, source, destination, mode, newline):
+    def _put_file(self, source, destination, mode, newline, path_separator):
         remote_file = self._create_remote_file(destination, mode)
         with open(source, 'rb') as local_file:
             position = 0

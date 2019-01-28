@@ -49,6 +49,12 @@ Put Directory Using Relative Source
     Remote Directory Should Exist With Content  ${REMOTE TEST ROOT}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
+Put Directory Using Relative Source With SCP
+    [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
+    Put Directory  ${CURDIR}${/}testdata${/}textfiles  ${REMOTE TEST ROOT}  scp_transfer= True
+    Remote Directory Should Exist With Content  ${REMOTE TEST ROOT}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 Put Directory Should Fail When Source Does Not Exists
     Run Keyword And Expect Error  There was no source path matching 'non-existing'.
     ...                           Put Directory  non-existing

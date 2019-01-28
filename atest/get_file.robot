@@ -37,6 +37,12 @@ Get File From Path Not Under Remote Home
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
+Get File From Path Not Under Remote Home With SCP
+    [Setup]  Create Tmp Dir And Move File
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp_transfer=True
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
 Get File With Multiple Sources To Single File Fails
     Run Keyword And Expect Error
     ...  Cannot copy multiple source files to one destination file.

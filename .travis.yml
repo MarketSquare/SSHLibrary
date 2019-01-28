@@ -28,8 +28,7 @@ before_install:
   - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
   - sudo service ssh restart
 install:
-  - pip install docutils
-  - pip install -r requirements-dev.txt
+  - pip install -r requirements-dev.txt docutils
 matrix:
   include:
     - python: "2.7"
@@ -57,7 +56,7 @@ before_script:
   - if [ "$JYTHON" == "true" ]; then
         export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/*;
     else
-        pip install paramiko==$PARAMIKO;
+        pip install paramiko==$PARAMIKO scp;
     fi
 script:
   - $INTERPRETER atest/run.py atest
