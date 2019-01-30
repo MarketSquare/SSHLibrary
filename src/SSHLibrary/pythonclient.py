@@ -231,7 +231,13 @@ class SCPClient(SFTPClient):
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
         super(SCPClient, self).__init__(ssh_client, encoding)
 
-    def _put_file(self,  source, destination, mode, newline, path_separator):
+    def put(self, source, destination, recursive=False):
+        self._scp_client.put(source, destination, recursive)
+
+    def get(self, source, destination, recursive=False):
+        self._scp_client.get(source, destination, recursive)
+
+    def _put_file(self, source, destination, mode, newline, path_separator):
         self._create_remote_file(destination, mode)
         self._scp_client.put(source, destination)
 

@@ -13,6 +13,19 @@ Put File To Absolute Destination
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
+Put File To Absolute Destination With SCP (transfer)
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=TRANSFER
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
+Put File To Absolute Destination With SCP (all)
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Execute Command  mkdir ${REMOTE TEST ROOT NAME}
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=ALL
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 Put File To Absolute Destination With Intermediate Subdirectories
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/robotdir/${FILE WITH NON-ASCII NAME}
     Put File  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}/robotdir/
@@ -47,12 +60,6 @@ Put File With Square Brackets
 Put File To Home Directory
     SSH.File Should Not Exist  ${FILE WITH NON-ASCII NAME}
     Put File  ${FILE WITH NON-ASCII}  .
-    SSH.File Should Exist  ${FILE WITH NON-ASCII NAME}
-    [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
-
-Put File To Home Directory With SCP
-    SSH.File Should Not Exist  ${FILE WITH NON-ASCII NAME}
-    Put File  ${FILE WITH NON-ASCII}  .  scp_transfer=True
     SSH.File Should Exist  ${FILE WITH NON-ASCII NAME}
     [Teardown]  Execute Command  rm -f ${FILE WITH NON-ASCII NAME}
 

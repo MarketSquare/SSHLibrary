@@ -355,6 +355,26 @@ class SSHLibrary(object):
 
     Prior to SSHLibrary 3.1.0, all non-empty strings, including ``no`` and ``none``
     were considered to be true. Considering ``none`` false is new in Robot Framework 3.0.3.
+
+    = Transfer files with SCP =
+     Secure Copy Protocol (SCP) is a way of secure transfer of files between hosts. It is based
+     on SSH protocol. The advantage it brings over SFTP is transfer speed. SFTP however can also be
+     used for directory listings and even editing files while transferring.
+     SCP can be enabled on keywords used for file transfer: `Get File`, `Get Directory`, `Put File`,
+     `Put Directory` by setting the ``scp`` value to ``TRANSFER`` or ``ALL``.
+
+     | OFF      | Transfer is done using SFTP only.                                                                       |
+     | TRANSFER | Directory listings (needed for logging) will be done using SFTP. Actual file transfer is done with SCP. |
+     | ALL      | Only SCP is used for file transfer. No logging available.                                               |
+
+     There are some limitations to the current SCP implementation::
+     - When using SCP, files cannot be altered during transfer and``newline`` argument does not work.
+     - If ``scp=ALL`` only ``source`` and ``destination`` arguments will work on the keywords. The directories are
+     transferred recursively. Also, when running with Jython `Put Directory` and get `Directory` won't word due to
+     current Trilead limitations.
+     - If running with Jython you can encounter some encoding issues when transferring files with non-ascii characters.
+
+     SCP transfer was introduced in SSHLibrary 3.3.0.
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -1359,7 +1379,7 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.', scp_transfer=False):
+    def get_file(self, source, destination='.', scp='OFF'):
         """Downloads file(s) from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1372,10 +1392,8 @@ class SSHLibrary(object):
         absolute paths and paths relative to the current working directory
         are supported.
 
-        ``scp_transfer`` enables the use of scp (secure copy protocol) for
-        the file transfer. SFTP is still used for directory listings even
-        if this argument is enabled, but in terms of speed, the transfer
-        will be faster.
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1409,16 +1427,15 @@ class SSHLibrary(object):
 
         See also `Get Directory`.
 
-        ``scp_transfer`` is new in SSHLibrary 3.3.0.
-
-        *Note:* Setting ``scp_transfer`` does not work when using Jython and
-        transferring files with non-ascii in filename.
+        ``scp`` is new in SSHLibrary 3.3.0.
         """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.get(source, destination)
         return self._run_command(self.current.get_file, source,
-                                 destination, is_truthy(scp_transfer))
+                                 destination, self._map_scp(scp))
 
     def get_directory(self, source, destination='.', recursive=False,
-                      scp_transfer=False):
+                      scp='OFF'):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1432,10 +1449,8 @@ class SSHLibrary(object):
         subdirectories inside ``source``. Subdirectories are downloaded if
         the argument value evaluates to true (see `Boolean arguments`).
 
-        ``scp_transfer`` enables the use of scp (secure copy protocol) for
-        the file transfer. SFTP is still used for directory listings even
-        if this argument is enabled, but in terms of speed, the transfer
-        will be faster.
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1460,17 +1475,16 @@ class SSHLibrary(object):
 
         See also `Get File`.
 
-        ``scp_transfer`` is new in SSHLibrary 3.3.0.
-
-        *Note:* Setting ``scp_transfer`` does not work when using Jython and
-        transferring files with non-ascii in filename.
+        ``scp`` is new in SSHLibrary 3.3.0.
         """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.get(source, destination, recursive=True)
         return self._run_command(self.current.get_directory, source,
                                  destination, is_truthy(recursive),
-                                 is_truthy(scp_transfer))
+                                 self._map_scp(scp))
 
     def put_file(self, source, destination='.', mode='0744', newline='',
-                 scp_transfer=False):
+                 scp='OFF'):
         """Uploads file(s) from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1489,15 +1503,10 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
-        Does not work if ``scp_transfer`` is enabled.
+        Does not work if ``scp`` is enabled.
 
-        ``scp_transfer`` enables the use of scp (secure copy protocol) for
-        the file transfer. SFTP is still used for directory listings even
-        if this argument is enabled, but in terms of speed, the transfer
-        will be faster. This protocol implementation different from SFTP
-        and as a result the ``newline`` argument does not work for this
-        keyword. Caution is advised when copying text files between different
-        platforms as the line separators are not updated.
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
@@ -1526,17 +1535,16 @@ class SSHLibrary(object):
 
         See also `Put Directory`.
 
-        ``scp_transfer`` is new in SSHLibrary 3.2.0.
-
-        *Note:* Setting ``scp_transfer`` does not work when using Jython and
-        transferring files with non-ascii in filename.
+        ``scp`` is new in SSHLibrary 3.3.0.
         """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.put(source, destination)
         return self._run_command(self.current.put_file, source,
                                  destination, mode, newline,
-                                 is_truthy(scp_transfer))
+                                 self._map_scp(scp))
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
-                      recursive=False, scp_transfer=False):
+                      recursive=False, scp='OFF'):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1552,19 +1560,14 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
-        Does not work if ``scp_transfer`` is enabled.
+        Does not work if ``scp`` is enabled.
 
         ``recursive`` specifies whether to recursively upload all
         subdirectories inside ``source``. Subdirectories are uploaded if the
         argument value evaluates to true (see `Boolean arguments`).
 
-        ``scp_transfer`` enables the use of scp (secure copy protocol) for
-        the file transfer. SFTP is still used for directory listings even
-        if this argument is enabled, but in terms of speed the transfer will
-        be faster. This protocol implementation different from SFTP and as a
-        result the ``newline`` argument does not work for this keyword.
-        Caution is advised when copying text files between different platforms
-        as the line separators are not updated.
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
@@ -1588,15 +1591,14 @@ class SSHLibrary(object):
 
         See also `Put File`.
 
-        ``scp_transfer`` is new in SSHLibrary 3.2.0.
-
-        *Note:* Setting ``scp_transfer`` does not work when using Jython and
-        transferring files with non-ascii in filename.
+        ``scp`` is new in SSHLibrary 3.3.0.
         """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.put(source, destination, recursive=True)
         return self._run_command(self.current.put_directory, source,
                                  destination, mode, newline,
                                  is_truthy(recursive),
-                                 is_truthy(scp_transfer))
+                                 self._map_scp(scp))
 
     def _run_command(self, command, *args):
         try:
@@ -1605,6 +1607,12 @@ class SSHLibrary(object):
             raise RuntimeError(e)
         for src, dst in files:
             self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
+
+    @staticmethod
+    def _map_scp(scp):
+        return {'OFF': False,
+                'TRANSFER': True,
+                'ALL': 'ALL'}.get(scp.upper(), scp)
 
     def file_should_exist(self, path):
         """Fails if the given ``path`` does NOT point to an existing file.

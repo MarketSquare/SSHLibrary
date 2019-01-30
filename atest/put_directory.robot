@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags      pybot   jybot
+Default Tags    pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
@@ -21,6 +21,17 @@ Put Directory To Non-Existing Remote Path
 
 Put Directory Including Subdirectories To Existing Remote Path
     Put Directory  ${LOCAL TEXTFILES}  .  recursive=True
+    Remote Directory Should Exist With Subdirectories  ./textfiles
+    [Teardown]  Execute Command  rm -rf ./textfiles
+
+Put Directory Including Subdirectories To Existing Remote Path With SCP (transfer)
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=TRANSFER
+    Remote Directory Should Exist With Subdirectories  ./textfiles
+    [Teardown]  Execute Command  rm -rf ./textfiles
+
+Put Directory Including Subdirectories To Existing Remote Path With SCP (all)
+    [Tags]  pybot
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=ALL
     Remote Directory Should Exist With Subdirectories  ./textfiles
     [Teardown]  Execute Command  rm -rf ./textfiles
 
@@ -46,12 +57,6 @@ Put Directory With Square Brackets In Name
 Put Directory Using Relative Source
     [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
     Put Directory  ${CURDIR}${/}testdata${/}textfiles  ${REMOTE TEST ROOT}
-    Remote Directory Should Exist With Content  ${REMOTE TEST ROOT}
-    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
-
-Put Directory Using Relative Source With SCP
-    [Setup]  SSH.Directory Should Not Exist  ${REMOTE TEST ROOT}
-    Put Directory  ${CURDIR}${/}testdata${/}textfiles  ${REMOTE TEST ROOT}  scp_transfer= True
     Remote Directory Should Exist With Content  ${REMOTE TEST ROOT}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 

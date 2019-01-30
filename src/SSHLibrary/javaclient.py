@@ -201,6 +201,18 @@ class SCPClient(SFTPClient):
         self._scp_client = JavaSCPClient(ssh_client)
         super(SCPClient, self).__init__(ssh_client, encoding)
 
+    def put(self, source, destination, recursive=False):
+        if recursive:
+            raise JavaSSHClientException('`Put Directory` not available with `scp=ALL` option. Try again with '
+                                         '`scp=TRANSFER` or `scp=OFF`.')
+        self._scp_client.put(source, destination)
+
+    def get(self, source, destination, recursive=False):
+        if recursive:
+            raise JavaSSHClientException('`Get Directory` not available with `scp=ALL` option. Try again with '
+                                         '`scp=TRANSFER` or `scp=OFF`.')
+        self._scp_client.get(source, destination)
+
     def _put_file(self, source, destination, mode, newline, path_separator):
         self._create_remote_file(destination, mode)
         self._scp_client.put(source, destination.rsplit(path_separator, 1)[0])

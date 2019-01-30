@@ -37,9 +37,15 @@ Get File From Path Not Under Remote Home
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
-Get File From Path Not Under Remote Home With SCP
+Get File From Path Not Under Remote Home With SCP (transfer)
     [Setup]  Create Tmp Dir And Move File
-    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp_transfer=True
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=TRANSFER
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
+Get File From Path Not Under Remote Home With SCP (all)
+    [Setup]  Create Tmp Dir And Move File
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=ALL
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
