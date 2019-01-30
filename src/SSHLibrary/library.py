@@ -355,6 +355,26 @@ class SSHLibrary(object):
 
     Prior to SSHLibrary 3.1.0, all non-empty strings, including ``no`` and ``none``
     were considered to be true. Considering ``none`` false is new in Robot Framework 3.0.3.
+
+    = Transfer files with SCP =
+     Secure Copy Protocol (SCP) is a way of secure transfer of files between hosts. It is based
+     on SSH protocol. The advantage it brings over SFTP is transfer speed. SFTP however can also be
+     used for directory listings and even editing files while transferring.
+     SCP can be enabled on keywords used for file transfer: `Get File`, `Get Directory`, `Put File`,
+     `Put Directory` by setting the ``scp`` value to ``TRANSFER`` or ``ALL``.
+
+     | OFF      | Transfer is done using SFTP only. This is the default value                                             |
+     | TRANSFER | Directory listings (needed for logging) will be done using SFTP. Actual file transfer is done with SCP. |
+     | ALL      | Only SCP is used for file transfer. No logging available.                                               |
+
+     There are some limitations to the current SCP implementation::
+     - When using SCP, files cannot be altered during transfer and ``newline`` argument does not work.
+     - If ``scp=ALL`` only ``source`` and ``destination`` arguments will work on the keywords. The directories are
+     transferred recursively. Also, when running with Jython `Put Directory` and `Get Directory` won't work due to
+     current Trilead implementation.
+     - If running with Jython you can encounter some encoding issues when transferring files with non-ascii characters.
+
+     SCP transfer was introduced in SSHLibrary 3.3.0.
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -1361,7 +1381,7 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', scp='OFF'):
         """Downloads file(s) from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1373,6 +1393,9 @@ class SSHLibrary(object):
         ``destination`` is the target path on the local machine. Both
         absolute paths and paths relative to the current working directory
         are supported.
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1405,11 +1428,16 @@ class SSHLibrary(object):
            accessible using built-in ``${EXECDIR}`` variable.
 
         See also `Get Directory`.
-        """
-        return self._run_sftp_command(self.current.get_file, source,
-                                      destination)
 
-    def get_directory(self, source, destination='.', recursive=False):
+        ``scp`` is new in SSHLibrary 3.3.0.
+        """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.get(source, destination)
+        return self._run_command(self.current.get_file, source,
+                                 destination, self._map_scp(scp))
+
+    def get_directory(self, source, destination='.', recursive=False,
+                      scp='OFF'):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1422,6 +1450,9 @@ class SSHLibrary(object):
         ``recursive`` specifies whether to recursively download all
         subdirectories inside ``source``. Subdirectories are downloaded if
         the argument value evaluates to true (see `Boolean arguments`).
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1445,11 +1476,17 @@ class SSHLibrary(object):
            variable.
 
         See also `Get File`.
-        """
-        return self._run_sftp_command(self.current.get_directory, source,
-                                      destination, is_truthy(recursive))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+        ``scp`` is new in SSHLibrary 3.3.0.
+        """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.get(source, destination, recursive=True)
+        return self._run_command(self.current.get_directory, source,
+                                 destination, is_truthy(recursive),
+                                 self._map_scp(scp))
+
+    def put_file(self, source, destination='.', mode='0744', newline='',
+                 scp='OFF'):
         """Uploads file(s) from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1468,6 +1505,10 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
+        Does not work if ``scp`` is enabled.
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
@@ -1495,12 +1536,17 @@ class SSHLibrary(object):
            on the remote machine is used as the destination.
 
         See also `Put Directory`.
+
+        ``scp`` is new in SSHLibrary 3.3.0.
         """
-        return self._run_sftp_command(self.current.put_file, source,
-                                      destination, mode, newline)
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.put(source, destination)
+        return self._run_command(self.current.put_file, source,
+                                 destination, mode, newline,
+                                 self._map_scp(scp))
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
-                      recursive=False):
+                      recursive=False, scp='OFF'):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1516,10 +1562,14 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
+        Does not work if ``scp`` is enabled.
 
         ``recursive`` specifies whether to recursively upload all
         subdirectories inside ``source``. Subdirectories are uploaded if the
         argument value evaluates to true (see `Boolean arguments`).
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
@@ -1542,17 +1592,29 @@ class SSHLibrary(object):
            uploaded to user's home directory on the remote machine.
 
         See also `Put File`.
-        """
-        return self._run_sftp_command(self.current.put_directory, source,
-                                      destination, mode, newline, is_truthy(recursive))
 
-    def _run_sftp_command(self, command, *args):
+        ``scp`` is new in SSHLibrary 3.3.0.
+        """
+        if is_string(self._map_scp(scp)):
+            return self.current.scp_client.put(source, destination, recursive=True)
+        return self._run_command(self.current.put_directory, source,
+                                 destination, mode, newline,
+                                 is_truthy(recursive),
+                                 self._map_scp(scp))
+
+    def _run_command(self, command, *args):
         try:
             files = command(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
         for src, dst in files:
             self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
+
+    @staticmethod
+    def _map_scp(scp):
+        return {'OFF': False,
+                'TRANSFER': True,
+                'ALL': 'ALL'}.get(scp.upper(), scp)
 
     def file_should_exist(self, path):
         """Fails if the given ``path`` does NOT point to an existing file.
