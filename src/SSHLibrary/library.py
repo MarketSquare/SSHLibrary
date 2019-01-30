@@ -363,15 +363,15 @@ class SSHLibrary(object):
      SCP can be enabled on keywords used for file transfer: `Get File`, `Get Directory`, `Put File`,
      `Put Directory` by setting the ``scp`` value to ``TRANSFER`` or ``ALL``.
 
-     | OFF      | Transfer is done using SFTP only.                                                                       |
+     | OFF      | Transfer is done using SFTP only. This is the default value                                             |
      | TRANSFER | Directory listings (needed for logging) will be done using SFTP. Actual file transfer is done with SCP. |
      | ALL      | Only SCP is used for file transfer. No logging available.                                               |
 
      There are some limitations to the current SCP implementation::
-     - When using SCP, files cannot be altered during transfer and``newline`` argument does not work.
+     - When using SCP, files cannot be altered during transfer and ``newline`` argument does not work.
      - If ``scp=ALL`` only ``source`` and ``destination`` arguments will work on the keywords. The directories are
-     transferred recursively. Also, when running with Jython `Put Directory` and get `Directory` won't word due to
-     current Trilead limitations.
+     transferred recursively. Also, when running with Jython `Put Directory` and `Get Directory` won't work due to
+     current Trilead implementation.
      - If running with Jython you can encounter some encoding issues when transferring files with non-ascii characters.
 
      SCP transfer was introduced in SSHLibrary 3.3.0.
@@ -1006,7 +1006,7 @@ class SSHLibrary(object):
 
         If the `timeout` expires before the command is executed, this keyword fails.
 
-        ``timeout`` argument is new in SSHLibrary 3.3.0.
+        ``timeout`` argument is new in SSHLibrary 3.2.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1336,7 +1336,7 @@ class SSHLibrary(object):
         make sure that the expression spans the whole prompt, because only the part of the
         output that matches the regular expression is stripped away.
 
-        ``strip_prompt`` argument is new in SSHLibrary 3.3.0.
+        ``strip_prompt`` argument is new in SSHLibrary 3.2.0.
         """
         return self._read_and_log(loglevel, self.current.read_until_prompt, is_truthy(strip_prompt))
 
