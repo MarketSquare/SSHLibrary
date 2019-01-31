@@ -218,7 +218,7 @@ class SFTPClient(AbstractSFTPClient):
         return self._client.readlink(path)
 
 
-class SCPClient(SFTPClient):
+class SCPClient(AbstractSFTPClient):
 
     def __init__(self, ssh_client, encoding):
         try:
@@ -229,7 +229,7 @@ class SCPClient(SFTPClient):
                 'Make sure you have SCP installed.'
             )
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
-        super(SCPClient, self).__init__(ssh_client, encoding)
+        super(SCPClient, self).__init__(encoding)
 
     def put(self, source, destination, recursive=False):
         self._scp_client.put(source, destination, recursive)
@@ -243,6 +243,11 @@ class SCPClient(SFTPClient):
 
     def _get_file(self, remote_path, local_path):
         self._scp_client.get(remote_path, local_path)
+
+    def _absolute_path(self, path):
+        if is_bytes(path):
+            path = path.decode(self._encoding)
+        return path
 
 
 class RemoteCommand(AbstractCommand):
