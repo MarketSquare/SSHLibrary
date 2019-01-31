@@ -14,7 +14,8 @@
 #  limitations under the License.
 
 try:
-    from com.trilead.ssh2 import (Connection, SFTPException, SFTPv3Client,
+    from com.trilead.ssh2 import (Connection, SCPClient as JavaSCPClient,
+                                  SFTPException, SFTPv3Client,
                                   SFTPv3DirectoryEntry, StreamGobbler)
 except ImportError:
     raise ImportError(
@@ -22,6 +23,7 @@ except ImportError:
         'Make sure you have the Trilead JAR distribution in your CLASSPATH.'
     )
 import jarray
+import os
 from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
                      IOException)
 
@@ -87,6 +89,9 @@ class JavaSSHClient(AbstractSSHClient):
 
     def _create_sftp_client(self):
         return SFTPClient(self.client, self.config.encoding)
+
+    def _create_scp_client(self):
+        return SCPClient(self.client, self.config.encoding)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -188,6 +193,32 @@ class SFTPClient(AbstractSFTPClient):
 
     def _readlink(self, path):
         return self._client.readLink(path)
+
+
+class SCPClient(SFTPClient):
+
+    def __init__(self, ssh_client, encoding):
+        self._scp_client = JavaSCPClient(ssh_client)
+        super(SCPClient, self).__init__(ssh_client, encoding)
+
+    def put(self, source, destination, recursive=False):
+        if recursive:
+            raise JavaSSHClientException('`Put Directory` not available with `scp=ALL` option. Try again with '
+                                         '`scp=TRANSFER` or `scp=OFF`.')
+        self._scp_client.put(source, destination)
+
+    def get(self, source, destination, recursive=False):
+        if recursive:
+            raise JavaSSHClientException('`Get Directory` not available with `scp=ALL` option. Try again with '
+                                         '`scp=TRANSFER` or `scp=OFF`.')
+        self._scp_client.get(source, destination)
+
+    def _put_file(self, source, destination, mode, newline, path_separator):
+        self._create_remote_file(destination, mode)
+        self._scp_client.put(source, destination.rsplit(path_separator, 1)[0])
+
+    def _get_file(self, remote_path, local_path):
+        self._scp_client.get(remote_path, local_path.rsplit(os.sep, 1)[0])
 
 
 class RemoteCommand(AbstractCommand):

@@ -111,6 +111,9 @@ class PythonSSHClient(AbstractSSHClient):
     def _create_sftp_client(self):
         return SFTPClient(self.client, self.config.encoding)
 
+    def _create_scp_client(self):
+        return SCPClient(self.client, self.config.encoding)
+
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
                      self.config.width, self.config.height)
@@ -160,6 +163,7 @@ class Shell(AbstractShell):
 class SFTPClient(AbstractSFTPClient):
 
     def __init__(self, ssh_client, encoding):
+        self.ssh_client = ssh_client
         self._client = ssh_client.open_sftp()
         super(SFTPClient, self).__init__(encoding)
 
@@ -212,6 +216,33 @@ class SFTPClient(AbstractSFTPClient):
 
     def _readlink(self, path):
         return self._client.readlink(path)
+
+
+class SCPClient(SFTPClient):
+
+    def __init__(self, ssh_client, encoding):
+        try:
+            import scp
+        except ImportError:
+            raise ImportError(
+                'Importing SCP library failed. '
+                'Make sure you have SCP installed.'
+            )
+        self._scp_client = scp.SCPClient(ssh_client.get_transport())
+        super(SCPClient, self).__init__(ssh_client, encoding)
+
+    def put(self, source, destination, recursive=False):
+        self._scp_client.put(source, destination, recursive)
+
+    def get(self, source, destination, recursive=False):
+        self._scp_client.get(source, destination, recursive)
+
+    def _put_file(self, source, destination, mode, newline, path_separator):
+        self._create_remote_file(destination, mode)
+        self._scp_client.put(source, destination)
+
+    def _get_file(self, remote_path, local_path):
+        self._scp_client.get(remote_path, local_path)
 
 
 class RemoteCommand(AbstractCommand):

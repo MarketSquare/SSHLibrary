@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags      pybot   jybot
+Default Tags      pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
@@ -10,6 +10,19 @@ Get Directory To Existing Local Path
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}
     Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
+Get Directory To Existing Local Path With SCP (transfer)
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=TRANSFER
+    Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
+Get Directory To Existing Local Path With SCP (all)
+    [Tags]  pybot
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=ALL
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory To Non-Existing Local Path
