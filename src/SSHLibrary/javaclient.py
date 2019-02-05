@@ -90,8 +90,11 @@ class JavaSSHClient(AbstractSSHClient):
     def _create_sftp_client(self):
         return SFTPClient(self.client, self.config.encoding)
 
-    def _create_scp_client(self):
-        return SCPClient(self.client, self.config.encoding)
+    def _create_scp_transfer_client(self):
+        return SCPTransferClient(self.client, self.config.encoding)
+
+    def _create_scp_all_client(self):
+        return SCPClient(self.client)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -195,23 +198,30 @@ class SFTPClient(AbstractSFTPClient):
         return self._client.readLink(path)
 
 
-class SCPClient(SFTPClient):
+class SCPClient(object):
+    def __init__(self, ssh_client):
+        self._scp_client = JavaSCPClient(ssh_client)
+
+    def put_file(self, source, destination, *args):
+        self._scp_client.put(source, destination)
+
+    def get_file(self, source, destination, *args):
+        self._scp_client.get(source, destination)
+
+    def put_directory(self, source, destination, *args):
+        raise JavaSSHClientException('`Put Directory` not available with `scp=ALL` option. Try again with '
+                                     '`scp=TRANSFER` or `scp=OFF`.')
+
+    def get_directory(self, source, destination, *args):
+        raise JavaSSHClientException('`Get Directory` not available with `scp=ALL` option. Try again with '
+                                     '`scp=TRANSFER` or `scp=OFF`.')
+
+
+class SCPTransferClient(SFTPClient):
 
     def __init__(self, ssh_client, encoding):
         self._scp_client = JavaSCPClient(ssh_client)
-        super(SCPClient, self).__init__(ssh_client, encoding)
-
-    def put(self, source, destination, recursive=False):
-        if recursive:
-            raise JavaSSHClientException('`Put Directory` not available with `scp=ALL` option. Try again with '
-                                         '`scp=TRANSFER` or `scp=OFF`.')
-        self._scp_client.put(source, destination)
-
-    def get(self, source, destination, recursive=False):
-        if recursive:
-            raise JavaSSHClientException('`Get Directory` not available with `scp=ALL` option. Try again with '
-                                         '`scp=TRANSFER` or `scp=OFF`.')
-        self._scp_client.get(source, destination)
+        super(SCPTransferClient, self).__init__(ssh_client, encoding)
 
     def _put_file(self, source, destination, mode, newline, path_separator):
         self._create_remote_file(destination, mode)
