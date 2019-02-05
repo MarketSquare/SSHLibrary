@@ -82,6 +82,10 @@ Switch Connection Using Index When Previous Connection Was Closed
     ${conn}=  Get Connection  2
     Should Be Equal As Strings  ${conn.index}  2
 
+Connection To Host Read From SSH Config File
+   [Tags]  pybot
+   Open Connection  ${TEST_HOSTNAME}
+
 *** Keywords ***
 Connection Should Be Closed
     Run Keyword And Expect Error  No open connection.  Write  pwd

@@ -15,6 +15,7 @@ ${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
 ${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
 ${KEY USERNAME}      testkey
 ${KEY}               ${KEY DIR}${/}id_rsa
+${TEST_HOSTNAME}     test_hostname
 
 *** Keywords ***
 Login As Valid User
