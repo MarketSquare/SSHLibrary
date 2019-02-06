@@ -240,7 +240,7 @@ class SCPClient(object):
         self._scp_client.get(source, destination)
 
     def put_directory(self, source, destination, *args):
-            self._scp_client.put(source, destination, True)
+        self._scp_client.put(source, destination, True)
 
     def get_directory(self, source, destination, *args):
         self._scp_client.get(source, destination, True)
