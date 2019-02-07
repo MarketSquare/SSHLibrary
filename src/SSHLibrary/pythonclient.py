@@ -24,6 +24,14 @@ except ImportError:
         'Make sure you have Paramiko installed.'
     )
 
+try:
+    import scp
+except ImportError:
+    raise ImportError(
+        'Importing SCP library failed. '
+        'Make sure you have SCP installed.'
+    )
+
 from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
@@ -111,8 +119,11 @@ class PythonSSHClient(AbstractSSHClient):
     def _create_sftp_client(self):
         return SFTPClient(self.client, self.config.encoding)
 
-    def _create_scp_client(self):
-        return SCPClient(self.client, self.config.encoding)
+    def _create_scp_transfer_client(self):
+        return SCPTransferClient(self.client, self.config.encoding)
+
+    def _create_scp_all_client(self):
+        return SCPClient(self.client)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -218,24 +229,28 @@ class SFTPClient(AbstractSFTPClient):
         return self._client.readlink(path)
 
 
-class SCPClient(SFTPClient):
+class SCPClient(object):
+    def __init__(self, ssh_client):
+        self._scp_client = scp.SCPClient(ssh_client.get_transport())
+
+    def put_file(self, source, destination, *args):
+        self._scp_client.put(source, destination)
+
+    def get_file(self, source, destination, *args):
+        self._scp_client.get(source, destination)
+
+    def put_directory(self, source, destination, *args):
+        self._scp_client.put(source, destination, True)
+
+    def get_directory(self, source, destination, *args):
+        self._scp_client.get(source, destination, True)
+
+
+class SCPTransferClient(SFTPClient):
 
     def __init__(self, ssh_client, encoding):
-        try:
-            import scp
-        except ImportError:
-            raise ImportError(
-                'Importing SCP library failed. '
-                'Make sure you have SCP installed.'
-            )
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
-        super(SCPClient, self).__init__(ssh_client, encoding)
-
-    def put(self, source, destination, recursive=False):
-        self._scp_client.put(source, destination, recursive)
-
-    def get(self, source, destination, recursive=False):
-        self._scp_client.get(source, destination, recursive)
+        super(SCPTransferClient, self).__init__(ssh_client, encoding)
 
     def _put_file(self, source, destination, mode, newline, path_separator):
         self._create_remote_file(destination, mode)

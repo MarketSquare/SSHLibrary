@@ -1431,10 +1431,8 @@ class SSHLibrary(object):
 
         ``scp`` is new in SSHLibrary 3.3.0.
         """
-        if is_string(self._map_scp(scp)):
-            return self.current.scp_client.get(source, destination)
         return self._run_command(self.current.get_file, source,
-                                 destination, self._map_scp(scp))
+                                 destination, scp)
 
     def get_directory(self, source, destination='.', recursive=False,
                       scp='OFF'):
@@ -1479,11 +1477,8 @@ class SSHLibrary(object):
 
         ``scp`` is new in SSHLibrary 3.3.0.
         """
-        if is_string(self._map_scp(scp)):
-            return self.current.scp_client.get(source, destination, recursive=True)
         return self._run_command(self.current.get_directory, source,
-                                 destination, is_truthy(recursive),
-                                 self._map_scp(scp))
+                                 destination, is_truthy(recursive), scp)
 
     def put_file(self, source, destination='.', mode='0744', newline='',
                  scp='OFF'):
@@ -1539,11 +1534,8 @@ class SSHLibrary(object):
 
         ``scp`` is new in SSHLibrary 3.3.0.
         """
-        if is_string(self._map_scp(scp)):
-            return self.current.scp_client.put(source, destination)
         return self._run_command(self.current.put_file, source,
-                                 destination, mode, newline,
-                                 self._map_scp(scp))
+                                 destination, mode, newline, scp)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
                       recursive=False, scp='OFF'):
@@ -1595,26 +1587,18 @@ class SSHLibrary(object):
 
         ``scp`` is new in SSHLibrary 3.3.0.
         """
-        if is_string(self._map_scp(scp)):
-            return self.current.scp_client.put(source, destination, recursive=True)
         return self._run_command(self.current.put_directory, source,
                                  destination, mode, newline,
-                                 is_truthy(recursive),
-                                 self._map_scp(scp))
+                                 is_truthy(recursive), scp)
 
     def _run_command(self, command, *args):
         try:
             files = command(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
-        for src, dst in files:
-            self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
-
-    @staticmethod
-    def _map_scp(scp):
-        return {'OFF': False,
-                'TRANSFER': True,
-                'ALL': 'ALL'}.get(scp.upper(), scp)
+        if files:
+            for src, dst in files:
+                self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
 
     def file_should_exist(self, path):
         """Fails if the given ``path`` does NOT point to an existing file.

@@ -44,8 +44,9 @@ The recommended installation method is using pip_::
 
     pip install --upgrade robotframework-sshlibrary
 
-Running this command installs also the latest Robot Framework and paramiko_
-versions. The minimum supported paramiko version is ``1.15.3``.
+Running this command installs also the latest Robot Framework, paramiko_
+and scp_ versions. The minimum supported paramiko version is ``1.15.3`` and
+minimum supported scp version is ``0.13.0``.
 The ``--upgrade`` option can be omitted when installing the library for the
 first time.
 
@@ -62,7 +63,7 @@ Python or Jython::
     python setup.py install
     jython setup.py install
 
-A benefit of using pip is that it automatically installs paramiko
+A benefit of using pip is that it automatically installs scp, paramiko
 and Cryptography_ modules (or PyCrypto_ if paramiko version < 2.0)
 that SSHLibrary requires on Python.
 
@@ -136,6 +137,7 @@ available:
 .. _Keyword Documentation: http://robotframework.org/SSHLibrary/SSHLibrary.html
 .. _Jython 2.7: http://jython.org
 .. _paramiko: http://www.paramiko.org
+.. _scp: https://github.com/jbardin/scp.py
 .. _Cryptography: https://cryptography.io
 .. _PyCrypto: http://www.pycrypto.org
 .. _Trilead SSH JAR distribution: http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar
