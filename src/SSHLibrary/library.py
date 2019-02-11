@@ -595,6 +595,18 @@ class SSHLibrary(object):
         The `terminal settings` are also configurable per connection:
 
         | `Open Connection` | 192.168.1.1  | term_type=ansi | width=40 |
+
+         Starting with version 3.3.0, SSHLibrary understands ``Host`` entries from
+        ``~/.ssh/config``. For instance, if the config file contains:
+
+        | Host | my_custom_hostname     |
+        |      | Hostname my.server.com |
+
+        The connection to the server can also be made like this:
+
+        | `Open connection` | my_custom_hostname |
+
+        ``Host`` entries are not read from config file when running with Jython.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline

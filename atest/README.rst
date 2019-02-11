@@ -111,6 +111,13 @@ Setup on Linux
 
     sudo /etc/init.d/ssh restart
 
+- Add test_hostname in ~/.ssh/config
+
+::
+
+    echo $'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
+
+
 Setup in Windows
 ================
 The acceptance tests can also be run on windows against a ssh server running on Cygwin.

@@ -27,6 +27,7 @@ before_install:
   - sudo bash -c "echo 'Testing pre-login banner' > /etc/ssh/sshd-banner"
   - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
   - sudo service ssh restart
+  - echo $'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
 install:
   - pip install -r requirements-dev.txt docutils
 matrix:
