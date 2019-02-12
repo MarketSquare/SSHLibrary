@@ -1109,8 +1109,8 @@ class AbstractSFTPClient(object):
         return sources
 
     def _get_put_file_destinations(self, sources, destination, path_separator):
-        if destination[1:3] == ':' + os.sep:
-            destination = os.sep + destination
+        if destination[1:3] == ':' + path_separator:
+            destination = path_separator + destination
         destination = self._format_destination_path(destination)
         if destination == '.':
             destination = self._homedir + '/'
