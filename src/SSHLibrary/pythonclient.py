@@ -141,14 +141,14 @@ class PythonSSHClient(AbstractSSHClient):
         return Shell(self.client, self.config.term_type,
                      self.config.width, self.config.height)
 
-    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port):
-        self._create_local_port_forwarder(local_port, remote_host, remote_port)
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, bind_address):
+        self._create_local_port_forwarder(local_port, remote_host, remote_port, bind_address)
 
-    def _create_local_port_forwarder(self, local_port, remote_host, remote_port):
+    def _create_local_port_forwarder(self, local_port, remote_host, remote_port, bind_address):
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
-        self.tunnel = LocalPortForwarding(int(remote_port), remote_host, transport)
+        self.tunnel = LocalPortForwarding(int(remote_port), remote_host, transport, bind_address)
         self.tunnel.forward(int(local_port))
 
     def close(self):

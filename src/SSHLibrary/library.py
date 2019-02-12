@@ -1135,7 +1135,7 @@ class SSHLibrary(object):
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port=22):
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port=22, bind_address=None):
         """
         The keyword uses the existing connection to set up local port forwarding
         (the openssh -L option) from a local port through a tunneled
@@ -1154,9 +1154,18 @@ class SSHLibrary(object):
 
         The default ``remote_port`` is 22.
 
-        New in SSHLibrary 3.1.0
+        By default, anyone can connect on the specified port on the SSH client
+        because the local machine listens on all interfaces. Access can be
+        restricted by specifying a ``bind_address``. Setting ``bind_address``
+        does not work with Jython.
+
+        Example:
+
+        | `Create Local SSH Tunnel` | 9191 | secure.server.com | 80 | bind_address=127.0.0.1 |
+
+        ``bind_address`` is new in SSHLibrary 3.3.0.
         """
-        self.current.create_local_ssh_tunnel(local_port, remote_host, remote_port)
+        self.current.create_local_ssh_tunnel(local_port, remote_host, remote_port, bind_address)
 
     def _legacy_output_options(self, stdout, stderr, rc):
         if not is_string(stdout):

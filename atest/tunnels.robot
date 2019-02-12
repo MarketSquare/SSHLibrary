@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags     pybot   jybot
+Default Tags     pybot   jybot
 Resource       resources/common.robot
 Test Setup     Open Connection  ${HOST}
 Test Teardown  Close All Connections
@@ -39,6 +39,12 @@ Local Tunnel With Default Remote Port
     Create Local SSH Tunnel  ${LOCAL PORT}  ${REMOTE HOST}
     Port Should Not Be Free  ${LOCAL PORT}
 
+Local Tunnel With Bind Address
+    [Tags]  pybot
+    Login  ${USERNAME}  ${PASSWORD}
+    Create Local SSH Tunnel  ${LOCAL PORT}  ${REMOTE HOST}  ${REMOTE PORT}  bind_address=localhost
+    Port Should Be Binded To Localhost  ${LOCAL PORT}
+
 *** Keywords ***
 Port Should Not Be Free
     [Arguments]  ${port}
@@ -47,6 +53,15 @@ Port Should Not Be Free
     ...  ELSE
     ...  Run  netstat -an
     Should Contain  ${result}  :${port}
+
+Port Should Be Binded To Localhost
+    [Arguments]  ${port}
+    ${result}  Run Keyword If  os.sep == '/'
+    ...  Run  netstat -tulpn
+    ...  ELSE
+    ...  Run  netstat -an
+    ${ip}  Set Variable If  '${HOST}' == 'localhost'  127.0.0.1  [::1]
+    Should Contain  ${result}  ${ip}:${port}
 
 Port Should Be Free
     [Arguments]  ${port}
