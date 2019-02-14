@@ -83,6 +83,7 @@ class PythonSSHClient(AbstractSSHClient):
             with open(ssh_config_file) as f:
                 conf.parse(f)
             return conf.lookup(host)['hostname'] if not None else host
+        return host
 
     def _login(self, username, password, look_for_keys=False):
         self.config.host = self._read_ssh_config_host(self.config.host)
