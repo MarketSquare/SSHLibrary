@@ -658,6 +658,9 @@ class SSHLibrary(object):
         No other connection is made active by this keyword. Manually use
         `Switch Connection` to switch to another connection.
 
+        If there are connections whose indexes are bigger than the index
+        of the connection to be closed their indexes will decrease by one.
+
         Example:
         | `Open Connection`  | my.server.com  |
         | `Login`            | johndoe        | secretpasswd |
@@ -774,8 +777,6 @@ class SSHLibrary(object):
         try:
             config = self._connections.get_connection(index_or_alias).config
         except RuntimeError:
-            config = SSHClient(None).config
-        except AttributeError:
             config = SSHClient(None).config
         self._log(str(config), self._config.loglevel)
         return_values = tuple(self._get_config_values(config, index, host,

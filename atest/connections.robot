@@ -74,13 +74,18 @@ Switch Connection When Previous Connection Was Closed
     Should Be Equal As Strings  ${old_index}  None
 
 Switch Connection Using Index When Previous Connection Was Closed
-    Open Connection  ${HOST}
-    Open Connection  ${HOST}
+    Open Connection  ${HOST}  con1
+    Open Connection  ${HOST}  con2
     Switch Connection  1
     Close Connection
-    Switch Connection  2
-    ${conn}=  Get Connection  2
-    Should Be Equal As Strings  ${conn.index}  2
+    Open Connection  ${HOST}  con1
+    ${conn}=  Get Connection  1
+    Should Be Equal As Integers  ${conn.index}  1
+    Should Be Equal As Strings  ${conn.alias}  con2
+    ${conn2}=  Get Connection  2
+    Should Be Equal As Integers  ${conn2.index}  2
+    Should Be Equal As Strings  ${conn2.alias}  con1
+    Get Connections
 
 Connection To Host Read From SSH Config File
    [Tags]  pybot
