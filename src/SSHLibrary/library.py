@@ -658,8 +658,8 @@ class SSHLibrary(object):
         No other connection is made active by this keyword. Manually use
         `Switch Connection` to switch to another connection.
 
-        If there are connections whose indexes are bigger than the index
-        of the connection to be closed their indexes will decrease by one.
+        All connections opened after the one that is being closed will have
+        their indexes decreased by one.
 
         Example:
         | `Open Connection`  | my.server.com  |

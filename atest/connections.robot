@@ -76,16 +76,49 @@ Switch Connection When Previous Connection Was Closed
 Switch Connection Using Index When Previous Connection Was Closed
     Open Connection  ${HOST}  con1
     Open Connection  ${HOST}  con2
+    Open Connection  ${HOST}  con3
+    Switch Connection  2
+    Close Connection
+    Open Connection  ${HOST}  con2
+    ${conn}=  Get Connection  2
+    Should Be Equal As Integers  ${conn.index}  2
+    Should Be Equal As Strings  ${conn.alias}  con3
+    ${conn2}=  Get Connection  3
+    Should Be Equal As Integers  ${conn2.index}  3
+    Should Be Equal As Strings  ${conn2.alias}  con2
+    Get Connections
+
+Closing First Connection Gets Right Indexes For Connections Opened After
+    Open Connection  ${HOST}  con1
+    Open Connection  ${HOST}  con2
+    Open Connection  ${HOST}  con3
     Switch Connection  1
     Close Connection
-    Open Connection  ${HOST}  con1
-    ${conn}=  Get Connection  1
-    Should Be Equal As Integers  ${conn.index}  1
-    Should Be Equal As Strings  ${conn.alias}  con2
+    ${conn1}=  Get Connection  1
     ${conn2}=  Get Connection  2
+    Should Be Equal As Integers  ${conn1.index}  1
     Should Be Equal As Integers  ${conn2.index}  2
-    Should Be Equal As Strings  ${conn2.alias}  con1
-    Get Connections
+    Should Be Equal As Strings  ${conn1.alias}  con2
+    Should Be Equal As Strings  ${conn2.alias}  con3
+
+Closing Last Connection Does Not Modify Indexes Of Previously Opened Connections
+    Open Connection  ${HOST}  con1
+    Open Connection  ${HOST}  con2
+    Open Connection  ${HOST}  con3
+    Close Connection
+    ${conn1}=  Get Connection  1
+    ${conn2}=  Get Connection  2
+    Should Be Equal As Integers  ${conn1.index}  1
+    Should Be Equal As Integers  ${conn2.index}  2
+    Should Be Equal As Strings  ${conn1.alias}  con1
+    Should Be Equal As Strings  ${conn2.alias}  con2
+
+Closing Connection Remove Connection From Existing Connections
+    Open Connection  ${HOST}  con1
+    Open Connection  ${HOST}  con2
+    Close Connection
+    ${connection_list}=  Get Connections
+    Should Not Contain Any  ${connection_list}  alias\=con2  index\=2
 
 Connection To Host Read From SSH Config File
    [Tags]  pybot
