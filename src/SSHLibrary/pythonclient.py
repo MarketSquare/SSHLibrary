@@ -13,8 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import time
+import os
 import ntpath
+import time
 
 try:
     import paramiko
@@ -74,7 +75,18 @@ class PythonSSHClient(AbstractSSHClient):
         paramiko.util.log_to_file(path)
         return True
 
+    @staticmethod
+    def _read_ssh_config_host(host):
+        ssh_config_file = os.path.expanduser("~/.ssh/config")
+        if os.path.exists(ssh_config_file):
+            conf = paramiko.SSHConfig()
+            with open(ssh_config_file) as f:
+                conf.parse(f)
+            return conf.lookup(host)['hostname'] if not None else host
+        return host
+
     def _login(self, username, password, look_for_keys=False):
+        self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             self.client.connect(self.config.host, self.config.port, username,
                                 password, look_for_keys=look_for_keys,
@@ -84,6 +96,7 @@ class PythonSSHClient(AbstractSSHClient):
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys):
+        self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
@@ -129,14 +142,14 @@ class PythonSSHClient(AbstractSSHClient):
         return Shell(self.client, self.config.term_type,
                      self.config.width, self.config.height)
 
-    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port):
-        self._create_local_port_forwarder(local_port, remote_host, remote_port)
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, bind_address):
+        self._create_local_port_forwarder(local_port, remote_host, remote_port, bind_address)
 
-    def _create_local_port_forwarder(self, local_port, remote_host, remote_port):
+    def _create_local_port_forwarder(self, local_port, remote_host, remote_port, bind_address):
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
-        self.tunnel = LocalPortForwarding(int(remote_port), remote_host, transport)
+        self.tunnel = LocalPortForwarding(int(remote_port), remote_host, transport, bind_address)
         self.tunnel.forward(int(local_port))
 
     def close(self):

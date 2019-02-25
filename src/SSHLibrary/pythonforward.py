@@ -18,11 +18,12 @@ def check_if_ipv6(ip):
 
 
 class LocalPortForwarding:
-    def __init__(self, port, host, transport):
+    def __init__(self, port, host, transport, bind_address):
         self.server = None
         self.port = port
         self.host = host
         self.transport = transport
+        self.bind_address = bind_address
 
     def forward(self, local_port):
         class SubHandler(LocalPortForwardingHandler):
@@ -30,7 +31,7 @@ class LocalPortForwarding:
             host = self.host
             ssh_transport = self.transport
 
-        self.server = ForwardServer(('', local_port), SubHandler, ipv6=check_if_ipv6(self.host))
+        self.server = ForwardServer((self.bind_address or '', local_port), SubHandler, ipv6=check_if_ipv6(self.host))
         t = threading.Thread(target=self.server.serve_forever)
         t.setDaemon(True)
         t.start()

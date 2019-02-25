@@ -51,8 +51,9 @@ about the library in general.</p>
 <h1><a class="toc-backref" href="#id4">Installation</a></h1>
 <p>The recommended installation method is using <a class="reference external" href="http://pip-installer.org">pip</a>:</p>
 <pre class="literal-block">pip install --upgrade robotframework-sshlibrary</pre>
-<p>Running this command installs also the latest Robot Framework and <a class="reference external" href="http://www.paramiko.org">paramiko</a>
-versions. The minimum supported paramiko version is <span class="docutils literal">1.15.3</span>.
+<p>Running this command installs also the latest Robot Framework, <a class="reference external" href="http://www.paramiko.org">paramiko</a>
+and <a class="reference external" href="https://github.com/jbardin/scp.py">scp</a> versions. The minimum supported paramiko version is <span class="docutils literal">1.15.3</span> and
+minimum supported scp version is <span class="docutils literal">0.13.0</span>.
 The <span class="docutils literal"><span class="pre">--upgrade</span></span> option can be omitted when installing the library for the
 first time.</p>
 <p>With recent versions of <span class="docutils literal">pip</span> it is possible to install directly from the
@@ -64,7 +65,7 @@ it, and install it using one of the following depending are you using
 Python or Jython:</p>
 <pre class="literal-block">python setup.py install
 jython setup.py install</pre>
-<p>A benefit of using pip is that it automatically installs paramiko
+<p>A benefit of using pip is that it automatically installs scp, paramiko
 and <a class="reference external" href="https://cryptography.io">Cryptography</a> modules (or <a class="reference external" href="http://www.pycrypto.org">PyCrypto</a> if paramiko version &lt; 2.0)
 that SSHLibrary requires on Python.</p>
 <p>On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
