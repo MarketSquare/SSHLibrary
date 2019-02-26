@@ -79,14 +79,10 @@ Switch Connection Using Index When Previous Connection Was Closed
     Open Connection  ${HOST}  con3
     Switch Connection  2
     Close Connection
-    Open Connection  ${HOST}  con2
-    ${conn}=  Get Connection  2
+    Switch Connection  2
+    ${conn}=  Get Connection
     Should Be Equal As Integers  ${conn.index}  2
     Should Be Equal As Strings  ${conn.alias}  con3
-    Switch Connection  2
-    ${conn2}=  Get Connection
-    Should Be Equal As Integers  ${conn2.index}  2
-    Should Be Equal As Strings  ${conn2.alias}  con3
 
 Closing First Connection Gets Right Indexes For Connections Opened After
     Open Connection  ${HOST}  con1

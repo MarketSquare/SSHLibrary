@@ -24,5 +24,5 @@ class SSHConnectionCache(ConnectionCache):
                 self.aliases[key] = self.aliases[key] - 1
         self.connections.remove(connection)
         for conn in islice(self.connections, conn_index - 1, None):
-            conn.config.update(index=conn.config.get('index').value-1)
+            conn.config.update(index=conn.config.get('index').value - 1)
         self.current = self._no_current
