@@ -1,6 +1,5 @@
 from robot.utils import ConnectionCache
 from itertools import islice
-from robot.api import logger
 
 
 class SSHConnectionCache(ConnectionCache):
@@ -17,13 +16,13 @@ class SSHConnectionCache(ConnectionCache):
 
     def close_current(self):
         connection = self.current
-        conn_index = connection.config.index - 1
+        conn_index = self.current_index
         connection.close()
         if connection.config.alias is not None:
             self.aliases.pop(connection.config.alias)
-            for key, value in dict(islice(self.aliases.items(), conn_index, None)).items():
+            for key in islice(self.aliases, conn_index - 1, None):
                 self.aliases[key] = self.aliases[key] - 1
         self.connections.remove(connection)
-        for conn in islice(self.connections, conn_index, None):
+        for conn in islice(self.connections, conn_index - 1, None):
             conn.config.update(index=conn.config.get('index').value-1)
         self.current = self._no_current

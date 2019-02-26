@@ -658,15 +658,22 @@ class SSHLibrary(object):
         No other connection is made active by this keyword. Manually use
         `Switch Connection` to switch to another connection.
 
-        All connections opened after the one that is being closed will have
-        their indexes decreased by one.
-
         Example:
         | `Open Connection`  | my.server.com  |
         | `Login`            | johndoe        | secretpasswd |
         | `Get File`         | results.txt    | /tmp         |
         | `Close Connection` |
         | # Do something with /tmp/results.txt               |
+
+        Closing a connection will update the indexes of the following
+        connections.
+
+        Example:
+        | `Open Connection`   | my.server.com  | con1 | # con1 has index 1                          |
+        | `Open Connection`   | my.server.com  | con2 | # con2 has index 2                          |
+        | `Switch Connection` | con1           |
+        | `Close Connection`  |                |      | # con2 will have index 1 after closing con1 |
+
         """
         connections = self._connections
         connections.close_current()
