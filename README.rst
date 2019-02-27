@@ -70,6 +70,9 @@ that SSHLibrary requires on Python.
 On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
 `Trilead SSH JAR distribution`_ and add it to CLASSPATH.
 
+On Windows operating system, when using Python version < 3.0, SSHLibrary will
+require win_inet_pton_. The minimum supported win_inet_pton version is ``1.1.0``.
+
 Usage
 -----
 
@@ -141,6 +144,7 @@ available:
 .. _Cryptography: https://cryptography.io
 .. _PyCrypto: http://www.pycrypto.org
 .. _Trilead SSH JAR distribution: http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar
+.. _win_inet_pton: https://github.com/hickeroar/win_inet_pton
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
 .. _Slack community: https://robotframework-slack-invite.herokuapp.com
 .. _issue tracker: https://github.com/robotframework/SSHLibrary/issues
