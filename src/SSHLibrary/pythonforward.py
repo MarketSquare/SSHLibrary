@@ -1,6 +1,9 @@
 import select
-import socket
 import threading
+from robot.utils import platform
+if platform.PY2 and platform.WINDOWS:
+    import win_inet_pton
+import socket
 
 try:
     import SocketServer
