@@ -18,23 +18,18 @@ class SSHConnectionCache(ConnectionCache):
         connection.close()
         if connection.config.alias is not None:
             self.aliases.pop(connection.config.alias)
-        self.connections.remove(connection)
-        self.current = self._no_current
+        idx = connection.config.index - 1
+        self.connections[idx] = self.current = self._no_current
+
+    def close_all(self):
+        open_connections = (conn for conn in self._connections if conn)
+        for connection in open_connections:
+            connection.close()
+        self.empty_cache()
+        return self.current
 
     def get_connection(self, alias_or_index=None):
-        if alias_or_index is None:
-            if not self:
-                self.current.raise_error()
-            return self.current
-        try:
-            index = self._resolve_alias_or_index(alias_or_index)
-        except ValueError:
+        connection = super(SSHConnectionCache, self).get_connection(alias_or_index)
+        if not connection:
             raise RuntimeError("Non-existing index or alias '%s'." % alias_or_index)
-        return next((x for x in self._connections if x.config._config['index'].value == index), None)
-
-    def _resolve_index(self, index):
-        try:
-            index = int(index)
-        except TypeError:
-            raise ValueError
-        return index
+        return connection
