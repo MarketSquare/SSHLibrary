@@ -851,7 +851,7 @@ class SSHLibrary(object):
         This keyword logs the information of connections with log level
         ``INFO``.
         """
-        configs = [c.config for c in self._connections._connections]
+        configs = [c.config for c in self._connections._connections if c]
         for c in configs:
             self._log(str(c), self._config.loglevel)
         return configs
