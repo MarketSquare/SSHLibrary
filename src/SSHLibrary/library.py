@@ -968,7 +968,7 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None, timeout=None):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None, forward_agent=False):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -1028,10 +1028,10 @@ class SSHLibrary(object):
             self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password, timeout)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password, timeout, forward_agent)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command, sudo=False,  sudo_password=None):
+    def start_command(self, command, sudo=False,  sudo_password=None, forward_agent=False):
         """Starts execution of the ``command`` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the ``command``
@@ -1075,7 +1075,7 @@ class SSHLibrary(object):
         else:
             self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
         self._last_command = command
-        self.current.start_command(command, sudo, sudo_password)
+        self.current.start_command(command, sudo, sudo_password, forward_agent)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False, timeout=None):

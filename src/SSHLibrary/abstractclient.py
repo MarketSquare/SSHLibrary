@@ -268,7 +268,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, forward_agent=False):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -289,10 +289,10 @@ class AbstractSSHClient(object):
         if timeout:
             timeout = float(TimeEntry(timeout).value)
 
-        self.start_command(command, sudo, sudo_password)
+        self.start_command(command, sudo, sudo_password, forward_agent)
         return self.read_command_output(timeout=timeout)
 
-    def start_command(self, command, sudo=False,  sudo_password=None):
+    def start_command(self, command, sudo=False,  sudo_password=None, forward_agent=False):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -311,9 +311,9 @@ class AbstractSSHClient(object):
         :param sudo_password are used for executing commands within a sudo session.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command, sudo, sudo_password))
+        self._started_commands.append(self._start_command(command, sudo, sudo_password, forward_agent))
 
-    def _start_command(self, command, sudo=False, sudo_password=None):
+    def _start_command(self, command, sudo=False, sudo_password=None, forward_agent=False):
         raise NotImplementedError
 
     def read_command_output(self, timeout=None):

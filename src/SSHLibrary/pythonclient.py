@@ -120,12 +120,14 @@ class PythonSSHClient(AbstractSSHClient):
         except Exception:
             raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
 
-    def _start_command(self, command, sudo=False,  sudo_password=None):
+    def _start_command(self, command, sudo=False,  sudo_password=None, forward_agent=False):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session(timeout=float(self.config.timeout))
+        if forward_agent:
+            paramiko.agent.AgentRequestHandler(new_shell)
         cmd.run_in(new_shell, sudo, sudo_password)
         return cmd
 
