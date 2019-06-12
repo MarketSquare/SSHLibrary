@@ -117,6 +117,13 @@ Put File Overwrite If User In The Same Group
    SSH.File Should Exist  ${TEST FILE NAME}
    [Teardown]  Remove testkey User From Group test And Cleanup
 
+Put File And Check For Proper Permissions
+	Put File  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}/  mode=0755
+	${output}=  Execute Command   ls
+	Should Contain  ${output}  to_put
+	Check File Permissions    0755    ${REMOTE_TEST_ROOT}${/}${FILE_WITH_NON-ASCII}
+	[Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 *** Keywords ***
 Change User And Overwrite File
     Open Connection  ${HOST}  prompt=${PROMPT}
