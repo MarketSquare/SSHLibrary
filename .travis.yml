@@ -50,8 +50,8 @@ matrix:
         - PARAMIKO=1.18.5
     - python: "3.6"
       env:
-        - ROBOTFRAMEWORK=3.1.1
-        - PARAMIKO=1.15.3
+        - ROBOTFRAMEWORK=3.2
+        - PARAMIKO=2.5.0
 before_script:
   - pip install robotframework==$ROBOTFRAMEWORK
   - if [ "$JYTHON" == "true" ]; then
