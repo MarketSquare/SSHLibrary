@@ -25,3 +25,8 @@ Login As Valid User
 Remove Test Files And Close Connections
     Execute Command  rm -rf ${REMOTE TEST ROOT}
     Close All Connections
+
+Check File Permissions
+   [Arguments]  ${mode}=755   ${remote_file}=to_put${/}ExampleText3.txt
+   ${file}=  Execute Command  stat -c %a ${remote_file}
+   Should Contain  ${file}  ${mode}
