@@ -19,7 +19,7 @@ try:
     from robot.api import logger
 except ImportError:
     logger = None
-
+import re
 from .sshconnectioncache import SSHConnectionCache
 from .abstractclient import SSHClientException
 from .client import SSHClient
@@ -1133,7 +1133,7 @@ class SSHLibrary(object):
             stdout, stderr, rc = self.current.read_command_output(timeout=timeout)
         except SSHClientException as msg:
             raise RuntimeError(msg)
-        return self._return_command_output(stdout, stderr, rc, *opts)
+        return self._escape_ansi_sequences(self._return_command_output(stdout, stderr, rc, *opts))
 
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port=22, bind_address=None):
         """
@@ -1400,7 +1400,11 @@ class SSHLibrary(object):
         except SSHClientException as e:
             raise RuntimeError(e)
         self._log(output, loglevel)
-        return output
+        return self._escape_ansi_sequences(output)
+
+    def _escape_ansi_sequences(self, output):
+        ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
+        return ansi_escape.sub('', output)
 
     def get_file(self, source, destination='.', scp='OFF'):
         """Downloads file(s) from the remote machine to the local machine.
