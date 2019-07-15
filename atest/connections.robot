@@ -102,7 +102,7 @@ Foo
     Read
     Write Until Expected Output  dir  \#test#  10  10
     Start Command  dir
-    Read Command Output  timeout=10
+    Read Command Output
 
 *** Keywords ***
 Connection Should Be Closed

@@ -1399,8 +1399,9 @@ class SSHLibrary(object):
             output = reader(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
+        output = self._escape_ansi_sequences(output)
         self._log(output, loglevel)
-        return self._escape_ansi_sequences(output)
+        return output
 
     def _escape_ansi_sequences(self, output):
         ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
