@@ -13,9 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import print_function
+
 import re
 
-from __future__ import print_function
 from .deco import keyword
 try:
     from robot.api import logger
@@ -160,6 +161,12 @@ class SSHLibrary(object):
 
     Argument ``term_type`` defines the virtual terminal type, and arguments
     ``width`` and ``height`` can be used to control its  virtual size.
+
+    === Escape ansi sequneces ===
+
+    Argument ``escape_ansi`` is a parameter used in order to escape ansi
+    sequences that appear in the output when the remote machine has
+    Windows as operating system.
 
     == Not configurable per connection ==
 
@@ -1406,7 +1413,7 @@ class SSHLibrary(object):
             output = reader(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
-        if is_truthy(self.current.config.escape_ansi or self._config.escape_ansi):
+        if is_truthy(self.current.config.escape_ansi):
             output = self._escape_ansi_sequences(output)
         self._log(output, loglevel)
         return output
