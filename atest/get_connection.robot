@@ -51,7 +51,7 @@ Get Connections
     Should Be Equal    ${conns[0].prompt}     >>
     Should Be Equal    ${conns[1].alias}      another
     Should Be Equal    ${conns[0].term_type}  vt100
-    Should Be Equal    ${conns[1].escape_ansi}   True
+    Should Be Equal    ${conns[0].escape_ansi}   True
     Should Be Equal    ${conns[1].escape_ansi}   False
 
 Get Connections Returns Empty List When No Connections

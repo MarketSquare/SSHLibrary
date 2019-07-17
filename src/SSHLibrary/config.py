@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .utils import is_bytes, secs_to_timestr, timestr_to_secs, is_truthy
+from .utils import is_bytes, secs_to_timestr, timestr_to_secs
 
 
 class ConfigurationException(Exception):

@@ -22,6 +22,7 @@ try:
     from robot.api import logger
 except ImportError:
     logger = None
+
 from .sshconnectioncache import SSHConnectionCache
 from .abstractclient import SSHClientException
 from .client import SSHClient
