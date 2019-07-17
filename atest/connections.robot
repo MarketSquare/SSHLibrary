@@ -86,24 +86,6 @@ Connection To Host Read From SSH Config File
    [Tags]  pybot
    Open Connection  ${TEST_HOSTNAME}
 
-Foo
-    Open Connection    host    alias=test    path_separator=\\\\    encoding=utf-8
-    Login    x   y
-    Set Client Configuration    prompt=#test#
-    Write    set PROMPT=#test#
-    Read Until Prompt
-    Write    dir
-    Read Until  \#test#
-    Write  dir
-    Read Until Prompt
-    Write  dir
-    Read Until Regexp  \#test#
-    Write  dir
-    Read
-    Write Until Expected Output  dir  \#test#  10  10
-    Start Command  dir
-    Read Command Output
-
 *** Keywords ***
 Connection Should Be Closed
     Run Keyword And Expect Error  No open connection.  Write  pwd

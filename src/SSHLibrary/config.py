@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .utils import is_bytes, secs_to_timestr, timestr_to_secs
+from .utils import is_bytes, secs_to_timestr, timestr_to_secs, is_truthy
 
 
 class ConfigurationException(Exception):
@@ -157,3 +157,8 @@ class NewlineEntry(Entry):
         value = value.upper()
         return value.replace('LF', '\n').replace('CR', '\r')
 
+class BooleanEntry(Entry):
+    """Boolean value to be stored in :py:class:`Configuration`."""
+
+    def _parse_value(self, value):
+        return is_truthy(value)

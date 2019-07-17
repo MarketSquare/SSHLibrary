@@ -13,13 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
+
 from __future__ import print_function
 from .deco import keyword
 try:
     from robot.api import logger
 except ImportError:
     logger = None
-import re
 from .sshconnectioncache import SSHConnectionCache
 from .abstractclient import SSHClientException
 from .client import SSHClient
@@ -388,6 +389,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_HEIGHT = 24
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
+    DEFAULT_ESCAPE_ANSI = False
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -398,7 +400,8 @@ class SSHLibrary(object):
                  width=DEFAULT_TERM_WIDTH,
                  height=DEFAULT_TERM_HEIGHT,
                  path_separator=DEFAULT_PATH_SEPARATOR,
-                 encoding=DEFAULT_ENCODING):
+                 encoding=DEFAULT_ENCODING,
+                 escape_ansi=DEFAULT_ESCAPE_ANSI):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -434,7 +437,8 @@ class SSHLibrary(object):
             width or self.DEFAULT_TERM_WIDTH,
             height or self.DEFAULT_TERM_HEIGHT,
             path_separator or self.DEFAULT_PATH_SEPARATOR,
-            encoding or self.DEFAULT_ENCODING
+            encoding or self.DEFAULT_ENCODING,
+            escape_ansi or self.DEFAULT_ESCAPE_ANSI
         )
 
     @property
@@ -445,7 +449,7 @@ class SSHLibrary(object):
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
-                                  encoding=None):
+                                  encoding=None, escape_ansi=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -479,11 +483,11 @@ class SSHLibrary(object):
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
-                            encoding=encoding)
+                            encoding=encoding, escape_ansi=escape_ansi)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None):
+                                 path_separator=None, encoding=None, escape_ansi=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than ``None`` are updated.
@@ -518,7 +522,7 @@ class SSHLibrary(object):
                                    prompt=prompt, term_type=term_type,
                                    width=width, height=height,
                                    path_separator=path_separator,
-                                   encoding=encoding)
+                                   encoding=encoding, escape_ansi=escape_ansi)
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given ``logfile``.
@@ -545,7 +549,7 @@ class SSHLibrary(object):
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None):
+                        height=None, path_separator=None, encoding=None, escape_ansi=None):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
         The new connection is made active. Possible existing connections
@@ -616,8 +620,9 @@ class SSHLibrary(object):
         height = height or self._config.height
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
+        escape_ansi = escape_ansi or self._config.escape_ansi
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, path_separator, encoding)
+                           term_type, width, height, path_separator, encoding, escape_ansi)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -690,7 +695,7 @@ class SSHLibrary(object):
     def get_connection(self, index_or_alias=None, index=False, host=False,
                        alias=False, port=False, timeout=False, newline=False,
                        prompt=False, term_type=False, width=False, height=False,
-                       encoding=False):
+                       encoding=False, escape_ansi=False):
         """Returns information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -782,7 +787,7 @@ class SSHLibrary(object):
                                                       alias, port, timeout,
                                                       newline, prompt,
                                                       term_type, width, height,
-                                                      encoding))
+                                                      encoding, escape_ansi))
         if not return_values:
             return config
         if len(return_values) == 1:
@@ -809,7 +814,7 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'." % level)
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
-                           newline, prompt, term_type, width, height, encoding):
+                           newline, prompt, term_type, width, height, encoding, escape_ansi):
         if is_truthy(index):
             yield config.index
         if is_truthy(host):
@@ -832,6 +837,8 @@ class SSHLibrary(object):
             yield config.height
         if is_truthy(encoding):
             yield config.encoding
+        if is_truthy(escape_ansi):
+            yield config.escape_ansi
 
     def get_connections(self):
         """Returns information about all the open connections.
@@ -1133,7 +1140,7 @@ class SSHLibrary(object):
             stdout, stderr, rc = self.current.read_command_output(timeout=timeout)
         except SSHClientException as msg:
             raise RuntimeError(msg)
-        return self._escape_ansi_sequences(self._return_command_output(stdout, stderr, rc, *opts))
+        return self._return_command_output(stdout, stderr, rc, *opts)
 
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port=22, bind_address=None):
         """
@@ -1399,7 +1406,8 @@ class SSHLibrary(object):
             output = reader(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
-        output = self._escape_ansi_sequences(output)
+        if is_truthy(self.current.config.escape_ansi or self._config.escape_ansi):
+            output = self._escape_ansi_sequences(output)
         self._log(output, loglevel)
         return output
 
@@ -1738,7 +1746,7 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, path_separator, encoding):
+                 height, path_separator, encoding, escape_ansi):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1748,5 +1756,6 @@ class _DefaultConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )
