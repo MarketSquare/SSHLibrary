@@ -85,8 +85,6 @@ Switch Connection Using Index When Previous Connection Was Closed
     Close Connection
     Connection Should Be Closed
     Switch Connection  2
-    ${conn}=  Get Connection  2
-    Should Be Equal As Strings  ${conn.index}  2
     Run Keyword And Expect Error  Non-existing index or alias '1'.  Switch Connection  1
     ${conn}=  Get Connection
     Should Be Equal As Strings  ${conn.index}  2
