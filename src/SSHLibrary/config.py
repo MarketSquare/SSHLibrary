@@ -156,9 +156,3 @@ class NewlineEntry(Entry):
             value = value.decode('ASCII')
         value = value.upper()
         return value.replace('LF', '\n').replace('CR', '\r')
-
-class BooleanEntry(Entry):
-    """Boolean value to be stored in :py:class:`Configuration`."""
-
-    def _parse_value(self, value):
-        return is_truthy(value)
