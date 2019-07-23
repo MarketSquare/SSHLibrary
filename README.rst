@@ -73,8 +73,11 @@ On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to downloa
 On Windows operating system, when using Python version < 3.0, SSHLibrary will
 require win_inet_pton_. The minimum supported win_inet_pton version is ``1.1.0``.
 
-When installing SSHLibrary in a container on Alpine Linux there are more dependencies
-the must be installed: gcc_, make_, openssl-dev_, musl-dev_ and libffi-dev_. These
+Docker
+~~~~~~
+
+When installing SSHLibrary in a container(eg. Alpine Linux) there are more dependencies
+that must be installed: gcc_, make_, openssl-dev_, musl-dev_ and libffi-dev_. These
 packages can be installed using::
 
     apk add gcc make openssl-dev musl-dev libffi-dev
