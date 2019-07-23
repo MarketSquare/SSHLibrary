@@ -76,7 +76,7 @@ require win_inet_pton_. The minimum supported win_inet_pton version is ``1.1.0``
 Docker
 ~~~~~~
 
-When installing SSHLibrary in a container(eg. Alpine Linux) there are more dependencies
+When installing SSHLibrary in a container (eg. Alpine Linux) there are more dependencies
 that must be installed: gcc_, make_, openssl-dev_, musl-dev_ and libffi-dev_. These
 packages can be installed using::
 
