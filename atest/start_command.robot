@@ -60,3 +60,10 @@ Start Time Consuming Sudo Command
     Start Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  cat
+
+Read Command Output With Timeout
+    Start Command  sleep 15
+    Run Keyword And Expect Error  *Timed out in 5 seconds  Read Command Output  timeout=5s
+
+Execute Command With Timeout
+    Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s
