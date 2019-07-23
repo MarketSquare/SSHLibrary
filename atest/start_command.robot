@@ -64,6 +64,3 @@ Start Time Consuming Sudo Command
 Read Command Output With Timeout
     Start Command  sleep 15
     Run Keyword And Expect Error  *Timed out in 5 seconds  Read Command Output  timeout=5s
-
-Execute Command With Timeout
-    Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s
