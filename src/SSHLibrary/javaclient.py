@@ -102,6 +102,7 @@ class JavaSSHClient(AbstractSSHClient):
 
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, *args):
         self.client.createLocalPortForwarder(int(local_port), remote_host, int(remote_port))
+        logger.info("Now forwarding port %s to %s:%s ..." % (local_port, remote_host, remote_port))
 
 
 class Shell(AbstractShell):

@@ -24,6 +24,7 @@ import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
+from .logger import logger
 from .utils import is_bytes, is_string, unicode
 
 
@@ -152,6 +153,10 @@ class AbstractSSHClient(object):
         self._scp_all_client = None
         self._shell = None
         self.client.close()
+        try:
+            logger.log_background_messages()
+        except AttributeError:
+            pass
 
     def login(self, username, password, delay=None, look_for_keys=False):
         """Logs into the remote host using password authentication.
