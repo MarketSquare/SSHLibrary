@@ -968,7 +968,8 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None, timeout=None):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None,
+                        invoke_subsystem=False):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -1020,7 +1021,11 @@ class SSHLibrary(object):
 
         If the `timeout` expires before the command is executed, this keyword fails.
 
-        ``timeout`` argument is new in SSHLibrary 3.2.0.
+        ``invoke_subsystem`` will request a subsystem on the server, given by the
+        ``command`` argument. If the server allows it, the channel will then be
+        directly connected to the requested subsystem.
+
+        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1028,10 +1033,11 @@ class SSHLibrary(object):
             self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password, timeout)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password,
+                                                          timeout, is_truthy(invoke_subsystem))
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command, sudo=False,  sudo_password=None):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Starts execution of the ``command`` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the ``command``
@@ -1068,14 +1074,16 @@ class SSHLibrary(object):
 
         This keyword logs the started command with log level ``INFO``.
 
-        ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
+        ``invoke_subsystem`` argument behaves similarly as with `Execute Command` keyword.
+
+        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Starting command '%s'." % command, self._config.loglevel)
         else:
             self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
         self._last_command = command
-        self.current.start_command(command, sudo, sudo_password)
+        self.current.start_command(command, sudo, sudo_password, is_truthy(invoke_subsystem))
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False, timeout=None):

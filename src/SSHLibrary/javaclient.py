@@ -79,12 +79,12 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def _start_command(self, command, sudo=False, sudo_password=None):
+    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False):
         new_shell = self.client.openSession()
         if sudo:
             new_shell.requestDumbPTY()
         cmd = RemoteCommand(command, self.config.encoding)
-        cmd.run_in(new_shell, sudo, sudo_password)
+        cmd.run_in(new_shell, sudo, sudo_password, invoke_subsystem)
         return cmd
 
     def _create_sftp_client(self):
@@ -255,6 +255,10 @@ class RemoteCommand(AbstractCommand):
     def _execute(self):
         command = self._command.decode(self._encoding)
         self._shell.execCommand(command)
+
+    def _invoke(self):
+        command = self._command.decode(self._encoding)
+        self._shell.startSubSystem(command)
 
     def _execute_with_sudo(self, sudo_password=None):
         command = 'sudo ' + self._command.decode(self._encoding)

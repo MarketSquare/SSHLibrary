@@ -88,4 +88,7 @@ Execute Time Consuming Sudo Command
     [Tags]     linux
     ${stdout} =  Execute Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     Should Contain  ${stdout}  cat
-	
+
+Execute Command With Invoke Subsystem
+    ${stdout} =  Execute Command  subsys  invoke_subsystem=yes
+    Should Be Equal  ${stdout}  Subsystem invoked.

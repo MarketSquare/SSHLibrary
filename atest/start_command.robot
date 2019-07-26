@@ -60,3 +60,8 @@ Start Time Consuming Sudo Command
     Start Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  cat
+
+Start Command And Read Process Output With Invoke Subsystem
+    Start Command  subsys  invoke_subsystem=yes
+    ${stdout} =  Read Command Output
+    Should Be Equal  ${stdout}  Subsystem invoked.
