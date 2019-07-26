@@ -1215,6 +1215,7 @@ class AbstractCommand(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
         :param invoke_subsystem will request a subsystem on the server.
         """
         self._shell = shell
