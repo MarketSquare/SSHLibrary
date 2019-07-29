@@ -1,6 +1,6 @@
 language: python
 sudo: required
-dist: trusty
+dist: xenial
 env:
   global:
     -JYTHON=false
@@ -32,25 +32,29 @@ install:
   - pip install -r requirements-dev.txt docutils
 matrix:
   include:
+    - python: "3.7"
+      env:
+        - ROBOTFRAMEWORK=3.1.2
+        - PARAMIKO=2.6.0
     - python: "2.7"
       env:
-        - ROBOTFRAMEWORK=3.1.1
+        - ROBOTFRAMEWORK=3.1.2
         - PARAMIKO=2.4.1
     - python: "2.7"
       env:
         - JYTHON=true
-        - ROBOTFRAMEWORK=3.1.1
+        - ROBOTFRAMEWORK=3.1.2
     - python: "3.4"
       env:
-        - ROBOTFRAMEWORK=3.1.1
+        - ROBOTFRAMEWORK=3.1.2
         - PARAMIKO=2.1.5
     - python: "3.5"
       env:
-        - ROBOTFRAMEWORK=3.1.1
+        - ROBOTFRAMEWORK=3.1.2
         - PARAMIKO=1.18.5
     - python: "3.6"
       env:
-        - ROBOTFRAMEWORK=3.1.1
+        - ROBOTFRAMEWORK=3.1.2
         - PARAMIKO=1.15.3
 before_script:
   - pip install robotframework==$ROBOTFRAMEWORK
