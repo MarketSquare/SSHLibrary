@@ -291,9 +291,6 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        if timeout:
-            timeout = float(TimeEntry(timeout).value)
-
         self.start_command(command, sudo, sudo_password)
         return self.read_command_output(timeout=timeout)
 
@@ -334,6 +331,8 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
+        if timeout:
+            timeout = float(TimeEntry(timeout).value)
         try:
             return self._started_commands.pop().read_outputs(timeout)
         except IndexError:

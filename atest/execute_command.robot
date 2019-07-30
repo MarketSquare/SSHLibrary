@@ -88,4 +88,6 @@ Execute Time Consuming Sudo Command
     [Tags]     linux
     ${stdout} =  Execute Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     Should Contain  ${stdout}  cat
-	
+
+Execute Command With Timeout
+    Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s
