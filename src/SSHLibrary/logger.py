@@ -13,4 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-VERSION = '3.4.0rc2.dev1'
+try:
+    from robotbackgroundlogger import BackgroundLogger
+    logger = BackgroundLogger()
+except ImportError:
+    from robot.api import logger
