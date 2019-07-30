@@ -73,6 +73,15 @@ On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to downloa
 On Windows operating system, when using Python version < 3.0, SSHLibrary will
 require win_inet_pton_. The minimum supported win_inet_pton version is ``1.1.0``.
 
+Docker
+~~~~~~
+
+When installing SSHLibrary in a container (eg. Alpine Linux) there are more dependencies
+that must be installed: gcc_, make_, openssl-dev_, musl-dev_ and libffi-dev_. These
+packages can be installed using::
+
+    apk add gcc make openssl-dev musl-dev libffi-dev
+
 Usage
 -----
 
@@ -145,6 +154,11 @@ available:
 .. _PyCrypto: http://www.pycrypto.org
 .. _Trilead SSH JAR distribution: http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar
 .. _win_inet_pton: https://github.com/hickeroar/win_inet_pton
+.. _gcc: https://pkgs.alpinelinux.org/packages?name=gcc&branch=edge
+.. _make: https://pkgs.alpinelinux.org/packages?name=make&branch=edge
+.. _openssl-dev: https://pkgs.alpinelinux.org/packages?name=openssl-dev&branch=edge
+.. _musl-dev: https://pkgs.alpinelinux.org/packages?name=musl-dev&branch=edge
+.. _libffi-dev: https://pkgs.alpinelinux.org/packages?name=libffi-dev&branch=edge
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
 .. _Slack community: https://robotframework-slack-invite.herokuapp.com
 .. _issue tracker: https://github.com/robotframework/SSHLibrary/issues
