@@ -85,12 +85,12 @@ class PythonSSHClient(AbstractSSHClient):
             return conf.lookup(host)['hostname'] if not None else host
         return host
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, allow_agent=False, look_for_keys=False):
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, look_for_keys=look_for_keys,
-                                allow_agent=look_for_keys,
+                                password, allow_agent=allow_agent,
+                                look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
             raise SSHClientException

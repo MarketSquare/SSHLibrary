@@ -856,7 +856,7 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, delay='0.5 seconds'):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay='0.5 seconds'):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -865,6 +865,15 @@ class SSHLibrary(object):
         in. If the `prompt` is set, everything until the prompt is read.
         Otherwise the output is read using the `Read` keyword with the given
         ``delay``. The output is logged using the default `log level`.
+
+        ``allow_agent`` enables the connection to the SSH agent.
+
+        ``look_for_keys`` enables the searching for discoverable private key files in ``~/.ssh/``.
+
+        ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
+        3.4.0.
+
+        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
 
         Example that logs in and returns the output:
 
@@ -878,7 +887,8 @@ class SSHLibrary(object):
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
         """
-        return self._login(self.current.login, username, password, delay)
+        return self._login(self.current.login, username, password, is_truthy(allow_agent),
+                           is_truthy(look_for_keys), delay)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,
