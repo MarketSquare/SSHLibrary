@@ -83,7 +83,7 @@ Put File And Specify Remote Newlines
     SSH.File Should Exist  ${target}
     ${expected} =  OS.Get Binary File  ${FILE WITH NEWLINES}
     SSH.Get File  ${target}  ${LOCAL TMPDIR}${/}
-    ${content} =  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
+    ${content}=  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
     ${win_rn}=   Encode String To Bytes  \r\n  UTF-8
     ${linux_n}=   Encode String To Bytes  ${\n}  UTF-8
     ${content}=  Replace String  ${content}  ${win_rn}  ${linux_n}

@@ -89,8 +89,8 @@ Port Should Be Binded To Localhost
     ...  Run  netstat -tulpn
     ...  ELSE
     ...  Run  netstat -an
-    ${ip}  Set Variable If  '${HOST}' == 'localhost'  127.0.0.1  [::1]
-    Should Contain  ${result}  ${ip}:${port}
+    ${ip}  Set Variable If  '${HOST}' == 'localhost'  127.0.0.1  [?::1]?
+    Should Match Regexp  ${result}  ${ip}:${port}
 
 Port Should Be Free
     [Arguments]  ${port}
