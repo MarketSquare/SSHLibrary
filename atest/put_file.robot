@@ -118,10 +118,10 @@ Put File Overwrite If User In The Same Group
    [Teardown]  Remove testkey User From Group test And Cleanup
 
 Put File And Check For Proper Permissions
-	Put File  ${FILE WITH NON-ASCII}  ${REMOTE TEST ROOT}/  mode=0755
+	Put File  ${LOCAL TEXTFILES}${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/  mode=0755
 	${output}=  Execute Command   ls
 	Should Contain  ${output}  to_put
-	Check File Permissions    0755    ${REMOTE_TEST_ROOT}${/}${FILE_WITH_NON-ASCII}
+	Check File Permissions    0755    ${REMOTE_TEST_ROOT}${/}${TEST FILE NAME}
 	[Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 *** Keywords ***

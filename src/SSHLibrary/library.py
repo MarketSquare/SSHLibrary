@@ -1556,7 +1556,7 @@ class SSHLibrary(object):
 
         ``mode`` can be used to set the target file permission.
         Numeric values are accepted. The default value is ``0744``
-        (``-rwxr--r--``). If a non numeric value is provided, setting modes
+        (``-rwxr--r--``). If None value is provided, setting modes
         will be skipped.
 
         ``newline`` can be used to force the line break characters that are
@@ -1569,7 +1569,7 @@ class SSHLibrary(object):
         Examples:
         | `Put File` | /path/to/*.txt          |
         | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=0770 |
-        | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=skip |
+        | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=None |
         | `Put File` | /path/to/*.txt          | newline=CRLF       |
 
         The remote ``destination`` is created as following:
