@@ -273,7 +273,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, invoke_subsystem=False):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -288,13 +288,15 @@ class AbstractSSHClient(object):
          and
         :param sudo_password are used for executing commands within a sudo session.
 
+        :param invoke_subsystem will request a subsystem on the server.
+
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        self.start_command(command, sudo, sudo_password)
+        self.start_command(command, sudo, sudo_password, invoke_subsystem)
         return self.read_command_output(timeout=timeout)
 
-    def start_command(self, command, sudo=False,  sudo_password=None):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -311,11 +313,13 @@ class AbstractSSHClient(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
+        :param invoke_subsystem will request a subsystem on the server.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command, sudo, sudo_password))
+        self._started_commands.append(self._start_command(command, sudo, sudo_password, invoke_subsystem))
 
-    def _start_command(self, command, sudo=False, sudo_password=None):
+    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False):
         raise NotImplementedError
 
     def read_command_output(self, timeout=None):
@@ -1207,7 +1211,7 @@ class AbstractCommand(object):
         self._encoding = encoding
         self._shell = None
 
-    def run_in(self, shell, sudo=False,  sudo_password=None):
+    def run_in(self, shell, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
@@ -1215,14 +1219,21 @@ class AbstractCommand(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
+        :param invoke_subsystem will request a subsystem on the server.
         """
         self._shell = shell
-        if not sudo:
+        if invoke_subsystem:
+            self._invoke()
+        elif not sudo:
             self._execute()
         else:
             self._execute_with_sudo(sudo_password)
 
     def _execute(self):
+        raise NotImplementedError
+
+    def _invoke(self):
         raise NotImplementedError
 
     def _execute_with_sudo(self, sudo_password=None):

@@ -61,6 +61,11 @@ Start Time Consuming Sudo Command
     ${stdout} =  Read Command Output
     Should Contain  ${stdout}  cat
 
+Start Command And Read Process Output With Invoke Subsystem
+    Start Command  subsys  invoke_subsystem=yes
+    ${stdout} =  Read Command Output
+    Should Be Equal  ${stdout}  Subsystem invoked.
+
 Read Command Output With Timeout
     Start Command  sleep 15
     Run Keyword And Expect Error  *Timed out in 5 seconds  Read Command Output  timeout=5s

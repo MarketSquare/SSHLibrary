@@ -26,6 +26,7 @@ before_install:
   - cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/
   - sudo bash -c "echo 'Testing pre-login banner' > /etc/ssh/sshd-banner"
   - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
+  - sudo bash -c "echo 'Subsystem subsys echo \"Subsystem invoked.\"' >> /etc/ssh/sshd_config"
   - sudo service ssh restart
   - echo $'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
 install:

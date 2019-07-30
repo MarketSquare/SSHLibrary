@@ -120,13 +120,13 @@ class PythonSSHClient(AbstractSSHClient):
         except Exception:
             raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
 
-    def _start_command(self, command, sudo=False,  sudo_password=None):
+    def _start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session(timeout=float(self.config.timeout))
-        cmd.run_in(new_shell, sudo, sudo_password)
+        cmd.run_in(new_shell, sudo, sudo_password, invoke_subsystem)
         return cmd
 
     def _create_sftp_client(self):
@@ -320,3 +320,6 @@ class RemoteCommand(AbstractCommand):
             self._shell.exec_command(command)
         else:
             self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
+
+    def _invoke(self):
+        self._shell.invoke_subsystem(self._command)
