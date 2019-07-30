@@ -55,7 +55,7 @@ Get Connection Host And Timeout Only
     Should Be Equal As Integers  ${timeout}  3
 
 Get Connections
-    Open Connection   ${HOST}   prompt=>>
+    Open Connection   ${HOST}   prompt=>>         escape_ansi=True
     Open Connection   ${HOST}   alias=another
     ${conns} =   Get Connections
     Length Should Be   ${conns}  2
@@ -66,6 +66,8 @@ Get Connections
     Should Be Equal    ${conns[0].prompt}     >>
     Should Be Equal    ${conns[1].alias}      another
     Should Be Equal    ${conns[0].term_type}  vt100
+    Should Be Equal    ${conns[0].escape_ansi}   True
+    Should Be Equal    ${conns[1].escape_ansi}   False
 
 Get Connections Returns Only Open Connections
     Open Connection   ${HOST}   prompt=>>
