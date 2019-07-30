@@ -34,7 +34,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding):
+                 width, height, path_separator, encoding, escape_ansi):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -47,7 +47,8 @@ class _ClientConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )
 
 
@@ -60,10 +61,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8'):
+                 path_separator='/', encoding='utf8', escape_ansi=False):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding)
+                                           path_separator, encoding, escape_ansi)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
