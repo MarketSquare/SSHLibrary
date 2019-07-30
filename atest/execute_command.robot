@@ -92,3 +92,6 @@ Execute Time Consuming Sudo Command
 Execute Command With Invoke Subsystem
     ${stdout} =  Execute Command  subsys  invoke_subsystem=yes
     Should Be Equal  ${stdout}  Subsystem invoked.
+
+Execute Command With Timeout
+    Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s

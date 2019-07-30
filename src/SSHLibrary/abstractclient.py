@@ -34,7 +34,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding):
+                 width, height, path_separator, encoding, escape_ansi):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -47,7 +47,8 @@ class _ClientConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )
 
 
@@ -60,10 +61,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8'):
+                 path_separator='/', encoding='utf8', escape_ansi=False):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding)
+                                           path_separator, encoding, escape_ansi)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
@@ -153,7 +154,7 @@ class AbstractSSHClient(object):
         self._shell = None
         self.client.close()
 
-    def login(self, username, password, delay=None, look_for_keys=False):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -166,13 +167,16 @@ class AbstractSSHClient(object):
 
         :param str password: Password for the `username`.
 
-        :param str delay: The `delay` passed to :py:meth:`read` for reading
-            the output after logging in. The delay is only effective if
-            the prompt is not set.
+        :param bool allow_agent: enables the connection to the SSH agent.
+            This option does not work when using Jython.
 
         :param bool look_for_keys: Whether the login method should look for
             available public keys for login. This will also enable ssh agent.
             This option is ignored when using Jython.
+
+        :param str delay: The `delay` passed to :py:meth:`read` for reading
+            the output after logging in. The delay is only effective if
+            the prompt is not set.
 
         :raises SSHClientException: If logging in failed.
 
@@ -181,7 +185,8 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, look_for_keys=look_for_keys)
+            self._login(username, password, allow_agent,
+                        look_for_keys)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
@@ -197,7 +202,7 @@ class AbstractSSHClient(object):
     def _decode(self, bytes):
         return bytes.decode(self.config.encoding)
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, allow_agent, look_for_keys):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -333,6 +338,8 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
+        if timeout:
+            timeout = float(TimeEntry(timeout).value)
         try:
             return self._started_commands.pop().read_outputs(timeout)
         except IndexError:
