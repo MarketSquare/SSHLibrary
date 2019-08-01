@@ -955,6 +955,8 @@ class SSHLibrary(object):
                       username), self._config.loglevel)
         try:
             login_output = login_method(username, *args)
+            if is_truthy(self.current.config.escape_ansi):
+                login_output = self._escape_ansi_sequences(login_output)
             self._log('Read output: %s' % login_output, self._config.loglevel)
             return login_output
         except SSHClientException as e:
@@ -1431,6 +1433,9 @@ class SSHLibrary(object):
         try:
             output = reader(*args)
         except SSHClientException as e:
+            if is_truthy(self.current.config.escape_ansi):
+                message = self._escape_ansi_sequences(e.args[0])
+                raise RuntimeError(message)
             raise RuntimeError(e)
         if is_truthy(self.current.config.escape_ansi):
             output = self._escape_ansi_sequences(output)
@@ -1438,7 +1443,7 @@ class SSHLibrary(object):
         return output
 
     def _escape_ansi_sequences(self, output):
-        ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
+        ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]', flags=re.IGNORECASE)
         return ansi_escape.sub('', output)
 
     def get_file(self, source, destination='.', scp='OFF'):
