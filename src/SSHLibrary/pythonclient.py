@@ -214,7 +214,7 @@ class SFTPClient(AbstractSFTPClient):
         destination = destination.encode(self._encoding)
         remote_file = self._client.file(destination, 'wb')
         remote_file.set_pipelined(True)
-        if not file_exists:
+        if not file_exists and mode:
             self._client.chmod(destination, mode)
         return remote_file
 

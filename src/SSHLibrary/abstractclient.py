@@ -1085,7 +1085,8 @@ class AbstractSFTPClient(object):
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
-            permissions, such as '0600'.
+            permissions, such as '0600'. If 'None' value is provided,
+            setting permissions will be skipped.
 
         :param str newline: If given, the newline characters of the uploaded
             files on the remote host are converted to this.
@@ -1098,7 +1099,8 @@ class AbstractSFTPClient(object):
             contain the local path as the first value and the remote target
             path as the second.
         """
-        mode = int(mode, 8)
+        if mode:
+            mode = int(mode, 8)
         newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
         local_files = self._get_put_file_sources(sources)
         remote_files, remote_dir = self._get_put_file_destinations(local_files,
