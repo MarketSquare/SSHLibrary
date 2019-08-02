@@ -49,6 +49,12 @@ Execute Command With Legacy Stderr Config
     ...                           stderr
     Should Be Equal  ${stderr}  This is stderr
 
+Execute Command With Timeout Argument
+    Run Keyword And Expect Error     SSHClientException: Timed out in * seconds
+    ...                              Execute Command    cat               timeout=1s
+    Run Keyword And Expect Error     SSHClientException: Timed out in * seconds
+    ...                              Execute Command    ping localhost    timeout=2s
+
 Execute Command With Legacy Stdout And Stderr Config
     ${stdout}  ${stderr} =  Execute Command  ${REMOTE TEST ROOT}/${TEST SCRIPT NAME}
     ...                     Both
@@ -82,3 +88,10 @@ Execute Time Consuming Sudo Command
     [Tags]     linux
     ${stdout} =  Execute Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     Should Contain  ${stdout}  cat
+
+Execute Command With Invoke Subsystem
+    ${stdout} =  Execute Command  subsys  invoke_subsystem=yes
+    Should Be Equal  ${stdout}  Subsystem invoked.
+
+Execute Command With Timeout
+    Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s

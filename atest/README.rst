@@ -95,21 +95,29 @@ Setup on Linux
 
 ::
 
-    Testing pre-login banner
+    Additional OpenSSH configuration
 
 - Open sshd configuration file /etc/ssh/sshd_config using a text editor
 
-- Add/edit the following line:
+- Add/edit the following lines:
 
 ::
 
-    Banner /etc/ssh/sshd-banner
+    Banner /etc/ssh/sshd-banner # for testing pre-login banner
+    Subsystem subsys echo "Subsystem invoked." # for testing invoke_subsystem
 
 - Save file and restart the ssh server:
 
 ::
 
     sudo /etc/init.d/ssh restart
+
+- Add test_hostname in ~/.ssh/config
+
+::
+
+    echo $'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
+
 
 Setup in Windows
 ================

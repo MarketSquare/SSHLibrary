@@ -44,8 +44,9 @@ The recommended installation method is using pip_::
 
     pip install --upgrade robotframework-sshlibrary
 
-Running this command installs also the latest Robot Framework and paramiko_
-versions. The minimum supported paramiko version is ``1.15.3``.
+Running this command installs also the latest Robot Framework, paramiko_
+and scp_ versions. The minimum supported paramiko version is ``1.15.3`` and
+minimum supported scp version is ``0.13.0``.
 The ``--upgrade`` option can be omitted when installing the library for the
 first time.
 
@@ -62,12 +63,26 @@ Python or Jython::
     python setup.py install
     jython setup.py install
 
-A benefit of using pip is that it automatically installs paramiko
+A benefit of using pip is that it automatically installs scp, paramiko
 and Cryptography_ modules (or PyCrypto_ if paramiko version < 2.0)
 that SSHLibrary requires on Python.
 
 On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
 `Trilead SSH JAR distribution`_ and add it to CLASSPATH.
+
+On Windows operating system, when using Python version < 3.0, SSHLibrary will
+require win_inet_pton_. The minimum supported win_inet_pton version is ``1.1.0``.
+
+For creating SSH tunnels robotbackgroundlogger_ > 1.2 is also a requirement.
+
+Docker
+~~~~~~
+
+When installing SSHLibrary in a container (eg. Alpine Linux) there are more dependencies
+that must be installed: gcc_, make_, openssl-dev_, musl-dev_ and libffi-dev_. These
+packages can be installed using::
+
+    apk add gcc make openssl-dev musl-dev libffi-dev
 
 Usage
 -----
@@ -136,9 +151,17 @@ available:
 .. _Keyword Documentation: http://robotframework.org/SSHLibrary/SSHLibrary.html
 .. _Jython 2.7: http://jython.org
 .. _paramiko: http://www.paramiko.org
+.. _scp: https://github.com/jbardin/scp.py
 .. _Cryptography: https://cryptography.io
 .. _PyCrypto: http://www.pycrypto.org
 .. _Trilead SSH JAR distribution: http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar
+.. _win_inet_pton: https://github.com/hickeroar/win_inet_pton
+.. _robotbackgroundlogger: https://github.com/robotframework/robotbackgroundlogger
+.. _gcc: https://pkgs.alpinelinux.org/packages?name=gcc&branch=edge
+.. _make: https://pkgs.alpinelinux.org/packages?name=make&branch=edge
+.. _openssl-dev: https://pkgs.alpinelinux.org/packages?name=openssl-dev&branch=edge
+.. _musl-dev: https://pkgs.alpinelinux.org/packages?name=musl-dev&branch=edge
+.. _libffi-dev: https://pkgs.alpinelinux.org/packages?name=libffi-dev&branch=edge
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
 .. _Slack community: https://robotframework-slack-invite.herokuapp.com
 .. _issue tracker: https://github.com/robotframework/SSHLibrary/issues
