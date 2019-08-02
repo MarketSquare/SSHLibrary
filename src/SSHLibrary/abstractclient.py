@@ -24,6 +24,7 @@ import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
+from .logger import logger
 from .utils import is_bytes, is_string, unicode
 
 
@@ -34,7 +35,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding):
+                 width, height, path_separator, encoding, escape_ansi):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -47,7 +48,8 @@ class _ClientConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )
 
 
@@ -60,14 +62,18 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8'):
+                 path_separator='/', encoding='utf8', escape_ansi=False):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding)
+                                           path_separator, encoding, escape_ansi)
         self._sftp_client = None
+        self._scp_transfer_client = None
+        self._scp_all_client = None
         self._shell = None
         self._started_commands = []
         self.client = self._get_client()
+        self.width = width
+        self.height = height
 
     def _get_client(self):
         raise NotImplementedError('This should be implemented in the subclass.')
@@ -84,7 +90,7 @@ class AbstractSSHClient(object):
 
     @property
     def sftp_client(self):
-        """Gets the SSH client for the connection.
+        """Gets the SFTP client for the connection.
 
         :returns: An object of the class that inherits from
             :py:class:`AbstractSFTPClient`.
@@ -92,6 +98,28 @@ class AbstractSSHClient(object):
         if not self._sftp_client:
             self._sftp_client = self._create_sftp_client()
         return self._sftp_client
+
+    @property
+    def scp_transfer_client(self):
+        """Gets the SCP client for the file transfer.
+
+        :returns: An object of the class that inherits from
+            :py:class:`SFTPClient`.
+        """
+        if not self._scp_transfer_client:
+            self._scp_transfer_client = self._create_scp_transfer_client()
+        return self._scp_transfer_client
+
+    @property
+    def scp_all_client(self):
+        """Gets the SCP client for the file transfer.
+
+        :returns: An object of the class type
+            :py:class:`SCPClient`.
+        """
+        if not self._scp_all_client:
+            self._scp_all_client = self._create_scp_all_client()
+        return self._scp_all_client
 
     @property
     def shell(self):
@@ -102,9 +130,18 @@ class AbstractSSHClient(object):
         """
         if not self._shell:
             self._shell = self._create_shell()
+        if self.width != self.config.width or self.height != self.config.height:
+            self._shell.resize(self.config.width, self.config.height)
+            self.width, self.height = self.config.width, self.config.height
         return self._shell
 
     def _create_sftp_client(self):
+        raise NotImplementedError
+
+    def _create_scp_transfer_client(self):
+        raise NotImplementedError
+
+    def _create_scp_all_client(self):
         raise NotImplementedError
 
     def _create_shell(self):
@@ -113,10 +150,16 @@ class AbstractSSHClient(object):
     def close(self):
         """Closes the connection."""
         self._sftp_client = None
+        self._scp_transfer_client = None
+        self._scp_all_client = None
         self._shell = None
         self.client.close()
+        try:
+            logger.log_background_messages()
+        except AttributeError:
+            pass
 
-    def login(self, username, password, delay=None, look_for_keys=False, proxy_cmd=None):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None,proxy_cmd=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -129,15 +172,17 @@ class AbstractSSHClient(object):
 
         :param str password: Password for the `username`.
 
-        :param str delay: The `delay` passed to :py:meth:`read` for reading
-            the output after logging in. The delay is only effective if
-            the prompt is not set.
+        :param bool allow_agent: enables the connection to the SSH agent.
+            This option does not work when using Jython.
 
         :param bool look_for_keys: Whether the login method should look for
             available public keys for login. This will also enable ssh agent.
             This option is ignored when using Jython.
 
         :param str proxy_cmd: Proxy command 
+        :param str delay: The `delay` passed to :py:meth:`read` for reading
+            the output after logging in. The delay is only effective if
+            the prompt is not set.
 
         :raises SSHClientException: If logging in failed.
 
@@ -146,7 +191,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, look_for_keys=look_for_keys, proxy_cmd=proxy_cmd)
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd=proxy_cmd)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
@@ -162,7 +207,7 @@ class AbstractSSHClient(object):
     def _decode(self, bytes):
         return bytes.decode(self.config.encoding)
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, allow_agent, look_for_keys):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -235,7 +280,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, invoke_subsystem=False):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -250,13 +295,15 @@ class AbstractSSHClient(object):
          and
         :param sudo_password are used for executing commands within a sudo session.
 
+        :param invoke_subsystem will request a subsystem on the server.
+
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        self.start_command(command, sudo, sudo_password)
-        return self.read_command_output()
+        self.start_command(command, sudo, sudo_password, invoke_subsystem)
+        return self.read_command_output(timeout=timeout)
 
-    def start_command(self, command, sudo=False,  sudo_password=None):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -273,14 +320,16 @@ class AbstractSSHClient(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
+        :param invoke_subsystem will request a subsystem on the server.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command, sudo, sudo_password))
+        self._started_commands.append(self._start_command(command, sudo, sudo_password, invoke_subsystem))
 
-    def _start_command(self, command, sudo=False, sudo_password=None):
+    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False):
         raise NotImplementedError
 
-    def read_command_output(self):
+    def read_command_output(self, timeout=None):
         """Reads the output of the previous started command.
 
         The previous started command, started with :py:meth:`start_command`,
@@ -293,8 +342,10 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
+        if timeout:
+            timeout = float(TimeEntry(timeout).value)
         try:
-            return self._started_commands.pop().read_outputs()
+            return self._started_commands.pop().read_outputs(timeout)
         except IndexError:
             raise SSHClientException('No started commands to read output from.')
 
@@ -407,7 +458,7 @@ class AbstractSSHClient(object):
         """
         return self.read_until(self.config.newline)
 
-    def read_until_prompt(self):
+    def read_until_prompt(self, strip_prompt=False):
         """Reads output from the current shell until the prompt is encountered
         or the timeout expires.
 
@@ -416,6 +467,9 @@ class AbstractSSHClient(object):
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
 
+        :param bool strip_prompt: If 'True' then the prompt is removed from
+            the resulting output
+
         :raises SSHClientException: If prompt is not set or is not found
             in the output when the timeout expires.
 
@@ -423,9 +477,23 @@ class AbstractSSHClient(object):
         """
         if not self.config.prompt:
             raise SSHClientException('Prompt is not set.')
+
         if self.config.prompt.startswith('REGEXP:'):
-            return self.read_until_regexp(self.config.prompt[7:])
-        return self.read_until(self.config.prompt)
+            output = self.read_until_regexp(self.config.prompt[7:])
+        else:
+            output = self.read_until(self.config.prompt)
+        if strip_prompt:
+            output = self._strip_prompt(output)
+        return output
+
+    def _strip_prompt(self, output):
+        if self.config.prompt.startswith('REGEXP:'):
+            pattern = re.compile(self.config.prompt[7:])
+            match = pattern.search(output)
+            length = match.end() - match.start()
+        else:
+            length = len(self.config.prompt)
+        return output[:-length]
 
     def read_until_regexp(self, regexp):
         """Reads output from the current shell until the `regexp` matches or
@@ -509,17 +577,19 @@ class AbstractSSHClient(object):
         raise SSHClientException("No match found for '%s' in %s."
                                  % (self._decode(expected), timeout))
 
-    def put_file(self, source, destination='.', mode='0o744', newline=''):
-        """Calls :py:meth:`AbstractSFTPClient.put_file` with the given
+    def put_file(self, source, destination='.', mode='0o744', newline='',
+                 scp='OFF'):
+        """Calls :py:meth:`AbstractS`FTPClient.put_file` with the given
         arguments.
 
         See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
-        return self.sftp_client.put_file(source, destination, mode, newline,
-                                         self.config.path_separator)
+        client = self._create_client(scp)
+        return client.put_file(source, destination, mode, newline,
+                               self.config.path_separator)
 
     def put_directory(self, source, destination='.', mode='0o744', newline='',
-                      recursive=False):
+                      recursive=False, scp='OFF'):
         """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
 
@@ -528,20 +598,23 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.put_directory` for more documentation.
         """
-        return self.sftp_client.put_directory(source, destination, mode,
-                                              newline,
-                                              self.config.path_separator,
-                                              recursive)
+        client = self._create_client(scp)
+        return client.put_directory(source, destination, mode,
+                                    newline,
+                                    self.config.path_separator,
+                                    recursive)
 
-    def get_file(self, source, destination='.'):
+    def get_file(self, source, destination='.', scp='OFF'):
         """Calls :py:meth:`AbstractSFTPClient.get_file` with the given
         arguments.
 
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
-        return self.sftp_client.get_file(source, destination, self.config.path_separator)
+        client = self._create_client(scp)
+        return client.get_file(source, destination, self.config.path_separator)
 
-    def get_directory(self, source, destination='.', recursive=False):
+    def get_directory(self, source, destination='.', recursive=False,
+                      scp='OFF'):
         """Calls :py:meth:`AbstractSFTPClient.get_directory` with the given
         arguments and the connection specific path separator.
 
@@ -550,9 +623,10 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.get_directory` for more documentation.
         """
-        return self.sftp_client.get_directory(source, destination,
-                                              self.config.path_separator,
-                                              recursive)
+        client = self._create_client(scp)
+        return client.get_directory(source, destination,
+                                    self.config.path_separator,
+                                    recursive)
 
     def list_dir(self, path, pattern=None, absolute=False):
         """Calls :py:meth:`.AbstractSFTPClient.list_dir` with the given
@@ -603,6 +677,11 @@ class AbstractSSHClient(object):
         See :py:meth:`AbstractSFTPClient.is_file` for more documentation.
         """
         return self.sftp_client.is_file(path)
+
+    def _create_client(self, scp):
+        return {'OFF': self.sftp_client,
+                'TRANSFER': self.scp_transfer_client,
+                'ALL': self.scp_all_client}.get(scp.upper(), self.sftp_client)
 
 
 class AbstractShell(object):
@@ -764,7 +843,15 @@ class AbstractSFTPClient(object):
                                    absolute)
 
     def _get_file_names(self, path):
-        return [item.name for item in self._list(path) if item.is_regular() or item.is_link()]
+        return [item.name
+                for item in self._list(path)
+                if item.is_regular()
+                or (item.is_link()
+                    and not self._is_dir_symlink(path, item.name))]
+
+    def _is_dir_symlink(self, path, item):
+        resolved_link = self._readlink('%s/%s' % (path, item))
+        return self.is_dir('%s/%s' % (path, resolved_link))
 
     def list_dirs_in_dir(self, path, pattern=None, absolute=False):
         """Gets the directory names, or optionally the absolute paths, on the
@@ -792,6 +879,11 @@ class AbstractSFTPClient(object):
 
     def get_directory(self, source, destination, path_separator='/',
                       recursive=False):
+        destination = self.build_destination(source, destination, path_separator)
+        return self._get_directory(source, destination, path_separator, recursive)
+
+    def _get_directory(self, source, destination, path_separator='/',
+                       recursive=False):
         """Downloads directory(-ies) from the remote host to the local machine,
         optionally with subdirectories included.
 
@@ -830,6 +922,24 @@ class AbstractSFTPClient(object):
             files.append((source, destination))
         return files
 
+    def build_destination(self, source, destination, path_separator):
+        """Add parent directory from source to destination path if destination is '.'
+        or if destination already exists.
+        Otherwise the missing intermediate directories are created.
+
+        :return: A new destination path.
+        """
+        if os.path.exists(destination) or destination == '.':
+            return destination + path_separator + self.get_parent_folder(source, path_separator)
+        else:
+            return destination
+
+    def get_parent_folder(self, source, path_separator):
+        if source.endswith(path_separator):
+            return (source[:-len(path_separator)]).split(path_separator)[-1]
+        else:
+            return source.split(path_separator)[-1]
+
     def _remove_ending_path_separator(self, path_separator, source):
         if source.endswith(path_separator):
             source = source[:-len(path_separator)]
@@ -838,7 +948,8 @@ class AbstractSFTPClient(object):
     def get_file(self, source, destination, path_separator='/'):
         """Downloads file(s) from the remote host to the local machine.
 
-        :param str source: The path to the file on the remote machine.
+        :param str source: Must be the path to an existing file on the remote
+            machine or a glob pattern.
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are downloaded.
 
@@ -872,8 +983,11 @@ class AbstractSFTPClient(object):
             path, pattern = '', source
         if not path:
             path = '.'
-        return [filename for filename in
-                self.list_files_in_dir(path, pattern, absolute=True)]
+        if not self.is_file(source):
+            return [filename for filename in
+                    self.list_files_in_dir(path, pattern, absolute=True)]
+        else:
+            return [source]
 
     def _get_get_file_destinations(self, source_files, destination):
         target_is_dir = destination.endswith(os.sep) or destination == '.'
@@ -961,7 +1075,8 @@ class AbstractSFTPClient(object):
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
         """Uploads the file(s) from the local machine to the remote host.
 
-        :param str source: The path to the file on the local machine.
+        :param str sources: Must be the path to an existing file on the remote
+            machine or a glob pattern .
             Glob patterns, like '*' and '?', can be used in the source, in
             which case all the matching files are uploaded.
 
@@ -972,7 +1087,8 @@ class AbstractSFTPClient(object):
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
-            permissions, such as '0600'.
+            permissions, such as '0600'. If 'None' value is provided,
+            setting permissions will be skipped.
 
         :param str newline: If given, the newline characters of the uploaded
             files on the remote host are converted to this.
@@ -985,7 +1101,8 @@ class AbstractSFTPClient(object):
             contain the local path as the first value and the remote target
             path as the second.
         """
-        mode = int(mode, 8)
+        if mode:
+            mode = int(mode, 8)
         newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
         local_files = self._get_put_file_sources(sources)
         remote_files, remote_dir = self._get_put_file_destinations(local_files,
@@ -994,18 +1111,23 @@ class AbstractSFTPClient(object):
         self._create_missing_remote_path(remote_dir, mode)
         files = list(zip(local_files, remote_files))
         for source, destination in files:
-            self._put_file(source, destination, mode, newline)
+            self._put_file(source, destination, mode, newline, path_separator)
         return files
 
     def _get_put_file_sources(self, source):
-        sources = [f for f in glob.glob(source.replace('/', os.sep))
-                   if os.path.isfile(f)]
+        source = source.replace('/', os.sep)
+        if not os.path.exists(source):
+            sources = [f for f in glob.glob(source)]
+        else:
+            sources = [f for f in [source]]
         if not sources:
             msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)
         return sources
 
     def _get_put_file_destinations(self, sources, destination, path_separator):
+        if destination[1:3] == ':' + path_separator:
+            destination = path_separator + destination
         destination = self._format_destination_path(destination)
         if destination == '.':
             destination = self._homedir + '/'
@@ -1054,7 +1176,7 @@ class AbstractSFTPClient(object):
                     mode = int(mode, 8)
                 self._client.mkdir(current_dir, mode)
 
-    def _put_file(self, source, destination, mode, newline):
+    def _put_file(self, source, destination, mode, newline, path_separator):
         remote_file = self._create_remote_file(destination, mode)
         with open(source, 'rb') as local_file:
             position = 0
@@ -1080,6 +1202,9 @@ class AbstractSFTPClient(object):
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, client):
         raise NotImplementedError
 
+    def _readlink(self, path):
+        raise NotImplementedError
+
 
 class AbstractCommand(object):
     """Base class for the remote command.
@@ -1095,7 +1220,7 @@ class AbstractCommand(object):
         self._encoding = encoding
         self._shell = None
 
-    def run_in(self, shell, sudo=False,  sudo_password=None):
+    def run_in(self, shell, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
@@ -1103,14 +1228,21 @@ class AbstractCommand(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
+        :param invoke_subsystem will request a subsystem on the server.
         """
         self._shell = shell
-        if not sudo:
+        if invoke_subsystem:
+            self._invoke()
+        elif not sudo:
             self._execute()
         else:
             self._execute_with_sudo(sudo_password)
 
     def _execute(self):
+        raise NotImplementedError
+
+    def _invoke(self):
         raise NotImplementedError
 
     def _execute_with_sudo(self, sudo_password=None):

@@ -16,9 +16,13 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#introduction" id="id2">Introduction</a></p></li>
 <li><p><a class="reference internal" href="#documentation" id="id3">Documentation</a></p></li>
-<li><p><a class="reference internal" href="#installation" id="id4">Installation</a></p></li>
-<li><p><a class="reference internal" href="#usage" id="id5">Usage</a></p></li>
-<li><p><a class="reference internal" href="#support" id="id6">Support</a></p></li>
+<li><p><a class="reference internal" href="#installation" id="id4">Installation</a></p>
+<ul>
+<li><p><a class="reference internal" href="#docker" id="id5">Docker</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#usage" id="id6">Usage</a></p></li>
+<li><p><a class="reference internal" href="#support" id="id7">Support</a></p></li>
 </ul>
 </div>
 <div class="section" id="introduction">
@@ -51,8 +55,9 @@ about the library in general.</p>
 <h1><a class="toc-backref" href="#id4">Installation</a></h1>
 <p>The recommended installation method is using <a class="reference external" href="http://pip-installer.org">pip</a>:</p>
 <pre class="literal-block">pip install --upgrade robotframework-sshlibrary</pre>
-<p>Running this command installs also the latest Robot Framework and <a class="reference external" href="http://www.paramiko.org">paramiko</a>
-versions. The minimum supported paramiko version is <span class="docutils literal">1.15.3</span>.
+<p>Running this command installs also the latest Robot Framework, <a class="reference external" href="http://www.paramiko.org">paramiko</a>
+and <a class="reference external" href="https://github.com/jbardin/scp.py">scp</a> versions. The minimum supported paramiko version is <span class="docutils literal">1.15.3</span> and
+minimum supported scp version is <span class="docutils literal">0.13.0</span>.
 The <span class="docutils literal"><span class="pre">--upgrade</span></span> option can be omitted when installing the library for the
 first time.</p>
 <p>With recent versions of <span class="docutils literal">pip</span> it is possible to install directly from the
@@ -64,14 +69,24 @@ it, and install it using one of the following depending are you using
 Python or Jython:</p>
 <pre class="literal-block">python setup.py install
 jython setup.py install</pre>
-<p>A benefit of using pip is that it automatically installs paramiko
+<p>A benefit of using pip is that it automatically installs scp, paramiko
 and <a class="reference external" href="https://cryptography.io">Cryptography</a> modules (or <a class="reference external" href="http://www.pycrypto.org">PyCrypto</a> if paramiko version &lt; 2.0)
 that SSHLibrary requires on Python.</p>
 <p>On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
 <a class="reference external" href="http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar">Trilead SSH JAR distribution</a> and add it to CLASSPATH.</p>
+<p>On Windows operating system, when using Python version &lt; 3.0, SSHLibrary will
+require <a class="reference external" href="https://github.com/hickeroar/win_inet_pton">win_inet_pton</a>. The minimum supported win_inet_pton version is <span class="docutils literal">1.1.0</span>.</p>
+<p>For creating SSH tunnels <a class="reference external" href="https://github.com/robotframework/robotbackgroundlogger">robotbackgroundlogger</a> &gt; 1.2 is also a requirement.</p>
+<div class="section" id="docker">
+<h2><a class="toc-backref" href="#id5">Docker</a></h2>
+<p>When installing SSHLibrary in a container (eg. Alpine Linux) there are more dependencies
+that must be installed: <a class="reference external" href="https://pkgs.alpinelinux.org/packages?name=gcc&amp;branch=edge">gcc</a>, <a class="reference external" href="https://pkgs.alpinelinux.org/packages?name=make&amp;branch=edge">make</a>, <a class="reference external" href="https://pkgs.alpinelinux.org/packages?name=openssl-dev&amp;branch=edge">openssl-dev</a>, <a class="reference external" href="https://pkgs.alpinelinux.org/packages?name=musl-dev&amp;branch=edge">musl-dev</a> and <a class="reference external" href="https://pkgs.alpinelinux.org/packages?name=libffi-dev&amp;branch=edge">libffi-dev</a>. These
+packages can be installed using:</p>
+<pre class="literal-block">apk add gcc make openssl-dev musl-dev libffi-dev</pre>
+</div>
 </div>
 <div class="section" id="usage">
-<h1><a class="toc-backref" href="#id5">Usage</a></h1>
+<h1><a class="toc-backref" href="#id6">Usage</a></h1>
 <p>To use SSHLibrary in Robot Framework tests, the library needs to first be
 imported using the Library setting as any other library.</p>
 <p>When using Robot Framework, it is generally recommended to write as
@@ -110,7 +125,7 @@ ${</span><span class="name variable">PASSWORD</span><span class="punctuation">} 
    </span><span class="name function">Login</span><span class="punctuation">               ${</span><span class="name variable">USERNAME</span><span class="punctuation">}        ${</span><span class="name variable">PASSWORD</span><span class="punctuation">}</span></code></pre>
 </div>
 <div class="section" id="support">
-<h1><a class="toc-backref" href="#id6">Support</a></h1>
+<h1><a class="toc-backref" href="#id7">Support</a></h1>
 <p>If the provided documentation is not enough, there are various support forums
 available:</p>
 <ul class="simple">

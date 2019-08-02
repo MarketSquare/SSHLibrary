@@ -15,11 +15,15 @@
 
 from __future__ import print_function
 
+import re
+
+from .deco import keyword
 try:
     from robot.api import logger
 except ImportError:
     logger = None
 
+from .sshconnectioncache import SSHConnectionCache
 from .abstractclient import SSHClientException
 from .client import SSHClient
 from .config import (Configuration, IntegerEntry, LogLevelEntry, NewlineEntry,
@@ -157,6 +161,12 @@ class SSHLibrary(object):
 
     Argument ``term_type`` defines the virtual terminal type, and arguments
     ``width`` and ``height`` can be used to control its  virtual size.
+
+    === Escape ansi sequneces ===
+
+    Argument ``escape_ansi`` is a parameter used in order to escape ansi
+    sequences that appear in the output when the remote machine has
+    Windows as operating system.
 
     == Not configurable per connection ==
 
@@ -353,6 +363,26 @@ class SSHLibrary(object):
 
     Prior to SSHLibrary 3.1.0, all non-empty strings, including ``no`` and ``none``
     were considered to be true. Considering ``none`` false is new in Robot Framework 3.0.3.
+
+    = Transfer files with SCP =
+     Secure Copy Protocol (SCP) is a way of secure transfer of files between hosts. It is based
+     on SSH protocol. The advantage it brings over SFTP is transfer speed. SFTP however can also be
+     used for directory listings and even editing files while transferring.
+     SCP can be enabled on keywords used for file transfer: `Get File`, `Get Directory`, `Put File`,
+     `Put Directory` by setting the ``scp`` value to ``TRANSFER`` or ``ALL``.
+
+     | OFF      | Transfer is done using SFTP only. This is the default value                                             |
+     | TRANSFER | Directory listings (needed for logging) will be done using SFTP. Actual file transfer is done with SCP. |
+     | ALL      | Only SCP is used for file transfer. No logging available.                                               |
+
+     There are some limitations to the current SCP implementation::
+     - When using SCP, files cannot be altered during transfer and ``newline`` argument does not work.
+     - If ``scp=ALL`` only ``source`` and ``destination`` arguments will work on the keywords. The directories are
+     transferred recursively. Also, when running with Jython `Put Directory` and `Get Directory` won't work due to
+     current Trilead implementation.
+     - If running with Jython you can encounter some encoding issues when transferring files with non-ascii characters.
+
+     SCP transfer was introduced in SSHLibrary 3.3.0.
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -366,6 +396,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_HEIGHT = 24
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
+    DEFAULT_ESCAPE_ANSI = False
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -376,7 +407,8 @@ class SSHLibrary(object):
                  width=DEFAULT_TERM_WIDTH,
                  height=DEFAULT_TERM_HEIGHT,
                  path_separator=DEFAULT_PATH_SEPARATOR,
-                 encoding=DEFAULT_ENCODING):
+                 encoding=DEFAULT_ENCODING,
+                 escape_ansi=DEFAULT_ESCAPE_ANSI):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -402,7 +434,7 @@ class SSHLibrary(object):
 
         | Library | SSHLibrary | newline=CRLF | path_separator=\\\\ |
         """
-        self._connections = ConnectionCache()
+        self._connections = SSHConnectionCache()
         self._config = _DefaultConfiguration(
             timeout or self.DEFAULT_TIMEOUT,
             newline or self.DEFAULT_NEWLINE,
@@ -412,17 +444,19 @@ class SSHLibrary(object):
             width or self.DEFAULT_TERM_WIDTH,
             height or self.DEFAULT_TERM_HEIGHT,
             path_separator or self.DEFAULT_PATH_SEPARATOR,
-            encoding or self.DEFAULT_ENCODING
+            encoding or self.DEFAULT_ENCODING,
+            escape_ansi or self.DEFAULT_ESCAPE_ANSI
         )
 
     @property
     def current(self):
         return self._connections.current
 
+    @keyword(types=None)
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
-                                  encoding=None):
+                                  encoding=None, escape_ansi=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -456,11 +490,11 @@ class SSHLibrary(object):
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
-                            encoding=encoding)
+                            encoding=encoding, escape_ansi=escape_ansi)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None):
+                                 path_separator=None, encoding=None, escape_ansi=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than ``None`` are updated.
@@ -488,12 +522,14 @@ class SSHLibrary(object):
 
         | `Open Connection`          | 192.168.1.1    |
         | `Set Client Configuration` | term_type=ansi | width=40 |
+
+        *Note:* Setting ``width`` and ``height`` does not work when using Jython.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
                                    width=width, height=height,
                                    path_separator=path_separator,
-                                   encoding=encoding)
+                                   encoding=encoding, escape_ansi=escape_ansi)
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given ``logfile``.
@@ -520,7 +556,7 @@ class SSHLibrary(object):
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None):
+                        height=None, path_separator=None, encoding=None, escape_ansi=None):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
         The new connection is made active. Possible existing connections
@@ -570,6 +606,18 @@ class SSHLibrary(object):
         The `terminal settings` are also configurable per connection:
 
         | `Open Connection` | 192.168.1.1  | term_type=ansi | width=40 |
+
+         Starting with version 3.3.0, SSHLibrary understands ``Host`` entries from
+        ``~/.ssh/config``. For instance, if the config file contains:
+
+        | Host | my_custom_hostname     |
+        |      | Hostname my.server.com |
+
+        The connection to the server can also be made like this:
+
+        | `Open connection` | my_custom_hostname |
+
+        ``Host`` entries are not read from config file when running with Jython.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -579,8 +627,9 @@ class SSHLibrary(object):
         height = height or self._config.height
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
+        escape_ansi = escape_ansi or self._config.escape_ansi
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, path_separator, encoding)
+                           term_type, width, height, path_separator, encoding, escape_ansi)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -628,8 +677,9 @@ class SSHLibrary(object):
         | `Close Connection` |
         | # Do something with /tmp/results.txt               |
         """
-        self.current.close()
-        self._connections.current = self._connections._no_current
+        connections = self._connections
+        connections.close_current()
+
 
     def close_all_connections(self):
         """Closes all open connections.
@@ -652,7 +702,7 @@ class SSHLibrary(object):
     def get_connection(self, index_or_alias=None, index=False, host=False,
                        alias=False, port=False, timeout=False, newline=False,
                        prompt=False, term_type=False, width=False, height=False,
-                       encoding=False):
+                       encoding=False, escape_ansi=False):
         """Returns information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -737,12 +787,14 @@ class SSHLibrary(object):
             config = self._connections.get_connection(index_or_alias).config
         except RuntimeError:
             config = SSHClient(None).config
+        except AttributeError:
+            config = SSHClient(None).config
         self._log(str(config), self._config.loglevel)
         return_values = tuple(self._get_config_values(config, index, host,
                                                       alias, port, timeout,
                                                       newline, prompt,
                                                       term_type, width, height,
-                                                      encoding))
+                                                      encoding, escape_ansi))
         if not return_values:
             return config
         if len(return_values) == 1:
@@ -769,7 +821,7 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'." % level)
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
-                           newline, prompt, term_type, width, height, encoding):
+                           newline, prompt, term_type, width, height, encoding, escape_ansi):
         if is_truthy(index):
             yield config.index
         if is_truthy(host):
@@ -792,6 +844,8 @@ class SSHLibrary(object):
             yield config.height
         if is_truthy(encoding):
             yield config.encoding
+        if is_truthy(escape_ansi):
+            yield config.escape_ansi
 
     def get_connections(self):
         """Returns information about all the open connections.
@@ -811,12 +865,12 @@ class SSHLibrary(object):
         This keyword logs the information of connections with log level
         ``INFO``.
         """
-        configs = [c.config for c in self._connections._connections]
+        configs = [c.config for c in self._connections._connections if c]
         for c in configs:
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, delay='0.5 seconds', proxy_cmd=None):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -826,6 +880,15 @@ class SSHLibrary(object):
         Otherwise the output is read using the `Read` keyword with the given
         ``delay``. The output is logged using the default `log level`. The 
         `proxy_cmd` is used to connect to a SSH proxy
+
+        ``allow_agent`` enables the connection to the SSH agent.
+
+        ``look_for_keys`` enables the searching for discoverable private key files in ``~/.ssh/``.
+
+        ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
+        3.4.0.
+
+        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
 
         Example that logs in and returns the output:
 
@@ -838,8 +901,18 @@ class SSHLibrary(object):
         | `Open Connection` | linux.server.com | prompt=$         |
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
+
+        Example that logs in through a proxy server (10.128.3.101)
+        | `Open Connection` | linux.server.com |
+        | ${output}=        | `Login`          | johndoe       | secretpasswd |
+/usr/bin/ssh -l robot -i ~/.ssh/robot_id_rsa -o StrictHostKeyChecking=no -o
+UserKnownHostsFile=/dev/null -W %h:%p 10.128.3.101 |
+        | `Should Contain`  | ${output}        | Last login at |
+        | 
+
         """
-        return self._login(self.current.login, username, password, delay, False, proxy_cmd)
+        return self._login(self.current.login, username, password, is_truthy(allow_agent),
+                           is_truthy(look_for_keys), delay, proxy_cmd)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,
@@ -853,7 +926,8 @@ class SSHLibrary(object):
         ``keyfile`` is a path to a valid OpenSSH private key file on the local
         filesystem.
 
-        ``password`` is used to unlock the ``keyfile`` if needed.
+        ``password`` is used to unlock the ``keyfile`` if needed. If the keyfile is
+        invalid a username-password authentication will be attempted.
 
         `proxy_cmd` is used to connect to a SSH Proxy server.
 
@@ -930,7 +1004,8 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None,
+                        invoke_subsystem=False):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -980,7 +1055,13 @@ class SSHLibrary(object):
         This keyword logs the executed command and its exit status with
         log level ``INFO``.
 
-        ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
+        If the `timeout` expires before the command is executed, this keyword fails.
+
+        ``invoke_subsystem`` will request a subsystem on the server, given by the
+        ``command`` argument. If the server allows it, the channel will then be
+        directly connected to the requested subsystem.
+
+        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -988,10 +1069,11 @@ class SSHLibrary(object):
             self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password,
+                                                          timeout, is_truthy(invoke_subsystem))
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command, sudo=False,  sudo_password=None):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Starts execution of the ``command`` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the ``command``
@@ -1028,17 +1110,19 @@ class SSHLibrary(object):
 
         This keyword logs the started command with log level ``INFO``.
 
-        ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
+        ``invoke_subsystem`` argument behaves similarly as with `Execute Command` keyword.
+
+        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Starting command '%s'." % command, self._config.loglevel)
         else:
             self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
         self._last_command = command
-        self.current.start_command(command, sudo, sudo_password)
+        self.current.start_command(command, sudo, sudo_password, is_truthy(invoke_subsystem))
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
-                            return_rc=False):
+                            return_rc=False, timeout=None):
         """Returns outputs of the most recent started command.
 
         At least one command must have been started using `Start Command`
@@ -1090,12 +1174,12 @@ class SSHLibrary(object):
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         try:
-            stdout, stderr, rc = self.current.read_command_output()
+            stdout, stderr, rc = self.current.read_command_output(timeout=timeout)
         except SSHClientException as msg:
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port):
+    def create_local_ssh_tunnel(self, local_port, remote_host, remote_port=22, bind_address=None):
         """
         The keyword uses the existing connection to set up local port forwarding
         (the openssh -L option) from a local port through a tunneled
@@ -1112,9 +1196,20 @@ class SSHLibrary(object):
 
         The tunnel is active as long as the connection is open.
 
-        New in SSHLibrary 3.1.0
+        The default ``remote_port`` is 22.
+
+        By default, anyone can connect on the specified port on the SSH client
+        because the local machine listens on all interfaces. Access can be
+        restricted by specifying a ``bind_address``. Setting ``bind_address``
+        does not work with Jython.
+
+        Example:
+
+        | `Create Local SSH Tunnel` | 9191 | secure.server.com | 80 | bind_address=127.0.0.1 |
+
+        ``bind_address`` is new in SSHLibrary 3.3.0.
         """
-        self.current.create_local_ssh_tunnel(local_port, remote_host, remote_port)
+        self.current.create_local_ssh_tunnel(local_port, remote_host, remote_port, bind_address)
 
     def _legacy_output_options(self, stdout, stderr, rc):
         if not is_string(stdout):
@@ -1275,7 +1370,7 @@ class SSHLibrary(object):
         """
         return self._read_and_log(loglevel, self.current.read_until, expected)
 
-    def read_until_prompt(self, loglevel=None):
+    def read_until_prompt(self, loglevel=None, strip_prompt=False):
         """Consumes and returns the server output until the prompt is found.
 
         Text up and until prompt is returned. The `prompt` must be set before
@@ -1302,8 +1397,15 @@ class SSHLibrary(object):
         See also `Read Until` and `Read Until Regexp` keywords. For more
         details about reading and writing in general, see the `Interactive
         shells` section.
+
+        If you want to exclude the prompt from the returned output, set ``strip_prompt``
+        to a true value (see `Boolean arguments`). If your prompt is a regular expression,
+        make sure that the expression spans the whole prompt, because only the part of the
+        output that matches the regular expression is stripped away.
+
+        ``strip_prompt`` argument is new in SSHLibrary 3.2.0.
         """
-        return self._read_and_log(loglevel, self.current.read_until_prompt)
+        return self._read_and_log(loglevel, self.current.read_until_prompt, is_truthy(strip_prompt))
 
     def read_until_regexp(self, regexp, loglevel=None):
         """Consumes and returns the server output until a match to ``regexp`` is found.
@@ -1341,10 +1443,16 @@ class SSHLibrary(object):
             output = reader(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
+        if is_truthy(self.current.config.escape_ansi):
+            output = self._escape_ansi_sequences(output)
         self._log(output, loglevel)
         return output
 
-    def get_file(self, source, destination='.'):
+    def _escape_ansi_sequences(self, output):
+        ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
+        return ansi_escape.sub('', output)
+
+    def get_file(self, source, destination='.', scp='OFF'):
         """Downloads file(s) from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1356,6 +1464,9 @@ class SSHLibrary(object):
         ``destination`` is the target path on the local machine. Both
         absolute paths and paths relative to the current working directory
         are supported.
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1388,11 +1499,14 @@ class SSHLibrary(object):
            accessible using built-in ``${EXECDIR}`` variable.
 
         See also `Get Directory`.
-        """
-        return self._run_sftp_command(self.current.get_file, source,
-                                      destination)
 
-    def get_directory(self, source, destination='.', recursive=False):
+        ``scp`` is new in SSHLibrary 3.3.0.
+        """
+        return self._run_command(self.current.get_file, source,
+                                 destination, scp)
+
+    def get_directory(self, source, destination='.', recursive=False,
+                      scp='OFF'):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1405,6 +1519,9 @@ class SSHLibrary(object):
         ``recursive`` specifies whether to recursively download all
         subdirectories inside ``source``. Subdirectories are downloaded if
         the argument value evaluates to true (see `Boolean arguments`).
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1428,11 +1545,14 @@ class SSHLibrary(object):
            variable.
 
         See also `Get File`.
-        """
-        return self._run_sftp_command(self.current.get_directory, source,
-                                      destination, is_truthy(recursive))
 
-    def put_file(self, source, destination='.', mode='0744', newline=''):
+        ``scp`` is new in SSHLibrary 3.3.0.
+        """
+        return self._run_command(self.current.get_directory, source,
+                                 destination, is_truthy(recursive), scp)
+
+    def put_file(self, source, destination='.', mode='0744', newline='',
+                 scp='OFF'):
         """Uploads file(s) from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1447,14 +1567,20 @@ class SSHLibrary(object):
 
         ``mode`` can be used to set the target file permission.
         Numeric values are accepted. The default value is ``0744``
-        (``-rwxr--r--``).
+        (``-rwxr--r--``). If None value is provided, setting modes
+        will be skipped.
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
+        Does not work if ``scp`` is enabled.
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
         | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=0770 |
+        | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=None |
         | `Put File` | /path/to/*.txt          | newline=CRLF       |
 
         The remote ``destination`` is created as following:
@@ -1478,12 +1604,14 @@ class SSHLibrary(object):
            on the remote machine is used as the destination.
 
         See also `Put Directory`.
+
+        ``scp`` is new in SSHLibrary 3.3.0.
         """
-        return self._run_sftp_command(self.current.put_file, source,
-                                      destination, mode, newline)
+        return self._run_command(self.current.put_file, source,
+                                 destination, mode, newline, scp)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
-                      recursive=False):
+                      recursive=False, scp='OFF'):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1499,10 +1627,14 @@ class SSHLibrary(object):
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
+        Does not work if ``scp`` is enabled.
 
         ``recursive`` specifies whether to recursively upload all
         subdirectories inside ``source``. Subdirectories are uploaded if the
         argument value evaluates to true (see `Boolean arguments`).
+
+        ``scp`` enables the use of scp (secure copy protocol) for
+        the file transfer. See `Transfer files with SCP` for more details.
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
@@ -1525,17 +1657,21 @@ class SSHLibrary(object):
            uploaded to user's home directory on the remote machine.
 
         See also `Put File`.
-        """
-        return self._run_sftp_command(self.current.put_directory, source,
-                                      destination, mode, newline, is_truthy(recursive))
 
-    def _run_sftp_command(self, command, *args):
+        ``scp`` is new in SSHLibrary 3.3.0.
+        """
+        return self._run_command(self.current.put_directory, source,
+                                 destination, mode, newline,
+                                 is_truthy(recursive), scp)
+
+    def _run_command(self, command, *args):
         try:
             files = command(*args)
         except SSHClientException as e:
             raise RuntimeError(e)
-        for src, dst in files:
-            self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
+        if files:
+            for src, dst in files:
+                self._log("'%s' -> '%s'" % (src, dst), self._config.loglevel)
 
     def file_should_exist(self, path):
         """Fails if the given ``path`` does NOT point to an existing file.
@@ -1649,7 +1785,7 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, path_separator, encoding):
+                 height, path_separator, encoding, escape_ansi):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1659,5 +1795,6 @@ class _DefaultConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )

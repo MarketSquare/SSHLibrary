@@ -1,1 +1,2 @@
 robotstatuschecker >= 1.3
+robotbackgroundlogger >= 1.2

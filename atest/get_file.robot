@@ -37,6 +37,18 @@ Get File From Path Not Under Remote Home
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
+Get File From Path Not Under Remote Home With SCP (transfer)
+    [Setup]  Create Tmp Dir And Move File
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=TRANSFER
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
+Get File From Path Not Under Remote Home With SCP (all)
+    [Setup]  Create Tmp Dir And Move File
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=ALL
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
 Get File With Multiple Sources To Single File Fails
     Run Keyword And Expect Error
     ...  Cannot copy multiple source files to one destination file.
@@ -52,6 +64,10 @@ Get File To Current Working Directory
     SSH.Get File  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}/${FILE WITH NON-ASCII NAME}  .
     OS.File Should Exist  ${FILE WITH NON-ASCII NAME}
     [Teardown]  OS.Remove File  ${FILE WITH NON-ASCII NAME}
+
+Get File With Square Brackets In Name
+    SSH.Get File  ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}  ${LOCAL TMPDIR}${/}
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}${FILE WITH SQUARE BRACKETS NAME}
 
 Get File When Destination Path Does Not Exist
     ${target} =  Set Variable  ${LOCAL TMPDIR}/new/none.txt
@@ -69,6 +85,14 @@ Get Symlink File
   SSH.Get File  ${REMOTE TEST ROOT}/${SYMLINK TO TEST FILE}  .
   OS.File Should Exist  ${SYMLINK TO TEST FILE}
   [Teardown]  OS.Remove File  ${SYMLINK TO TEST FILE}
+
+Get File That Is A Symlink Directory
+    Execute Command  mkdir -p ${REMOTE TEST ROOT}/dir/subdir
+    Execute Command  touch ${REMOTE TEST ROOT}/dir/${TEST FILE NAME}
+    Execute Command  cd ${REMOTE TEST ROOT};ln -s dir/subdir symlink_dir
+    SSH.Get File  ${REMOTE TEST ROOT}/dir/*
+    OS.File Should Not Exist  symlink_dir
+    [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 *** Keywords ***
 Create Tmp Dir And Move File
