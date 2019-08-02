@@ -101,7 +101,7 @@ class PythonSSHClient(AbstractSSHClient):
                     pass
                 transport.auth_password(username,password)
             except Exception as err:
-                raise err
+                raise SSHClientException
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys):
@@ -121,7 +121,7 @@ class PythonSSHClient(AbstractSSHClient):
                     pass
                 transport.auth_publickey(username,None)
             except Exception as err:
-                raise err
+                raise SSHClientException
             raise SSHClientException
 
 
