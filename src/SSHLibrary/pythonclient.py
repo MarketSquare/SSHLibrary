@@ -119,7 +119,7 @@ class PythonSSHClient(AbstractSSHClient):
                     transport.auth_none(username)
                 except:
                     pass
-                transport.auth_publickey(username)
+                transport.auth_publickey(username,None)
             except Exception as err:
                 raise err
             raise SSHClientException
