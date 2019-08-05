@@ -677,9 +677,12 @@ class AbstractSSHClient(object):
         return self.sftp_client.is_file(path)
 
     def _create_client(self, scp):
-        return {'OFF': self.sftp_client,
-                'TRANSFER': self.scp_transfer_client,
-                'ALL': self.scp_all_client}.get(scp.upper(), self.sftp_client)
+        if scp.upper() == 'ALL':
+            return self.scp_all_client
+        elif scp.upper() == 'TRANSFER':
+            return self.scp_transfer_client
+        else:
+            return self.sftp_client
 
 
 class AbstractShell(object):
