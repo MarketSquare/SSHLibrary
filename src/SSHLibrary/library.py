@@ -1442,9 +1442,11 @@ class SSHLibrary(object):
         self._log(output, loglevel)
         return output
 
-    def _escape_ansi_sequences(self, output):
+    @staticmethod
+    def _escape_ansi_sequences(output):
         ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]', flags=re.IGNORECASE)
-        return ansi_escape.sub('', output)
+        output = ansi_escape.sub('', output)
+        return ("%r" % output)[1:-1].encode().decode('unicode-escape')
 
     def get_file(self, source, destination='.', scp='OFF'):
         """Downloads file(s) from the remote machine to the local machine.
