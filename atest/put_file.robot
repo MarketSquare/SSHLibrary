@@ -118,6 +118,7 @@ Put File Overwrite If User In The Same Group
    [Teardown]  Remove testkey User From Group test And Cleanup
 
 Put File And Check For Proper Permissions
+    [Tags]  linux
 	Put File  ${LOCAL TEXTFILES}${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/  mode=0755
 	${output}=  Execute Command   ls
 	Should Contain  ${output}  to_put
