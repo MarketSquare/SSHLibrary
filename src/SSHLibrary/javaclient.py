@@ -60,7 +60,10 @@ class JavaSSHClient(AbstractSSHClient):
     def enable_logging(logfile):
         return False
 
-    def _login(self, username, password, look_for_keys='ignored'):
+    def _login(self, username, password, allow_agent='ignored', look_for_keys='ignored'):
+        if allow_agent or look_for_keys:
+            raise JavaSSHClientException("Arguments 'allow_agent' and "
+                                         "'look_for_keys' do not work with Jython.")
         if not self.client.authenticateWithPassword(username, password):
             raise SSHClientException
 
@@ -79,12 +82,12 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def _start_command(self, command, sudo=False, sudo_password=None, forward_agent=False):
+    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False, forward_agent=False):
         new_shell = self.client.openSession()
         if sudo:
             new_shell.requestDumbPTY()
         cmd = RemoteCommand(command, self.config.encoding)
-        cmd.run_in(new_shell, sudo, sudo_password)
+        cmd.run_in(new_shell, sudo, sudo_password, invoke_subsystem)
         return cmd
 
     def _create_sftp_client(self):
@@ -102,6 +105,7 @@ class JavaSSHClient(AbstractSSHClient):
 
     def create_local_ssh_tunnel(self, local_port, remote_host, remote_port, *args):
         self.client.createLocalPortForwarder(int(local_port), remote_host, int(remote_port))
+        logger.info("Now forwarding port %s to %s:%s ..." % (local_port, remote_host, remote_port))
 
 
 class Shell(AbstractShell):
@@ -262,3 +266,8 @@ class RemoteCommand(AbstractCommand):
             self._shell.execCommand(command)
         else:
             self._shell.execCommand('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
+
+    def _invoke(self):
+        command = self._command.decode(self._encoding)
+        self._shell.startSubSystem(command)
+

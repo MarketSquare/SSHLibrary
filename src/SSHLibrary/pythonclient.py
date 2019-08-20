@@ -85,14 +85,23 @@ class PythonSSHClient(AbstractSSHClient):
             return conf.lookup(host)['hostname'] if not None else host
         return host
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, allow_agent=False, look_for_keys=False):
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             self.client.connect(self.config.host, self.config.port, username,
-                                password, look_for_keys=look_for_keys,
-                                allow_agent=look_for_keys,
+                                password, allow_agent=allow_agent,
+                                look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
+            try:
+                transport = self.client.get_transport()
+                try:
+                    transport.auth_none(username)
+                except:
+                    pass
+                transport.auth_password(username,password)
+            except Exception as err:
+                raise SSHClientException
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys):
@@ -104,7 +113,17 @@ class PythonSSHClient(AbstractSSHClient):
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
+            try:
+                transport = self.client.get_transport()
+                try:
+                    transport.auth_none(username)
+                except:
+                    pass
+                transport.auth_publickey(username,None)
+            except Exception as err:
+                raise SSHClientException
             raise SSHClientException
+
 
     def get_banner(self):
         return self.client.get_transport().get_banner()
@@ -120,15 +139,18 @@ class PythonSSHClient(AbstractSSHClient):
         except Exception:
             raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
 
-    def _start_command(self, command, sudo=False,  sudo_password=None, forward_agent=False):
+    def _start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session(timeout=float(self.config.timeout))
+
         if forward_agent:
             paramiko.agent.AgentRequestHandler(new_shell)
-        cmd.run_in(new_shell, sudo, sudo_password)
+            
+        cmd.run_in(new_shell, sudo, sudo_password, invoke_subsystem)
+
         return cmd
 
     def _create_sftp_client(self):
@@ -216,7 +238,7 @@ class SFTPClient(AbstractSFTPClient):
         destination = destination.encode(self._encoding)
         remote_file = self._client.file(destination, 'wb')
         remote_file.set_pipelined(True)
-        if not file_exists:
+        if not file_exists and mode:
             self._client.chmod(destination, mode)
         return remote_file
 
@@ -322,3 +344,6 @@ class RemoteCommand(AbstractCommand):
             self._shell.exec_command(command)
         else:
             self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
+
+    def _invoke(self):
+        self._shell.invoke_subsystem(self._command)

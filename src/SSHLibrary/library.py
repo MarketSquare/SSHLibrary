@@ -14,6 +14,9 @@
 #  limitations under the License.
 
 from __future__ import print_function
+
+import re
+
 from .deco import keyword
 try:
     from robot.api import logger
@@ -159,6 +162,12 @@ class SSHLibrary(object):
 
     Argument ``term_type`` defines the virtual terminal type, and arguments
     ``width`` and ``height`` can be used to control its  virtual size.
+
+    === Escape ansi sequneces ===
+
+    Argument ``escape_ansi`` is a parameter used in order to escape ansi
+    sequences that appear in the output when the remote machine has
+    Windows as operating system.
 
     == Not configurable per connection ==
 
@@ -388,6 +397,7 @@ class SSHLibrary(object):
     DEFAULT_TERM_HEIGHT = 24
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
+    DEFAULT_ESCAPE_ANSI = False
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -398,7 +408,8 @@ class SSHLibrary(object):
                  width=DEFAULT_TERM_WIDTH,
                  height=DEFAULT_TERM_HEIGHT,
                  path_separator=DEFAULT_PATH_SEPARATOR,
-                 encoding=DEFAULT_ENCODING):
+                 encoding=DEFAULT_ENCODING,
+                 escape_ansi=DEFAULT_ESCAPE_ANSI):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -434,7 +445,8 @@ class SSHLibrary(object):
             width or self.DEFAULT_TERM_WIDTH,
             height or self.DEFAULT_TERM_HEIGHT,
             path_separator or self.DEFAULT_PATH_SEPARATOR,
-            encoding or self.DEFAULT_ENCODING
+            encoding or self.DEFAULT_ENCODING,
+            escape_ansi or self.DEFAULT_ESCAPE_ANSI
         )
 
     @property
@@ -445,7 +457,7 @@ class SSHLibrary(object):
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
-                                  encoding=None):
+                                  encoding=None, escape_ansi=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -479,11 +491,11 @@ class SSHLibrary(object):
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
-                            encoding=encoding)
+                            encoding=encoding, escape_ansi=escape_ansi)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None):
+                                 path_separator=None, encoding=None, escape_ansi=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than ``None`` are updated.
@@ -518,7 +530,7 @@ class SSHLibrary(object):
                                    prompt=prompt, term_type=term_type,
                                    width=width, height=height,
                                    path_separator=path_separator,
-                                   encoding=encoding)
+                                   encoding=encoding, escape_ansi=escape_ansi)
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given ``logfile``.
@@ -545,7 +557,7 @@ class SSHLibrary(object):
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None):
+                        height=None, path_separator=None, encoding=None, escape_ansi=None):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
         The new connection is made active. Possible existing connections
@@ -616,8 +628,9 @@ class SSHLibrary(object):
         height = height or self._config.height
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
+        escape_ansi = escape_ansi or self._config.escape_ansi
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, path_separator, encoding)
+                           term_type, width, height, path_separator, encoding, escape_ansi)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -690,7 +703,7 @@ class SSHLibrary(object):
     def get_connection(self, index_or_alias=None, index=False, host=False,
                        alias=False, port=False, timeout=False, newline=False,
                        prompt=False, term_type=False, width=False, height=False,
-                       encoding=False):
+                       encoding=False, escape_ansi=False):
         """Returns information about the connection.
 
         Connection is not changed by this keyword, use `Switch Connection` to
@@ -782,7 +795,7 @@ class SSHLibrary(object):
                                                       alias, port, timeout,
                                                       newline, prompt,
                                                       term_type, width, height,
-                                                      encoding))
+                                                      encoding, escape_ansi))
         if not return_values:
             return config
         if len(return_values) == 1:
@@ -809,7 +822,7 @@ class SSHLibrary(object):
         raise AssertionError("Invalid log level '%s'." % level)
 
     def _get_config_values(self, config, index, host, alias, port, timeout,
-                           newline, prompt, term_type, width, height, encoding):
+                           newline, prompt, term_type, width, height, encoding, escape_ansi):
         if is_truthy(index):
             yield config.index
         if is_truthy(host):
@@ -832,6 +845,8 @@ class SSHLibrary(object):
             yield config.height
         if is_truthy(encoding):
             yield config.encoding
+        if is_truthy(escape_ansi):
+            yield config.escape_ansi
 
     def get_connections(self):
         """Returns information about all the open connections.
@@ -851,12 +866,12 @@ class SSHLibrary(object):
         This keyword logs the information of connections with log level
         ``INFO``.
         """
-        configs = [c.config for c in self._connections._connections]
+        configs = [c.config for c in self._connections._connections if c]
         for c in configs:
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, delay='0.5 seconds'):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay='0.5 seconds'):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -865,6 +880,15 @@ class SSHLibrary(object):
         in. If the `prompt` is set, everything until the prompt is read.
         Otherwise the output is read using the `Read` keyword with the given
         ``delay``. The output is logged using the default `log level`.
+
+        ``allow_agent`` enables the connection to the SSH agent.
+
+        ``look_for_keys`` enables the searching for discoverable private key files in ``~/.ssh/``.
+
+        ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
+        3.4.0.
+
+        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
 
         Example that logs in and returns the output:
 
@@ -878,7 +902,8 @@ class SSHLibrary(object):
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
         """
-        return self._login(self.current.login, username, password, delay)
+        return self._login(self.current.login, username, password, is_truthy(allow_agent),
+                           is_truthy(look_for_keys), delay)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,
@@ -930,6 +955,8 @@ class SSHLibrary(object):
                       username), self._config.loglevel)
         try:
             login_output = login_method(username, *args)
+            if is_truthy(self.current.config.escape_ansi):
+                login_output = self._escape_ansi_sequences(login_output)
             self._log('Read output: %s' % login_output, self._config.loglevel)
             return login_output
         except SSHClientException as e:
@@ -968,7 +995,8 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None, timeout=None, forward_agent=False):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None,
+                        invoke_subsystem=False, forward_agent=False):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -1020,7 +1048,11 @@ class SSHLibrary(object):
 
         If the `timeout` expires before the command is executed, this keyword fails.
 
-        ``timeout`` argument is new in SSHLibrary 3.2.0.
+        ``invoke_subsystem`` will request a subsystem on the server, given by the
+        ``command`` argument. If the server allows it, the channel will then be
+        directly connected to the requested subsystem.
+
+        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1028,10 +1060,11 @@ class SSHLibrary(object):
             self._log("Executing command 'sudo %s'." % command, self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
-        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password, timeout, forward_agent)
+        stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password,
+                                                          timeout, is_truthy(invoke_subsystem), forward_agent)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
-    def start_command(self, command, sudo=False,  sudo_password=None, forward_agent=False):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
         """Starts execution of the ``command`` on the remote machine and returns immediately.
 
         This keyword returns nothing and does not wait for the ``command``
@@ -1068,14 +1101,16 @@ class SSHLibrary(object):
 
         This keyword logs the started command with log level ``INFO``.
 
-        ``sudo`` and ``sudo_password`` arguments are new in SSHLibrary 3.0.0.
+        ``invoke_subsystem`` argument behaves similarly as with `Execute Command` keyword.
+
+        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Starting command '%s'." % command, self._config.loglevel)
         else:
             self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
         self._last_command = command
-        self.current.start_command(command, sudo, sudo_password, forward_agent)
+        self.current.start_command(command, sudo, sudo_password, is_truthy(invoke_subsystem), forward_agent)
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False, timeout=None):
@@ -1398,9 +1433,20 @@ class SSHLibrary(object):
         try:
             output = reader(*args)
         except SSHClientException as e:
+            if is_truthy(self.current.config.escape_ansi):
+                message = self._escape_ansi_sequences(e.args[0])
+                raise RuntimeError(message)
             raise RuntimeError(e)
+        if is_truthy(self.current.config.escape_ansi):
+            output = self._escape_ansi_sequences(output)
         self._log(output, loglevel)
         return output
+
+    @staticmethod
+    def _escape_ansi_sequences(output):
+        ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]', flags=re.IGNORECASE)
+        output = ansi_escape.sub('', output)
+        return ("%r" % output)[1:-1].encode().decode('unicode-escape')
 
     def get_file(self, source, destination='.', scp='OFF'):
         """Downloads file(s) from the remote machine to the local machine.
@@ -1517,7 +1563,8 @@ class SSHLibrary(object):
 
         ``mode`` can be used to set the target file permission.
         Numeric values are accepted. The default value is ``0744``
-        (``-rwxr--r--``).
+        (``-rwxr--r--``). If None value is provided, setting modes
+        will be skipped.
 
         ``newline`` can be used to force the line break characters that are
         written to the remote files. Valid values are ``LF`` and ``CRLF``.
@@ -1529,6 +1576,7 @@ class SSHLibrary(object):
         Examples:
         | `Put File` | /path/to/*.txt          |
         | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=0770 |
+        | `Put File` | /path/to/*.txt          | /home/groups/robot | mode=None |
         | `Put File` | /path/to/*.txt          | newline=CRLF       |
 
         The remote ``destination`` is created as following:
@@ -1733,7 +1781,7 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, path_separator, encoding):
+                 height, path_separator, encoding, escape_ansi):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1743,5 +1791,6 @@ class _DefaultConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )

@@ -77,8 +77,8 @@ Put Directory And Check For Proper Permissions
 	Put Directory  ${CURDIR}${/}testdata${/}to_put  recursive=True  mode=0755
 	${output}=  Execute Command   ls
 	Should Contain  ${output}  to_put
-	Check File Permissions
-	Check Folder Permissions
+	Check File Permissions    0755    to_put${/}ExampleText3.txt
+	Check Folder Permissions    0755
 	[Teardown]  Execute Command  rm -rf ${CURDIR}${/}testdata${/}to_put
 
 *** Keywords ***
@@ -117,9 +117,6 @@ Check And Remove Local Added Directory
     [Teardown]  OS.Remove File  ${COLON CHAR FILE}
 
 Check Folder Permissions
-   ${folder}=  Execute Command  stat -c %a to_put${/}Folder3
-   Should Contain  ${folder}  755
-
-Check File Permissions
-   ${file}=  Execute Command  stat -c %a to_put${/}ExampleText3.txt
-   Should Contain  ${file}  755
+   [Arguments]    ${expected_permission}
+   ${actual_permission}=  Execute Command  stat -c %a to_put${/}Folder3
+   Should Be Equal As Integers  ${actual_permission}  ${expected_permission}  Folder has not expected permission ${expected_permission}:\t${actual_permission}

@@ -83,7 +83,7 @@ Put File And Specify Remote Newlines
     SSH.File Should Exist  ${target}
     ${expected} =  OS.Get Binary File  ${FILE WITH NEWLINES}
     SSH.Get File  ${target}  ${LOCAL TMPDIR}${/}
-    ${content} =  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
+    ${content}=  OS.Get Binary File  ${LOCAL TMPDIR}${/}${FILE WITH NEWLINES NAME}
     ${win_rn}=   Encode String To Bytes  \r\n  UTF-8
     ${linux_n}=   Encode String To Bytes  ${\n}  UTF-8
     ${content}=  Replace String  ${content}  ${win_rn}  ${linux_n}
@@ -116,6 +116,14 @@ Put File Overwrite If User In The Same Group
    Switch Connection  1
    SSH.File Should Exist  ${TEST FILE NAME}
    [Teardown]  Remove testkey User From Group test And Cleanup
+
+Put File And Check For Proper Permissions
+    [Tags]  linux
+	Put File  ${LOCAL TEXTFILES}${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/  mode=0755
+	${output}=  Execute Command   ls
+	Should Contain  ${output}  to_put
+	Check File Permissions    0755    ${REMOTE_TEST_ROOT}${/}${TEST FILE NAME}
+	[Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 *** Keywords ***
 Change User And Overwrite File

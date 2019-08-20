@@ -24,6 +24,7 @@ import ntpath
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
+from .logger import logger
 from .utils import is_bytes, is_string, unicode
 
 
@@ -34,7 +35,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding):
+                 width, height, path_separator, encoding, escape_ansi):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -47,7 +48,8 @@ class _ClientConfiguration(Configuration):
             width=IntegerEntry(width),
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
-            encoding=StringEntry(encoding)
+            encoding=StringEntry(encoding),
+            escape_ansi=StringEntry(escape_ansi)
         )
 
 
@@ -60,10 +62,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8'):
+                 path_separator='/', encoding='utf8', escape_ansi=False):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding)
+                                           path_separator, encoding, escape_ansi)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
@@ -152,8 +154,12 @@ class AbstractSSHClient(object):
         self._scp_all_client = None
         self._shell = None
         self.client.close()
+        try:
+            logger.log_background_messages()
+        except AttributeError:
+            pass
 
-    def login(self, username, password, delay=None, look_for_keys=False):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -166,13 +172,16 @@ class AbstractSSHClient(object):
 
         :param str password: Password for the `username`.
 
-        :param str delay: The `delay` passed to :py:meth:`read` for reading
-            the output after logging in. The delay is only effective if
-            the prompt is not set.
+        :param bool allow_agent: enables the connection to the SSH agent.
+            This option does not work when using Jython.
 
         :param bool look_for_keys: Whether the login method should look for
             available public keys for login. This will also enable ssh agent.
             This option is ignored when using Jython.
+
+        :param str delay: The `delay` passed to :py:meth:`read` for reading
+            the output after logging in. The delay is only effective if
+            the prompt is not set.
 
         :raises SSHClientException: If logging in failed.
 
@@ -181,7 +190,8 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, look_for_keys=look_for_keys)
+            self._login(username, password, allow_agent,
+                        look_for_keys)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
@@ -197,7 +207,7 @@ class AbstractSSHClient(object):
     def _decode(self, bytes):
         return bytes.decode(self.config.encoding)
 
-    def _login(self, username, password, look_for_keys=False):
+    def _login(self, username, password, allow_agent, look_for_keys):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -268,7 +278,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, forward_agent=False):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, invoke_subsystem=False, forward_agent=False):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -283,16 +293,18 @@ class AbstractSSHClient(object):
          and
         :param sudo_password are used for executing commands within a sudo session.
 
+        :param invoke_subsystem will request a subsystem on the server.
+
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         if timeout:
             timeout = float(TimeEntry(timeout).value)
 
-        self.start_command(command, sudo, sudo_password, forward_agent)
+        self.start_command(command, sudo, sudo_password, invoke_subsystem)
         return self.read_command_output(timeout=timeout)
 
-    def start_command(self, command, sudo=False,  sudo_password=None, forward_agent=False):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -309,11 +321,14 @@ class AbstractSSHClient(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
+        :param invoke_subsystem will request a subsystem on the server.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command, sudo, sudo_password, forward_agent))
 
-    def _start_command(self, command, sudo=False, sudo_password=None, forward_agent=False):
+        self._started_commands.append(self._start_command(command, sudo, sudo_password, invoke_subsystem, forward_agent))
+
+    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False, forward_agent=False):
         raise NotImplementedError
 
     def read_command_output(self, timeout=None):
@@ -329,6 +344,8 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
+        if timeout:
+            timeout = float(TimeEntry(timeout).value)
         try:
             return self._started_commands.pop().read_outputs(timeout)
         except IndexError:
@@ -1072,7 +1089,8 @@ class AbstractSFTPClient(object):
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
-            permissions, such as '0600'.
+            permissions, such as '0600'. If 'None' value is provided,
+            setting permissions will be skipped.
 
         :param str newline: If given, the newline characters of the uploaded
             files on the remote host are converted to this.
@@ -1085,7 +1103,8 @@ class AbstractSFTPClient(object):
             contain the local path as the first value and the remote target
             path as the second.
         """
-        mode = int(mode, 8)
+        if mode:
+            mode = int(mode, 8)
         newline = {'CRLF': '\r\n', 'LF': '\n'}.get(newline.upper(), None)
         local_files = self._get_put_file_sources(sources)
         remote_files, remote_dir = self._get_put_file_destinations(local_files,
@@ -1203,7 +1222,7 @@ class AbstractCommand(object):
         self._encoding = encoding
         self._shell = None
 
-    def run_in(self, shell, sudo=False,  sudo_password=None):
+    def run_in(self, shell, sudo=False,  sudo_password=None, invoke_subsystem=False):
         """Runs this command in the given `shell`.
 
         :param shell: A shell in the already open connection.
@@ -1211,14 +1230,21 @@ class AbstractCommand(object):
         :param sudo
          and
         :param sudo_password are used for executing commands within a sudo session.
+
+        :param invoke_subsystem will request a subsystem on the server.
         """
         self._shell = shell
-        if not sudo:
+        if invoke_subsystem:
+            self._invoke()
+        elif not sudo:
             self._execute()
         else:
             self._execute_with_sudo(sudo_password)
 
     def _execute(self):
+        raise NotImplementedError
+
+    def _invoke(self):
         raise NotImplementedError
 
     def _execute_with_sudo(self, sudo_password=None):
