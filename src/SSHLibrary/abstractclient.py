@@ -301,7 +301,7 @@ class AbstractSSHClient(object):
         if timeout:
             timeout = float(TimeEntry(timeout).value)
 
-        self.start_command(command, sudo, sudo_password, invoke_subsystem)
+        self.start_command(command, sudo, sudo_password, invoke_subsystem, forward_agent)
         return self.read_command_output(timeout=timeout)
 
     def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
