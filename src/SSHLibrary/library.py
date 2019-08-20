@@ -1052,6 +1052,10 @@ class SSHLibrary(object):
         ``command`` argument. If the server allows it, the channel will then be
         directly connected to the requested subsystem.
 
+        ``forward_agent`` determines whether to forward the local SSH Agent process to the process being executed. 
+        This assumes that there is an agent in use (i.e. `eval $(ssh-agent)`)
+        | `Execute Command` | ssh-add -L | forward_agent=True |
+
         ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
@@ -1102,6 +1106,8 @@ class SSHLibrary(object):
         This keyword logs the started command with log level ``INFO``.
 
         ``invoke_subsystem`` argument behaves similarly as with `Execute Command` keyword.
+
+        ``forward_agent`` argument behaves similarly as with `Execute Command` keyword.
 
         ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
         """
