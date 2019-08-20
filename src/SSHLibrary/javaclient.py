@@ -79,7 +79,7 @@ class JavaSSHClient(AbstractSSHClient):
             # IOError is raised also when the keyfile is invalid
             raise SSHClientException
 
-    def _start_command(self, command, sudo=False, sudo_password=None):
+    def _start_command(self, command, sudo=False, sudo_password=None, forward_agent=False):
         new_shell = self.client.openSession()
         if sudo:
             new_shell.requestDumbPTY()
