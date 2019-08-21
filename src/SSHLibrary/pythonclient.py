@@ -150,7 +150,6 @@ class PythonSSHClient(AbstractSSHClient):
             paramiko.agent.AgentRequestHandler(new_shell)
             
         cmd.run_in(new_shell, sudo, sudo_password, invoke_subsystem)
-
         return cmd
 
     def _create_sftp_client(self):

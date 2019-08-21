@@ -1056,7 +1056,7 @@ class SSHLibrary(object):
         This assumes that there is an agent in use (i.e. `eval $(ssh-agent)`)
         | `Execute Command` | ssh-add -L | forward_agent=True |
 
-        ``invoke_subsystem`` is new in SSHLibrary 3.4.0.
+        ``invoke_subsystem`` and ``forward_agent`` are new in SSHLibrary 3.4.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1116,7 +1116,7 @@ class SSHLibrary(object):
         else:
             self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
         self._last_command = command
-        self.current.start_command(command, sudo, sudo_password, is_truthy(invoke_subsystem), forward_agent)
+        self.current.start_command(command, sudo, sudo_password, is_truthy(invoke_subsystem), is_truthy(forward_agent))
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
                             return_rc=False, timeout=None):
