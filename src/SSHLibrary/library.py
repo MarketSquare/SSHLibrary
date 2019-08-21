@@ -1053,7 +1053,8 @@ class SSHLibrary(object):
         directly connected to the requested subsystem.
 
         ``forward_agent`` determines whether to forward the local SSH Agent process to the process being executed. 
-        This assumes that there is an agent in use (i.e. `eval $(ssh-agent)`)
+        This assumes that there is an agent in use (i.e. `eval $(ssh-agent)`). Setting ``forward_agent`` does not
+        work with Jython.
         | `Execute Command` | ssh-add -L | forward_agent=True |
 
         ``invoke_subsystem`` and ``forward_agent`` are new in SSHLibrary 3.4.0.
