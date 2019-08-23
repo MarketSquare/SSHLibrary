@@ -280,7 +280,7 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, invoke_subsystem=False):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, invoke_subsystem=False, forward_agent=False):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -300,10 +300,10 @@ class AbstractSSHClient(object):
         :returns: A 3-tuple (stdout, stderr, return_code) with values
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
-        self.start_command(command, sudo, sudo_password, invoke_subsystem)
+        self.start_command(command, sudo, sudo_password, invoke_subsystem, forward_agent)
         return self.read_command_output(timeout=timeout)
 
-    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
+    def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
         """Starts the execution of the `command` on the remote host.
 
         The started `command` is pushed into an internal stack. This stack
@@ -324,9 +324,10 @@ class AbstractSSHClient(object):
         :param invoke_subsystem will request a subsystem on the server.
         """
         command = self._encode(command)
-        self._started_commands.append(self._start_command(command, sudo, sudo_password, invoke_subsystem))
 
-    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False):
+        self._started_commands.append(self._start_command(command, sudo, sudo_password, invoke_subsystem, forward_agent))
+
+    def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False, forward_agent=False):
         raise NotImplementedError
 
     def read_command_output(self, timeout=None):
@@ -679,9 +680,12 @@ class AbstractSSHClient(object):
         return self.sftp_client.is_file(path)
 
     def _create_client(self, scp):
-        return {'OFF': self.sftp_client,
-                'TRANSFER': self.scp_transfer_client,
-                'ALL': self.scp_all_client}.get(scp.upper(), self.sftp_client)
+        if scp.upper() == 'ALL':
+            return self.scp_all_client
+        elif scp.upper() == 'TRANSFER':
+            return self.scp_transfer_client
+        else:
+            return self.sftp_client
 
 
 class AbstractShell(object):

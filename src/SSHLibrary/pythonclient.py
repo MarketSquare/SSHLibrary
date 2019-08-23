@@ -93,6 +93,15 @@ class PythonSSHClient(AbstractSSHClient):
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
+            try:
+                transport = self.client.get_transport()
+                try:
+                    transport.auth_none(username)
+                except:
+                    pass
+                transport.auth_password(username,password)
+            except Exception as err:
+                raise SSHClientException
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None):
@@ -113,7 +122,17 @@ class PythonSSHClient(AbstractSSHClient):
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout))
         except paramiko.AuthenticationException:
+            try:
+                transport = self.client.get_transport()
+                try:
+                    transport.auth_none(username)
+                except:
+                    pass
+                transport.auth_publickey(username,None)
+            except Exception as err:
+                raise SSHClientException
             raise SSHClientException
+
 
     def get_banner(self):
         return self.client.get_transport().get_banner()
@@ -129,12 +148,16 @@ class PythonSSHClient(AbstractSSHClient):
         except Exception:
             raise SSHClientException('Unable to connect to port {} on {}'.format(port, host))
 
-    def _start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False):
+    def _start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
         cmd = RemoteCommand(command, self.config.encoding)
         transport = self.client.get_transport()
         if not transport:
             raise AssertionError("Connection not open")
         new_shell = transport.open_session(timeout=float(self.config.timeout))
+
+        if forward_agent:
+            paramiko.agent.AgentRequestHandler(new_shell)
+            
         cmd.run_in(new_shell, sudo, sudo_password, invoke_subsystem)
         return cmd
 
