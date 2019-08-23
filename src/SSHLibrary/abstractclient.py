@@ -159,7 +159,7 @@ class AbstractSSHClient(object):
         except AttributeError:
             pass
 
-    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None,proxy_cmd=None):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,

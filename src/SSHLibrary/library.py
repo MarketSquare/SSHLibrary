@@ -879,7 +879,7 @@ class SSHLibrary(object):
         in. If the `prompt` is set, everything until the prompt is read.
         Otherwise the output is read using the `Read` keyword with the given
         ``delay``. The output is logged using the default `log level`. The 
-        `proxy_cmd` is used to connect to a SSH proxy
+        `proxy_cmd` is used to connect through a SSH proxy
 
         ``allow_agent`` enables the connection to the SSH agent.
 
@@ -888,7 +888,7 @@ class SSHLibrary(object):
         ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
         3.4.0.
 
-        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
+        *Note:* ``allow_agent``, ``look_for_keys`` and ``proxy_cmd`` do not work when using Jython.
 
         Example that logs in and returns the output:
 
@@ -902,13 +902,11 @@ class SSHLibrary(object):
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
 
-        Example that logs in through a proxy server (10.128.3.101)
+        Example that logs in a remote server (linux.server.com) through a proxy server (proxy.server.com)
         | `Open Connection` | linux.server.com |
-        | ${output}=        | `Login`          | johndoe       | secretpasswd |
-/usr/bin/ssh -l robot -i ~/.ssh/robot_id_rsa -o StrictHostKeyChecking=no -o
-UserKnownHostsFile=/dev/null -W %h:%p 10.128.3.101 |
+        | ${output}=        | `Login`          | johndoe       | secretpasswd | \
+	proxy_cmd=ssh -l user -i keyfile -W linux.server.com:22 proxy.server.com |
         | `Should Contain`  | ${output}        | Last login at |
-        | 
 
         """
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
@@ -929,7 +927,7 @@ UserKnownHostsFile=/dev/null -W %h:%p 10.128.3.101 |
         ``password`` is used to unlock the ``keyfile`` if needed. If the keyfile is
         invalid a username-password authentication will be attempted.
 
-        `proxy_cmd` is used to connect to a SSH Proxy server.
+        `proxy_cmd` is used to connect to a SSH Proxy server. 
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
@@ -954,11 +952,11 @@ UserKnownHostsFile=/dev/null -W %h:%p 10.128.3.101 |
         ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
         3.0.0.
 
-        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
+        *Note:* ``allow_agent``, ``look_for_keys`` and ``proxy_cmd`` do not work when using Jython.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, is_truthy(allow_agent),
-                           is_truthy(look_for_keys), delay)
+                           is_truthy(look_for_keys), delay, proxy_cmd)
 
     def _login(self, login_method, username, *args):
         self._log("Logging into '%s:%s' as '%s'."
