@@ -878,8 +878,9 @@ class SSHLibrary(object):
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
         Otherwise the output is read using the `Read` keyword with the given
-        ``delay``. The output is logged using the default `log level`. The 
-        `proxy_cmd` is used to connect through a SSH proxy
+        ``delay``. The output is logged using the default `log level`.
+
+        ``proxy_cmd`` is used to connect through a SSH proxy.
 
         ``allow_agent`` enables the connection to the SSH agent.
 
@@ -905,7 +906,7 @@ class SSHLibrary(object):
         Example that logs in a remote server (linux.server.com) through a proxy server (proxy.server.com)
         | `Open Connection` | linux.server.com |
         | ${output}=        | `Login`          | johndoe       | secretpasswd | \
-	proxy_cmd=ssh -l user -i keyfile -W linux.server.com:22 proxy.server.com |
+        proxy_cmd=ssh -l user -i keyfile -W linux.server.com:22 proxy.server.com |
         | `Should Contain`  | ${output}        | Last login at |
 
         """
@@ -927,7 +928,7 @@ class SSHLibrary(object):
         ``password`` is used to unlock the ``keyfile`` if needed. If the keyfile is
         invalid a username-password authentication will be attempted.
 
-        `proxy_cmd` is used to connect to a SSH Proxy server. 
+        ``proxy_cmd`` is used to connect through a SSH proxy.
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.

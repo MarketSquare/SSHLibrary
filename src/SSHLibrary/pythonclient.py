@@ -89,15 +89,12 @@ class PythonSSHClient(AbstractSSHClient):
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             if proxy_cmd:
-                proxy = paramiko.ProxyCommand(proxy_cmd)
-            else:
-                proxy = None
-           
-            try: 
+                proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
+            try:
                 self.client.connect(self.config.host, self.config.port, username,
                                     password, look_for_keys=look_for_keys,
                                     allow_agent=look_for_keys,
-                                    timeout=float(self.config.timeout), sock=proxy)
+                                    timeout=float(self.config.timeout), sock=proxy_cmd)
             except paramiko.AuthenticationException:
                 try:
                     transport = self.client.get_transport()
@@ -115,16 +112,13 @@ class PythonSSHClient(AbstractSSHClient):
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             if proxy_cmd:
-                proxy = paramiko.ProxyCommand(proxy_cmd)
-            else:
-                proxy = None
-
+                proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout),
-                                sock=proxy)
+                                sock=proxy_cmd)
         except paramiko.AuthenticationException:
             try:
                 transport = self.client.get_transport()
