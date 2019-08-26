@@ -159,7 +159,7 @@ class AbstractSSHClient(object):
         except AttributeError:
             pass
 
-    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -179,6 +179,7 @@ class AbstractSSHClient(object):
             available public keys for login. This will also enable ssh agent.
             This option is ignored when using Jython.
 
+        :param str proxy_cmd: Proxy command 
         :param str delay: The `delay` passed to :py:meth:`read` for reading
             the output after logging in. The delay is only effective if
             the prompt is not set.
@@ -190,8 +191,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, allow_agent,
-                        look_for_keys)
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd=proxy_cmd)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
@@ -218,7 +218,7 @@ class AbstractSSHClient(object):
         return self.read_until_prompt()
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
-                              look_for_keys=False, delay=None):
+                              look_for_keys=False, delay=None, proxy_cmd=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -243,6 +243,8 @@ class AbstractSSHClient(object):
         :param str delay: The `delay` passed to :py:meth:`read` for reading
             the output after logging in. The delay is only effective if
             the prompt is not set.
+
+        :param str proxy_cmd : Proxy command
 
         :raises SSHClientException: If logging in failed.
 

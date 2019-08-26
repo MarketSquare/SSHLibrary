@@ -34,7 +34,6 @@ from .version import VERSION
 
 __version__ = VERSION
 
-
 class SSHLibrary(object):
     """SSHLibrary is a Robot Framework test library for SSH and SFTP.
 
@@ -871,7 +870,7 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, allow_agent=False, look_for_keys=False, delay='0.5 seconds'):
+    def login(self, username, password, allow_agent=False, look_for_keys=False, delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -879,7 +878,8 @@ class SSHLibrary(object):
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
         Otherwise the output is read using the `Read` keyword with the given
-        ``delay``. The output is logged using the default `log level`.
+        ``delay``. The output is logged using the default `log level`. The 
+        `proxy_cmd` is used to connect through a SSH proxy
 
         ``allow_agent`` enables the connection to the SSH agent.
 
@@ -888,7 +888,7 @@ class SSHLibrary(object):
         ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
         3.4.0.
 
-        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
+        *Note:* ``allow_agent``, ``look_for_keys`` and ``proxy_cmd`` do not work when using Jython.
 
         Example that logs in and returns the output:
 
@@ -901,13 +901,20 @@ class SSHLibrary(object):
         | `Open Connection` | linux.server.com | prompt=$         |
         | ${output}=        | `Login`          | johndoe          | secretpasswd |
         | `Should Contain`  | ${output}        | johndoe@linux:~$ |
+
+        Example that logs in a remote server (linux.server.com) through a proxy server (proxy.server.com)
+        | `Open Connection` | linux.server.com |
+        | ${output}=        | `Login`          | johndoe       | secretpasswd | \
+	proxy_cmd=ssh -l user -i keyfile -W linux.server.com:22 proxy.server.com |
+        | `Should Contain`  | ${output}        | Last login at |
+
         """
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
-                           is_truthy(look_for_keys), delay)
+                           is_truthy(look_for_keys), delay, proxy_cmd)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,
-                              delay='0.5 seconds'):
+                              delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -919,6 +926,8 @@ class SSHLibrary(object):
 
         ``password`` is used to unlock the ``keyfile`` if needed. If the keyfile is
         invalid a username-password authentication will be attempted.
+
+        `proxy_cmd` is used to connect to a SSH Proxy server. 
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
@@ -943,11 +952,11 @@ class SSHLibrary(object):
         ``allow_agent`` and ``look_for_keys`` arguments are new in SSHLibrary
         3.0.0.
 
-        *Note:* ``allow_agent`` and ``look_for_keys`` do not work when using Jython.
+        *Note:* ``allow_agent``, ``look_for_keys`` and ``proxy_cmd`` do not work when using Jython.
         """
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, is_truthy(allow_agent),
-                           is_truthy(look_for_keys), delay)
+                           is_truthy(look_for_keys), delay, proxy_cmd)
 
     def _login(self, login_method, username, *args):
         self._log("Logging into '%s:%s' as '%s'."

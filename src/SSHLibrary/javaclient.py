@@ -60,7 +60,7 @@ class JavaSSHClient(AbstractSSHClient):
     def enable_logging(logfile):
         return False
 
-    def _login(self, username, password, allow_agent='ignored', look_for_keys='ignored'):
+    def _login(self, username, password, allow_agent='ignored', look_for_keys='ignored', proxy_cmd=None):
         if allow_agent or look_for_keys:
             raise JavaSSHClientException("Arguments 'allow_agent' and "
                                          "'look_for_keys' do not work with Jython.")
@@ -68,7 +68,7 @@ class JavaSSHClient(AbstractSSHClient):
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password,
-                               allow_agent='ignored', look_for_keys='ignored'):
+                               allow_agent='ignored', look_for_keys='ignored', proxy_cmd=None):
         if allow_agent or look_for_keys:
             raise JavaSSHClientException("Arguments 'allow_agent' and "
                                          "'look_for_keys' do not work with Jython.")
