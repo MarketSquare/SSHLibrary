@@ -193,6 +193,7 @@ class AbstractSSHClient(object):
         try:
             self._login(username, password, allow_agent, look_for_keys, proxy_cmd)
         except SSHClientException:
+            self.client.close()
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
         return self._read_login_output(delay)
@@ -257,6 +258,7 @@ class AbstractSSHClient(object):
                                         allow_agent, look_for_keys,
                                         proxy_cmd)
         except SSHClientException:
+            self.client.close()
             raise SSHClientException("Login with public key failed for user "
                                      "'%s'." % self._decode(username))
         return self._read_login_output(delay)
