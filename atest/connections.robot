@@ -118,6 +118,16 @@ Connection To Host Read From SSH Config File
    [Tags]  pybot
    Open Connection  ${TEST_HOSTNAME}
 
+Write In Teardown Should Not Hang If Auth Failed
+  Open Connection  ${HOST}
+  Run Keyword And Expect Error  Authentication failed*  Login  ${USERNAME}  invalid
+  [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write  ls
+
+Write Bare In Teardown Should Not Hang If Auth Failed
+  Open Connection  ${HOST}
+  Run Keyword And Expect Error  Login with public key failed*  Login With Public Key  invalid  ${KEY}
+  [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write Bare  ls
+
 *** Keywords ***
 Connection Should Be Closed
     Run Keyword And Expect Error  No open connection.  Write  pwd

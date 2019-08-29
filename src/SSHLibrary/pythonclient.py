@@ -189,7 +189,10 @@ class PythonSSHClient(AbstractSSHClient):
 class Shell(AbstractShell):
 
     def __init__(self, client, term_type, term_width, term_height):
-        self._shell = client.invoke_shell(term_type, term_width, term_height)
+        try:
+            self._shell = client.invoke_shell(term_type, term_width, term_height)
+        except AttributeError:
+            raise RuntimeError('Cannot open session, you need to establish a connection first.')
 
     def read(self):
         data = b''
