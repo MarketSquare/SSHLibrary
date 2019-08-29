@@ -191,7 +191,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, allow_agent, look_for_keys, proxy_cmd=proxy_cmd)
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd)
         except SSHClientException:
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
@@ -207,7 +207,7 @@ class AbstractSSHClient(object):
     def _decode(self, bytes):
         return bytes.decode(self.config.encoding)
 
-    def _login(self, username, password, allow_agent, look_for_keys):
+    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -254,7 +254,8 @@ class AbstractSSHClient(object):
         self._verify_key_file(keyfile)
         try:
             self._login_with_public_key(username, keyfile, password,
-                                        allow_agent, look_for_keys)
+                                        allow_agent, look_for_keys,
+                                        proxy_cmd)
         except SSHClientException:
             raise SSHClientException("Login with public key failed for user "
                                      "'%s'." % self._decode(username))
@@ -270,7 +271,7 @@ class AbstractSSHClient(object):
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
     def _login_with_public_key(self, username, keyfile, password,
-                               allow_agent, look_for_keys):
+                               allow_agent, look_for_keys, proxy_cmd):
         raise NotImplementedError
 
     @staticmethod
