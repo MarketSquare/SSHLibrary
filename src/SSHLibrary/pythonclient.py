@@ -117,7 +117,12 @@ class PythonSSHClient(AbstractSSHClient):
             elif jumphost_connection and not proxy_cmd:
                 dest_addr = (self.config.host, self.config.port)
                 jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
-                sock_tunnel = jumphost_connection.client.get_transport().open_channel("direct-tcpip", dest_addr, jump_addr)
+                jumphost_transport = jumphost_connection.client.get_transport()
+                if not jumphost_transport:
+                    raise RuntimeError("Could not get transport for {}:{}. Have you logged in?".format(*jump_addr))
+                sock_tunnel = jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
+            elif proxy_cmd and jumphost_connection:
+                raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,

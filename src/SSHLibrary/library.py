@@ -932,7 +932,13 @@ class SSHLibrary(object):
         ``proxy_cmd`` is used to connect through a SSH proxy.
 
         ``jumphost_index_or_alias`` is used to connect through an intermediary
-        SSH connection that has been assigned an Index or Alias.
+        SSH connection that has been assigned an Index or Alias. Note that
+        this requires a Connection that has been logged in prior to use.
+
+        *Note:* ``proxy_cmd`` and ``jumphost_index_or_alias`` are mutually
+        exclusive SSH features. If you wish to use them both, create the
+        jump-host's Connection using the proxy_cmd first, then use jump-host
+        for secondary Connection.
 
         This keyword reads, returns and logs the server output after logging
         in. If the `prompt` is set, everything until the prompt is read.
@@ -960,6 +966,8 @@ class SSHLibrary(object):
         *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, and
         ``jumphost_index_or_alias`` do not work when using Jython.
         """
+        if proxy_cmd and jumphost_index_or_alias:
+            raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
         jumphost_connection_conf = self.get_connection(index_or_alias=jumphost_index_or_alias) if jumphost_index_or_alias else None
         jumphost_connection = self._connections.connections[jumphost_connection_conf.index-1] if jumphost_connection_conf and jumphost_connection_conf.index else None
         return self._login(self.current.login_with_public_key, username,
