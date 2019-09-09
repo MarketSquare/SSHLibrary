@@ -219,7 +219,8 @@ class AbstractSSHClient(object):
         return self.read_until_prompt()
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
-                              look_for_keys=False, delay=None, proxy_cmd=None):
+                              look_for_keys=False, delay=None, proxy_cmd=None,
+                              jumphost_connection=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -246,6 +247,10 @@ class AbstractSSHClient(object):
             the prompt is not set.
 
         :param str proxy_cmd : Proxy command
+        
+        :param PythonSSHClient jumphost_connection : An instance of
+            PythonSSHClient that is will be used as an intermediary jump-host
+            for the SSH connection being attempted.
 
         :raises SSHClientException: If logging in failed.
 
@@ -256,7 +261,7 @@ class AbstractSSHClient(object):
         try:
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
-                                        proxy_cmd)
+                                        proxy_cmd, jumphost_connection)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Login with public key failed for user "
@@ -273,7 +278,8 @@ class AbstractSSHClient(object):
             raise SSHClientException("Could not read key file '%s'." % keyfile)
 
     def _login_with_public_key(self, username, keyfile, password,
-                               allow_agent, look_for_keys, proxy_cmd):
+                               allow_agent, look_for_keys, proxy_cmd,
+                               jumphost_index_or_alias):
         raise NotImplementedError
 
     @staticmethod

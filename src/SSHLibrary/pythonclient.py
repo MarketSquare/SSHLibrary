@@ -85,7 +85,7 @@ class PythonSSHClient(AbstractSSHClient):
             return conf.lookup(host)['hostname'] if not None else host
         return host
 
-    def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None):
+    def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None, jumphost_connection=None):
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             if proxy_cmd:
@@ -108,17 +108,22 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None):
+    def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None, jumphost_connection=None):
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
-            if proxy_cmd:
-                proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
+            sock_tunnel=None
+            if proxy_cmd and not jumphost_connection:
+                sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
+            elif jumphost_connection and not proxy_cmd:
+                dest_addr = (self.config.host, self.config.port)
+                jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
+                sock_tunnel = jumphost_connection.client.get_transport().open_channel("direct-tcpip", dest_addr, jump_addr)
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout),
-                                sock=proxy_cmd)
+                                sock=sock_tunnel)
         except paramiko.AuthenticationException:
             try:
                 transport = self.client.get_transport()
