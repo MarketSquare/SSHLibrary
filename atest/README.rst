@@ -78,6 +78,12 @@ Setup on Linux
 
     cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
+- Make the key known to the ssh agent:
+
+::
+
+    ssh-add ~/.ssh/id_rsa
+
 - Log out, back to your normal user account:
 
 ::
