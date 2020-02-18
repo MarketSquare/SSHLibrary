@@ -891,7 +891,7 @@ class AbstractSFTPClient(object):
 
     def _get_directory(self, source, destination, path_separator='/',
                        recursive=False):
-        """Downloads directory(-ies) from the remote host to the local machine,
+        r"""Downloads directory(-ies) from the remote host to the local machine,
         optionally with subdirectories included.
 
         :param str source: The path to the directory on the remote machine.
@@ -953,7 +953,7 @@ class AbstractSFTPClient(object):
         return source
 
     def get_file(self, source, destination, path_separator='/'):
-        """Downloads file(s) from the remote host to the local machine.
+        r"""Downloads file(s) from the remote host to the local machine.
 
         :param str source: Must be the path to an existing file on the remote
             machine or a glob pattern.
@@ -1019,7 +1019,7 @@ class AbstractSFTPClient(object):
 
     def put_directory(self, source, destination, mode, newline,
                       path_separator='/', recursive=False):
-        """Uploads directory(-ies) from the local machine to the remote host,
+        r"""Uploads directory(-ies) from the local machine to the remote host,
         optionally with subdirectories included.
 
         :param str source: The path to the directory on the local machine.
@@ -1080,7 +1080,7 @@ class AbstractSFTPClient(object):
                                      % path)
 
     def put_file(self, sources, destination, mode, newline, path_separator='/'):
-        """Uploads the file(s) from the local machine to the remote host.
+        r"""Uploads the file(s) from the local machine to the remote host.
 
         :param str sources: Must be the path to an existing file on the remote
             machine or a glob pattern .
