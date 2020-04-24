@@ -47,7 +47,7 @@ List Files Using Symlink As Path
 
 List Files With Non-ASCII Characters In Path
     ${expected} =  Create List  ${FILE WITH NON-ASCII NAME}
-    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    ${listing} =  List Files In Directory  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Files With Absolute Paths Using Absolute Path

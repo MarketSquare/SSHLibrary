@@ -34,7 +34,7 @@ List Directories Using Symlink As Path
 
 List Directories Using Non-ASCII Characters In Path
     ${expected} =  Create List  ${DIRECTORY WITH EMPTY SUBDIRECTORY}
-    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    ${listing} =  List Directories In Directory  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Directories With Absolute Paths Using Absolute Path

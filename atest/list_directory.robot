@@ -50,7 +50,7 @@ List Content Using Symlink As Path
 List Content Using Non-ASCII Characters In Path
     ${expected} =  Create List  ${FILE WITH NON-ASCII NAME}
     ...                         ${DIRECTORY WITH EMPTY SUBDIRECTORY}
-    ${listing} =  List Directory  ${REMOTE TEST ROOT}${/}${SUBDIRECTORY NAME}
+    ${listing} =  List Directory  ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
     Lists Should Be Equal  ${listing}  ${expected}
 
 List Content With Absolute Paths Using Absolute Path
