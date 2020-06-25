@@ -385,17 +385,17 @@ class SSHLibrary(object):
      SCP transfer was introduced in SSHLibrary 3.3.0.
 
     = Aliases =
-    SSHLibrary allow the use of an alias when opening a new connection using the parameter ``alias``.
+    SSHLibrary allows the use of an alias when opening a new connection using the parameter ``alias``.
 
     | `Open Connection` | alias=connection1 |
 
     These aliases can later be used with other keywords like  `Get Connection` or `Switch Connection` in order to
     get information respectively to switch to a certain connection that has that alias.
 
-    Note that if the connection index in unique this is not the case for aliases. Having multiple connections with
-    the same alias is possible but it is not recommended. If the same ``alias`` is used for more connections,
-    keywords `Switch Connection` and `Get Connection` will switch/get information only about the last opened
-    connection with that ``alias``.
+    When a connection is closed, it is no longer possible to switch or get information about the other connections that
+    have the same alias as the closed one. If the same ``alias`` is used for more connections, keywords
+    `Switch Connection` and `Get Connection` will switch/get information only about the last opened connection with
+    that ``alias``.
 
     | `Open Connection`             | my.server.com         | alias=conn  |
     | `Open Connection`             | my.server.com         | alias=conn  |
@@ -673,9 +673,9 @@ class SSHLibrary(object):
         ``index_or_alias`` is either connection index (an integer) or alias
         (a string). Index is got as the return value of `Open Connection`.
         Alternatively, both index and alias can queried as attributes
-        of the object returned by `Get Connection`. If the same alias
-        was used for multiple connections `Switch Connection` switches
-        to the last opened connection with that alias.
+        of the object returned by `Get Connection`. If there exists more
+        connections with the same alias the keyword will switch to the last
+        opened connection that has that alias.
 
         This keyword returns the index of the previous active connection,
         which can be used to switch back to that connection later.
