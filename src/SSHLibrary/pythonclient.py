@@ -37,7 +37,8 @@ from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
 from .pythonforward import LocalPortForwarding
-from .utils import is_bytes, is_list_like, is_unicode
+from .utils import is_bytes, is_list_like, is_unicode, is_truthy
+from robot.api import logger
 
 
 # There doesn't seem to be a simpler way to increase banner timeout
@@ -306,34 +307,50 @@ class SCPTransferClient(SFTPClient):
 
 class RemoteCommand(AbstractCommand):
 
-    def read_outputs(self, timeout=None):
-        stderr, stdout = self._receive_stdout_and_stderr(timeout)
+    def read_outputs(self, timeout=None, output_during_execution=False, output_if_timeout=False):
+        stderr, stdout = self._receive_stdout_and_stderr(timeout, output_during_execution, output_if_timeout)
         rc = self._shell.recv_exit_status()
         self._shell.close()
         return stdout, stderr, rc
 
-    def _receive_stdout_and_stderr(self, timeout=None):
+    def _receive_stdout_and_stderr(self, timeout=None, output_during_execution=False, output_if_timeout=False):
         stdout_filebuffer = self._shell.makefile('rb', -1)
         stderr_filebuffer = self._shell.makefile_stderr('rb', -1)
         stdouts = []
         stderrs = []
         while self._shell_open():
-            self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout)
+            self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout,
+                                          output_during_execution, output_if_timeout)
             time.sleep(0.01) # lets not be so busy
         stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
         stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
         return stderr, stdout
 
-    def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout=None):
+    def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout=None,
+                                 output_during_execution=False, output_if_timeout=False):
         if timeout:
-            self._shell.status_event.wait(timeout)
+            end_time = time.time() + timeout
+            while time.time() < end_time:
+                self._output_logging(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution)
             if not self._shell.status_event.isSet():
+                if is_truthy(output_if_timeout):
+                    logger.info(stdouts)
+                    logger.info(stderrs)
                 raise SSHClientException('Timed out in %s seconds' % int(timeout))
+        else:
+            self._output_logging(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution)
 
+    def _output_logging(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution=False):
         if self._shell.recv_ready():
-            stdouts.append(stdout_filebuffer.read(len(self._shell.in_buffer)))
+            stdout_output = stdout_filebuffer.read(len(self._shell.in_buffer))
+            if is_truthy(output_during_execution):
+                logger.console(stdout_output)
+            stdouts.append(stdout_output)
         if self._shell.recv_stderr_ready():
-            stderrs.append(stderr_filebuffer.read(len(self._shell.in_stderr_buffer)))
+            stderr_output = stderr_filebuffer.read(len(self._shell.in_stderr_buffer))
+            if is_truthy(output_during_execution):
+                logger.console(stderr_output)
+            stderrs.append(stderr_output)
 
     def _shell_open(self):
         return not (self._shell.closed or

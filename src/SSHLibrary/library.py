@@ -1005,8 +1005,8 @@ class SSHLibrary(object):
         return banner.decode(self.DEFAULT_ENCODING)
 
     def execute_command(self, command, return_stdout=True, return_stderr=False,
-                        return_rc=False, sudo=False,  sudo_password=None, timeout=None,
-                        invoke_subsystem=False, forward_agent=False):
+                        return_rc=False, sudo=False,  sudo_password=None, timeout=None, output_during_execution=False,
+                        output_if_timeout=False, invoke_subsystem=False, forward_agent=False):
         """Executes ``command`` on the remote machine and returns its outputs.
 
         This keyword executes the ``command`` and returns after the execution
@@ -1068,6 +1068,13 @@ class SSHLibrary(object):
         | `Execute Command` | ssh-add -L | forward_agent=True |
 
         ``invoke_subsystem`` and ``forward_agent`` are new in SSHLibrary 3.4.0.
+
+        ``output_during_execution`` enable logging the output of the command as it is generated, into the console.
+
+        ``output_if_timeout`` if the executed command doesn't end before reaching timeout, the parameter will log the
+        output of the command at the moment of timeout.
+
+        `` output_during_execution`` and ``output_if_timeout`` are new in SSHLibrary 3.5.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
@@ -1076,7 +1083,8 @@ class SSHLibrary(object):
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         stdout, stderr, rc = self.current.execute_command(command, sudo, sudo_password,
-                                                          timeout, is_truthy(invoke_subsystem), forward_agent)
+                                                          timeout, output_during_execution, output_if_timeout,
+                                                          is_truthy(invoke_subsystem), forward_agent)
         return self._return_command_output(stdout, stderr, rc, *opts)
 
     def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):

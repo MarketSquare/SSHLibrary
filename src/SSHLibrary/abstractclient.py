@@ -283,7 +283,8 @@ class AbstractSSHClient(object):
     def get_banner(self):
         raise NotImplementedError('Not supported on this Python interpreter.')
 
-    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, invoke_subsystem=False, forward_agent=False):
+    def execute_command(self, command, sudo=False,  sudo_password=None, timeout=None, output_during_execution=False,
+                        output_if_timeout=False, invoke_subsystem=False, forward_agent=False):
         """Executes the `command` on the remote host.
 
         This method waits until the output triggered by the execution of the
@@ -304,7 +305,8 @@ class AbstractSSHClient(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         self.start_command(command, sudo, sudo_password, invoke_subsystem, forward_agent)
-        return self.read_command_output(timeout=timeout)
+        return self.read_command_output(timeout=timeout, output_during_execution=output_during_execution,
+                                        output_if_timeout=output_if_timeout)
 
     def start_command(self, command, sudo=False,  sudo_password=None, invoke_subsystem=False, forward_agent=False):
         """Starts the execution of the `command` on the remote host.
@@ -333,7 +335,7 @@ class AbstractSSHClient(object):
     def _start_command(self, command, sudo=False, sudo_password=None, invoke_subsystem=False, forward_agent=False):
         raise NotImplementedError
 
-    def read_command_output(self, timeout=None):
+    def read_command_output(self, timeout=None, output_during_execution=False, output_if_timeout=False):
         """Reads the output of the previous started command.
 
         The previous started command, started with :py:meth:`start_command`,
@@ -349,7 +351,7 @@ class AbstractSSHClient(object):
         if timeout:
             timeout = float(TimeEntry(timeout).value)
         try:
-            return self._started_commands.pop().read_outputs(timeout)
+            return self._started_commands.pop().read_outputs(timeout, output_during_execution, output_if_timeout)
         except IndexError:
             raise SSHClientException('No started commands to read output from.')
 

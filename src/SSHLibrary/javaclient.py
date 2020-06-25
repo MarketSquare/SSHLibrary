@@ -22,6 +22,7 @@ except ImportError:
         'Importing Trilead SSH library failed. '
         'Make sure you have the Trilead JAR distribution in your CLASSPATH.'
     )
+import time
 import jarray
 import os
 from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
@@ -30,6 +31,7 @@ from java.io import (BufferedReader, File, FileOutputStream, InputStreamReader,
 from .abstractclient import (AbstractShell, AbstractSSHClient,
                              AbstractSFTPClient, AbstractCommand,
                              SSHClientException, SFTPFileInfo)
+from .utils import is_truthy
 try:
     from robot.api import logger
 except ImportError:
@@ -40,12 +42,15 @@ class JavaSSHClientException(Exception):
     pass
 
 
-def _wait_until_timeout(_shell, timeout):
+def _wait_until_timeout(_shell, timeout, stdout, stderr, output_if_timeout=False):
     timeout_condition = 1
     rc = 32
-    condition = _shell.waitForCondition(rc , int(timeout) * 1000)
+    condition = _shell.waitForCondition(rc, int(timeout * 1000))
 
     if condition & timeout_condition != 0:
+        if is_truthy(output_if_timeout) and logger is not None:
+            logger.info(stdout)
+            logger.info(stderr)
         raise SSHClientException("Timed out in %s seconds" % int(timeout))
 
 class JavaSSHClient(AbstractSSHClient):
@@ -237,21 +242,28 @@ class SCPTransferClient(SFTPClient):
 
 class RemoteCommand(AbstractCommand):
 
-    def read_outputs(self, timeout=None):
+    def read_outputs(self, timeout=None, output_during_execution=False, output_if_timeout=False):
         if timeout:
-            _wait_until_timeout(self._shell, timeout)
-        stdout = self._read_from_stream(self._shell.getStdout())
-        stderr = self._read_from_stream(self._shell.getStderr())
+            end_time = time.time() + timeout
+            while time.time() < end_time:
+                stdout = self._read_from_stream(self._shell.getStdout(), output_during_execution)
+                stderr = self._read_from_stream(self._shell.getStderr(), output_during_execution)
+            _wait_until_timeout(self._shell, 0.001, stdout, stderr, output_if_timeout)
+        else:
+            stdout = self._read_from_stream(self._shell.getStdout(), output_during_execution)
+            stderr = self._read_from_stream(self._shell.getStderr(), output_during_execution)
         rc = self._shell.getExitStatus() or 0
         self._shell.close()
         return stdout, stderr, rc
 
-    def _read_from_stream(self, stream):
+    def _read_from_stream(self, stream, output_during_execution=False):
         reader = BufferedReader(InputStreamReader(StreamGobbler(stream),
                                                   self._encoding))
         result = ''
         line = reader.readLine()
         while line is not None:
+            if is_truthy(output_during_execution) and logger is not None:
+                logger.console(line)
             result += line + '\n'
             line = reader.readLine()
         return result
