@@ -383,6 +383,38 @@ class SSHLibrary(object):
      - If running with Jython you can encounter some encoding issues when transferring files with non-ascii characters.
 
      SCP transfer was introduced in SSHLibrary 3.3.0.
+
+    = Aliases =
+    SSHLibrary allows the use of an alias when opening a new connection using the parameter ``alias``.
+
+    | `Open Connection` | alias=connection1 |
+
+    These aliases can later be used with other keywords like  `Get Connection` or `Switch Connection` in order to
+    get information respectively to switch to a certain connection that has that alias.
+
+    When a connection is closed, it is no longer possible to switch or get information about the other connections that
+    have the same alias as the closed one. If the same ``alias`` is used for more connections, keywords
+    `Switch Connection` and `Get Connection` will switch/get information only about the last opened connection with
+    that ``alias``.
+
+    | `Open Connection`             | my.server.com         | alias=conn  |
+    | `Open Connection`             | my.server.com         | alias=conn  |
+    | `Open Connection`             | my.server.com         | alias=conn2 |
+    | ${conn_info}=                 | `Get Connection`      | conn        |
+    | `Should Be Equal As Integers` | ${conn_info.index}    | 2           |
+    | `Switch Connection`           | conn                  |
+    | ${current_conn}=              | `Get Connection`      | conn        |
+    | `Should Be Equal As Integers` | ${current_conn.index} | 2           |
+
+    Note that if a connection that has the same alias as other connections is closed trying to switch or get information
+    about the other connections that have the same alias is impossible.
+
+    | 'Open Connection`              | my.server.com                       | alias=conn          |
+    | 'Open Connection`              | my.server.com                       | alias=conn          |
+    | `Close Connection`             |
+    | `Switch Connection`            | conn                                |
+    | `Run Keyword And Expect Error` | Non-existing index or alias 'conn'. | `Switch Connection` | conn        |
+
     """
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
@@ -571,7 +603,8 @@ class SSHLibrary(object):
         when `Close All Connections` is used.
 
         Optional ``alias`` can be given for the connection and can be used for
-        switching between connections, similarly as the index.
+        switching between connections, similarly as the index. Multiple
+        connections with the same ``alias`` are allowed.
         See `Switch Connection` for more details.
 
         Connection parameters, like `timeout` and `newline` are documented in
@@ -640,7 +673,9 @@ class SSHLibrary(object):
         ``index_or_alias`` is either connection index (an integer) or alias
         (a string). Index is got as the return value of `Open Connection`.
         Alternatively, both index and alias can queried as attributes
-        of the object returned by `Get Connection`.
+        of the object returned by `Get Connection`. If there exists more
+        connections with the same alias the keyword will switch to the last
+        opened connection that has that alias.
 
         This keyword returns the index of the previous active connection,
         which can be used to switch back to that connection later.
@@ -709,7 +744,8 @@ class SSHLibrary(object):
         change the active connection.
 
         If ``index_or_alias`` is not given, the information of the current
-        connection is returned.
+        connection is returned. If there exists more connections with the same alias
+        the keyword will return last opened connection that has that alias.
 
         This keyword returns an object that has the following attributes:
 
