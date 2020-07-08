@@ -26,7 +26,6 @@ from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from .logger import logger
 from .utils import is_bytes, is_string, unicode
-from robotstatuschecker import process_output
 
 
 class SSHClientException(RuntimeError):
