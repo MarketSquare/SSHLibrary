@@ -1074,7 +1074,7 @@ class SSHLibrary(object):
         ``output_if_timeout`` if the executed command doesn't end before reaching timeout, the parameter will log the
         output of the command at the moment of timeout.
 
-        `` output_during_execution`` and ``output_if_timeout`` are new in SSHLibrary 3.5.0.
+        `` output_during_execution`` and ``output_if_timeout`` are not working with Jython. New in SSHLibrary 3.5.0.
         """
         if not is_truthy(sudo):
             self._log("Executing command '%s'." % command, self._config.loglevel)
