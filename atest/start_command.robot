@@ -69,3 +69,15 @@ Start Command And Read Process Output With Invoke Subsystem
 Read Command Output With Timeout
     Start Command  sleep 15
     Run Keyword And Expect Error  *Timed out in 5 seconds  Read Command Output  timeout=5s
+
+Start Commands In Different Connections
+    [Setup]  Login As Valid User
+    Switch Connection  1
+    Start Command  pwd
+    Switch Connection  2
+    Start Command  hostname
+    Switch Connection  1
+    ${out}    ${err}=    Read Command Output    return_stderr=True
+    Switch Connection    1
+    ${out}    ${err}=    Read Command Output    return_stderr=True
+    [Teardown]  Run Keywords  Switch Connection  1  AND  Close Connection

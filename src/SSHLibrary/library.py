@@ -447,6 +447,7 @@ class SSHLibrary(object):
             encoding or self.DEFAULT_ENCODING,
             escape_ansi or self.DEFAULT_ESCAPE_ANSI
         )
+        self._last_commands = dict()
 
     @property
     def current(self):
@@ -1126,7 +1127,11 @@ class SSHLibrary(object):
             self._log("Starting command '%s'." % command, self._config.loglevel)
         else:
             self._log("Starting command 'sudo %s'." % command, self._config.loglevel)
-        self._last_command = command
+        if self.current.config.index not in self._last_commands.keys():
+            self._last_commands[self.current.config.index] = command
+        else:
+            temp_dict = {self.current.config.index: command}
+            self._last_commands.update(temp_dict)
         self.current.start_command(command, sudo, sudo_password, is_truthy(invoke_subsystem), is_truthy(forward_agent))
 
     def read_command_output(self, return_stdout=True, return_stderr=False,
@@ -1178,7 +1183,7 @@ class SSHLibrary(object):
 
         This keyword logs the read command with log level ``INFO``.
         """
-        self._log("Reading output of command '%s'." % self._last_command, self._config.loglevel)
+        self._log("Reading output of command '%s'." % self._last_commands.get(self.current.config.index), self._config.loglevel)
         opts = self._legacy_output_options(return_stdout, return_stderr,
                                            return_rc)
         try:
