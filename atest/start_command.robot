@@ -72,12 +72,14 @@ Read Command Output With Timeout
 
 Start Commands In Different Connections
     [Setup]  Login As Valid User
+    [Documentation]  PASS
+    ...              LOG  7:1  INFO  Reading output of command 'pwd'.
+    ...              LOG  9:1  INFO  Reading output of command 'hostname'.
     Switch Connection  1
     Start Command  pwd
     Switch Connection  2
     Start Command  hostname
     Switch Connection  1
-    ${out}    ${err}=    Read Command Output    return_stderr=True
-    Switch Connection    1
-    ${out}    ${err}=    Read Command Output    return_stderr=True
-    [Teardown]  Run Keywords  Switch Connection  1  AND  Close Connection
+    ${out}=    Read Command Output    return_stderr=True
+    Switch Connection    2
+    ${out}=    Read Command Output    return_stderr=True
