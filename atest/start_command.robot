@@ -69,3 +69,17 @@ Start Command And Read Process Output With Invoke Subsystem
 Read Command Output With Timeout
     Start Command  sleep 15
     Run Keyword And Expect Error  *Timed out in 5 seconds  Read Command Output  timeout=5s
+
+Start Commands In Different Connections
+    [Setup]  Login As Valid User
+    [Documentation]  PASS
+    ...              LOG  7:1  INFO  Reading output of command 'pwd'.
+    ...              LOG  9:1  INFO  Reading output of command 'hostname'.
+    Switch Connection  1
+    Start Command  pwd
+    Switch Connection  2
+    Start Command  hostname
+    Switch Connection  1
+    ${out}=    Read Command Output    return_stderr=True
+    Switch Connection    2
+    ${out}=    Read Command Output    return_stderr=True
