@@ -237,7 +237,7 @@ class SCPTransferClient(SFTPClient):
 
 class RemoteCommand(AbstractCommand):
 
-    def read_outputs(self, timeout=None):
+    def read_outputs(self, timeout=None, *args):
         if timeout:
             _wait_until_timeout(self._shell, timeout)
         stdout = self._read_from_stream(self._shell.getStdout())
