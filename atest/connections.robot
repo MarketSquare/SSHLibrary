@@ -128,6 +128,11 @@ Write Bare In Teardown Should Not Hang If Auth Failed
   Run Keyword And Expect Error  Login with public key failed*  Login With Public Key  invalid  ${KEY}
   [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write Bare  ls
 
+Login With Agent
+   [Tags]  pybot
+   Open Connection  ${HOST}
+   Login  ${KEY USERNAME}  allow_agent=True
+
 *** Keywords ***
 Connection Should Be Closed
     Run Keyword And Expect Error  No open connection.  Write  pwd

@@ -94,7 +94,7 @@ class PythonSSHClient(AbstractSSHClient):
             try:
                 self.client.connect(self.config.host, self.config.port, username,
                                     password, look_for_keys=look_for_keys,
-                                    allow_agent=look_for_keys,
+                                    allow_agent=allow_agent,
                                     timeout=float(self.config.timeout), sock=proxy_cmd)
             except paramiko.AuthenticationException:
                 try:
@@ -139,7 +139,7 @@ class PythonSSHClient(AbstractSSHClient):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(str(host), int(port), username="bad-username", password="bad-password")
+            client.connect(str(host), int(port), username="bad-username")
         except paramiko.AuthenticationException:
             return client.get_transport().get_banner()
         except Exception:

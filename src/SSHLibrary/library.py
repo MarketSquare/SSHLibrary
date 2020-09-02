@@ -907,7 +907,7 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password, allow_agent=False, look_for_keys=False, delay='0.5 seconds', proxy_cmd=None):
+    def login(self, username, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds', proxy_cmd=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -946,6 +946,10 @@ class SSHLibrary(object):
         proxy_cmd=ssh -l user -i keyfile -W linux.server.com:22 proxy.server.com |
         | `Should Contain`  | ${output}        | Last login at |
 
+        Example usage of SSH Agent:
+        First, add the key to the authentication agent with: ``ssh-add /path/to/keyfile``.
+        | `Open Connection` | linux.server.com |
+        | `Login` | johndoe | allow_agent=True |
         """
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
                            is_truthy(look_for_keys), delay, proxy_cmd)
