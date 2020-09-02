@@ -7,8 +7,9 @@ Library         OperatingSystem  WITH NAME  OS
 
 *** Test Cases ***
 Execute Timeout
+    [Tags]  pybot
     [Documentation]  FAIL  SSHClientException: Timed out in 3 seconds
-    ...              LOG  1:2  INFO  [b'Command no. 1\\n', b'Command no. 2\\n', b'Command no. 3\\n']
+    ...              LOG  1:2  INFO  GLOB:  *Command no. 1*Command no. 2*Command no. 3*
     Execute Command  for i in {1..10}; do echo "Command no. $i"; sleep 1; done  timeout=3s  output_if_timeout=True
 
 Execute Command With Defaults

@@ -22,8 +22,9 @@ Get File Using Pattern As Source
     ...                         ${FILE WITH NEWLINES NAME}
     ${destination} =  Set Variable  ${LOCAL TMPDIR}${/}
     SSH.Get File  ${REMOTE TEST ROOT}/*est*.txt  ${destination}
-    : FOR  ${filename}  IN  @{expected}
-    \  OS.File Should Exist  ${destination}${/}${filename}
+    FOR  ${filename}  IN  @{expected}
+        OS.File Should Exist  ${destination}${/}${filename}
+    END
 
 Get File From Path Not Under Remote Home
     [Setup]  Create Tmp Dir And Move File
