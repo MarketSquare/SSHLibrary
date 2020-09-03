@@ -1,5 +1,5 @@
+os: linux
 language: python
-sudo: required
 dist: xenial
 env:
   global:
@@ -33,7 +33,7 @@ before_install:
   - ssh-add /home/testkey/.ssh/id_rsa
 install:
   - pip install -r requirements-dev.txt docutils
-matrix:
+jobs:
   include:
     - python: "3.8"
       env:
