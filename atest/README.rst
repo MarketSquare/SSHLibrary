@@ -97,9 +97,6 @@ Setup on Linux
     sudo cp ~testkey/.ssh/id_rsa <path_to_sshlibrary>/atest/testdata/keyfiles/
 
 - Change the rights for that file so that you can read it.
-- Create your login banner file ``/etc/ssh/sshd-banner`` and append text:
-
-
 
 Additional OpenSSH configuration
 ################################
