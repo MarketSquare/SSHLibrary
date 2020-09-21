@@ -341,6 +341,8 @@ class RemoteCommand(AbstractCommand):
         if timeout:
             end_time = time.time() + timeout
             while time.time() < end_time:
+                if self._shell.status_event.wait(0):
+                    break
                 self._output_logging(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution)
             if not self._shell.status_event.isSet():
                 if is_truthy(output_if_timeout):
