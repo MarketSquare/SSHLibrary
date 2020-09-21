@@ -103,7 +103,7 @@ Execute Command With Invoke Subsystem
 Execute Command With Timeout
     Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s
 
-Execute Command Executes In Certain Ammout Of Time
+Execute Command In Certain Amount Of Time
     ${start_time}=  Get Current Date  result_format=%s  exclude_millis=True
     Execute Command  for i in {1..3}; do echo "Command no. $i"; sleep 1; done  timeout=5s
     ${end_time}=  Get Current Date  result_format=%s  exclude_millis=True
