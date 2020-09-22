@@ -4,6 +4,7 @@ Resource        resources/shell.robot
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files And Close Connections
 Library         OperatingSystem  WITH NAME  OS
+Library         DateTime
 
 *** Test Cases ***
 Execute Timeout
@@ -101,3 +102,10 @@ Execute Command With Invoke Subsystem
 
 Execute Command With Timeout
     Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s
+
+Execute Command In Certain Amount Of Time
+    ${start_time}=  Get Current Date  result_format=%s  exclude_millis=True
+    Execute Command  for i in {1..3}; do echo "Command no. $i"; sleep 1; done  timeout=5s
+    ${end_time}=  Get Current Date  result_format=%s  exclude_millis=True
+    ${execution_time}=  Subtract Time From Time  ${end_time}  ${start_time}
+    Should Be Equal As Numbers   3  ${execution_time}
