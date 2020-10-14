@@ -115,7 +115,6 @@ class PythonSSHClient(AbstractSSHClient):
                                jumphost_connection=None, read_config_host=False):
         if read_config_host:
             self.config.host = self._read_ssh_config_host(self.config.host)
-        self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             sock_tunnel=None
             if proxy_cmd and not jumphost_connection:
