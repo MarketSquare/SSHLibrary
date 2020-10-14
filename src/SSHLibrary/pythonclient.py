@@ -86,8 +86,10 @@ class PythonSSHClient(AbstractSSHClient):
             return conf.lookup(host)['hostname'] if not None else host
         return host
 
-    def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None, jumphost_connection=None):
-        self.config.host = self._read_ssh_config_host(self.config.host)
+    def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
+               read_config_host=False):
+        if read_config_host:
+            self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             if proxy_cmd:
                 proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
@@ -109,7 +111,10 @@ class PythonSSHClient(AbstractSSHClient):
         except paramiko.AuthenticationException:
             raise SSHClientException
 
-    def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None, jumphost_connection=None):
+    def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
+                               jumphost_connection=None, read_config_host=False):
+        if read_config_host:
+            self.config.host = self._read_ssh_config_host(self.config.host)
         self.config.host = self._read_ssh_config_host(self.config.host)
         try:
             sock_tunnel=None
