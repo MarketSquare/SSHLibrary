@@ -125,6 +125,22 @@ Put File And Check For Proper Permissions
 	Check File Permissions    0755    ${REMOTE_TEST_ROOT}${/}${TEST FILE NAME}
 	[Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
+Put File With Scp (all) And Preserve Time
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Execute Command  mkdir ${REMOTE TEST ROOT NAME}
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=ALL  scp_preserve_times=True
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    ${alo} =  Execute Command  stat ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
+Put File With SCP (transfer) And Preserve Time
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Execute Command  mkdir ${REMOTE TEST ROOT NAME}
+    Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=TRANSFER  scp_preserve_times=True
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    ${alo} =  Execute Command  stat ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 *** Keywords ***
 Change User And Overwrite File
     Open Connection  ${HOST}  prompt=${PROMPT}

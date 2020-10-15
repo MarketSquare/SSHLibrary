@@ -1533,7 +1533,7 @@ class SSHLibrary(object):
         output = ansi_escape.sub('', output)
         return ("%r" % output)[1:-1].encode().decode('unicode-escape')
 
-    def get_file(self, source, destination='.', scp='OFF'):
+    def get_file(self, source, destination='.', scp='OFF', scp_preserve_times=False):
         """Downloads file(s) from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1548,6 +1548,9 @@ class SSHLibrary(object):
 
         ``scp`` enables the use of scp (secure copy protocol) for
         the file transfer. See `Transfer files with SCP` for more details.
+
+        ``scp_preserve_times`` preserve modification time and access time
+        of transferred files and directories.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1581,13 +1584,13 @@ class SSHLibrary(object):
 
         See also `Get Directory`.
 
-        ``scp`` is new in SSHLibrary 3.3.0.
+        ``scp_preserve_times`` is new in SSHLibrary 3.6.0.
         """
         return self._run_command(self.current.get_file, source,
-                                 destination, scp)
+                                 destination, scp, scp_preserve_times)
 
     def get_directory(self, source, destination='.', recursive=False,
-                      scp='OFF'):
+                      scp='OFF', scp_preserve_times=False):
         """Downloads a directory, including its content, from the remote machine to the local machine.
 
         ``source`` is a path on the remote machine. Both absolute paths and
@@ -1603,6 +1606,9 @@ class SSHLibrary(object):
 
         ``scp`` enables the use of scp (secure copy protocol) for
         the file transfer. See `Transfer files with SCP` for more details.
+
+        ``scp_preserve_times`` preserve modification time and access time
+        of transferred files and directories.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1627,13 +1633,13 @@ class SSHLibrary(object):
 
         See also `Get File`.
 
-        ``scp`` is new in SSHLibrary 3.3.0.
+        ``scp_preserve_times`` is new in SSHLibrary 3.6.0.
         """
         return self._run_command(self.current.get_directory, source,
-                                 destination, is_truthy(recursive), scp)
+                                 destination, is_truthy(recursive), scp, scp_preserve_times)
 
     def put_file(self, source, destination='.', mode='0744', newline='',
-                 scp='OFF'):
+                 scp='OFF', scp_preserve_times=False):
         """Uploads file(s) from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1657,6 +1663,9 @@ class SSHLibrary(object):
 
         ``scp`` enables the use of scp (secure copy protocol) for
         the file transfer. See `Transfer files with SCP` for more details.
+
+        ``scp_preserve_times`` preserve modification time and access time
+        of transferred files and directories.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
@@ -1686,13 +1695,13 @@ class SSHLibrary(object):
 
         See also `Put Directory`.
 
-        ``scp`` is new in SSHLibrary 3.3.0.
+        ``scp_preserve_times`` is new in SSHLibrary 3.6.0.
         """
         return self._run_command(self.current.put_file, source,
-                                 destination, mode, newline, scp)
+                                 destination, mode, newline, scp, scp_preserve_times)
 
     def put_directory(self, source, destination='.', mode='0744', newline='',
-                      recursive=False, scp='OFF'):
+                      recursive=False, scp='OFF', scp_preserve_times=False):
         """Uploads a directory, including its content, from the local machine to the remote machine.
 
         ``source`` is the path on the local machine. Both absolute paths and
@@ -1717,6 +1726,9 @@ class SSHLibrary(object):
         ``scp`` enables the use of scp (secure copy protocol) for
         the file transfer. See `Transfer files with SCP` for more details.
 
+        ``scp_preserve_times`` preserve modification time and access time
+        of transferred files and directories.
+
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
         | `Put Directory` | /var/logs | /tmp/non/existing  |
@@ -1739,11 +1751,11 @@ class SSHLibrary(object):
 
         See also `Put File`.
 
-        ``scp`` is new in SSHLibrary 3.3.0.
+        ``scp_preserve_times`` is new in SSHLibrary 3.6.0.
         """
         return self._run_command(self.current.put_directory, source,
                                  destination, mode, newline,
-                                 is_truthy(recursive), scp)
+                                 is_truthy(recursive), scp, scp_preserve_times)
 
     def _run_command(self, command, *args):
         try:

@@ -91,6 +91,23 @@ Get Directory containing a symlink
    OS.File Should Exist  ${LOCAL TMPDIR}${/}symlink${/}${SYMLINK TO TEST FILE}
    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
+Get Directory With SCP (transfer) And Preserve Time
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=TRANSFER  scp_preserve_times=True
+    Sleep  60s
+    Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
+    ${alo} =  Run  stat ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir${/}robot-testdir
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
+Get Directory With SCP (all) And Preserve Time
+    [Tags]  pybot
+    [Setup]  Create Directory  ${LOCAL TMPDIR}
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=ALL  scp_preserve_times=True
+    Sleep  60s
+    Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
+    ${alo} =  Run  stat ${/}robot-testdir
+    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
+
 *** Keywords ***
 File content should be
     [Arguments]    ${file}    ${expected}

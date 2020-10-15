@@ -81,6 +81,19 @@ Put Directory And Check For Proper Permissions
 	Check Folder Permissions    0755
 	[Teardown]  Execute Command  rm -rf ${CURDIR}${/}testdata${/}to_put
 
+Put Directory With SCP (transfer) And Preserve Time
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=TRANSFER  scp_preserve_times=True
+    Remote Directory Should Exist With Subdirectories  ./textfiles
+     ${alo} =  Execute Command  stat ./textfiles
+#    [Teardown]  Execute Command  rm -rf ./textfiles
+
+Put Directory With SCP (all) And Preserve Time
+    [Tags]  pybot
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=ALL  scp_preserve_times=True
+    ${alo} =  Execute Command  stat ./textfiles
+    Remote Directory Should Exist With Subdirectories  ./textfiles
+    [Teardown]  Execute Command  rm -rf ./textfiles
+
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
     OS.Remove Directory  ${LOCAL TEXTFILES}${/}empty

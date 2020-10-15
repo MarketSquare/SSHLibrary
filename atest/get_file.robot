@@ -89,6 +89,22 @@ Get File That Is A Symlink Directory
     OS.File Should Not Exist  symlink_dir
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
+Get File With SCP (transfer) And Preserve Time
+    [Setup]  Create Tmp Dir And Move File
+    Sleep  60s
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=TRANSFER  scp_preserve_times=True
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    ${alo} =  Run  stat ${LOCAL TMPDIR}${/}test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
+Get File With SCP (all) And Preserve Time
+    [Setup]  Create Tmp Dir And Move File
+    Sleep  60s
+    SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=ALL  scp_preserve_times=True
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    ${alo} =  Run  stat ${LOCAL TMPDIR}${/}test_file.txt
+    [Teardown]  Remove Tmp Dir And Remote File
+
 *** Keywords ***
 Create Tmp Dir And Move File
     Put File  ${TEST FILE}  /tmp/

@@ -591,18 +591,18 @@ class AbstractSSHClient(object):
                                  % (self._decode(expected), timeout))
 
     def put_file(self, source, destination='.', mode='0o744', newline='',
-                 scp='OFF'):
+                 scp='OFF', scp_preserve_times=False):
         """Calls :py:meth:`AbstractS`FTPClient.put_file` with the given
         arguments.
 
         See :py:meth:`AbstractSFTPClient.put_file` for more documentation.
         """
         client = self._create_client(scp)
-        return client.put_file(source, destination, mode, newline,
+        return client.put_file(source, destination, scp_preserve_times, mode, newline,
                                self.config.path_separator)
 
     def put_directory(self, source, destination='.', mode='0o744', newline='',
-                      recursive=False, scp='OFF'):
+                      recursive=False, scp='OFF', scp_preserve_times=False):
         """Calls :py:meth:`AbstractSFTPClient.put_directory` with the given
         arguments and the connection specific path separator.
 
@@ -612,22 +612,20 @@ class AbstractSSHClient(object):
         See :py:meth:`AbstractSFTPClient.put_directory` for more documentation.
         """
         client = self._create_client(scp)
-        return client.put_directory(source, destination, mode,
-                                    newline,
-                                    self.config.path_separator,
-                                    recursive)
+        return client.put_directory(source, destination, scp_preserve_times, mode,
+                                    newline, self.config.path_separator, recursive)
 
-    def get_file(self, source, destination='.', scp='OFF'):
+    def get_file(self, source, destination='.', scp='OFF', scp_preserve_times=False):
         """Calls :py:meth:`AbstractSFTPClient.get_file` with the given
         arguments.
 
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
         client = self._create_client(scp)
-        return client.get_file(source, destination, self.config.path_separator)
+        return client.get_file(source, destination, scp_preserve_times, self.config.path_separator)
 
     def get_directory(self, source, destination='.', recursive=False,
-                      scp='OFF'):
+                      scp='OFF', scp_preserve_times=False):
         """Calls :py:meth:`AbstractSFTPClient.get_directory` with the given
         arguments and the connection specific path separator.
 
@@ -637,7 +635,7 @@ class AbstractSSHClient(object):
         See :py:meth:`AbstractSFTPClient.get_directory` for more documentation.
         """
         client = self._create_client(scp)
-        return client.get_directory(source, destination,
+        return client.get_directory(source, destination, scp_preserve_times,
                                     self.config.path_separator,
                                     recursive)
 
@@ -893,13 +891,13 @@ class AbstractSFTPClient(object):
     def _get_directory_names(self, path):
         return [item.name for item in self._list(path) if item.is_directory()]
 
-    def get_directory(self, source, destination, path_separator='/',
+    def get_directory(self, source, destination, scp_preserve_time, path_separator='/',
                       recursive=False):
         destination = self.build_destination(source, destination, path_separator)
-        return self._get_directory(source, destination, path_separator, recursive)
+        return self._get_directory(source, destination, path_separator, recursive, scp_preserve_time)
 
     def _get_directory(self, source, destination, path_separator='/',
-                       recursive=False):
+                       recursive=False, scp_preserve_times=False):
         r"""Downloads directory(-ies) from the remote host to the local machine,
         optionally with subdirectories included.
 
@@ -907,6 +905,9 @@ class AbstractSFTPClient(object):
 
         :param str destination: The target path on the local machine.
             The destination defaults to the current local working directory.
+
+        :param bool scp_preserve_times: preserve modification time and access time
+        of transferred files and directories.
 
         :param str path_separator: The path separator used for joining the
             paths on the remote host. On Windows, this must be set as `\`.
@@ -928,9 +929,9 @@ class AbstractSFTPClient(object):
                 remote = source + path_separator + item
                 local = os.path.join(destination, item)
                 if self.is_file(remote):
-                    files += self.get_file(remote, local)
+                    files += self.get_file(remote, local, scp_preserve_times)
                 elif recursive:
-                    files += self.get_directory(remote, local, path_separator,
+                    files += self.get_directory(remote, local, scp_preserve_times, path_separator,
                                                 recursive)
         else:
             if not os.path.exists(destination):
@@ -961,7 +962,7 @@ class AbstractSFTPClient(object):
             source = source[:-len(path_separator)]
         return source
 
-    def get_file(self, source, destination, path_separator='/'):
+    def get_file(self, source, destination, scp_preserve_times, path_separator='/'):
         r"""Downloads file(s) from the remote host to the local machine.
 
         :param str source: Must be the path to an existing file on the remote
@@ -973,6 +974,9 @@ class AbstractSFTPClient(object):
             If many files are downloaded, e.g. patterns are used in the
             `source`, then this must be a path to an existing directory.
             The destination defaults to the current local working directory.
+
+        :param bool scp_preserve_times: preserve modification time and access time
+        of transferred files and directories.
 
         :param str path_separator: The path separator used for joining the
             paths on the remote host. On Windows, this must be set as `\`.
@@ -989,7 +993,7 @@ class AbstractSFTPClient(object):
         local_files = self._get_get_file_destinations(remote_files, destination)
         files = list(zip(remote_files, local_files))
         for src, dst in files:
-            self._get_file(src, dst)
+            self._get_file(src, dst, scp_preserve_times)
         return files
 
     def _get_get_file_sources(self, source, path_separator):
@@ -1023,10 +1027,10 @@ class AbstractSFTPClient(object):
         if not os.path.exists(destination):
             os.makedirs(destination)
 
-    def _get_file(self, source, destination):
+    def _get_file(self, source, destination, scp_preserve_times):
         raise NotImplementedError
 
-    def put_directory(self, source, destination, mode, newline,
+    def put_directory(self, source, destination, scp_preserve_times,mode, newline,
                       path_separator='/', recursive=False):
         r"""Uploads directory(-ies) from the local machine to the remote host,
         optionally with subdirectories included.
@@ -1035,6 +1039,9 @@ class AbstractSFTPClient(object):
 
         :param str destination: The target path on the remote host.
             The destination defaults to the user's home at the remote host.
+
+        :param bool scp_preserve_times: preserve modification time and access time
+        of transferred files and directories.
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
@@ -1061,10 +1068,10 @@ class AbstractSFTPClient(object):
             destination = destination + path_separator +\
                           source.rsplit(os.path.sep)[-1]
         return self._put_directory(source, destination, mode, newline,
-                                   path_separator, recursive)
+                                   path_separator, recursive, scp_preserve_times)
 
     def _put_directory(self, source, destination, mode, newline,
-                       path_separator, recursive):
+                       path_separator, recursive, scp_preserve_times=False):
         files = []
         items = os.listdir(source)
         if items:
@@ -1072,12 +1079,12 @@ class AbstractSFTPClient(object):
                 local_path = os.path.join(source, item)
                 remote_path = destination + path_separator + item
                 if os.path.isfile(local_path):
-                    files += self.put_file(local_path, remote_path, mode,
-                                           newline, path_separator)
+                    files += self.put_file(local_path, remote_path, scp_preserve_times,
+                                           mode, newline, path_separator)
                 elif recursive and os.path.isdir(local_path):
                     files += self._put_directory(local_path, remote_path,
                                                  mode, newline,
-                                                 path_separator, recursive)
+                                                 path_separator, recursive, scp_preserve_times)
         else:
             self._create_missing_remote_path(destination, mode)
             files.append((source, destination))
@@ -1088,7 +1095,7 @@ class AbstractSFTPClient(object):
             raise SSHClientException("There was no source path matching '%s'."
                                      % path)
 
-    def put_file(self, sources, destination, mode, newline, path_separator='/'):
+    def put_file(self, sources, destination, scp_preserve_times, mode, newline, path_separator='/'):
         r"""Uploads the file(s) from the local machine to the remote host.
 
         :param str sources: Must be the path to an existing file on the remote
@@ -1100,6 +1107,9 @@ class AbstractSFTPClient(object):
             If multiple files are uploaded, e.g. patterns are used in the
             `source`, then this must be a path to an existing directory.
             The destination defaults to the user's home at the remote host.
+
+        :param bool scp_preserve_times: preserve modification time and access time
+        of transferred files and directories.
 
         :param str mode: The uploaded files on the remote host are created with
             these modes. The modes are given as traditional Unix octal
@@ -1127,7 +1137,7 @@ class AbstractSFTPClient(object):
         self._create_missing_remote_path(remote_dir, mode)
         files = list(zip(local_files, remote_files))
         for source, destination in files:
-            self._put_file(source, destination, mode, newline, path_separator)
+            self._put_file(source, destination, mode, newline, path_separator, scp_preserve_times)
         return files
 
     def _get_put_file_sources(self, source):
@@ -1192,7 +1202,7 @@ class AbstractSFTPClient(object):
                     mode = int(mode, 8)
                 self._client.mkdir(current_dir, mode)
 
-    def _put_file(self, source, destination, mode, newline, path_separator):
+    def _put_file(self, source, destination, mode, newline, path_separator, scp_preserve_times=False):
         remote_file = self._create_remote_file(destination, mode)
         with open(source, 'rb') as local_file:
             position = 0
