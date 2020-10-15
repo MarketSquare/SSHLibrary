@@ -5,6 +5,7 @@ Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
 Library         OperatingSystem  WITH NAME  OS
 Library         String
+Library         DateTime
 
 *** Test Cases ***
 Put File To Absolute Destination
@@ -128,17 +129,25 @@ Put File And Check For Proper Permissions
 Put File With Scp (all) And Preserve Time
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
+    ${current_time} =  Get Current Date  result_format=epoch
     Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=ALL  scp_preserve_times=True
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
-    ${alo} =  Execute Command  stat ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    ${last_access_time} =  Execute Command  stat -c %X ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    ${last_modify_time} =  Execute Command  stat -c %X ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Should Be True  ${current_time} > ${last_access_time}
+    Should Be True  ${current_time} > ${last_modify_time}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With SCP (transfer) And Preserve Time
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
+    ${current_time} =  Get Current Date  result_format=epoch
     Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=TRANSFER  scp_preserve_times=True
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
-    ${alo} =  Execute Command  stat ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    ${last_access_time} =  Execute Command  stat -c %X ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    ${last_modify_time} =  Execute Command  stat -c %X ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Should Be True  ${current_time} > ${last_access_time}
+    Should Be True  ${current_time} > ${last_modify_time}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 *** Keywords ***

@@ -384,6 +384,14 @@ class SSHLibrary(object):
 
      SCP transfer was introduced in SSHLibrary 3.3.0.
 
+    == Preserving original times ==
+    SCP allows some configuration when transferring files and directories. One of this configuration is whether to
+    preserve the original modify time and access time of transferred files and directories. This is done using the
+    ``scp_preserve_times`` argument. This argument works only when ``scp`` argument is set to ``TRANSFER`` or ``ALL``.
+    Also, when running with Jython ``scp_preserve_times`` won't work due to current current Trilead implementation.
+
+    ``scp_preserve_times`` was introduced in SSHLibrary 3.6.0.
+
     = Aliases =
     SSHLibrary allows the use of an alias when opening a new connection using the parameter ``alias``.
 
