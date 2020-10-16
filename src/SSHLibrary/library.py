@@ -388,7 +388,9 @@ class SSHLibrary(object):
     SCP allows some configuration when transferring files and directories. One of this configuration is whether to
     preserve the original modify time and access time of transferred files and directories. This is done using the
     ``scp_preserve_times`` argument. This argument works only when ``scp`` argument is set to ``TRANSFER`` or ``ALL``.
-    Also, when running with Jython ``scp_preserve_times`` won't work due to current current Trilead implementation.
+    When moving directory with ``scp`` set to ``TRANSFER`` and ``scp_preserve_times`` is enabled only the files inside
+    the director will keep their original timestamps. Also, when running with Jython ``scp_preserve_times`` won't work
+    due to current current Trilead implementation.
 
     ``scp_preserve_times`` was introduced in SSHLibrary 3.6.0.
 

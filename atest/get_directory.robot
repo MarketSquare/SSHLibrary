@@ -4,6 +4,7 @@ Resource        resources/sftp.robot
 Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
 Library         OperatingSystem  WITH NAME  OS
+Library         DateTime
 
 *** Test Cases ***
 Get Directory To Existing Local Path
@@ -93,19 +94,27 @@ Get Directory containing a symlink
 
 Get Directory With SCP (transfer) And Preserve Time
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=TRANSFER  scp_preserve_times=True
     Sleep  60s
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=TRANSFER  scp_preserve_times=True
     Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
-    ${alo} =  Run  stat ${TEMPDIR}${/}robot-sshlibrary-test-tmpdir${/}robot-testdir
+    ${last_access_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}robot-testdir/test_file.txt
+    ${last_modify_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}robot-testdir/test_file.txt
+    Should Be True  ${current_time} > ${last_access_time}
+    Should Be True  ${current_time} > ${last_modify_time}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory With SCP (all) And Preserve Time
     [Tags]  pybot
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=ALL  scp_preserve_times=True
     Sleep  60s
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=ALL  scp_preserve_times=True
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
-    ${alo} =  Run  stat ${/}robot-testdir
+    ${last_access_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}robot-testdir
+    ${last_modify_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}robot-testdir
+    Should Be True  ${current_time} > ${last_access_time}
+    Should Be True  ${current_time} > ${last_modify_time}
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 *** Keywords ***
