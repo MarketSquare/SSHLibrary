@@ -117,6 +117,13 @@ Reuse Closed Connection Alias
 Connection To Host Read From SSH Config File
    [Tags]  pybot
    Open Connection  ${TEST_HOSTNAME}
+   Login  ${USERNAME}  ${PASSWORD}  read_config_host=True
+
+Connection To Host Ignoring SSH Config File
+   [Tags]  pybot
+   Open Connection  ${TEST_HOSTNAME}
+   Run Keyword And Expect Error  *Err*  Login  ${USERNAME}  ${PASSWORD}  read_config_host=False
+   Run Keyword And Expect Error  *Err*  Login With Public Key  ${KEY USERNAME}  ${KEY}  read_config_host=False
 
 Write In Teardown Should Not Hang If Auth Failed
   Open Connection  ${HOST}

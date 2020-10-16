@@ -39,7 +39,7 @@ jobs:
       env:
         - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=2.7.2
-    - python: "3.7"
+    - python: "3.7.9"
       env:
         - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=2.6.0
