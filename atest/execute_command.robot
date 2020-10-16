@@ -82,17 +82,14 @@ Execute Command With Huge Output
    [Teardown]  Execute Command     rm file.txt
 
 Execute Sudo Command With Correct Password
-    [Tags]     linux
     ${stdout} =  Execute Command  -k pwd   sudo=True  sudo_password=test
-    Should Contain  ${stdout}   ${REMOTE HOME TEST}
+    Should Be Equal  ${stdout}   ${REMOTE HOME TEST}
 
 Execute Sudo Command With Incorrect Password
-    [Tags]     linux
     ${stdout} =  Execute Command  -k pwd   sudo=True  sudo_password=test123
     Should Not Contain  ${stdout}  ${REMOTE HOME TEST}
 
 Execute Time Consuming Sudo Command
-    [Tags]     linux
     ${stdout} =  Execute Command  -k sleep 5; echo cat   sudo=True  sudo_password=test
     Should Contain  ${stdout}  cat
 
