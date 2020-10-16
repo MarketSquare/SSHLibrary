@@ -92,7 +92,7 @@ Get File That Is A Symlink Directory
 
 Get File With SCP (transfer) And Preserve Time
     [Setup]  Create Tmp Dir And Move File
-    Sleep  60s
+    Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
     SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=TRANSFER  scp_preserve_times=True
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
@@ -104,7 +104,7 @@ Get File With SCP (transfer) And Preserve Time
 
 Get File With SCP (all) And Preserve Time
     [Setup]  Create Tmp Dir And Move File
-    Sleep  60s
+    Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
     SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=ALL  scp_preserve_times=True
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt

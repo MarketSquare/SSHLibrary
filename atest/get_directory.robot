@@ -94,7 +94,7 @@ Get Directory containing a symlink
 
 Get Directory With SCP (transfer) And Preserve Time
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Sleep  60s
+    Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=TRANSFER  scp_preserve_times=True
     Directory Should Exist With Content  ${LOCAL TMPDIR}  ${/}robot-testdir
@@ -107,7 +107,7 @@ Get Directory With SCP (transfer) And Preserve Time
 Get Directory With SCP (all) And Preserve Time
     [Tags]  pybot
     [Setup]  Create Directory  ${LOCAL TMPDIR}
-    Sleep  60s
+    Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=ALL  scp_preserve_times=True
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
