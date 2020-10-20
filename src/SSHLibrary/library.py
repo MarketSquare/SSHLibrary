@@ -918,7 +918,7 @@ class SSHLibrary(object):
         return configs
 
     def login(self, username, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds',
-              proxy_cmd=None, read_config_host=False):
+              proxy_cmd=None, read_config_host=False, jumphost_index_or_alias=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -930,6 +930,15 @@ class SSHLibrary(object):
 
         ``proxy_cmd`` is used to connect through a SSH proxy.
 
+        ``jumphost_index_or_alias`` is used to connect through an intermediary
+        SSH connection that has been assigned an Index or Alias. Note that
+        this requires a Connection that has been logged in prior to use.
+
+        *Note:* ``proxy_cmd`` and ``jumphost_index_or_alias`` are mutually
+        exclusive SSH features. If you wish to use them both, create the
+        jump-host's Connection using the proxy_cmd first, then use jump-host
+        for secondary Connection.
+
         ``allow_agent`` enables the connection to the SSH agent.
 
         ``look_for_keys`` enables the searching for discoverable private key files in ``~/.ssh/``.
@@ -938,7 +947,7 @@ class SSHLibrary(object):
 
         ``read_config_host`` is new in SSHLibrary 3.5.1.
 
-        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd`` and ``read_config_host``
+        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config_host``
         do not work when using Jython.
 
         Example that logs in and returns the output:
@@ -964,8 +973,13 @@ class SSHLibrary(object):
         | `Open Connection` | linux.server.com |
         | `Login` | johndoe | allow_agent=True |
         """
+        jumphost_connection_conf = self.get_connection(index_or_alias=jumphost_index_or_alias) \
+            if jumphost_index_or_alias else None
+        jumphost_connection = self._connections.connections[jumphost_connection_conf.index-1] \
+            if jumphost_connection_conf and jumphost_connection_conf.index else None
+
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
-                           is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config_host))
+                           is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config_host), jumphost_connection)
 
     def login_with_public_key(self, username, keyfile, password='',
                               allow_agent=False, look_for_keys=False,

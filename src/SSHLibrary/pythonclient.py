@@ -88,19 +88,32 @@ class PythonSSHClient(AbstractSSHClient):
             return conf.lookup(host)['hostname'] if not None else host
         return host
 
+    def _get_jumphost_tunnel(self, jumphost_connection):
+        dest_addr = (self.config.host, self.config.port)
+        jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
+        jumphost_transport = jumphost_connection.client.get_transport()
+        if not jumphost_transport:
+            raise RuntimeError("Could not get transport for {}:{}. Have you logged in?".format(*jump_addr))
+        return jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
+
     def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
-               read_config_host=False):
+               read_config_host=False, jumphost_connection=None):
         if read_config_host:
             self.config.host = self._read_ssh_config_host(self.config.host)
+        sock_tunnel = None
 
-        if proxy_cmd:
-            proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
+        if proxy_cmd and jumphost_connection:
+            raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
+        elif proxy_cmd:
+            sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
+        elif jumphost_connection:
+            sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
 
         try:
             self.client.connect(self.config.host, self.config.port, username,
                                 password, look_for_keys=look_for_keys,
                                 allow_agent=allow_agent,
-                                timeout=float(self.config.timeout), sock=proxy_cmd)
+                                timeout=float(self.config.timeout), sock=sock_tunnel)
         except paramiko.AuthenticationException:
             try:
                 transport = self.client.get_transport()
@@ -123,12 +136,7 @@ class PythonSSHClient(AbstractSSHClient):
         elif proxy_cmd:
             sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
         elif jumphost_connection:
-            dest_addr = (self.config.host, self.config.port)
-            jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
-            jumphost_transport = jumphost_connection.client.get_transport()
-            if not jumphost_transport:
-                raise RuntimeError("Could not get transport for {}:{}. Have you logged in?".format(*jump_addr))
-            sock_tunnel = jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
+            sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
 
         try:
             self.client.connect(self.config.host, self.config.port, username,
