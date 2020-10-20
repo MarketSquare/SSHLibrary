@@ -60,8 +60,10 @@ def _custom_log(self, level, msg, *args):
         msg = escape(msg)
     return self._orig_log(level, msg, *args)
 
+
 paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
 paramiko.sftp_client.SFTPClient._log = _custom_log
+
 
 class PythonSSHClient(AbstractSSHClient):
     tunnel = None
@@ -127,6 +129,7 @@ class PythonSSHClient(AbstractSSHClient):
                 sock_tunnel = jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
             elif proxy_cmd and jumphost_connection:
                 raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
+
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,
@@ -334,7 +337,7 @@ class RemoteCommand(AbstractCommand):
         while self._shell_open():
             self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout,
                                           output_during_execution, output_if_timeout)
-            time.sleep(0.01) # lets not be so busy
+            time.sleep(0.01)  # lets not be so busy
         stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
         stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
         return stderr, stdout
@@ -369,9 +372,9 @@ class RemoteCommand(AbstractCommand):
 
     def _shell_open(self):
         return not (self._shell.closed or
-                self._shell.eof_received or
-                self._shell.eof_sent or
-                not self._shell.active)
+                    self._shell.eof_received or
+                    self._shell.eof_sent or
+                    not self._shell.active)
 
     def _execute(self):
         self._shell.exec_command(self._command)
