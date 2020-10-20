@@ -116,18 +116,19 @@ class PythonSSHClient(AbstractSSHClient):
                                jumphost_connection=None, read_config_host=False):
         if read_config_host:
             self.config.host = self._read_ssh_config_host(self.config.host)
-        sock_tunnel=None
-        if proxy_cmd and not jumphost_connection:
+        sock_tunnel = None
+
+        if proxy_cmd and jumphost_connection:
+            raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
+        elif proxy_cmd:
             sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
-        elif jumphost_connection and not proxy_cmd:
+        elif jumphost_connection:
             dest_addr = (self.config.host, self.config.port)
             jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
             jumphost_transport = jumphost_connection.client.get_transport()
             if not jumphost_transport:
                 raise RuntimeError("Could not get transport for {}:{}. Have you logged in?".format(*jump_addr))
             sock_tunnel = jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
-        elif proxy_cmd and jumphost_connection:
-            raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
 
         try:
             self.client.connect(self.config.host, self.config.port, username,
