@@ -90,26 +90,25 @@ class PythonSSHClient(AbstractSSHClient):
                read_config_host=False):
         if read_config_host:
             self.config.host = self._read_ssh_config_host(self.config.host)
+
+        if proxy_cmd:
+            proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
+
         try:
-            if proxy_cmd:
-                proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
-            try:
-                self.client.connect(self.config.host, self.config.port, username,
-                                    password, look_for_keys=look_for_keys,
-                                    allow_agent=allow_agent,
-                                    timeout=float(self.config.timeout), sock=proxy_cmd)
-            except paramiko.AuthenticationException:
-                try:
-                    transport = self.client.get_transport()
-                    try:
-                        transport.auth_none(username)
-                    except:
-                        pass
-                    transport.auth_password(username,password)
-                except:
-                    raise SSHClientException
+            self.client.connect(self.config.host, self.config.port, username,
+                                password, look_for_keys=look_for_keys,
+                                allow_agent=allow_agent,
+                                timeout=float(self.config.timeout), sock=proxy_cmd)
         except paramiko.AuthenticationException:
-            raise SSHClientException
+            try:
+                transport = self.client.get_transport()
+                try:
+                    transport.auth_none(username)
+                except:
+                    pass
+                transport.auth_password(username,password)
+            except:
+                raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
                                jumphost_connection=None, read_config_host=False):
