@@ -177,7 +177,7 @@ class SFTPClient(AbstractSFTPClient):
     def _close_remote_file(self, remote_file):
         self._client.closeFile(remote_file)
 
-    def _get_file(self, remote_path, local_path):
+    def _get_file(self, remote_path, local_path, scp_preserve_times):
         local_file = FileOutputStream(local_path)
         remote_file_size = self._client.stat(remote_path).size
         remote_file = self._client.openFileRO(remote_path)
@@ -230,11 +230,11 @@ class SCPTransferClient(SFTPClient):
         self._scp_client = JavaSCPClient(ssh_client)
         super(SCPTransferClient, self).__init__(ssh_client, encoding)
 
-    def _put_file(self, source, destination, mode, newline, path_separator):
+    def _put_file(self, source, destination, mode, newline, path_separator, scp_preserve_times):
         self._create_remote_file(destination, mode)
         self._scp_client.put(source, destination.rsplit(path_separator, 1)[0])
 
-    def _get_file(self, remote_path, local_path):
+    def _get_file(self, remote_path, local_path, scp_preserve_times):
         self._scp_client.get(remote_path, local_path.rsplit(os.sep, 1)[0])
 
 

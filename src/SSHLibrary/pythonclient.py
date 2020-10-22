@@ -270,7 +270,7 @@ class SFTPClient(AbstractSFTPClient):
     def _close_remote_file(self, remote_file):
         remote_file.close()
 
-    def _get_file(self, remote_path, local_path):
+    def _get_file(self, remote_path, local_path, scp_preserve_times):
         remote_path = remote_path.encode(self._encoding)
         self._client.get(remote_path, local_path)
 
@@ -292,17 +292,17 @@ class SCPClient(object):
     def __init__(self, ssh_client):
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
 
-    def put_file(self, source, destination, *args):
-        self._scp_client.put(source, destination)
+    def put_file(self, source, destination, scp_preserve_times, *args):
+        self._scp_client.put(source, destination, preserve_times=is_truthy(scp_preserve_times))
 
-    def get_file(self, source, destination, *args):
-        self._scp_client.get(source, destination)
+    def get_file(self, source, destination, scp_preserve_times, *args):
+        self._scp_client.get(source, destination, preserve_times=is_truthy(scp_preserve_times))
 
-    def put_directory(self, source, destination, *args):
-        self._scp_client.put(source, destination, True)
+    def put_directory(self, source, destination, scp_preserve_times, *args):
+        self._scp_client.put(source, destination, True, preserve_times=is_truthy(scp_preserve_times))
 
-    def get_directory(self, source, destination, *args):
-        self._scp_client.get(source, destination, True)
+    def get_directory(self, source, destination, scp_preserve_times, *args):
+        self._scp_client.get(source, destination, True, preserve_times=is_truthy(scp_preserve_times))
 
 
 class SCPTransferClient(SFTPClient):
@@ -311,12 +311,12 @@ class SCPTransferClient(SFTPClient):
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
         super(SCPTransferClient, self).__init__(ssh_client, encoding)
 
-    def _put_file(self, source, destination, mode, newline, path_separator):
+    def _put_file(self, source, destination, mode, newline, path_separator, scp_preserve_times=False):
         self._create_remote_file(destination, mode)
-        self._scp_client.put(source, destination)
+        self._scp_client.put(source, destination, preserve_times=is_truthy(scp_preserve_times))
 
-    def _get_file(self, remote_path, local_path):
-        self._scp_client.get(remote_path, local_path)
+    def _get_file(self, remote_path, local_path, scp_preserve_times=False):
+        self._scp_client.get(remote_path, local_path, preserve_times=is_truthy(scp_preserve_times))
 
 
 class RemoteCommand(AbstractCommand):

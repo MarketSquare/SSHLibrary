@@ -5,6 +5,7 @@ Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
 Library         OperatingSystem  WITH NAME  OS
 Library         Collections
+Library         DateTime
 
 *** Test Cases ***
 Put Directory To Existing Remote Path
@@ -80,6 +81,27 @@ Put Directory And Check For Proper Permissions
 	Check File Permissions    0755    to_put${/}ExampleText3.txt
 	Check Folder Permissions    0755
 	[Teardown]  Execute Command  rm -rf ${CURDIR}${/}testdata${/}to_put
+
+Put Directory With SCP (transfer) And Preserve Time
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=TRANSFER  scp_preserve_times=True
+    Remote Directory Should Exist With Subdirectories  ./textfiles
+    ${last_access_time} =  Execute Command  stat -c %X ./textfiles/test_file.txt
+    ${last_modify_time} =  Execute Command  stat -c %X ./textfiles/test_file.txt
+    Should Be True  ${current_time} > ${last_access_time}
+    Should Be True  ${current_time} > ${last_modify_time}
+    [Teardown]  Execute Command  rm -rf ./textfiles
+
+Put Directory With SCP (all) And Preserve Time
+    [Tags]  pybot
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=ALL  scp_preserve_times=True
+    ${last_access_time} =  Execute Command  stat -c %X ./textfiles
+    ${last_modify_time} =  Execute Command  stat -c %X ./textfiles
+    Should Be True  ${current_time} > ${last_access_time}
+    Should Be True  ${current_time} > ${last_modify_time}
+    Remote Directory Should Exist With Subdirectories  ./textfiles
+    [Teardown]  Execute Command  rm -rf ./textfiles
 
 *** Keywords ***
 Remove Local Empty Directory And Remote Files
