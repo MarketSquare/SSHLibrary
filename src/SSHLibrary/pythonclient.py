@@ -93,21 +93,33 @@ class PythonSSHClient(AbstractSSHClient):
         try:
             if proxy_cmd:
                 proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
-            try:
-                self.client.connect(self.config.host, self.config.port, username,
-                                    password, look_for_keys=look_for_keys,
-                                    allow_agent=allow_agent,
-                                    timeout=float(self.config.timeout), sock=proxy_cmd)
-            except paramiko.AuthenticationException:
+            if password == None:
+                # If no password is given, try login without authentication
                 try:
-                    transport = self.client.get_transport()
+                    self.client.connect(self.config.host, self.config.port, username,
+                                        password, look_for_keys=look_for_keys,
+                                        allow_agent=allow_agent,
+                                        timeout=float(self.config.timeout), sock=proxy_cmd)
+                except paramiko.SSHException:
+                    pass
+                transport = self.client.get_transport()
+                transport.auth_none(username)
+            else:
+                try:
+                    self.client.connect(self.config.host, self.config.port, username,
+                                        password, look_for_keys=look_for_keys,
+                                        allow_agent=allow_agent,
+                                        timeout=float(self.config.timeout), sock=proxy_cmd)
+                except paramiko.AuthenticationException:
                     try:
-                        transport.auth_none(username)
+                        transport = self.client.get_transport()
+                        try:
+                            transport.auth_none(username)
+                        except:
+                            pass
+                        transport.auth_password(username,password)
                     except:
-                        pass
-                    transport.auth_password(username,password)
-                except:
-                    raise SSHClientException
+                        raise SSHClientException
         except paramiko.AuthenticationException:
             raise SSHClientException
 
