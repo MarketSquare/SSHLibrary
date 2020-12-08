@@ -60,8 +60,10 @@ def _custom_log(self, level, msg, *args):
         msg = escape(msg)
     return self._orig_log(level, msg, *args)
 
+
 paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
 paramiko.sftp_client.SFTPClient._log = _custom_log
+
 
 class PythonSSHClient(AbstractSSHClient):
     tunnel = None
@@ -86,20 +88,35 @@ class PythonSSHClient(AbstractSSHClient):
             return conf.lookup(host)['hostname'] if not None else host
         return host
 
+    def _get_jumphost_tunnel(self, jumphost_connection):
+        dest_addr = (self.config.host, self.config.port)
+        jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
+        jumphost_transport = jumphost_connection.client.get_transport()
+        if not jumphost_transport:
+            raise RuntimeError("Could not get transport for {}:{}. Have you logged in?".format(*jump_addr))
+        return jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
+
     def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
-               read_config_host=False):
+               read_config_host=False, jumphost_connection=None):
         if read_config_host:
             self.config.host = self._read_ssh_config_host(self.config.host)
+        sock_tunnel = None
+
+        if proxy_cmd and jumphost_connection:
+            raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
+        elif proxy_cmd:
+            sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
+        elif jumphost_connection:
+            sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
+
         try:
-            if proxy_cmd:
-                proxy_cmd = paramiko.ProxyCommand(proxy_cmd)
             if password == None:
                 # If no password is given, try login without authentication
                 try:
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=proxy_cmd)
+                                        timeout=float(self.config.timeout), sock=sock_tunnel)
                 except paramiko.SSHException:
                     pass
                 transport = self.client.get_transport()
@@ -109,7 +126,7 @@ class PythonSSHClient(AbstractSSHClient):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=proxy_cmd)
+                                        timeout=float(self.config.timeout), sock=sock_tunnel)
                 except paramiko.AuthenticationException:
                     try:
                         transport = self.client.get_transport()
@@ -117,7 +134,7 @@ class PythonSSHClient(AbstractSSHClient):
                             transport.auth_none(username)
                         except:
                             pass
-                        transport.auth_password(username,password)
+                        transport.auth_password(username, password)
                     except:
                         raise SSHClientException
         except paramiko.AuthenticationException:
@@ -127,19 +144,16 @@ class PythonSSHClient(AbstractSSHClient):
                                jumphost_connection=None, read_config_host=False):
         if read_config_host:
             self.config.host = self._read_ssh_config_host(self.config.host)
+        sock_tunnel = None
+
+        if proxy_cmd and jumphost_connection:
+            raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
+        elif proxy_cmd:
+            sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
+        elif jumphost_connection:
+            sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
+
         try:
-            sock_tunnel=None
-            if proxy_cmd and not jumphost_connection:
-                sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
-            elif jumphost_connection and not proxy_cmd:
-                dest_addr = (self.config.host, self.config.port)
-                jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
-                jumphost_transport = jumphost_connection.client.get_transport()
-                if not jumphost_transport:
-                    raise RuntimeError("Could not get transport for {}:{}. Have you logged in?".format(*jump_addr))
-                sock_tunnel = jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
-            elif proxy_cmd and jumphost_connection:
-                raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
             self.client.connect(self.config.host, self.config.port, username,
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,
@@ -347,7 +361,7 @@ class RemoteCommand(AbstractCommand):
         while self._shell_open():
             self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout,
                                           output_during_execution, output_if_timeout)
-            time.sleep(0.01) # lets not be so busy
+            time.sleep(0.01)  # lets not be so busy
         stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
         stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
         return stderr, stdout
@@ -382,9 +396,9 @@ class RemoteCommand(AbstractCommand):
 
     def _shell_open(self):
         return not (self._shell.closed or
-                self._shell.eof_received or
-                self._shell.eof_sent or
-                not self._shell.active)
+                    self._shell.eof_received or
+                    self._shell.eof_sent or
+                    not self._shell.active)
 
     def _execute(self):
         self._shell.exec_command(self._command)
