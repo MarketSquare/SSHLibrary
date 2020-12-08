@@ -160,7 +160,7 @@ class AbstractSSHClient(object):
             pass
 
     def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config_host=False):
+              read_config_host=False, jumphost_connection=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -187,6 +187,10 @@ class AbstractSSHClient(object):
 
         :param read_config_host: reads or ignores host entries from ``~/.ssh/config`` file.
 
+        :param PythonSSHClient jumphost_connection : An instance of
+            PythonSSHClient that will be used as an intermediary jump-host
+            for the SSH connection being attempted.
+
         :raises SSHClientException: If logging in failed.
 
         :returns: The read output from the server.
@@ -194,7 +198,7 @@ class AbstractSSHClient(object):
         username = self._encode(username)
         password = self._encode(password)
         try:
-            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host)
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host, jumphost_connection)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Authentication failed for user '%s'."
@@ -211,7 +215,7 @@ class AbstractSSHClient(object):
     def _decode(self, bytes):
         return bytes.decode(self.config.encoding)
 
-    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host):
+    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host, jumphost_connection):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
