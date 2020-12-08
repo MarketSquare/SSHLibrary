@@ -196,7 +196,8 @@ class AbstractSSHClient(object):
         :returns: The read output from the server.
         """
         username = self._encode(username)
-        password = self._encode(password)
+        if password != None:
+            password = self._encode(password)
         try:
             self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host, jumphost_connection)
         except SSHClientException:
