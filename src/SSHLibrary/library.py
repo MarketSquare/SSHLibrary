@@ -1580,7 +1580,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories.
+        of transferred files and directories. It is ignored when running with Jython.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1638,7 +1638,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories.
+        of transferred files and directories. It is ignored when running with Jython.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1695,7 +1695,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories.
+        of transferred files and directories. It is ignored when running with Jython.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
@@ -1757,7 +1757,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories.
+        of transferred files and directories. It is ignored when running with Jython.
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
@@ -1765,7 +1765,7 @@ class SSHLibrary(object):
         | `Put Directory` | /var/logs |
         | `Put Directory` | /var/logs | recursive=True     |
         | `Put Directory` | /var/logs | /home/groups/robot | mode=0770 |
-        | `Put Directory` | /var/logs | newline=CRLF       |
+        | `Put Directory` | /var/logs | newline=CRLF       |Get File With SCP (transfer) And Preserve Time
 
         The remote ``destination`` is created as following:
 

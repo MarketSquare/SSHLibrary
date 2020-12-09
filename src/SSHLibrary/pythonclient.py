@@ -110,7 +110,7 @@ class PythonSSHClient(AbstractSSHClient):
             sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
 
         try:
-            if password == None:
+            if not password and not allow_agent:
                 # If no password is given, try login without authentication
                 try:
                     self.client.connect(self.config.host, self.config.port, username,

@@ -106,4 +106,4 @@ Execute Command In Certain Amount Of Time
     Execute Command  for i in {1..3}; do echo "Command no. $i"; sleep 1; done  timeout=5s
     ${end_time}=  Get Current Date  result_format=%s  exclude_millis=True
     ${execution_time}=  Subtract Time From Time  ${end_time}  ${start_time}
-    Should Be Equal As Numbers   3  ${execution_time}
+    Should Be True  ${execution_time} < 5

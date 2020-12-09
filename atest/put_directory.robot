@@ -83,6 +83,7 @@ Put Directory And Check For Proper Permissions
 	[Teardown]  Execute Command  rm -rf ${CURDIR}${/}testdata${/}to_put
 
 Put Directory With SCP (transfer) And Preserve Time
+    [Tags]  pybot
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
     Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=TRANSFER  scp_preserve_times=True
     Remote Directory Should Exist With Subdirectories  ./textfiles

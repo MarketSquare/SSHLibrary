@@ -93,6 +93,7 @@ Get Directory containing a symlink
    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory With SCP (transfer) And Preserve Time
+    [Tags]  pybot
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True

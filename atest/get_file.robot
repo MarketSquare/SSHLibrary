@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags      pybot   jybot
+Default Tags    pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
@@ -91,6 +91,7 @@ Get File That Is A Symlink Directory
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File With SCP (transfer) And Preserve Time
+    [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
@@ -100,9 +101,10 @@ Get File With SCP (transfer) And Preserve Time
     ${last_modify_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}test_file.txt
     Should Be True  ${current_time} > ${last_access_time}
     Should Be True  ${current_time} > ${last_modify_time}
-#    [Teardown]  Remove Tmp Dir And Remote File
+    [Teardown]  Remove Tmp Dir And Remote File
 
 Get File With SCP (all) And Preserve Time
+    [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
