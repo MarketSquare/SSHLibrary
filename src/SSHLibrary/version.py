@@ -13,4 +13,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-VERSION = '3.5.2.dev1'
+VERSION = '3.6.0rc1'
