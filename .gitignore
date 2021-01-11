@@ -8,6 +8,7 @@ dist
 *.swp
 results
 atest/testdata/keyfiles/id_rsa
+atest/docker/results
 examples/output.xml
 examples/log.html
 examples/report.html
