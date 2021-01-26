@@ -145,8 +145,14 @@ Go to the ``docker-compose.yml`` file and change the branch name so that the cho
 
     command: /bin/bash -c "service ssh start && cd SSHLibrary && git checkout <branch_name> && git pull origin <branch_name> && python3 atest/run.py ."
 
+Save the changes and create a folder ``results`` in the ``docker`` folder, that will be used by
+``docker-compose`` to get from the container the test reports
 
-Save the changes and run the docker-compose file:
+::
+    mkdir results
+
+
+Run the docker-compose file:
 
 ::
 

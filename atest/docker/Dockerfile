@@ -1,7 +1,12 @@
-FROM ubuntu:18.04
-RUN apt-get update -y 
-RUN apt-get install -y python3.6 python3-pip gcc make musl-dev libffi-dev net-tools language-pack-en locales
-RUN python3 -m pip install --upgrade robotframework-sshlibrary robotbackgroundlogger robotstatuschecker
+FROM ubuntu:16.04
+RUN apt-get update -y
+RUN apt-get update -y
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt update
+RUN apt-get install -y python3.7 python3-pip gcc make musl-dev libffi-dev net-tools language-pack-en locales
+RUN python3.7 -m pip install --upgrade pip
+RUN python3.7 -m pip install --upgrade robotframework-sshlibrary robotbackgroundlogger robotstatuschecker
 ARG repository
 RUN apt-get install -y openssh-server sudo git
 RUN useradd test -m -s /bin/bash
@@ -22,7 +27,6 @@ RUN echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config
 RUN echo 'Subsystem subsys echo "Subsystem invoked."' >> /etc/ssh/sshd_config
 RUN sudo mkdir -p ~/.ssh
 RUN echo 'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
-RUN sudo service ssh start;eval "$(ssh-agent -s)";ssh-add /home/testkey/.ssh/id_rsa
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 ENV LANG en_US.UTF-8  
 ENV LANGUAGE en_US:en  

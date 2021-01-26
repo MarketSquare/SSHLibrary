@@ -6,7 +6,7 @@ services:
         - type: bind
           source: ./results
           target: /SSHLibrary/atest/results  
-    command: /bin/bash -c "service ssh start && cd SSHLibrary && git checkout master && git pull origin master && python3 atest/run.py ."
+    command: /bin/bash -c "service ssh start && eval $$(ssh-agent -s) && ssh-add /home/testkey/.ssh/id_rsa && cd SSHLibrary && git checkout master && git pull origin master && python3.7 atest/run.py ."
     
   
     
