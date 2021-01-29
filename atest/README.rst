@@ -139,16 +139,18 @@ First go into the ``docker`` folder and build a SSHLibrary image that will be ba
     sudo docker build -t sshlibrary --build-arg repository=<link_to_desired_sshlibrary_repository> .
 
 
-Go to the ``docker-compose.yml`` file and change the branch name so that the chosen git branch will be selected
+Go to the ``docker-compose.yml`` file and change the branch name so that the chosen git branch will be selected:
 
 ::
 
-    command: /bin/bash -c "service ssh start && cd SSHLibrary && git checkout <branch_name> && git pull origin <branch_name> && python3 atest/run.py ."
+    command: /bin/bash -c "service ssh start && && eval $$(ssh-agent -s) && ssh-add /home/testkey/.ssh/id_rsa &&
+    cd SSHLibrary && git checkout <branch_name> && git pull origin <branch_name> && python3 atest/run.py ."
 
 Save the changes and create a folder ``results`` in the ``docker`` folder, that will be used by
-``docker-compose`` to get from the container the test reports
+``docker-compose`` to get from the container the test reports:
 
 ::
+
     mkdir results
 
 
@@ -160,7 +162,13 @@ Run the docker-compose file:
 
 
 After running the latest command some time will be required for the acceptance tests to be executed. The results
-files can be found in the ``/docker/results/python`` folder
+files can be found in the ``/docker/results/python`` folder.
+
+To follow the test execution in real time use the command:
+
+::
+
+    sudo docker logs <container_id> --follow
 
 Setup in Windows
 ================
