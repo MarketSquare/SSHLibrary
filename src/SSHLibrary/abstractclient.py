@@ -159,8 +159,8 @@ class AbstractSSHClient(object):
         except AttributeError:
             pass
 
-    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config_host=False, jumphost_connection=None):
+    def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
+              read_config=False, jumphost_connection=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -185,7 +185,8 @@ class AbstractSSHClient(object):
             the output after logging in. The delay is only effective if
             the prompt is not set.
 
-        :param read_config_host: reads or ignores host entries from ``~/.ssh/config`` file.
+        :param read_config: reads or ignores host entries from ``~/.ssh/config`` file. This parameter will read the hostname,
+        port number, username and proxy command.
 
         :param PythonSSHClient jumphost_connection : An instance of
             PythonSSHClient that will be used as an intermediary jump-host
@@ -199,12 +200,20 @@ class AbstractSSHClient(object):
         if not password and not allow_agent:
             password = self._encode(password)
         try:
-            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host, jumphost_connection)
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config, jumphost_connection)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Authentication failed for user '%s'."
                                      % self._decode(username))
         return self._read_login_output(delay)
+
+    @staticmethod
+    def get_ssh_config_username(host):
+        raise NotImplementedError
+
+    @staticmethod
+    def get_ssh_config_port(host, port):
+        raise NotImplementedError
 
     def _encode(self, text):
         if is_bytes(text):
@@ -216,7 +225,7 @@ class AbstractSSHClient(object):
     def _decode(self, bytes):
         return bytes.decode(self.config.encoding)
 
-    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host, jumphost_connection):
+    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config, jumphost_connection):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -228,7 +237,7 @@ class AbstractSSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config_host=False):
+                              jumphost_connection=None, read_config=False):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -260,19 +269,22 @@ class AbstractSSHClient(object):
             PythonSSHClient that is will be used as an intermediary jump-host
             for the SSH connection being attempted.
 
-        :param read_config_host: reads or ignores host entries from ``~/.ssh/config`` file.
+        :param read_config: reads or ignores entries from ``~/.ssh/config`` file. This parameter will read the hostname,
+        port number, username, identity file and proxy command.
 
         :raises SSHClientException: If logging in failed.
 
         :returns: The read output from the server.
         """
-        username = self._encode(username)
-        self._verify_key_file(keyfile)
+        if username:
+            username = self._encode(username)
+        if keyfile:
+            self._verify_key_file(keyfile)
         try:
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
                                         proxy_cmd, jumphost_connection,
-                                        read_config_host)
+                                        read_config)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Login with public key failed for user "
@@ -290,7 +302,7 @@ class AbstractSSHClient(object):
 
     def _login_with_public_key(self, username, keyfile, password,
                                allow_agent, look_for_keys, proxy_cmd,
-                               jumphost_index_or_alias, read_config_host):
+                               jumphost_index_or_alias, read_config):
         raise NotImplementedError
 
     @staticmethod
