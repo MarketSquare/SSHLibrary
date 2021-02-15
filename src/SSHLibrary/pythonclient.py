@@ -142,30 +142,6 @@ class PythonSSHClient(AbstractSSHClient):
         except KeyError:
             return host
 
-    @staticmethod
-    def get_ssh_config_username(host):
-        ssh_config_file = os.path.expanduser("~/.ssh/config")
-        if os.path.exists(ssh_config_file):
-            conf = paramiko.SSHConfig()
-            with open(ssh_config_file) as f:
-                conf.parse(f)
-            try:
-                return conf.lookup(host)['user'] if not None else None
-            except KeyError:
-                raise KeyError('User is not defined in config file')
-
-    @staticmethod
-    def get_ssh_config_port(host, port):
-        ssh_config_file = os.path.expanduser("~/.ssh/config")
-        if os.path.exists(ssh_config_file):
-            conf = paramiko.SSHConfig()
-            with open(ssh_config_file) as f:
-                conf.parse(f)
-            try:
-                return conf.lookup(host)['port'] if not None else port
-            except KeyError:
-                return port
-
     def _get_jumphost_tunnel(self, jumphost_connection):
         dest_addr = (self.config.host, self.config.port)
         jump_addr = (jumphost_connection.config.host, jumphost_connection.config.port)
@@ -229,7 +205,16 @@ class PythonSSHClient(AbstractSSHClient):
                 self._read_public_key_ssh_config(hostname, username, self.config.port, proxy_cmd, key_file)
 
         sock_tunnel = None
-
+        if key_file is not None:
+            if not os.path.exists(key_file):
+                raise SSHClientException("Given key file '%s' does not exist." %
+                                         key_file)
+            try:
+                open(key_file).close()
+            except IOError:
+                raise SSHClientException("Could not read key file '%s'." % key_file)
+        else:
+            raise RuntimeError("Keyfile must be specified as keyword argument or in config file.")
         if proxy_cmd and jumphost_connection:
             raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
         elif proxy_cmd:
