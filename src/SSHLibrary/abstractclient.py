@@ -207,14 +207,6 @@ class AbstractSSHClient(object):
                                      % self._decode(username))
         return self._read_login_output(delay)
 
-    @staticmethod
-    def get_ssh_config_username(host):
-        raise NotImplementedError
-
-    @staticmethod
-    def get_ssh_config_port(host, port):
-        raise NotImplementedError
-
     def _encode(self, text):
         if is_bytes(text):
             return text
