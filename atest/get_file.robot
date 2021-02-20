@@ -45,6 +45,12 @@ Get File From Path Not Under Remote Home With SCP (all)
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     [Teardown]  Remove Tmp Dir And Remote File
 
+Get File With SCP And Pattern Matching
+    [Setup]  Create Tmp Dir And Move File
+    SSH.Get File  ${REMOTE TEST ROOT}/*est*.txt  ${LOCAL TMPDIR}${/}  scp=ALL
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
+    OS.File Should Exist  ${LOCAL TMPDIR}${/}Test_newlines.txt
+
 Get File With Multiple Sources To Single File Fails
     Run Keyword And Expect Error
     ...  Cannot copy multiple source files to one destination file.

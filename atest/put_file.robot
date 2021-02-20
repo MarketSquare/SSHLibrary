@@ -99,6 +99,13 @@ Put File With Pattern In Source File Name
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
+Put File With SCP And Pattern Matching
+    SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    Execute Command  mkdir ${REMOTE TEST ROOT NAME}
+    Put File  ${LOCAL TEXTFILES}${/}tes*.txt  ${REMOTE TEST ROOT}/  scp=ALL
+    SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
+    [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
+
 Put File With Pattern In Source Directory Name
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Put File  ${LOCAL TEST DATA}${/}text*es${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/
