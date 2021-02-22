@@ -25,7 +25,7 @@ import ntpath
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from .logger import logger
-from .utils import is_bytes, is_string, unicode
+from .utils import is_bytes, is_string, unicode, is_list_like
 
 
 class SSHClientException(RuntimeError):
@@ -633,7 +633,14 @@ class AbstractSSHClient(object):
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
         client = self._create_client(scp)
+        if scp == 'ALL':
+            sources = self._get_files_for_scp_all(source)
+            return client.get_file(sources, destination, scp_preserve_times, self.config.path_separator)
         return client.get_file(source, destination, scp_preserve_times, self.config.path_separator)
+
+    def _get_files_for_scp_all(self, source):
+        sources = self.execute_command('dir %s' % source)
+        return sources[0].split('\n')
 
     def get_directory(self, source, destination='.', recursive=False,
                       scp='OFF', scp_preserve_times=False):

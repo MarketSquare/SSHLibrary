@@ -205,7 +205,7 @@ class PythonSSHClient(AbstractSSHClient):
         return SCPTransferClient(self.client, self.config.encoding)
 
     def _create_scp_all_client(self):
-        return SCPClient(self.client, self.config.encoding)
+        return SCPClient(self.client)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -315,18 +315,15 @@ class SFTPClient(AbstractSFTPClient):
 
 
 class SCPClient(object):
-    def __init__(self, ssh_client, encoding):
+    def __init__(self, ssh_client):
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
-        self.encoding = encoding
-        self.client = ssh_client
 
     def put_file(self, source, destination, scp_preserve_times, *args):
         sources = self._get_put_file_sources(source)
         self._scp_client.put(sources, destination, preserve_times=is_truthy(scp_preserve_times))
 
     def get_file(self, source, destination, scp_preserve_times, *args):
-        sources = self._get_get_file_sources(source)
-        self._scp_client.get(sources, destination, preserve_times=is_truthy(scp_preserve_times))
+        self._scp_client.get(source, destination, preserve_times=is_truthy(scp_preserve_times))
 
     def put_directory(self, source, destination, scp_preserve_times, *args):
         self._scp_client.put(source, destination, True, preserve_times=is_truthy(scp_preserve_times))
@@ -344,20 +341,6 @@ class SCPClient(object):
             msg = "There are no source files matching '%s'." % source
             raise SSHClientException(msg)
         return sources
-
-    def _get_get_file_sources(self, source, path_separator='/'):
-        sftp_client = SFTPClient(self.client, self.encoding)
-        if path_separator in source:
-            path, pattern = source.rsplit(path_separator, 1)
-        else:
-            path, pattern = '', source
-        if not path:
-            path = '.'
-        if not sftp_client.is_file(source):
-            return [filename for filename in
-                    sftp_client.list_files_in_dir(path, pattern, absolute=True)]
-        else:
-            return [source]
 
 
 class SCPTransferClient(SFTPClient):
