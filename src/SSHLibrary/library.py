@@ -946,7 +946,7 @@ class SSHLibrary(object):
         ``read_config`` reads or ignores entries from ``~/.ssh/config`` file. This parameter will read the hostname,
         port number, username and proxy command.
 
-        ``read_config`` is new in SSHLibrary 3.6.0.
+        ``read_config`` is new in SSHLibrary 3.7.0.
 
         *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config_host``
         do not work when using Jython.
@@ -1033,7 +1033,7 @@ class SSHLibrary(object):
         ``read_config`` reads or ignores entries from ``~/.ssh/config`` file. This parameter will read the hostname,
         port number, username, identity file and proxy command.
 
-        ``read_config`` is new in SSHLibrary 3.6.0.
+        ``read_config`` is new in SSHLibrary 3.7.0.
 
         *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config``
         do not work when using Jython.

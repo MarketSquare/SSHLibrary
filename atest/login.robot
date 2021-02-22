@@ -61,4 +61,5 @@ Login With Public Key Using Config File
 
 Login Using Config File Proxy Command
     [Setup]  Open Connection   ${TEST_PROXY_HOSTNAME}  prompt=${PROMPT}
-    Login  password=test  read_config=True
+    ${output}=  Login  password=test  read_config=True
+    Should Contain  ${output}  test@
