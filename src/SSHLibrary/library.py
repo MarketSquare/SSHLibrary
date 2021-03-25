@@ -1450,10 +1450,22 @@ class SSHLibrary(object):
         """
         return self._read_and_log(loglevel, self.current.read, delay)
 
-    def read_until(self, expected, loglevel=None):
+    def read_until(self, expected, handle_decode_error='NONE', loglevel=None):
         """Consumes and returns the server output until ``expected`` is encountered.
 
         Text up until and including the ``expected`` will be returned.
+
+        ``handle_decode_error`` specifies how decoding errors are expected to be handled.
+
+        | SKIP    | # if a char can not be decoded it will be skipped, and the output will be formed by the chars that were able to be decoded. |
+        | REPLACE | # replaces the undecodable char with replacement character. |
+
+        If ``handle_decode_error`` is not specified or is any other value than `SKIP` and `REPLACE`
+        the the old mechanism of handling decoding errors will be in place.
+
+        By default ``handle_decode_error`` is set to the old decoding mechanism.
+
+        ``handle_decode_error`` is new in SSHLibrary 3.7.0.
 
         If the `timeout` expires before the match is found, this keyword fails.
 
@@ -1464,17 +1476,17 @@ class SSHLibrary(object):
         | `Open Connection` | my.server.com |
         | `Login`           | johndoe       | ${PASSWORD}                  |
         | `Write`           | sudo su -     |                              |
-        | ${output}=        | `Read Until`  | :                            |
+        | ${output}=        | `Read Until`  | :                            | handle_decode_error=REPLACE |
         | `Should Contain`  | ${output}     | [sudo] password for johndoe: |
         | `Write`           | ${PASSWORD}   |                              |
-        | ${output}=        | `Read Until`  | @                            |
+        | ${output}=        | `Read Until`  | @                            | handle_decode_error=SKIP    |
         | `Should End With` | ${output}     | root@                        |
 
         See also `Read Until Prompt` and `Read Until Regexp` keywords. For
         more details about reading and writing in general, see the
         `Interactive shells` section.
         """
-        return self._read_and_log(loglevel, self.current.read_until, expected)
+        return self._read_and_log(loglevel, self.current.read_until, expected, handle_decode_error)
 
     def read_until_prompt(self, loglevel=None, strip_prompt=False):
         """Consumes and returns the server output until the prompt is found.

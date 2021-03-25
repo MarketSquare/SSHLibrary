@@ -419,23 +419,31 @@ class AbstractSSHClient(object):
             output += read
         return output
 
-    def read_char(self):
+    def read_char(self, handle_decode_error='NONE'):
         """Reads a single Unicode character from the current shell.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
+
+        :param str handle_decode_error: Specifies the way decode errors are handled.
 
         :returns: A single char read from the output.
         """
         server_output = b''
         while True:
             try:
-                server_output += self.shell.read_byte()
+                read_byte = self.shell.read_byte()
+                server_output += read_byte
                 return self._decode(server_output)
             except UnicodeDecodeError:
-                pass
+                if handle_decode_error.upper() == 'REPLACE':
+                    return server_output.decode(self.config.encoding, 'replace')
+                elif handle_decode_error.upper() == 'SKIP':
+                    return server_output.decode(self.config.encoding, 'ignore')
+                else:
+                    pass
 
-    def read_until(self, expected):
+    def read_until(self, expected, handle_decode_error='NONE'):
         """Reads output from the current shell until the `expected` text is
         encountered or the timeout expires.
 
@@ -446,19 +454,21 @@ class AbstractSSHClient(object):
 
         :param str expected: The text to look for in the output.
 
+        :param str handle_decode_error: Specifies the way decode errors are handled.
+
         :raises SSHClientException: If `expected` is not found in the output
             when the timeout expires.
 
         :returns: The read output, including the encountered `expected` text.
         """
-        return self._read_until(lambda s: expected in s, expected)
+        return self._read_until(lambda s: expected in s, expected, handle_decode_error=handle_decode_error)
 
-    def _read_until(self, matcher, expected, timeout=None):
+    def _read_until(self, matcher, expected, handle_decode_error='NONE', timeout=None):
         output = ''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         max_time = time.time() + timeout.value
         while time.time() < max_time:
-            output += self.read_char()
+            output += self.read_char(handle_decode_error=handle_decode_error)
             if matcher(output):
                 return output
             time.sleep(.00001) # Release GIL so paramiko I/O thread can run
@@ -519,7 +529,7 @@ class AbstractSSHClient(object):
             length = len(self.config.prompt)
         return output[:-length]
 
-    def read_until_regexp(self, regexp):
+    def read_until_regexp(self, regexp, handle_decode_error='NONE'):
         """Reads output from the current shell until the `regexp` matches or
         the timeout expires.
 
@@ -531,6 +541,8 @@ class AbstractSSHClient(object):
         :param regexp: Either the regular expression as a string or a compiled
             Regex object.
 
+        :param str handle_decode_error: Specifies the way decode errors are handled.
+
         :raises SSHClientException: If no match against `regexp` is found when
             the timeout expires.
 
@@ -538,7 +550,7 @@ class AbstractSSHClient(object):
         """
         if is_string(regexp):
             regexp = re.compile(regexp)
-        return self._read_until(lambda s: regexp.search(s), regexp.pattern)
+        return self._read_until(lambda s: regexp.search(s), regexp.pattern, handle_decode_error=handle_decode_error)
 
     def read_until_regexp_with_prefix(self, regexp, prefix):
         """

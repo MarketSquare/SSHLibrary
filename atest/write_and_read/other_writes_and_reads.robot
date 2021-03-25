@@ -1,7 +1,7 @@
 *** Settings ***
 Resource        ../resources/write_and_read_resource.robot
 Default Tags      pybot   jybot
-Suite Setup     Login And Upload Test Scripts
+Suite Setup     Run Keywords  Login And Upload Test Scripts  AND  Put File  ${CORRUPTED FILE}  ${REMOTE TEST ROOT}
 Suite Teardown  Remove Test Files and Close Connections
 
 
@@ -108,3 +108,11 @@ Configure Session Width And Height Not Supported
     [Documentation]  WARN  1.1:1  Setting width or height is not supported with Jython.
     Set Client Configuration  prompt=${PROMPT}  height=48  width=160
     [Teardown]  Set Client Configuration  height=24  width=80
+
+Read Until With Handle Decode Error On Replace
+    Write   cat ${CORRUPTED FILE}
+    ${output} =  Read Until   Hello   handle_decode_error=REPLACE
+
+Read Until With Handle Decode Error On Skip
+    Write   cat ${CORRUPTED FILE}
+    ${output} =  Read Until   Hello   handle_decode_error=SKIP
