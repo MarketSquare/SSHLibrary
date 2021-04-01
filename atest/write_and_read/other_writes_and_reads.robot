@@ -113,6 +113,10 @@ Read Until With Handle Decode Error On Replace
     Write   cat ${CORRUPTED FILE}
     ${output} =  Read Until   Hello   handle_decode_error=REPLACE
 
+Read Until With Handle Decode Error On Raise
+    Write   cat ${CORRUPTED FILE}
+    Run Keyword And Expect Error  *codec can't decode byte*  Read Until   Hello   handle_decode_error=RAISE
+
 Read Until With Handle Decode Error On Skip
     Write   cat ${CORRUPTED FILE}
     ${output} =  Read Until   Hello   handle_decode_error=SKIP

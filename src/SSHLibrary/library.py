@@ -1459,11 +1459,9 @@ class SSHLibrary(object):
 
         | SKIP    | # if a char can not be decoded it will be skipped, and the output will be formed by the chars that were able to be decoded. |
         | REPLACE | # replaces the undecodable char with replacement character. |
+        | RAISE   | # raises an error when an undecodable character is found.   |
 
-        If ``handle_decode_error`` is not specified or is any other value than `SKIP` and `REPLACE`,
-        `UnicodeDecodeError` will be raised whenever a character could not be read.
-
-        By default ``handle_decode_error`` is set to the old decoding mechanism.
+        By default ``handle_decode_error`` is set to `NONE`.
 
         ``handle_decode_error`` is new in SSHLibrary 3.7.0.
 

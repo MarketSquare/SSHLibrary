@@ -440,6 +440,9 @@ class AbstractSSHClient(object):
                     return server_output.decode(self.config.encoding, 'replace')
                 elif handle_decode_error.upper() == 'SKIP':
                     return server_output.decode(self.config.encoding, 'ignore')
+                elif handle_decode_error.upper() == 'RAISE':
+                    self.shell.read()  # clear shell to eliminate the characters that cause the error
+                    raise
                 else:
                     pass
 
