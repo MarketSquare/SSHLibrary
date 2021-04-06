@@ -110,13 +110,25 @@ Configure Session Width And Height Not Supported
     [Teardown]  Set Client Configuration  height=24  width=80
 
 Read Until With Handle Decode Error On Replace
+    Set Client Configuration   handle_decode_errors=replace
     Write   cat ${CORRUPTED FILE}
-    ${output} =  Read Until   Hello   handle_decode_error=REPLACE
+    ${output} =  Read Until   Hello
+    Should Contain  ${output}  Hello
 
-Read Until With Handle Decode Error On Raise
+Read Until With Handle Decode Error On Strict
+    Set Client Configuration   handle_decode_errors=strict
     Write   cat ${CORRUPTED FILE}
-    Run Keyword And Expect Error  *codec can't decode byte*  Read Until   Hello   handle_decode_error=RAISE
+    Run Keyword And Expect Error  *codec can't decode byte*  Read Until   Hello
 
-Read Until With Handle Decode Error On Skip
+Read Until With Handle Decode Error On Ignore
+    Set Client Configuration   handle_decode_errors=ignore
     Write   cat ${CORRUPTED FILE}
-    ${output} =  Read Until   Hello   handle_decode_error=SKIP
+    ${output} =  Read Until   Hello
+    Should Contain  ${output}  Hello
+
+Read Until With Handle Decode Error In Open Connection
+    [Setup]  Run Keywords  Open Connection  ${HOST}  prompt=${PROMPT}  handle_decode_errors=replace  AND
+    ...                    Login  ${USERNAME}  ${PASSWORD}
+    Write   cat ${CORRUPTED FILE}
+    ${output} =  Read Until   Hello
+    Should Contain  ${output}  Hello

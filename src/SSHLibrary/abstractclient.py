@@ -35,7 +35,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding, escape_ansi):
+                 width, height, path_separator, encoding, escape_ansi, handle_decode_errors):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -49,7 +49,8 @@ class _ClientConfiguration(Configuration):
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
-            escape_ansi=StringEntry(escape_ansi)
+            escape_ansi=StringEntry(escape_ansi),
+            handle_decode_errors=StringEntry(handle_decode_errors)
         )
 
 
@@ -62,10 +63,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8', escape_ansi=False):
+                 path_separator='/', encoding='utf8', escape_ansi=False, handle_decode_errors='NONE'):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding, escape_ansi)
+                                           path_separator, encoding, escape_ansi, handle_decode_errors)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
@@ -211,10 +212,14 @@ class AbstractSSHClient(object):
             return text
         if not is_string(text):
             text = unicode(text)
-        return text.encode(self.config.encoding)
+        if self.config.handle_decode_errors.upper() == 'NONE':
+            return text.encode(self.config.encoding)
+        return text.encode(self.config.encoding, self.config.handle_decode_errors)
 
     def _decode(self, bytes):
-        return bytes.decode(self.config.encoding)
+        if self.config.handle_decode_errors.upper() == 'NONE':
+            return bytes.decode(self.config.encoding)
+        return bytes.decode(self.config.encoding, self.config.handle_decode_errors)
 
     def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host, jumphost_connection):
         raise NotImplementedError
@@ -419,34 +424,27 @@ class AbstractSSHClient(object):
             output += read
         return output
 
-    def read_char(self, handle_decode_error='NONE'):
+    def read_char(self):
         """Reads a single Unicode character from the current shell.
 
         Reading always consumes the output, meaning that after being read,
         the read content is no longer present in the output.
-
-        :param str handle_decode_error: Specifies the way decode errors are handled.
 
         :returns: A single char read from the output.
         """
         server_output = b''
         while True:
             try:
-                read_byte = self.shell.read_byte()
-                server_output += read_byte
+                server_output += self.shell.read_byte()
                 return self._decode(server_output)
             except UnicodeDecodeError:
-                if handle_decode_error.upper() == 'REPLACE':
-                    return server_output.decode(self.config.encoding, 'replace')
-                elif handle_decode_error.upper() == 'SKIP':
-                    return server_output.decode(self.config.encoding, 'ignore')
-                elif handle_decode_error.upper() == 'RAISE':
-                    self.shell.read()  # clear shell to eliminate the characters that cause the error
+                if self.config.handle_decode_errors.upper() == 'STRICT':
+                    self.shell.read()
                     raise
                 else:
                     pass
 
-    def read_until(self, expected, handle_decode_error='NONE'):
+    def read_until(self, expected):
         """Reads output from the current shell until the `expected` text is
         encountered or the timeout expires.
 
@@ -457,21 +455,19 @@ class AbstractSSHClient(object):
 
         :param str expected: The text to look for in the output.
 
-        :param str handle_decode_error: Specifies the way decode errors are handled.
-
         :raises SSHClientException: If `expected` is not found in the output
             when the timeout expires.
 
         :returns: The read output, including the encountered `expected` text.
         """
-        return self._read_until(lambda s: expected in s, expected, handle_decode_error=handle_decode_error)
+        return self._read_until(lambda s: expected in s, expected)
 
-    def _read_until(self, matcher, expected, handle_decode_error='NONE', timeout=None):
+    def _read_until(self, matcher, expected, timeout=None):
         output = ''
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         max_time = time.time() + timeout.value
         while time.time() < max_time:
-            output += self.read_char(handle_decode_error=handle_decode_error)
+            output += self.read_char()
             if matcher(output):
                 return output
             time.sleep(.00001) # Release GIL so paramiko I/O thread can run
@@ -532,7 +528,7 @@ class AbstractSSHClient(object):
             length = len(self.config.prompt)
         return output[:-length]
 
-    def read_until_regexp(self, regexp, handle_decode_error='NONE'):
+    def read_until_regexp(self, regexp):
         """Reads output from the current shell until the `regexp` matches or
         the timeout expires.
 
@@ -544,8 +540,6 @@ class AbstractSSHClient(object):
         :param regexp: Either the regular expression as a string or a compiled
             Regex object.
 
-        :param str handle_decode_error: Specifies the way decode errors are handled.
-
         :raises SSHClientException: If no match against `regexp` is found when
             the timeout expires.
 
@@ -553,7 +547,7 @@ class AbstractSSHClient(object):
         """
         if is_string(regexp):
             regexp = re.compile(regexp)
-        return self._read_until(lambda s: regexp.search(s), regexp.pattern, handle_decode_error=handle_decode_error)
+        return self._read_until(lambda s: regexp.search(s), regexp.pattern)
 
     def read_until_regexp_with_prefix(self, regexp, prefix):
         """
