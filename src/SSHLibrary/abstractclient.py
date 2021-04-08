@@ -439,7 +439,7 @@ class AbstractSSHClient(object):
                 return self._decode(server_output)
             except UnicodeDecodeError:
                 if self.config.handle_decode_errors.upper() == 'STRICT':
-                    self.shell.read()
+                    self.shell.read() # clear shell to eliminate the characters that cause the error
                     raise
                 else:
                     pass
