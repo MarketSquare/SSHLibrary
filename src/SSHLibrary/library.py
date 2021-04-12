@@ -949,7 +949,7 @@ class SSHLibrary(object):
 
         ``keep_alive_interval`` is used to specify after which idle interval of time a
         ``keepalive`` packet will be sent to remote host. By default ``keep_alive_interval`` is
-        set to ``0``, which means sending the ``keepalive`` packet is disable.
+        set to ``0``, which means sending the ``keepalive`` packet is disabled.
 
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
 
@@ -1042,7 +1042,7 @@ class SSHLibrary(object):
 
         ``keep_alive_interval`` is used to specify after which idle interval of time a
         ``keepalive`` packet will be sent to remote host. By default ``keep_alive_interval`` is
-        set to ``0``, which means sending the ``keepalive`` packet is disable.
+        set to ``0``, which means sending the ``keepalive`` packet is disabled.
 
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
 
