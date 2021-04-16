@@ -20,6 +20,8 @@ ${COLON CHAR FILE}               ${LOCAL TEXTFILES}${/}special:char.txt
 ${SYMLINK TO TEST FILE}          symlink_to_text_file.txt
 ${FILE WITH SQUARE BRACKETS NAME}     test[1].txt
 ${FILE WITH SQUARE BRACKETS}     ${LOCAL TEXTFILES}${/}${FILE WITH SQUARE BRACKETS NAME}
+${CORRUPTED FILE NAME}           corrupted.txt
+${CORRUPTED FILE}                ${LOCAL TEXTFILES}${/}${CORRUPTED FILE NAME}
 
 *** Keywords ***
 Login And Upload Test Files

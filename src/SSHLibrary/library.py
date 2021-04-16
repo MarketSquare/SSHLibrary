@@ -126,6 +126,20 @@ class SSHLibrary(object):
     character encoding] of input and output sequences. The default encoding
     is UTF-8.
 
+    It is also possible to configure the error handler to use if encoding or
+    decoding characters fails. Accepted values are the same that encode/decode
+    functions in Python strings accept. In practice the following values
+    are the most useful:
+
+    - ``ignore``: ignore characters that cannot be decoded(default)
+
+    - ``strict``: fail if characters cannot be decoded
+
+    - ``replace``: replace characters that cannot be decoded with replacement
+      character
+
+    By default ``handle_decode_errors`` is set to ``NONE``. ``handle_decode_errors``
+    is new in SSHLibrary 3.7.0.
     === Path separator ===
 
     Argument ``path_separator`` must be set to the one known by the operating
@@ -439,6 +453,7 @@ class SSHLibrary(object):
     DEFAULT_PATH_SEPARATOR = '/'
     DEFAULT_ENCODING = 'UTF-8'
     DEFAULT_ESCAPE_ANSI = False
+    DEFAULT_HANDLE_ERRORS = 'NONE'
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -450,7 +465,8 @@ class SSHLibrary(object):
                  height=DEFAULT_TERM_HEIGHT,
                  path_separator=DEFAULT_PATH_SEPARATOR,
                  encoding=DEFAULT_ENCODING,
-                 escape_ansi=DEFAULT_ESCAPE_ANSI):
+                 escape_ansi=DEFAULT_ESCAPE_ANSI,
+                 handle_decode_errors=DEFAULT_HANDLE_ERRORS):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -487,7 +503,8 @@ class SSHLibrary(object):
             height or self.DEFAULT_TERM_HEIGHT,
             path_separator or self.DEFAULT_PATH_SEPARATOR,
             encoding or self.DEFAULT_ENCODING,
-            escape_ansi or self.DEFAULT_ESCAPE_ANSI
+            escape_ansi or self.DEFAULT_ESCAPE_ANSI,
+            handle_decode_errors or self.DEFAULT_HANDLE_ERRORS
         )
         self._last_commands = dict()
 
@@ -499,7 +516,7 @@ class SSHLibrary(object):
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
-                                  encoding=None, escape_ansi=None):
+                                  encoding=None, escape_ansi=None, handle_decode_errors=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -533,11 +550,11 @@ class SSHLibrary(object):
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
-                            encoding=encoding, escape_ansi=escape_ansi)
+                            encoding=encoding, escape_ansi=escape_ansi, handle_decode_errors=handle_decode_errors)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None, escape_ansi=None):
+                                 path_separator=None, encoding=None, escape_ansi=None, handle_decode_errors=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than ``None`` are updated.
@@ -572,7 +589,8 @@ class SSHLibrary(object):
                                    prompt=prompt, term_type=term_type,
                                    width=width, height=height,
                                    path_separator=path_separator,
-                                   encoding=encoding, escape_ansi=escape_ansi)
+                                   encoding=encoding, escape_ansi=escape_ansi,
+                                   handle_decode_errors=handle_decode_errors)
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given ``logfile``.
@@ -599,7 +617,7 @@ class SSHLibrary(object):
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None, escape_ansi=None):
+                        height=None, path_separator=None, encoding=None, escape_ansi=None, handle_decode_errors=None):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
         The new connection is made active. Possible existing connections
@@ -672,8 +690,9 @@ class SSHLibrary(object):
         path_separator = path_separator or self._config.path_separator
         encoding = encoding or self._config.encoding
         escape_ansi = escape_ansi or self._config.escape_ansi
+        handle_decode_errors = handle_decode_errors or self._config.handle_decode_errors
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, path_separator, encoding, escape_ansi)
+                           term_type, width, height, path_separator, encoding, escape_ansi, handle_decode_errors)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -1910,7 +1929,7 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, path_separator, encoding, escape_ansi):
+                 height, path_separator, encoding, escape_ansi, handle_decode_errors):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1921,5 +1940,6 @@ class _DefaultConfiguration(Configuration):
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
-            escape_ansi=StringEntry(escape_ansi)
+            escape_ansi=StringEntry(escape_ansi),
+            handle_decode_errors=StringEntry(handle_decode_errors)
         )

@@ -10,6 +10,7 @@ Library         Collections
 List Files Using Absolute Path
     ${expected} =  Create List
     ...                         ${FILE WITH NEWLINES NAME}
+    ...                         ${CORRUPTED FILE NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
@@ -19,6 +20,7 @@ List Files Using Absolute Path
 List Files Using Relative Path
     ${expected} =  Create List
     ...                         ${FILE WITH NEWLINES NAME}
+    ...                         ${CORRUPTED FILE NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
@@ -38,6 +40,7 @@ List Files Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
     ${expected} =  Create List
     ...                         ${FILE WITH NEWLINES NAME}
+    ...                         ${CORRUPTED FILE NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
@@ -53,6 +56,7 @@ List Files With Non-ASCII Characters In Path
 List Files With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -62,6 +66,7 @@ List Files With Absolute Paths Using Absolute Path
 List Files With Absolute Paths Using Relative Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -85,6 +90,7 @@ List Files With Absolute Paths Using Symlink As Path
     [Setup]  Execute Command  ln -s ${REMOTE TEST ROOT} symlink
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
+    ...                 ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
