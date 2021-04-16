@@ -936,8 +936,8 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds',
-              proxy_cmd=None, read_config=False, jumphost_index_or_alias=None):
+    def login(self, username, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds',
+              proxy_cmd=None, read_config_host=False, jumphost_index_or_alias=None, keep_alive_interval='0 seconds'):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -967,8 +967,14 @@ class SSHLibrary(object):
 
         ``read_config`` is new in SSHLibrary 3.7.0.
 
-        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config_host``
-        do not work when using Jython.
+        ``keep_alive_interval`` is used to specify after which idle interval of time a
+        ``keepalive`` packet will be sent to remote host. By default ``keep_alive_interval`` is
+        set to ``0``, which means sending the ``keepalive`` packet is disabled.
+
+        ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
+
+        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias``,
+        ``read_config_host`` and ``keep_alive_interval`` do not work when using Jython.
 
         Example that logs in and returns the output:
 
@@ -999,13 +1005,14 @@ class SSHLibrary(object):
             if jumphost_connection_conf and jumphost_connection_conf.index else None
 
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
-                           is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config), jumphost_connection)
+                           is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config_host),
+                           jumphost_connection, keep_alive_interval)
 
     def login_with_public_key(self, username=None, keyfile=None, password='',
                               allow_agent=False, look_for_keys=False,
                               delay='0.5 seconds', proxy_cmd=None,
                               jumphost_index_or_alias=None,
-                              read_config=False):
+                              read_config_host=False, keep_alive_interval='0 seconds'):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -1054,8 +1061,14 @@ class SSHLibrary(object):
 
         ``read_config`` is new in SSHLibrary 3.7.0.
 
-        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config``
-        do not work when using Jython.
+        ``keep_alive_interval`` is used to specify after which idle interval of time a
+        ``keepalive`` packet will be sent to remote host. By default ``keep_alive_interval`` is
+        set to ``0``, which means sending the ``keepalive`` packet is disabled.
+
+        ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
+
+        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias``,
+        ``read_config_host`` and ``keep_alive_interval`` do not work when using Jython.
         """
         if proxy_cmd and jumphost_index_or_alias:
             raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
@@ -1064,7 +1077,7 @@ class SSHLibrary(object):
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, is_truthy(allow_agent),
                            is_truthy(look_for_keys), delay, proxy_cmd,
-                           jumphost_connection, is_truthy(read_config))
+                           jumphost_connection, is_truthy(read_config_host), keep_alive_interval)
 
     def _login(self, login_method, username, *args):
         self._log("Logging into '%s:%s' as '%s'."

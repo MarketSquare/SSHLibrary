@@ -151,7 +151,7 @@ class PythonSSHClient(AbstractSSHClient):
         return jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
 
     def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
-               read_config=False, jumphost_connection=None):
+               read_config=False, jumphost_connection=None, keep_alive_interval=None):
         if read_config:
             hostname = self.config.host
             self.config.host, username, self.config.port, proxy_cmd = \
@@ -165,7 +165,6 @@ class PythonSSHClient(AbstractSSHClient):
             sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
         elif jumphost_connection:
             sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
-
         try:
             if not password and not allow_agent:
                 # If no password is given, try login without authentication
@@ -177,6 +176,7 @@ class PythonSSHClient(AbstractSSHClient):
                 except paramiko.SSHException:
                     pass
                 transport = self.client.get_transport()
+                transport.set_keepalive(keep_alive_interval)
                 transport.auth_none(username)
             else:
                 try:
@@ -184,9 +184,12 @@ class PythonSSHClient(AbstractSSHClient):
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
                                         timeout=float(self.config.timeout), sock=sock_tunnel)
+                    transport = self.client.get_transport()
+                    transport.set_keepalive(keep_alive_interval)
                 except paramiko.AuthenticationException:
                     try:
                         transport = self.client.get_transport()
+                        transport.set_keepalive(keep_alive_interval)
                         try:
                             transport.auth_none(username)
                         except:
@@ -198,7 +201,7 @@ class PythonSSHClient(AbstractSSHClient):
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
-                               jumphost_connection=None, read_config=False):
+                               jumphost_connection=None, read_config=False, keep_alive_interval=None):
         if read_config:
             hostname = self.config.host
             self.config.host, username, self.config.port, key_file, proxy_cmd = \
@@ -229,9 +232,12 @@ class PythonSSHClient(AbstractSSHClient):
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout),
                                 sock=sock_tunnel)
+            transport = self.client.get_transport()
+            transport.set_keepalive(keep_alive_interval)
         except paramiko.AuthenticationException:
             try:
                 transport = self.client.get_transport()
+                transport.set_keepalive(keep_alive_interval)
                 try:
                     transport.auth_none(username)
                 except:

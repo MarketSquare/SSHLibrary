@@ -161,7 +161,7 @@ class AbstractSSHClient(object):
             pass
 
     def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config=False, jumphost_connection=None):
+              read_config=False, jumphost_connection=None, keep_alive_interval=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -169,6 +169,8 @@ class AbstractSSHClient(object):
         is read (using :py:meth:`read_until_prompt` internally).
         Otherwise everything on the output is read with the specified `delay`
         (using :py:meth:`read` internally).
+
+        :param keep_alive_interval: Set the transport keepalive interval.
 
         :param str username: Username to log in with.
 
@@ -197,11 +199,13 @@ class AbstractSSHClient(object):
 
         :returns: The read output from the server.
         """
+        keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
         username = self._encode(username)
         if not password and not allow_agent:
             password = self._encode(password)
         try:
-            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config, jumphost_connection)
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config,
+                        jumphost_connection, keep_alive_interval)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Authentication failed for user '%s'."
@@ -222,7 +226,8 @@ class AbstractSSHClient(object):
             return bytes.decode(self.config.encoding)
         return bytes.decode(self.config.encoding, self.config.handle_decode_errors)
 
-    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config, jumphost_connection):
+    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config,
+               jumphost_connection, keep_alive_interval):
         raise NotImplementedError
 
     def _read_login_output(self, delay):
@@ -234,7 +239,7 @@ class AbstractSSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config=False):
+                              jumphost_connection=None, read_config_host=False, keep_alive_interval=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -277,11 +282,12 @@ class AbstractSSHClient(object):
             username = self._encode(username)
         if keyfile:
             self._verify_key_file(keyfile)
+            keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
         try:
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
                                         proxy_cmd, jumphost_connection,
-                                        read_config)
+                                        read_config_host, keep_alive_interval)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Login with public key failed for user "
@@ -299,7 +305,7 @@ class AbstractSSHClient(object):
 
     def _login_with_public_key(self, username, keyfile, password,
                                allow_agent, look_for_keys, proxy_cmd,
-                               jumphost_index_or_alias, read_config):
+                               jumphost_index_or_alias, read_config_host, keep_alive_interval):
         raise NotImplementedError
 
     @staticmethod
