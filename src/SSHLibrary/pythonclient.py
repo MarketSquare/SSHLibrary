@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import glob
 import os
 import ntpath
 import time
@@ -388,7 +388,8 @@ class SCPClient(object):
         self._scp_client = scp.SCPClient(ssh_client.get_transport())
 
     def put_file(self, source, destination, scp_preserve_times, *args):
-        self._scp_client.put(source, destination, preserve_times=is_truthy(scp_preserve_times))
+        sources = self._get_put_file_sources(source)
+        self._scp_client.put(sources, destination, preserve_times=is_truthy(scp_preserve_times))
 
     def get_file(self, source, destination, scp_preserve_times, *args):
         self._scp_client.get(source, destination, preserve_times=is_truthy(scp_preserve_times))
@@ -398,6 +399,17 @@ class SCPClient(object):
 
     def get_directory(self, source, destination, scp_preserve_times, *args):
         self._scp_client.get(source, destination, True, preserve_times=is_truthy(scp_preserve_times))
+
+    def _get_put_file_sources(self, source):
+        source = source.replace('/', os.sep)
+        if not os.path.exists(source):
+            sources = [f for f in glob.glob(source)]
+        else:
+            sources = [f for f in [source]]
+        if not sources:
+            msg = "There are no source files matching '%s'." % source
+            raise SSHClientException(msg)
+        return sources
 
 
 class SCPTransferClient(SFTPClient):
