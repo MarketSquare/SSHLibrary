@@ -16,7 +16,7 @@
 from __future__ import print_function
 
 import re
-
+import os
 from .deco import keyword
 try:
     from robot.api import logger
@@ -917,8 +917,8 @@ class SSHLibrary(object):
             self._log(str(c), self._config.loglevel)
         return configs
 
-    def login(self, username, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds',
-              proxy_cmd=None, read_config_host=False, jumphost_index_or_alias=None):
+    def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds',
+              proxy_cmd=None, read_config=False, jumphost_index_or_alias=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -943,9 +943,10 @@ class SSHLibrary(object):
 
         ``look_for_keys`` enables the searching for discoverable private key files in ``~/.ssh/``.
 
-        ``read_config_host`` reads or ignores host entries from ``~/.ssh/config`` file.
+        ``read_config`` reads or ignores entries from ``~/.ssh/config`` file. This parameter will read the hostname,
+        port number, username and proxy command.
 
-        ``read_config_host`` is new in SSHLibrary 3.5.1.
+        ``read_config`` is new in SSHLibrary 3.7.0.
 
         *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config_host``
         do not work when using Jython.
@@ -979,13 +980,13 @@ class SSHLibrary(object):
             if jumphost_connection_conf and jumphost_connection_conf.index else None
 
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
-                           is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config_host), jumphost_connection)
+                           is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config), jumphost_connection)
 
-    def login_with_public_key(self, username, keyfile, password='',
+    def login_with_public_key(self, username=None, keyfile=None, password='',
                               allow_agent=False, look_for_keys=False,
                               delay='0.5 seconds', proxy_cmd=None,
                               jumphost_index_or_alias=None,
-                              read_config_host=False):
+                              read_config=False):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -1029,11 +1030,12 @@ class SSHLibrary(object):
         ``look_for_keys`` enables the searching for discoverable private key
         files in ``~/.ssh/``.
 
-        ``read_config_host`` reads or ignores host entries from ``~/.ssh/config`` file.
+        ``read_config`` reads or ignores entries from ``~/.ssh/config`` file. This parameter will read the hostname,
+        port number, username, identity file and proxy command.
 
-        ``read_config_host`` is new in SSHLibrary 3.5.1.
+        ``read_config`` is new in SSHLibrary 3.7.0.
 
-        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config_host``
+        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias`` and ``read_config``
         do not work when using Jython.
         """
         if proxy_cmd and jumphost_index_or_alias:
@@ -1043,7 +1045,7 @@ class SSHLibrary(object):
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, is_truthy(allow_agent),
                            is_truthy(look_for_keys), delay, proxy_cmd,
-                           jumphost_connection, is_truthy(read_config_host))
+                           jumphost_connection, is_truthy(read_config))
 
     def _login(self, login_method, username, *args):
         self._log("Logging into '%s:%s' as '%s'."

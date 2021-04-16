@@ -14,6 +14,8 @@ ${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
 ${KEY USERNAME}      testkey
 ${KEY}               ${KEY DIR}${/}id_rsa
 ${TEST_HOSTNAME}     test_hostname
+${TESTKEY_HOSTNAME}  testkey_hostname
+${TEST_PROXY_HOSTNAME}  test_proxy_hostname
 
 *** Keywords ***
 Login As Valid User

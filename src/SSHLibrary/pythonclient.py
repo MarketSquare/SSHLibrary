@@ -79,14 +79,68 @@ class PythonSSHClient(AbstractSSHClient):
         return True
 
     @staticmethod
-    def _read_ssh_config_host(host):
+    def _read_login_ssh_config(host, username, port_number, proxy_cmd):
         ssh_config_file = os.path.expanduser("~/.ssh/config")
         if os.path.exists(ssh_config_file):
             conf = paramiko.SSHConfig()
             with open(ssh_config_file) as f:
                 conf.parse(f)
+            port = PythonSSHClient._get_ssh_config_port(conf, host, port_number)
+            user = PythonSSHClient._get_ssh_config_user(conf, host, username)
+            proxy_command = PythonSSHClient._get_ssh_config_proxy_cmd(conf, host, proxy_cmd)
+            host = PythonSSHClient._get_ssh_config_host(conf, host)
+            return host, user, port, proxy_command
+        return host, username, port_number, proxy_cmd
+
+    @staticmethod
+    def _read_public_key_ssh_config(host, username, port_number, proxy_cmd, identity_file):
+        ssh_config_file = os.path.expanduser("~/.ssh/config")
+        if os.path.exists(ssh_config_file):
+            conf = paramiko.SSHConfig()
+            with open(ssh_config_file) as f:
+                conf.parse(f)
+            port = PythonSSHClient._get_ssh_config_port(conf, host, port_number)
+            id_file = PythonSSHClient._get_ssh_config_identity_file(conf, host, identity_file)
+            user = PythonSSHClient._get_ssh_config_user(conf, host, username)
+            proxy_command = PythonSSHClient._get_ssh_config_proxy_cmd(conf, host, proxy_cmd)
+            host = PythonSSHClient._get_ssh_config_host(conf, host)
+            return host, user, port, id_file, proxy_command
+        return host, username, port_number, identity_file, proxy_cmd
+
+    @staticmethod
+    def _get_ssh_config_user(conf, host, user):
+        try:
+            return conf.lookup(host)['user'] if not None else user
+        except KeyError:
+            return None
+
+    @staticmethod
+    def _get_ssh_config_proxy_cmd(conf, host, proxy_cmd):
+        try:
+            return conf.lookup(host)['proxycommand'] if not None else proxy_cmd
+        except KeyError:
+            return proxy_cmd
+
+    @staticmethod
+    def _get_ssh_config_identity_file(conf, host, id_file):
+        try:
+            return conf.lookup(host)['identityfile'][0] if not None else id_file
+        except KeyError:
+            return id_file
+
+    @staticmethod
+    def _get_ssh_config_port(conf, host, port_number):
+        try:
+            return conf.lookup(host)['port'] if not None else port_number
+        except KeyError:
+            return port_number
+
+    @staticmethod
+    def _get_ssh_config_host(conf, host):
+        try:
             return conf.lookup(host)['hostname'] if not None else host
-        return host
+        except KeyError:
+            return host
 
     def _get_jumphost_tunnel(self, jumphost_connection):
         dest_addr = (self.config.host, self.config.port)
@@ -97,9 +151,12 @@ class PythonSSHClient(AbstractSSHClient):
         return jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
 
     def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
-               read_config_host=False, jumphost_connection=None):
-        if read_config_host:
-            self.config.host = self._read_ssh_config_host(self.config.host)
+               read_config=False, jumphost_connection=None):
+        if read_config:
+            hostname = self.config.host
+            self.config.host, username, self.config.port, proxy_cmd = \
+                self._read_login_ssh_config(hostname, username, self.config.port, proxy_cmd)
+
         sock_tunnel = None
 
         if proxy_cmd and jumphost_connection:
@@ -141,11 +198,23 @@ class PythonSSHClient(AbstractSSHClient):
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
-                               jumphost_connection=None, read_config_host=False):
-        if read_config_host:
-            self.config.host = self._read_ssh_config_host(self.config.host)
-        sock_tunnel = None
+                               jumphost_connection=None, read_config=False):
+        if read_config:
+            hostname = self.config.host
+            self.config.host, username, self.config.port, key_file, proxy_cmd = \
+                self._read_public_key_ssh_config(hostname, username, self.config.port, proxy_cmd, key_file)
 
+        sock_tunnel = None
+        if key_file is not None:
+            if not os.path.exists(key_file):
+                raise SSHClientException("Given key file '%s' does not exist." %
+                                         key_file)
+            try:
+                open(key_file).close()
+            except IOError:
+                raise SSHClientException("Could not read key file '%s'." % key_file)
+        else:
+            raise RuntimeError("Keyfile must be specified as keyword argument or in config file.")
         if proxy_cmd and jumphost_connection:
             raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
         elif proxy_cmd:

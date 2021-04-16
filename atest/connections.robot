@@ -117,7 +117,7 @@ Reuse Closed Connection Alias
 Connection To Host Read From SSH Config File
    [Tags]  pybot
    Open Connection  ${TEST_HOSTNAME}
-   Login  ${USERNAME}  ${PASSWORD}  read_config_host=True
+   Login  ${USERNAME}  ${PASSWORD}  read_config=True
 
 Connection To Host Ignoring SSH Config File
    [Tags]  pybot
