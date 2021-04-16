@@ -10,6 +10,7 @@ List Content Using Absolute Path
     ${expected} =  Create List
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SUBDIRECTORY NAME}
+    ...                         ${CORRUPTED FILE NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
@@ -20,6 +21,7 @@ List Content Using Relative Path
     ${expected} =  Create List
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SUBDIRECTORY NAME}
+    ...                         ${CORRUPTED FILE NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
@@ -40,6 +42,7 @@ List Content Using Symlink As Path
     ${expected} =  Create List
     ...                         ${FILE WITH NEWLINES NAME}
     ...                         ${SUBDIRECTORY NAME}
+    ...                         ${CORRUPTED FILE NAME}
     ...                         ${FILE WITH SPECIAL CHARS NAME}
     ...                         ${FILE WITH SQUARE BRACKETS NAME}
     ...                         ${TEST FILE NAME}
@@ -57,6 +60,7 @@ List Content With Absolute Paths Using Absolute Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ...                 ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -67,6 +71,7 @@ List Content With Absolute Paths Using Relative Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ...                 ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -90,6 +95,7 @@ List Content With Absolute Paths Using Symlink As Path
     ${expected} =  Create List
     ...                 ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     ...                 ${REMOTE TEST ROOT}/${SUBDIRECTORY NAME}
+    ...                 ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SPECIAL CHARS NAME}
     ...                 ${REMOTE TEST ROOT}/${FILE WITH SQUARE BRACKETS NAME}
     ...                 ${REMOTE TEST ROOT}/${TEST FILE NAME}

@@ -25,7 +25,7 @@ import ntpath
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from .logger import logger
-from .utils import is_bytes, is_string, unicode
+from .utils import is_bytes, is_string, unicode, is_list_like
 
 
 class SSHClientException(RuntimeError):
@@ -35,7 +35,7 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding, escape_ansi):
+                 width, height, path_separator, encoding, escape_ansi, handle_decode_errors):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -49,7 +49,8 @@ class _ClientConfiguration(Configuration):
             height=IntegerEntry(height),
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
-            escape_ansi=StringEntry(escape_ansi)
+            escape_ansi=StringEntry(escape_ansi),
+            handle_decode_errors=StringEntry(handle_decode_errors)
         )
 
 
@@ -62,10 +63,10 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8', escape_ansi=False):
+                 path_separator='/', encoding='utf8', escape_ansi=False, handle_decode_errors='NONE'):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding, escape_ansi)
+                                           path_separator, encoding, escape_ansi, handle_decode_errors)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
@@ -159,8 +160,8 @@ class AbstractSSHClient(object):
         except AttributeError:
             pass
 
-    def login(self, username, password, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config_host=False, jumphost_connection=None, keep_alive_interval=None):
+    def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
+              read_config=False, jumphost_connection=None, keep_alive_interval=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -187,7 +188,8 @@ class AbstractSSHClient(object):
             the output after logging in. The delay is only effective if
             the prompt is not set.
 
-        :param read_config_host: reads or ignores host entries from ``~/.ssh/config`` file.
+        :param read_config: reads or ignores host entries from ``~/.ssh/config`` file. This parameter will read the hostname,
+        port number, username and proxy command.
 
         :param PythonSSHClient jumphost_connection : An instance of
             PythonSSHClient that will be used as an intermediary jump-host
@@ -202,7 +204,7 @@ class AbstractSSHClient(object):
         if not password and not allow_agent:
             password = self._encode(password)
         try:
-            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host,
+            self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config,
                         jumphost_connection, keep_alive_interval)
         except SSHClientException:
             self.client.close()
@@ -215,12 +217,16 @@ class AbstractSSHClient(object):
             return text
         if not is_string(text):
             text = unicode(text)
-        return text.encode(self.config.encoding)
+        if self.config.handle_decode_errors.upper() == 'NONE':
+            return text.encode(self.config.encoding)
+        return text.encode(self.config.encoding, self.config.handle_decode_errors)
 
     def _decode(self, bytes):
-        return bytes.decode(self.config.encoding)
+        if self.config.handle_decode_errors.upper() == 'NONE':
+            return bytes.decode(self.config.encoding)
+        return bytes.decode(self.config.encoding, self.config.handle_decode_errors)
 
-    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config_host,
+    def _login(self, username, password, allow_agent, look_for_keys, proxy_cmd, read_config,
                jumphost_connection, keep_alive_interval):
         raise NotImplementedError
 
@@ -265,15 +271,18 @@ class AbstractSSHClient(object):
             PythonSSHClient that is will be used as an intermediary jump-host
             for the SSH connection being attempted.
 
-        :param read_config_host: reads or ignores host entries from ``~/.ssh/config`` file.
+        :param read_config: reads or ignores entries from ``~/.ssh/config`` file. This parameter will read the hostname,
+        port number, username, identity file and proxy command.
 
         :raises SSHClientException: If logging in failed.
 
         :returns: The read output from the server.
         """
-        username = self._encode(username)
-        self._verify_key_file(keyfile)
-        keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
+        if username:
+            username = self._encode(username)
+        if keyfile:
+            self._verify_key_file(keyfile)
+            keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
         try:
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
@@ -439,7 +448,11 @@ class AbstractSSHClient(object):
                 server_output += self.shell.read_byte()
                 return self._decode(server_output)
             except UnicodeDecodeError:
-                pass
+                if self.config.handle_decode_errors.upper() == 'STRICT':
+                    self.shell.read() # clear shell to eliminate the characters that cause the error
+                    raise
+                else:
+                    pass
 
     def read_until(self, expected):
         """Reads output from the current shell until the `expected` text is
@@ -639,7 +652,14 @@ class AbstractSSHClient(object):
         See :py:meth:`AbstractSFTPClient.get_file` for more documentation.
         """
         client = self._create_client(scp)
+        if scp == 'ALL':
+            sources = self._get_files_for_scp_all(source)
+            return client.get_file(sources, destination, scp_preserve_times, self.config.path_separator)
         return client.get_file(source, destination, scp_preserve_times, self.config.path_separator)
+
+    def _get_files_for_scp_all(self, source):
+        sources = self.execute_command('dir %s' % source)
+        return sources[0].split('\n')
 
     def get_directory(self, source, destination='.', recursive=False,
                       scp='OFF', scp_preserve_times=False):

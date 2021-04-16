@@ -123,11 +123,21 @@ Additional OpenSSH configuration
     Testing pre-login banner
 
 
-- Add test_hostname in ``~/.ssh/config``
+- Add test_hostname, testkey_hostname and test_proxy_hostname in ``~/.ssh/config``
 
 ::
 
-    echo $'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
+    echo $'Host test_hostname\n    Hostname localhost\n    User test\n    Port 22\n' >> ~/.ssh/config
+
+::
+
+    echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n
+    IdentityFile <path_to_sshlibrary>/atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
+
+::
+
+    echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n
+    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
 
 
 Setup for Docker
