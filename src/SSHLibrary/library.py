@@ -69,7 +69,6 @@ class SSHLibrary(object):
     - `Importing`
     - `Time format`
     - `Boolean arguments`
-    - `Shortcuts`
     - `Keywords`
 
     = Connections and login =
