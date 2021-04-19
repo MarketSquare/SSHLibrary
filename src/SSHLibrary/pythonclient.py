@@ -85,7 +85,7 @@ class PythonSSHClient(AbstractSSHClient):
             conf = paramiko.SSHConfig()
             with open(ssh_config_file) as f:
                 conf.parse(f)
-            port = PythonSSHClient._get_ssh_config_port(conf, host, port_number)
+            port = int(PythonSSHClient._get_ssh_config_port(conf, host, port_number))
             user = PythonSSHClient._get_ssh_config_user(conf, host, username)
             proxy_command = PythonSSHClient._get_ssh_config_proxy_cmd(conf, host, proxy_cmd)
             host = PythonSSHClient._get_ssh_config_host(conf, host)
@@ -99,7 +99,7 @@ class PythonSSHClient(AbstractSSHClient):
             conf = paramiko.SSHConfig()
             with open(ssh_config_file) as f:
                 conf.parse(f)
-            port = PythonSSHClient._get_ssh_config_port(conf, host, port_number)
+            port = int(PythonSSHClient._get_ssh_config_port(conf, host, port_number))
             id_file = PythonSSHClient._get_ssh_config_identity_file(conf, host, identity_file)
             user = PythonSSHClient._get_ssh_config_user(conf, host, username)
             proxy_command = PythonSSHClient._get_ssh_config_proxy_cmd(conf, host, proxy_cmd)

@@ -131,13 +131,11 @@ Additional OpenSSH configuration
 
 ::
 
-    echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n
-    IdentityFile <path_to_sshlibrary>/atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
+    echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n    IdentityFile <path_to_sshlibrary>/atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
 
 ::
 
-    echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n
-    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
+    echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
 
 
 Setup for Docker

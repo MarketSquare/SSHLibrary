@@ -27,48 +27,35 @@ before_install:
   - sudo bash -c "echo 'Testing pre-login banner' > /etc/ssh/sshd-banner"
   - sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
   - sudo bash -c "echo 'Subsystem subsys echo \"Subsystem invoked.\"' >> /etc/ssh/sshd_config"
-  - sudo service ssh restart
   - echo $'Host test_hostname\n    Hostname localhost\n    User test\n    Port 22\n' >> ~/.ssh/config
-  - echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n
-    IdentityFile <path_to_sshlibrary>/atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
-  - echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n
-  ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
+  - echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n    IdentityFile atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
+  - echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
+  - sudo service ssh restart
   - eval "$(ssh-agent -s)"
   - ssh-add /home/testkey/.ssh/id_rsa
 install:
-  - pip install -r requirements-dev.txt docutils
+  - pip install -r requirements-dev.txt
 jobs:
   include:
     - python: "3.8"
       env:
-        - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=2.7.2
     - python: "3.7.9"
       env:
-        - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=2.6.0
     - python: "2.7"
       env:
-        - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=2.4.1
     - python: "2.7"
       env:
         - JYTHON=true
-        - ROBOTFRAMEWORK=3.2.2
-    - python: "3.4"
-      env:
-        - ROBOTFRAMEWORK=3.2.2
-        - PARAMIKO=2.1.5
     - python: "3.5"
       env:
-        - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=1.18.5
     - python: "3.6"
       env:
-        - ROBOTFRAMEWORK=3.2.2
         - PARAMIKO=1.15.3
 before_script:
-  - pip install robotframework==$ROBOTFRAMEWORK
   - if [ "$JYTHON" == "true" ]; then
         export CLASSPATH=$CLASSPATH:$TRAVIS_BUILD_DIR/lib/*;
     else

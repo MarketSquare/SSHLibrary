@@ -1,2 +1,3 @@
-robotstatuschecker >= 1.3
+robotframework >= 4.0
+robotstatuschecker == 1.5.1
 robotbackgroundlogger >= 1.2

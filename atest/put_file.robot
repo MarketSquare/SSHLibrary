@@ -94,21 +94,22 @@ Put File And Specify Remote Newlines
 Put File With Pattern In Source File Name
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
-    Put File  ${LOCAL TEXTFILES}${/}?est*.txt  ${REMOTE TEST ROOT}/
+    Put File  ${LOCAL TEXTFILES}${/}?est*.txt  ${REMOTE TEST ROOT}/
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${FILE WITH NEWLINES NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With SCP And Pattern Matching
+    [Tags]  pybot
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
-    Put File  ${LOCAL TEXTFILES}${/}tes*.txt  ${REMOTE TEST ROOT}/  scp=ALL
+    Put File  ${LOCAL TEXTFILES}${/}tes*.txt  ${REMOTE TEST ROOT}/  scp=ALL
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With Pattern In Source Directory Name
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
-    Put File  ${LOCAL TEST DATA}${/}text*es${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/
+    Put File  ${LOCAL TEST DATA}${/}text*es${/}${TEST FILE NAME}  ${REMOTE TEST ROOT}/
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 

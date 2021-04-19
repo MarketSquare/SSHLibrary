@@ -46,6 +46,7 @@ Get File From Path Not Under Remote Home With SCP (all)
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File With SCP And Pattern Matching
+    [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     SSH.Get File  ${REMOTE TEST ROOT}/*est*.txt  ${LOCAL TMPDIR}${/}  scp=ALL
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt

@@ -239,7 +239,7 @@ class AbstractSSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config_host=False, keep_alive_interval=None):
+                              jumphost_connection=None, read_config=False, keep_alive_interval=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -287,7 +287,7 @@ class AbstractSSHClient(object):
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
                                         proxy_cmd, jumphost_connection,
-                                        read_config_host, keep_alive_interval)
+                                        read_config, keep_alive_interval)
         except SSHClientException:
             self.client.close()
             raise SSHClientException("Login with public key failed for user "
@@ -305,7 +305,7 @@ class AbstractSSHClient(object):
 
     def _login_with_public_key(self, username, keyfile, password,
                                allow_agent, look_for_keys, proxy_cmd,
-                               jumphost_index_or_alias, read_config_host, keep_alive_interval):
+                               jumphost_index_or_alias, read_config, keep_alive_interval):
         raise NotImplementedError
 
     @staticmethod
@@ -659,7 +659,9 @@ class AbstractSSHClient(object):
 
     def _get_files_for_scp_all(self, source):
         sources = self.execute_command('dir %s' % source)
-        return sources[0].split('\n')
+        result = sources[0].split('\n')
+        result[:] = [x for x in result if x]  # remove empty empty entries
+        return result
 
     def get_directory(self, source, destination='.', recursive=False,
                       scp='OFF', scp_preserve_times=False):

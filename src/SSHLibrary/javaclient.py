@@ -61,7 +61,7 @@ class JavaSSHClient(AbstractSSHClient):
         return False
 
     def _login(self, username, password, allow_agent='ignored', look_for_keys='ignored',
-               proxy_cmd=None, jumphost_alias_or_index=None, read_config_host=False, keep_alive_interval=None):
+               proxy_cmd=None, jumphost_alias_or_index=None, read_config=False, keep_alive_interval=None):
         if allow_agent or look_for_keys or keep_alive_interval:
             raise JavaSSHClientException("Arguments 'allow_agent', 'look_for_keys', "
                                          "`jumphost_index_or_alias` and `keep_alive_interval`" 
@@ -72,7 +72,7 @@ class JavaSSHClient(AbstractSSHClient):
     def _login_with_public_key(self, username, key_file, password,
                                allow_agent='ignored', look_for_keys='ignored',
                                proxy_cmd=None, jumphost_alias_or_index=None,
-                               read_config_host=False, keep_alive_interval=None):
+                               read_config=False, keep_alive_interval=None):
         if allow_agent or look_for_keys or keep_alive_interval:
             raise JavaSSHClientException("Arguments 'allow_agent', 'look_for_keys', "
                                          "`jumphost_index_or_alias` and `keep_alive_interval`"
