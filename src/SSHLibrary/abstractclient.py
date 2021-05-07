@@ -981,7 +981,10 @@ class AbstractSFTPClient(object):
         :return: A new destination path.
         """
         if os.path.exists(destination) or destination == '.':
-            return destination + path_separator + self.get_parent_folder(source, path_separator)
+            fulpath_destination = os.path.join(destination, self.get_parent_folder(source, path_separator))
+            if not os.path.exists(fulpath_destination):
+                os.makedirs(fulpath_destination)
+            return fulpath_destination
         else:
             return destination
 
