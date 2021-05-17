@@ -278,7 +278,7 @@ class AbstractSSHClient(object):
             username = self._encode(username)
         if keyfile:
             self._verify_key_file(keyfile)
-            keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
+        keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
         try:
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
@@ -981,7 +981,10 @@ class AbstractSFTPClient(object):
         :return: A new destination path.
         """
         if os.path.exists(destination) or destination == '.':
-            return destination + path_separator + self.get_parent_folder(source, path_separator)
+            fullpath_destination = os.path.join(destination, self.get_parent_folder(source, path_separator))
+            if not os.path.exists(fullpath_destination):
+                os.makedirs(fullpath_destination)
+            return fullpath_destination
         else:
             return destination
 
