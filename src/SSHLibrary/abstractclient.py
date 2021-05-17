@@ -278,7 +278,7 @@ class AbstractSSHClient(object):
             username = self._encode(username)
         if keyfile:
             self._verify_key_file(keyfile)
-            keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
+        keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
         try:
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
