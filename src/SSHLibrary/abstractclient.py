@@ -472,7 +472,7 @@ class AbstractSSHClient(object):
         timeout = TimeEntry(timeout) if timeout else self.config.get('timeout')
         max_time = time.time() + timeout.value
         while time.time() < max_time:
-            output += self.read_char()
+            output += self.read()
             if matcher(output):
                 return output
             time.sleep(.00001) # Release GIL so paramiko I/O thread can run
