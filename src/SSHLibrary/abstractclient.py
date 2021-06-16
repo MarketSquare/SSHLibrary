@@ -21,6 +21,7 @@ import time
 import glob
 import posixpath
 import ntpath
+import sys
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
@@ -475,7 +476,7 @@ class AbstractSSHClient(object):
             output += self.read_char()
             if matcher(output):
                 return output
-            time.sleep(.00001) # Release GIL so paramiko I/O thread can run
+            sys.__stdout__.write('.\b')  # Release GIL so paramiko I/O thread can run
         raise SSHClientException("No match found for '%s' in %s\nOutput:\n%s."
                                  % (expected, timeout, output))
 
