@@ -58,3 +58,19 @@ File Should Not Exist Using Relative Path
     SSH.File Should Not Exist  ${target}
     Run Keyword And Expect Error  File '${target}' does not exist.
     ...                           SSH.File Should Exist  ${target}
+
+File Should Exist Using GLOB Patterns
+    ${target} =  Set Variable  ${REMOTE TEST ROOT NAME}/${SUBDIRECTORY NAME}/?[a][!b]*.txt
+    SSH.File Should Exist  ${target}
+
+File Should Not Exist Using GLOB Patterns
+    ${target} =  Set Variable  ${REMOTE TEST ROOT NAME}/${SUBDIRECTORY NAME}/?[a]z[!b]*.txt
+    SSH.File Should Not Exist  ${target}
+
+Directory Should Exist Using GLOB Patterns
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/[abcDAWF][!b]?*
+    SSH.Directory Should Exist  ${target}
+
+Directory Should Not Exist Using GLOB Patterns
+    ${target} =  Set Variable  ${REMOTE TEST ROOT}/z*
+    SSH.Directory Should Not Exist  ${target}

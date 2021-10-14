@@ -1833,8 +1833,11 @@ class SSHLibrary(object):
     def file_should_exist(self, path):
         """Fails if the given ``path`` does NOT point to an existing file.
 
+        Supports wildcard expansions described in `glob pattenrs`, but only on the last tag.
+
         Example:
         | `File Should Exist` | /boot/initrd.img |
+        | `File Should Exist` | /boot/*.img |
 
         Note that symlinks are followed:
         | `File Should Exist` | /initrd.img | # Points to /boot/initrd.img |
@@ -1845,8 +1848,11 @@ class SSHLibrary(object):
     def file_should_not_exist(self, path):
         """Fails if the given ``path`` points to an existing file.
 
+        Supports wildcard expansions described in `glob pattenrs`, but only on the last tag.
+
         Example:
         | `File Should Not Exist` | /non/existing |
+        | `File Should Not Exist` | /non/* |
 
         Note that this keyword follows symlinks. Thus the example fails if
         ``/non/existing`` is a link that points an existing file.
@@ -1857,8 +1863,11 @@ class SSHLibrary(object):
     def directory_should_exist(self, path):
         """Fails if the given ``path`` does not point to an existing directory.
 
+        Supports wildcard expansions described in `glob pattenrs`, but only on the last tag.
+
         Example:
         | `Directory Should Exist` | /usr/share/man |
+        | `Directory Should Exist` | /usr/share/* |
 
         Note that symlinks are followed:
         | `Directory Should Exist` | /usr/local/man | # Points to /usr/share/man/ |
@@ -1869,8 +1878,11 @@ class SSHLibrary(object):
     def directory_should_not_exist(self, path):
         """Fails if the given ``path`` points to an existing directory.
 
+        Supports wildcard expansions described in `glob pattenrs`, but only on the last tag.
+
         Example:
         | `Directory Should Not Exist` | /non/existing |
+        | `Directory Should Not Exist` | /non/* |
 
         Note that this keyword follows symlinks. Thus the example fails if
         ``/non/existing`` is a link that points to an existing directory.

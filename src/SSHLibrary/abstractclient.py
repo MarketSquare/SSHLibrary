@@ -21,6 +21,7 @@ import time
 import glob
 import posixpath
 import ntpath
+import fnmatch
 
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
@@ -716,6 +717,13 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.is_dir` for more documentation.
         """
+        has_glob = bool([ops for ops in '*?![' if(ops in path)])
+        if has_glob:
+            dir_dir = path[:(-len(path.split(self.config.path_separator)[-1]))]
+            dirs = self.sftp_client.list_dirs_in_dir(dir_dir)
+            for dirname in dirs:
+                if fnmatch.fnmatch(dirname, path.split(self.config.path_separator)[-1]):
+                    return self.sftp_client.is_dir(dir_dir + dirname)
         return self.sftp_client.is_dir(path)
 
     def is_file(self, path):
@@ -723,6 +731,15 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.is_file` for more documentation.
         """
+        has_glob = bool([ops for ops in '*?![' if(ops in path)])
+        if has_glob:
+            file_dir = path[:(-len(path.split(self.config.path_separator)[-1]))]
+            if file_dir == '':
+                return self.sftp_client.is_file(path)
+            files = self.sftp_client.list_files_in_dir(file_dir)
+            for filename in files:
+                if fnmatch.fnmatch(filename, path.split(self.config.path_separator)[-1]):
+                    return self.sftp_client.is_file(file_dir + filename)
         return self.sftp_client.is_file(path)
 
     def _create_client(self, scp):
