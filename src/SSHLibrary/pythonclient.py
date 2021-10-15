@@ -495,7 +495,8 @@ class RemoteCommand(AbstractCommand):
         if sudo_password is None:
             self._shell.exec_command(command)
         else:
-            self._shell.exec_command('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
+            self._shell.exec_command('sudo --stdin --prompt "" %s' % (command))
+            self._shell.sendall(sudo_password + '\n')
 
     def _invoke(self):
         self._shell.invoke_subsystem(self._command)
