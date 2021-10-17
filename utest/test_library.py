@@ -26,10 +26,10 @@ class TestSSHLibraryConfiguration(unittest.TestCase):
 
     def _assert_config(self, cfg, timeout=3, newline='\n', prompt=None,
                        loglevel='INFO'):
-        self.assertEquals(cfg.timeout, timeout)
-        self.assertEquals(cfg.newline, newline)
-        self.assertEquals(cfg.prompt, prompt)
-        self.assertEquals(cfg.loglevel, loglevel)
+        self.assertEqual(cfg.timeout, timeout)
+        self.assertEqual(cfg.newline, newline)
+        self.assertEqual(cfg.prompt, prompt)
+        self.assertEqual(cfg.loglevel, loglevel)
 
 
 class TestSSHClientConfiguration(unittest.TestCase):
@@ -55,12 +55,12 @@ class TestSSHClientConfiguration(unittest.TestCase):
 
     def _assert_config(self, cfg, host=HOSTNAME, timeout=3, newline='\n',
                        prompt=None, port=22, term_type='vt100'):
-        self.assertEquals(cfg.host, host)
-        self.assertEquals(cfg.timeout, timeout)
-        self.assertEquals(cfg.newline, newline)
-        self.assertEquals(cfg.prompt, prompt)
-        self.assertEquals(cfg.term_type, term_type)
-        self.assertEquals(cfg.port, port)
+        self.assertEqual(cfg.host, host)
+        self.assertEqual(cfg.timeout, timeout)
+        self.assertEqual(cfg.newline, newline)
+        self.assertEqual(cfg.prompt, prompt)
+        self.assertEqual(cfg.term_type, term_type)
+        self.assertEqual(cfg.port, port)
 
 
 if __name__ == '__main__':

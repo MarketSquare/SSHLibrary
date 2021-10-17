@@ -39,19 +39,19 @@ class TestConfigurationEntries(unittest.TestCase):
         self._assert_entry(entry, '\r\n')
 
     def _assert_entry(self, entry, expected_value):
-        self.assertEquals(entry.value, expected_value)
+        self.assertEqual(entry.value, expected_value)
 
 
 class TestConfiguration(unittest.TestCase):
 
     def test_creating_configuration(self):
         cfg = Configuration(name=StringEntry(STRING_VALUE))
-        self.assertEquals(cfg.name, STRING_VALUE)
+        self.assertEqual(cfg.name, STRING_VALUE)
 
     def test_updating_configuration_values(self):
         cfg = Configuration(entry=StringEntry('other value'))
         cfg.update(entry=STRING_VALUE)
-        self.assertEquals(cfg.entry, STRING_VALUE)
+        self.assertEqual(cfg.entry, STRING_VALUE)
 
     def test_missing_config_item(self):
         self.assertRaises(ConfigurationException,

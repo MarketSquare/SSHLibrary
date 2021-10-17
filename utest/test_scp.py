@@ -19,7 +19,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
             client = abstractclient.AbstractSFTPClient()
             client.is_dir = lambda x: False
             remote = client._get_put_file_destinations(src, dest, '/')[0]
-            self.assertEquals(remote, exp)
+            self.assertEqual(remote, exp)
 
     def test_get_file(self):
         data = [(['foo.txt'], '/home/test/', ['/home/test/foo.txt']),
@@ -31,7 +31,7 @@ class TestRemoteAndLocalPathResolution(unittest.TestCase):
         for src, dest, exp in data:
             client = abstractclient.AbstractSFTPClient()
             local = client._get_get_file_destinations(src, dest)
-            self.assertEquals(local, exp)
+            self.assertEqual(local, exp)
 
 
 class TestSSHClientGetMethod(unittest.TestCase):
