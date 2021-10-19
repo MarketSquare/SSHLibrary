@@ -1834,6 +1834,7 @@ class SSHLibrary(object):
         """Fails if the given ``path`` does NOT point to an existing file.
 
         Supports wildcard expansions described in `glob patterns`.
+        See :py:class:`SSHLibrary` for more documentation on glob patterns.
 
         Example:
         | `File Should Exist` | /boot/initrd.img |
@@ -1849,6 +1850,7 @@ class SSHLibrary(object):
         """Fails if the given ``path`` points to an existing file.
 
         Supports wildcard expansions described in `glob patterns`.
+        See :py:class:`SSHLibrary` for more documentation on glob patterns.
 
         Example:
         | `File Should Not Exist` | /non/existing |
@@ -1864,6 +1866,7 @@ class SSHLibrary(object):
         """Fails if the given ``path`` does not point to an existing directory.
 
         Supports wildcard expansions described in `glob patterns`, but only on the current directory.
+        See :py:class:`SSHLibrary` for more documentation on glob patterns.
 
         Example:
         | `Directory Should Exist` | /usr/share/man |
@@ -1879,6 +1882,7 @@ class SSHLibrary(object):
         """Fails if the given ``path`` points to an existing directory.
 
         Supports wildcard expansions described in `glob patterns`, but only on the current directory.
+        See :py:class:`SSHLibrary` for more documentation on glob patterns.
 
         Example:
         | `Directory Should Not Exist` | /non/existing |
