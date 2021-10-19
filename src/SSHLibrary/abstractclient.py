@@ -715,6 +715,12 @@ class AbstractSSHClient(object):
     def is_dir(self, path):
         """Calls :py:meth:`AbstractSFTPClient.is_dir` with the given `path`.
 
+        :param str path: Path to check for directory. Supports GLOB Patterns.
+
+        :returns: Boolean indicating is the directory is present or not.
+
+        :rtype: bool
+
         See :py:meth:`AbstractSFTPClient.is_dir` for more documentation.
         """
         has_glob = bool([ops for ops in '*?![' if(ops in path)])
@@ -728,6 +734,12 @@ class AbstractSSHClient(object):
 
     def is_file(self, path):
         """Calls :py:meth:`AbstractSFTPClient.is_file` with the given `path`.
+
+        :param str path: Path to check for file. Supports GLOB Patterns.
+
+        :returns: Boolean indicating is the file is present or not.
+
+        :rtype: bool
 
         See :py:meth:`AbstractSFTPClient.is_file` for more documentation.
         """
