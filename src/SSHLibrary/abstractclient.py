@@ -743,8 +743,7 @@ class AbstractSSHClient(object):
 
         See :py:meth:`AbstractSFTPClient.is_file` for more documentation.
         """
-        has_glob = bool([ops for ops in '*?![' if(ops in path)])
-        if has_glob:
+        if bool([ops for ops in '*?![' if(ops in path)]):
             file_dir = path[:(-len(path.split(self.config.path_separator)[-1]))]
             if file_dir == '':
                 return self.sftp_client.is_file(path)
