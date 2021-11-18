@@ -1,4 +1,4 @@
-name: SwingLibrary CI
+name: SSHLibrary CI
 
 on: [ push, pull_request ]
 
