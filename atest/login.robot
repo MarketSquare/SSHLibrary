@@ -65,6 +65,14 @@ Login With No Password
 	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
 	Login  ${USERNAME_NOPASSWD}
 
+Login With Explicit No Password
+	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
+	Login  ${USERNAME_NOPASSWD}  ${EMPTY_STRING}
+
+Login With Empty Quotes No Password
+	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
+	Login  ${USERNAME_NOPASSWD}  ""
+
 #Login Using Config File Proxy Command
 #    TODO  fix failing with Travis-CI
 #    [Tags]  pybot

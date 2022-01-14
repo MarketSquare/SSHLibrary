@@ -9,11 +9,15 @@ RUN python3.7 -m pip install --upgrade pip
 RUN python3.7 -m pip install --upgrade robotframework-sshlibrary robotbackgroundlogger robotstatuschecker
 ARG repository
 RUN apt-get install -y openssh-server sudo git
-RUN useradd test -m -s /bin/bash
+RUN useradd --create-home --shell /bin/bash test-nopasswd
+RUN passwd --delete test-nopasswd
+RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+RUN systemctl restart sshd
+RUN useradd test --create-home --shell /bin/bash test
 RUN (echo 'test'; echo 'test') | passwd test
 RUN echo -e "test\n test" | adduser test sudo
 RUN sh -c "echo 'test   ALL=(ALL:ALL) PASSWD:ALL' > /etc/sudoers.d/passworded"
-RUN useradd -m testkey -s /bin/bash 
+RUN useradd -m testkey -s /bin/bash
 RUN sudo -E su test -c echo "$'export PS1='\u@\h \W \$ '' >> /home/test/.bashrc"
 RUN sudo -E su testkey -c echo "$'export PS1='\u@\h \W \$ '' >> /home/testkey/.bashrc"
 RUN sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"
@@ -28,6 +32,6 @@ RUN echo 'Subsystem subsys echo "Subsystem invoked."' >> /etc/ssh/sshd_config
 RUN sudo mkdir -p ~/.ssh
 RUN echo 'Host test_hostname\n    Hostname localhost\n' >> ~/.ssh/config
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8 
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8

@@ -47,11 +47,29 @@ Setup on Linux
 
 - exit
 
+- Create a new user ``test-nopasswd``:
+
+::
+
+	sudo useradd --create-home --shell /bin/bash test-nopasswd
+
+- Delete it's password
+
+::
+
+	sudo passwd --delete test-nopasswd
+
 - Create a new user ``testkey``:
 
 ::
 
     sudo useradd -m testkey -s /bin/bash
+
+- Allow passwordless authentication
+
+::
+
+	echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 
 - Log in as ``testkey``:
 
