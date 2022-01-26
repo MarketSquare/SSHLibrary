@@ -35,7 +35,8 @@ except ImportError:
 
 from .abstractclient import (AbstractShell, AbstractSFTPClient,
                              AbstractSSHClient, AbstractCommand,
-                             SSHClientException, SFTPFileInfo)
+                             SSHClientException, SSHClientTimeoutException,
+                             SFTPFileInfo)
 from .pythonforward import LocalPortForwarding
 from .utils import is_bytes, is_list_like, is_unicode, is_truthy
 from robot.api import logger
@@ -431,8 +432,33 @@ class SCPTransferClient(SFTPClient):
     def _get_file(self, remote_path, local_path, scp_preserve_times=False):
         self._scp_client.get(remote_path, local_path, preserve_times=is_truthy(scp_preserve_times))
 
+class OutputBuffers():
+    def __init__(self, shell):
+        self._shell = shell
+        self._stdout_filebuffer = shell.makefile('rb', -1)
+        self._stderr_filebuffer = shell.makefile_stderr('rb', -1)
+        self._stdouts = []
+        self._stderrs = []
+
+    def read(self, do_logging=False):
+        if self._shell.recv_ready():
+            stdout_output = self._stdout_filebuffer.read(len(self._shell.in_buffer))
+            if do_logging:
+                logger.console(stdout_output)
+            self._stdouts.append(stdout_output)
+        if self._shell.recv_stderr_ready():
+            stderr_output = self._stderr_filebuffer.read(len(self._shell.in_stderr_buffer))
+            if do_logging:
+                logger.console(stderr_output)
+            self._stderrs.append(stderr_output)
+
+    def serialize(self, encoding):
+        stdout = (b''.join(self._stdouts) + self._stdout_filebuffer.read()).decode(encoding)
+        stderr = (b''.join(self._stderrs) + self._stderr_filebuffer.read()).decode(encoding)
+        return stdout, stderr
 
 class RemoteCommand(AbstractCommand):
+    _buffers = None
 
     def read_outputs(self, timeout=None, output_during_execution=False, output_if_timeout=False):
         stderr, stdout = self._receive_stdout_and_stderr(timeout, output_during_execution, output_if_timeout)
@@ -440,46 +466,44 @@ class RemoteCommand(AbstractCommand):
         self._shell.close()
         return stdout, stderr, rc
 
+    def read_unfinished_outputs(self):
+        if self._buffers is None:
+            return None, None
+        if not self._shell.closed:
+            self._buffers.read() # Get remaining unread output from channel
+
+        stdout, stderr = self._buffers.serialize(self._encoding)
+        self._cleanup_buffers()
+
+        return stdout, stderr
+
+    def _cleanup_buffers(self):
+        self._buffers = None
+
     def _receive_stdout_and_stderr(self, timeout=None, output_during_execution=False, output_if_timeout=False):
-        stdout_filebuffer = self._shell.makefile('rb', -1)
-        stderr_filebuffer = self._shell.makefile_stderr('rb', -1)
-        stdouts = []
-        stderrs = []
+        self._buffers = OutputBuffers(self._shell)
         while self._shell_open():
-            self._flush_stdout_and_stderr(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout,
-                                          output_during_execution, output_if_timeout)
+            self._flush_stdout_and_stderr(timeout, output_during_execution, output_if_timeout)
             time.sleep(0.01)  # lets not be so busy
-        stdout = (b''.join(stdouts) + stdout_filebuffer.read()).decode(self._encoding)
-        stderr = (b''.join(stderrs) + stderr_filebuffer.read()).decode(self._encoding)
+
+        stdout, stderr = self._buffers.serialize(self._encoding)
+
+        self._buffers = None
+
         return stderr, stdout
 
-    def _flush_stdout_and_stderr(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, timeout=None,
-                                 output_during_execution=False, output_if_timeout=False):
+    def _flush_stdout_and_stderr(self, timeout=None, output_during_execution=False, output_if_timeout=False):
+        do_logging = is_truthy(output_during_execution)
         if timeout:
             end_time = time.time() + timeout
             while time.time() < end_time:
                 if self._shell.status_event.wait(0):
                     break
-                self._output_logging(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution)
+                self._buffers.read(do_logging)
             if not self._shell.status_event.isSet():
-                if is_truthy(output_if_timeout):
-                    logger.info(stdouts)
-                    logger.info(stderrs)
-                raise SSHClientException('Timed out in %s seconds' % int(timeout))
+                raise SSHClientTimeoutException('Timed out in %s seconds' % int(timeout))
         else:
-            self._output_logging(stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution)
-
-    def _output_logging(self, stderr_filebuffer, stderrs, stdout_filebuffer, stdouts, output_during_execution=False):
-        if self._shell.recv_ready():
-            stdout_output = stdout_filebuffer.read(len(self._shell.in_buffer))
-            if is_truthy(output_during_execution):
-                logger.console(stdout_output)
-            stdouts.append(stdout_output)
-        if self._shell.recv_stderr_ready():
-            stderr_output = stderr_filebuffer.read(len(self._shell.in_stderr_buffer))
-            if is_truthy(output_during_execution):
-                logger.console(stderr_output)
-            stderrs.append(stderr_output)
+            self._buffers.read(do_logging)
 
     def _shell_open(self):
         return not (self._shell.closed or

@@ -23,15 +23,18 @@ import posixpath
 import ntpath
 import fnmatch
 
+from robot.errors import TimeoutError
+
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from .logger import logger
-from .utils import is_bytes, is_string, unicode, is_list_like
-
+from .utils import is_bytes, is_string, unicode, is_list_like, is_truthy
 
 class SSHClientException(RuntimeError):
     pass
 
+class SSHClientTimeoutException(SSHClientException):
+    pass
 
 class _ClientConfiguration(Configuration):
 
@@ -381,10 +384,23 @@ class AbstractSSHClient(object):
         """
         if timeout:
             timeout = float(TimeEntry(timeout).value)
-        try:
-            return self._started_commands.pop().read_outputs(timeout, output_during_execution, output_if_timeout)
-        except IndexError:
+
+        if not self._started_commands:
             raise SSHClientException('No started commands to read output from.')
+
+        command = self._started_commands.pop()
+        try:
+            return command.read_outputs(timeout, output_during_execution, output_if_timeout)
+        except (TimeoutError, SSHClientTimeoutException):
+            if is_truthy(output_if_timeout):
+                try:
+                    stdout, stderr = command.read_unfinished_outputs()
+                    if stdout or stderr:
+                        logger.info("---- Stdout ----\n" + stdout + ("-" * 16) + "\n")
+                        logger.info("---- Stderr ----\n" + stderr + ("-" * 16) + "\n")
+                except NotImplementedError:
+                    pass
+            raise
 
     def write(self, text, add_newline=False):
         """Writes `text` in the current shell.
@@ -1350,6 +1366,15 @@ class AbstractCommand(object):
             `stdout` and `stderr` as strings and `return_code` as an integer.
         """
         raise NotImplementedError
+
+    def read_unfinished_outputs(self):
+        """Returns the output of the last command, that hasn't been read.
+        This can be used, when the execution is aborted by a test timeout.
+
+        :returns: A 2-tuple (stdout, stderr) with values
+            `stdout` and `stderr` as strings.
+        """
+        return NotImplementedError
 
 
 class SFTPFileInfo(object):
