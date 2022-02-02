@@ -118,6 +118,7 @@ Putting Multiple Source Files To Single File Fails
     ...                           Put File  ${LOCAL TEXTFILES}${/}?est*.txt  invalid.txt
 
 Put File Overwrite If User In The Same Group
+   [Tags]  no-gh-actions
    Put File  ${LOCAL TEXTFILES}${/}${TEST FILE NAME}
    SSH.File Should Exist  ${TEST FILE NAME}
    Add testkey User To Group test And Set Permissions

@@ -54,7 +54,7 @@ Switch to closed connection jybot
     Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
 
 Get pre-login banner without open connection
-    [Tags]   pybot
+    [Tags]   pybot  no-gh-actions
     ${banner} =  Get Pre Login Banner  ${HOST}
     Should Be Equal  ${banner}  Testing pre-login banner\n
 
@@ -136,7 +136,7 @@ Write Bare In Teardown Should Not Hang If Auth Failed
   [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write Bare  ls
 
 Login With Agent
-   [Tags]  pybot
+   [Tags]  pybot  no-gh-actions
    Open Connection  ${HOST}
    Login  ${KEY USERNAME}  allow_agent=True
 

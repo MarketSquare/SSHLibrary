@@ -1,0 +1,59 @@
+name: SSHLibrary Python CI
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-18.04' ]
+        python-version: [ 3.8 ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install paramiko==2.7.2 scp==0.14.1
+      - name: Configure test environment for Linux
+        run: |
+          sudo useradd test -m -s /bin/bash
+          (echo 'test'; echo 'test') | sudo passwd test
+          sudo -E su test -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/test/.bashrc"
+          sudo sh -c "echo 'test   ALL=(ALL:ALL) PASSWD:ALL' > /etc/sudoers.d/passworded"
+          sudo useradd -m testkey -s /bin/bash
+          sudo -E su testkey -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/testkey/.bashrc"
+          sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"
+          sudo -E su testkey -c "ssh-keygen -f /home/testkey/.ssh/id_rsa -t rsa -N ''"
+          sudo -E su testkey -c "cp /home/testkey/.ssh/id_rsa.pub /home/testkey/.ssh/authorized_keys"
+          sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
+          sudo -E su testkey -c "chmod 600 /home/testkey/.ssh/authorized_keys"
+          cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/
+          sudo -E su testkey -c "chmod 700 /home/testkey/.ssh"
+          sudo -E su testkey -c "chmod 600 /home/testkey/.ssh/id_rsa"
+          sudo chmod 600 atest/testdata/keyfiles/id_rsa
+          sudo bash -c "echo 'Testing pre-login banner' > /etc/ssh/sshd-banner"
+          sudo bash -c "echo 'Banner /etc/ssh/sshd-banner' >> /etc/ssh/sshd_config"
+          sudo bash -c "echo 'Subsystem subsys echo \"Subsystem invoked.\"' >> /etc/ssh/sshd_config"
+          mkdir ~/.ssh
+          echo $'Host test_hostname\n    Hostname localhost\n    User test\n    Port 22\n' >> ~/.ssh/config
+          echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n    IdentityFile atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
+          echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
+          sudo service ssh restart
+          eval "$(ssh-agent -s)"
+          ssh-add atest/testdata/keyfiles/id_rsa
+      - name: Run tests
+        run: |
+          python atest/run.py -e no-gh-actions atest
+      - uses: actions/upload-artifact@v1
+        if: success() || failure()
+        with:
+          name: Test Results - ${{ runner.os }}
+          path: "atest/results/"
