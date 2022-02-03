@@ -23,7 +23,7 @@ jobs:
         run: |
           wget -nv "http://search.maven.org/remotecontent?filepath=org/python/jython-installer/${{ matrix.jython-version }}/jython-installer-${{ matrix.jython-version }}.jar" -O jytinst.jar
           java -jar jytinst.jar -s -d jython/
-          jython/bin/jython -m pip install -r requirements-dev.txt
+          jython/bin/jython -m easy_install robotframework robotstatuschecker robotbackgroundlogger
       - name: Configure test environment for Linux
         run: |
           sudo useradd test -m -s /bin/bash
