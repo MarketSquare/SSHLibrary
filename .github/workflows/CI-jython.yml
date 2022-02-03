@@ -23,7 +23,7 @@ jobs:
         run: |
           wget -nv "http://search.maven.org/remotecontent?filepath=org/python/jython-installer/${{ matrix.jython-version }}/jython-installer-${{ matrix.jython-version }}.jar" -O jytinst.jar
           java -jar jytinst.jar -s -d jython/
-          jython/bin/jython -m pip install -r requirements-dev.txt
+          jython/bin/jython -m easy_install robotframework==4.1.3 robotstatuschecker==1.5.1 robotbackgroundlogger
       - name: Configure test environment for Linux
         run: |
           sudo useradd test -m -s /bin/bash
@@ -53,6 +53,7 @@ jobs:
           ssh-add atest/testdata/keyfiles/id_rsa
       - name: Run tests
         run: |
+          export CLASSPATH=$CLASSPATH:./lib/*
           jython/bin/jython atest/run.py -e no-gh-actions atest
       - uses: actions/upload-artifact@v1
         if: success() || failure()
