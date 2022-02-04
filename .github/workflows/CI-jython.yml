@@ -26,6 +26,11 @@ jobs:
           jython/bin/jython -m easy_install robotframework==4.1.3 robotstatuschecker==1.5.1 robotbackgroundlogger
       - name: Configure test environment for Linux
         run: |
+          sudo useradd --create-home --shell /bin/bash test-nopasswd
+          sudo passwd --delete test-nopasswd
+          sudo echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+          sudo useradd test -m -s /bin/bash
+          systemctl restart sshd
           sudo useradd test -m -s /bin/bash
           (echo 'test'; echo 'test') | sudo passwd test
           sudo -E su test -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/test/.bashrc"
