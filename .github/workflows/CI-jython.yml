@@ -28,9 +28,7 @@ jobs:
         run: |
           sudo useradd --create-home --shell /bin/bash test-nopasswd
           sudo passwd --delete test-nopasswd
-          sudo echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
-          sudo useradd test -m -s /bin/bash
-          systemctl restart sshd
+          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
           sudo useradd test -m -s /bin/bash
           (echo 'test'; echo 'test') | sudo passwd test
           sudo -E su test -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/test/.bashrc"

@@ -28,7 +28,6 @@ jobs:
           sudo passwd --delete test-nopasswd
           echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
           sudo useradd test -m -s /bin/bash
-          systemctl restart sshd
           (echo 'test'; echo 'test') | sudo passwd test
           sudo -E su test -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/test/.bashrc"
           sudo sh -c "echo 'test   ALL=(ALL:ALL) PASSWD:ALL' > /etc/sudoers.d/passworded"
