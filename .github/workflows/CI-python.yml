@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo useradd --create-home --shell /bin/bash test-nopasswd
           sudo passwd --delete test-nopasswd
-          sudo echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
           sudo useradd test -m -s /bin/bash
           systemctl restart sshd
           (echo 'test'; echo 'test') | sudo passwd test
