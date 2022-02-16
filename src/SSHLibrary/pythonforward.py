@@ -1,9 +1,16 @@
+import os
 import select
 import socket
+import sys
 import threading
-from robot.utils import platform
 from .logger import logger
-if platform.PY2 and platform.WINDOWS:
+
+
+PY2 = sys.version_info[0] == 2
+WINDOWS = os.sep != "/"
+
+
+if PY2 and WINDOWS:
     import win_inet_pton
 try:
     import SocketServer
