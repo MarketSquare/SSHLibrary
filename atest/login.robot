@@ -1,5 +1,4 @@
 *** Settings ***
-Default Tags     pybot   jybot
 Resource       resources/common.robot
 Test Setup     Open Connection  ${HOST}
 Test Teardown  Close All Connections
@@ -52,18 +51,15 @@ Logging In Returns Server Output If Prompt Is Set
     Should Be Equal  ${output.strip()}  ${EMPTY}
 
 Login Using Config File
-    [Tags]   pybot
     [Setup]  Open Connection  ${TEST_HOSTNAME}  prompt=${PROMPT}
     Login  password=test  read_config=True
 
 Login With Public Key Using Config File
-    [Tags]  pybot
     [Setup]  Open Connection   ${TESTKEY_HOSTNAME}  prompt=${PROMPT}
     Login With Public Key  read_config=True
 
-#Login Using Config File Proxy Command
-#    TODO  fix failing with Travis-CI
-#    [Tags]  pybot
-#    [Setup]  Open Connection   ${TEST_PROXY_HOSTNAME}  prompt=${PROMPT}
-#    ${output}=  Login  password=test  read_config=True
-#    Should Contain  ${output}  test@
+Login Using Config File Proxy Command
+    [Tags]  no-gh-actions
+    [Setup]  Open Connection   ${TEST_PROXY_HOSTNAME}  prompt=${PROMPT}
+    ${output}=  Login  password=test  read_config=True
+    Should Contain  ${output}  test@

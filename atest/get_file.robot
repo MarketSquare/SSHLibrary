@@ -1,5 +1,4 @@
 *** Settings ***
-Default Tags    pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
@@ -46,7 +45,6 @@ Get File From Path Not Under Remote Home With SCP (all)
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File With SCP And Pattern Matching
-    [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     SSH.Get File  ${REMOTE TEST ROOT}/*est*.txt  ${LOCAL TMPDIR}${/}  scp=ALL
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
@@ -98,7 +96,6 @@ Get File That Is A Symlink Directory
     [Teardown]  OS.Remove File  ${TEST FILE NAME}
 
 Get File With SCP (transfer) And Preserve Time
-    [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
@@ -111,7 +108,6 @@ Get File With SCP (transfer) And Preserve Time
     [Teardown]  Remove Tmp Dir And Remote File
 
 Get File With SCP (all) And Preserve Time
-    [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
