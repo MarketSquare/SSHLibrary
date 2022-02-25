@@ -266,12 +266,11 @@ class RemoteCommand(AbstractCommand):
         self._shell.execCommand(command)
 
     def _execute_with_sudo(self, sudo_password=None):
-        command = self._command.decode(self._encoding)
+        command = 'sudo ' + self._command.decode(self._encoding)
         if sudo_password is None:
-            self._shell.execCommand('sudo ' + command)
+            self._shell.execCommand(command)
         else:
-            self._shell.execCommand('sudo --stdin --prompt "" %s' % (command))
-            self._shell.write('\n\n' + sudo_password + '\n')
+            self._shell.execCommand('echo %s | sudo --stdin --prompt "" %s' % (sudo_password, command))
 
     def _invoke(self):
         command = self._command.decode(self._encoding)
