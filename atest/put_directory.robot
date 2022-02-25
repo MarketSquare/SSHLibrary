@@ -81,7 +81,7 @@ Put Directory And Check For Proper Permissions
 	[Teardown]  Execute Command  rm -rf ${CURDIR}${/}testdata${/}to_put
 
 Put Directory With SCP (transfer) And Preserve Time
-    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
     Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=TRANSFER  scp_preserve_times=True
     Remote Directory Should Exist With Subdirectories  ./textfiles
     ${last_access_time} =  Execute Command  stat -c %X ./textfiles/test_file.txt
@@ -91,8 +91,9 @@ Put Directory With SCP (transfer) And Preserve Time
     [Teardown]  Execute Command  rm -rf ./textfiles
 
 Put Directory With SCP (all) And Preserve Time
-    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
     Put Directory  ${LOCAL TEXTFILES}  .  recursive=True  scp=ALL  scp_preserve_times=True
+    Remote Directory Should Exist With Subdirectories  ./textfiles
     ${last_access_time} =  Execute Command  stat -c %X ./textfiles
     ${last_modify_time} =  Execute Command  stat -c %X ./textfiles
     Should Be True  ${current_time} > ${last_access_time}
