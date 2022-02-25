@@ -198,11 +198,9 @@ class SSHClient(object):
         :param str password: Password for the `username`.
 
         :param bool allow_agent: enables the connection to the SSH agent.
-            This option does not work when using Jython.
 
         :param bool look_for_keys: Whether the login method should look for
             available public keys for login. This will also enable ssh agent.
-            This option is ignored when using Jython.
 
         :param str proxy_cmd: Proxy command
         :param str delay: The `delay` passed to :py:meth:`read` for reading
@@ -267,11 +265,9 @@ class SSHClient(object):
         :param str password: Password (if needed) for unlocking the `keyfile`.
 
         :param boolean allow_agent: enables the connection to the SSH agent.
-            This option does not work when using Jython.
 
         :param boolean look_for_keys: enables the searching for discoverable
-            private key files in ~/.ssh/. This option also does not work when
-            using Jython.
+            private key files in ~/.ssh/.
 
         :param str delay: The `delay` passed to :py:meth:`read` for reading
             the output after logging in. The delay is only effective if

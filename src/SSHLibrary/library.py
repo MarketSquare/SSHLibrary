@@ -52,11 +52,9 @@ class SSHLibrary(object):
     - Ensuring that files or directories exist on the remote machine
       (e.g. `File Should Exist` and `Directory Should Not Exist`).
 
-    This library works both with Python and Jython, but uses different
-    SSH modules internally depending on the interpreter. See
+    This library works both with Python 3.6+. See
     [http://robotframework.org/SSHLibrary/#installation|installation instructions]
-    for more details about the dependencies. IronPython is unfortunately
-    not supported. Python 3 is supported starting from SSHLibrary 3.0.0.
+    for more details about the dependencies.
 
     == Table of contents ==
 
@@ -392,9 +390,7 @@ class SSHLibrary(object):
      There are some limitations to the current SCP implementation::
      - When using SCP, files cannot be altered during transfer and ``newline`` argument does not work.
      - If ``scp=ALL`` only ``source`` and ``destination`` arguments will work on the keywords. The directories are
-     transferred recursively. Also, when running with Jython `Put Directory` and `Get Directory` won't work due to
-     current Trilead implementation.
-     - If running with Jython you can encounter some encoding issues when transferring files with non-ascii characters.
+     transferred recursively.
 
      SCP transfer was introduced in SSHLibrary 3.3.0.
 
@@ -403,8 +399,7 @@ class SSHLibrary(object):
     preserve the original modify time and access time of transferred files and directories. This is done using the
     ``scp_preserve_times`` argument. This argument works only when ``scp`` argument is set to ``TRANSFER`` or ``ALL``.
     When moving directory with ``scp`` set to ``TRANSFER`` and ``scp_preserve_times`` is enabled only the files inside
-    the director will keep their original timestamps. Also, when running with Jython ``scp_preserve_times`` won't work
-    due to current current Trilead implementation.
+    the director will keep their original timestamps.
 
     ``scp_preserve_times`` was introduced in SSHLibrary 3.6.0.
 
@@ -582,8 +577,6 @@ class SSHLibrary(object):
 
         | `Open Connection`          | 192.168.1.1    |
         | `Set Client Configuration` | term_type=ansi | width=40 |
-
-        *Note:* Setting ``width`` and ``height`` does not work when using Jython.
         """
         self.current.config.update(timeout=timeout, newline=newline,
                                    prompt=prompt, term_type=term_type,
@@ -608,8 +601,6 @@ class SSHLibrary(object):
         | `Open Connection`    | build.local.net | # Logged     |
         | # Do something with the connections    |
         | # Check myserver.log for detailed debug information   |
-
-        *Note:* This keyword does not work when using Jython.
         """
         if SSHClient.enable_logging(logfile):
             self._log(f'SSH log is written to <a href="{logfile}">file</a>.',
@@ -622,10 +613,6 @@ class SSHLibrary(object):
 
         The new connection is made active. Possible existing connections
         are left open in the background.
-
-        Note that on Jython this keyword actually opens a connection and
-        will fail immediately on unreachable hosts. On Python the actual
-        connection attempt will not be done until `Login` is called.
 
         This keyword returns the index of the new connection which can be used
         later to switch back to it. Indices start from ``1`` and are reset
@@ -678,8 +665,6 @@ class SSHLibrary(object):
         The connection to the server can also be made like this:
 
         | `Open connection` | my_custom_hostname |
-
-        ``Host`` entries are not read from config file when running with Jython.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -972,9 +957,6 @@ class SSHLibrary(object):
 
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
 
-        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias``,
-        ``read_config`` and ``keep_alive_interval`` do not work when using Jython.
-
         Example that logs in and returns the output:
 
         | `Open Connection` | linux.server.com |
@@ -1065,9 +1047,6 @@ class SSHLibrary(object):
         set to ``0``, which means sending the ``keepalive`` packet is disabled.
 
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
-
-        *Note:* ``allow_agent``, ``look_for_keys``, ``proxy_cmd``, ``jumphost_index_or_alias``,
-        ``read_config`` and ``keep_alive_interval`` do not work when using Jython.
         """
         if proxy_cmd and jumphost_index_or_alias:
             raise ValueError("`proxy_cmd` and `jumphost_connection` are mutually exclusive SSH features.")
@@ -1114,8 +1093,6 @@ class SSHLibrary(object):
         | `Should Be Equal`  | ${banner}              | Testing pre-login banner |
 
         New in SSHLibrary 3.0.0.
-
-        *Note:* This keyword does not work when using Jython.
         """
         if host:
             banner = SSHClient.get_banner_without_login(host, port)
@@ -1184,8 +1161,7 @@ class SSHLibrary(object):
         directly connected to the requested subsystem.
 
         ``forward_agent`` determines whether to forward the local SSH Agent process to the process being executed.
-        This assumes that there is an agent in use (i.e. `eval $(ssh-agent)`). Setting ``forward_agent`` does not
-        work with Jython.
+        This assumes that there is an agent in use (i.e. `eval $(ssh-agent)`).
         | `Execute Command` | ssh-add -L | forward_agent=True |
 
         ``invoke_subsystem`` and ``forward_agent`` are new in SSHLibrary 3.4.0.
@@ -1194,8 +1170,6 @@ class SSHLibrary(object):
 
         ``output_if_timeout`` if the executed command doesn't end before reaching timeout, the parameter will log the
         output of the command at the moment of timeout.
-
-        ``output_during_execution`` and ``output_if_timeout`` are not working with Jython. New in SSHLibrary 3.5.0.
         """
         if not is_truthy(sudo):
             self._log(f"Executing command '{command}'.", self._config.loglevel)
@@ -1342,8 +1316,7 @@ class SSHLibrary(object):
 
         By default, anyone can connect on the specified port on the SSH client
         because the local machine listens on all interfaces. Access can be
-        restricted by specifying a ``bind_address``. Setting ``bind_address``
-        does not work with Jython.
+        restricted by specifying a ``bind_address``.
 
         Example:
 
@@ -1616,7 +1589,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories. It is ignored when running with Jython.
+        of transferred files and directories.
 
         Examples:
         | `Get File` | /var/log/auth.log | /tmp/                      |
@@ -1674,7 +1647,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories. It is ignored when running with Jython.
+        of transferred files and directories.
 
         Examples:
         | `Get Directory` | /var/logs      | /tmp                |
@@ -1731,7 +1704,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories. It is ignored when running with Jython.
+        of transferred files and directories.
 
         Examples:
         | `Put File` | /path/to/*.txt          |
@@ -1793,7 +1766,7 @@ class SSHLibrary(object):
         the file transfer. See `Transfer files with SCP` for more details.
 
         ``scp_preserve_times`` preserve modification time and access time
-        of transferred files and directories. It is ignored when running with Jython.
+        of transferred files and directories.
 
         Examples:
         | `Put Directory` | /var/logs | /tmp               |
