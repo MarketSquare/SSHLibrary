@@ -10,7 +10,7 @@ SSHLibrary_ is a `Robot Framework`_ test
 library for SSH and SFTP.  The project is hosted on GitHub_
 and downloads can be found from PyPI_.
 
-SSHLibrary is operating system independent and supports Python 3.4 or newer.
+SSHLibrary is operating system independent and supports Python 3.6 or newer.
 
 The library has the following main usages:
 
