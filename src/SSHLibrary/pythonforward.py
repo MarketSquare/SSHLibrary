@@ -1,9 +1,9 @@
 import select
 import socket
 import threading
-from robot.utils import platform
+from robot.utils import PY2, WINDOWS
 from .logger import logger
-if platform.PY2 and platform.WINDOWS:
+if PY2 and WINDOWS:
     import win_inet_pton
 try:
     import SocketServer
