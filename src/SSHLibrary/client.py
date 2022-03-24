@@ -182,7 +182,7 @@ class SSHClient(object):
             pass
 
     def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config=False, jumphost_connection=None, keep_alive_interval=None):
+              read_config=False, jumphost_connection=None, keep_alive_interval='0 seconds'):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -249,7 +249,7 @@ class SSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config=False, keep_alive_interval=None):
+                              jumphost_connection=None, read_config=False, keep_alive_interval='0 seconds'):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -1012,8 +1012,7 @@ class Shell(object):
 class SFTPClient(object):
     """Base class for the SFTP implementation.
 
-    Classes derived from this class (i.e. :py:class:`pythonclient.SFTPClient`
-    and :py:class:`javaclient.SFTPClient`) provide the concrete and the language
+    This class provide the concrete and the language
     specific implementations for getting, putting and listing files and
     directories.
     """
@@ -1582,8 +1581,7 @@ class SCPTransferClient(SFTPClient):
 class RemoteCommand(object):
     """Base class for the remote command.
 
-    Classes derived from this class (i.e. :py:class:`pythonclient.RemoteCommand`
-    and :py:class:`javaclient.RemoteCommand`) provide the concrete and the
+    This class provide the concrete and the
     language specific implementations for running the command on the remote
     host.
     """

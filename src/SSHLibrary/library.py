@@ -52,7 +52,7 @@ class SSHLibrary(object):
     - Ensuring that files or directories exist on the remote machine
       (e.g. `File Should Exist` and `Directory Should Not Exist`).
 
-    This library works both with Python 3.6+. See
+    This library works with Python 3.6+. See
     [http://robotframework.org/SSHLibrary/#installation|installation instructions]
     for more details about the dependencies.
 
