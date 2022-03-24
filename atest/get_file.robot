@@ -101,7 +101,7 @@ Get File With SCP (transfer) And Preserve Time
     [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     Sleep  15s
-    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
     SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=TRANSFER  scp_preserve_times=True
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     ${last_access_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}test_file.txt
@@ -114,7 +114,7 @@ Get File With SCP (all) And Preserve Time
     [Tags]  pybot
     [Setup]  Create Tmp Dir And Move File
     Sleep  15s
-    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
     SSH.Get File  /tmp/test_file.txt  ${LOCAL TMPDIR}${/}  scp=ALL  scp_preserve_times=True
     OS.File Should Exist  ${LOCAL TMPDIR}${/}test_file.txt
     ${last_access_time} =  Run  stat -c %X ${LOCAL TMPDIR}${/}test_file.txt

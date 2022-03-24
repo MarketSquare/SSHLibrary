@@ -139,7 +139,7 @@ Put File With Scp (all) And Preserve Time
     [Tags]  pybot
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
-    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
     Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=ALL  scp_preserve_times=True
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${last_access_time} =  Execute Command  stat -c %X ${REMOTE TEST ROOT}/${TEST FILE NAME}
@@ -152,7 +152,7 @@ Put File With SCP (transfer) And Preserve Time
     [Tags]  pybot
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
-    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
+    ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
     Put File  ${TEST FILE}  ${REMOTE TEST ROOT}/  scp=TRANSFER  scp_preserve_times=True
     SSH.File Should Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     ${last_access_time} =  Execute Command  stat -c %X ${REMOTE TEST ROOT}/${TEST FILE NAME}
