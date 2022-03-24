@@ -102,8 +102,8 @@ Execute Command With Timeout
 
 Execute Command In Certain Amount Of Time
     [Tags]  pybot
-    ${start_time}=  Get Current Date  result_format=%s  exclude_millis=True
+    ${start_time}=  Get Current Date  result_format=%s  exclude_millis=False
     Execute Command  for i in {1..3}; do echo "Command no. $i"; sleep 1; done  timeout=5s
-    ${end_time}=  Get Current Date  result_format=%s  exclude_millis=True
+    ${end_time}=  Get Current Date  result_format=%s  exclude_millis=False
     ${execution_time}=  Subtract Time From Time  ${end_time}  ${start_time}
     Should Be True  ${execution_time} < 5
