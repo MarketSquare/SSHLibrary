@@ -162,7 +162,7 @@ class AbstractSSHClient(object):
             pass
 
     def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config=False, jumphost_connection=None, keep_alive_interval=None):
+              read_config=False, jumphost_connection=None, keep_alive_interval='0 seconds'):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -236,7 +236,7 @@ class AbstractSSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config=False, keep_alive_interval=None):
+                              jumphost_connection=None, read_config=False, keep_alive_interval='0 seconds'):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
