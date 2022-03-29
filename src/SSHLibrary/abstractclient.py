@@ -202,7 +202,9 @@ class AbstractSSHClient(object):
         """
         keep_alive_interval = int(TimeEntry(keep_alive_interval).value)
         username = self._encode(username)
-        if not password and not allow_agent:
+        if not password or password == '""':
+            password = None
+        if password and not allow_agent:
             password = self._encode(password)
         try:
             self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config,

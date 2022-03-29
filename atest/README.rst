@@ -47,6 +47,18 @@ Setup on Linux
 
 - exit
 
+- Create a new user ``test-nopasswd``:
+
+::
+
+	sudo useradd --create-home --shell /bin/bash test-nopasswd
+
+- Delete it's password
+
+::
+
+	sudo passwd --delete test-nopasswd
+
 - Create a new user ``testkey``:
 
 ::
@@ -106,7 +118,7 @@ Additional OpenSSH configuration
 - Add/edit the following lines:
 
 ::
-
+    PermitEmptyPasswords yes
     Banner /etc/ssh/sshd-banner # for testing pre-login banner
     Subsystem subsys echo "Subsystem invoked." # for testing invoke_subsystem
 
