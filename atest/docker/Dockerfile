@@ -11,7 +11,7 @@ ARG repository
 RUN apt-get install -y openssh-server sudo git
 RUN useradd --create-home --shell /bin/bash test-nopasswd
 RUN passwd --delete test-nopasswd
-RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+RUN echo "PermitEmptyPasswords yes" >> /etc/ssh/sshd_config
 RUN systemctl restart sshd
 RUN useradd test --create-home --shell /bin/bash test
 RUN (echo 'test'; echo 'test') | passwd test

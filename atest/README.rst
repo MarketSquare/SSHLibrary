@@ -69,7 +69,7 @@ Setup on Linux
 
 ::
 
-	echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+	echo "PermitEmptyPasswords yes" >> /etc/ssh/sshd_config
 
 - Log in as ``testkey``:
 
