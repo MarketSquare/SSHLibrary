@@ -24,9 +24,6 @@ jobs:
           pip install paramiko==2.7.2 scp==0.14.1
       - name: Configure test environment for Linux
         run: |
-          sudo useradd --create-home --shell /bin/bash test-nopasswd
-          sudo passwd --delete test-nopasswd
-          sudo bash -c "echo 'PermitEmptyPasswords yes' >> /etc/ssh/sshd_config"
           sudo useradd test -m -s /bin/bash
           (echo 'test'; echo 'test') | sudo passwd test
           sudo -E su test -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/test/.bashrc"
@@ -49,6 +46,9 @@ jobs:
           echo $'Host test_hostname\n    Hostname localhost\n    User test\n    Port 22\n' >> ~/.ssh/config
           echo $'Host testkey_hostname\n    Hostname localhost\n    User testkey\n    Port 22\n    IdentityFile atest/testdata/keyfiles/id_rsa\n' >> ~/.ssh/config
           echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
+          sudo useradd test-nopasswd -m -s /bin/bash
+          sudo passwd --delete test-nopasswd
+          sudo bash -c "echo 'PermitEmptyPasswords yes' >> /etc/ssh/sshd_config"
           sudo service ssh restart
           eval "$(ssh-agent -s)"
           ssh-add atest/testdata/keyfiles/id_rsa
