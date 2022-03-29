@@ -65,12 +65,6 @@ Setup on Linux
 
     sudo useradd -m testkey -s /bin/bash
 
-- Allow passwordless authentication
-
-::
-
-	echo "PermitEmptyPasswords yes" >> /etc/ssh/sshd_config
-
 - Log in as ``testkey``:
 
 ::
@@ -124,7 +118,7 @@ Additional OpenSSH configuration
 - Add/edit the following lines:
 
 ::
-
+    PermitEmptyPasswords yes
     Banner /etc/ssh/sshd-banner # for testing pre-login banner
     Subsystem subsys echo "Subsystem invoked." # for testing invoke_subsystem
 
