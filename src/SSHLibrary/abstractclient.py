@@ -36,7 +36,8 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding, escape_ansi, encoding_errors):
+                 width, height, path_separator, encoding, escape_ansi, encoding_errors,
+                 socket_timeout):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -51,7 +52,8 @@ class _ClientConfiguration(Configuration):
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
             escape_ansi=StringEntry(escape_ansi),
-            encoding_errors=StringEntry(encoding_errors)
+            encoding_errors=StringEntry(encoding_errors),
+            socket_timeout=IntegerEntry(socket_timeout)
         )
 
 
@@ -64,10 +66,12 @@ class AbstractSSHClient(object):
     """
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8', escape_ansi=False, encoding_errors='strict'):
+                 path_separator='/', encoding='utf8', escape_ansi=False, encoding_errors='strict',
+                 socket_timeout=10):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding, escape_ansi, encoding_errors)
+                                           path_separator, encoding, escape_ansi, encoding_errors,
+                                           socket_timeout)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
