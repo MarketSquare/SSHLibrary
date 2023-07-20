@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         java: [ '1.8' ]
-        os: [ 'ubuntu-18.04' ]
+        os: [ 'ubuntu-latest' ]
         jython-version: [ '2.7.2' ]
 
     steps:
