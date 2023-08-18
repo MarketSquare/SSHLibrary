@@ -280,7 +280,7 @@ class PythonSSHClient(AbstractSSHClient):
         return SCPTransferClient(self.client, self.config.encoding)
 
     def _create_scp_all_client(self):
-        return SCPClient(self.client)
+        return SCPClient(self.client, self.config.socket_timeout)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -390,8 +390,8 @@ class SFTPClient(AbstractSFTPClient):
 
 
 class SCPClient(object):
-    def __init__(self, ssh_client):
-        self._scp_client = scp.SCPClient(ssh_client.get_transport())
+    def __init__(self, ssh_client, socket_timeout):
+        self._scp_client = scp.SCPClient(ssh_client.get_transport(), socket_timeout=socket_timeout)
 
     def put_file(self, source, destination, scp_preserve_times, *args):
         sources = self._get_put_file_sources(source)

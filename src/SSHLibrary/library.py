@@ -163,6 +163,12 @@ class SSHLibrary(object):
     Argument ``timeout`` is used by `Read Until` variants. The default value
     is ``3 seconds``. See `time format` below for supported timeout syntax.
 
+    === Socket timeout ===
+
+    Argument ``socket timeout`` defines the timeout for waiting for the individual
+    packets. The value is specified in seconds and should be integer.
+    The default is ``10`` seconds.
+
     === Newline ===
 
     Argument ``newline`` is the line break sequence used by `Write` keyword
@@ -454,6 +460,7 @@ class SSHLibrary(object):
     DEFAULT_ENCODING = 'UTF-8'
     DEFAULT_ESCAPE_ANSI = False
     DEFAULT_ENCODING_ERRORS = 'strict'
+    DEFAULT_SOCKET_TIMEOUT = 10
 
     def __init__(self,
                  timeout=DEFAULT_TIMEOUT,
@@ -466,7 +473,8 @@ class SSHLibrary(object):
                  path_separator=DEFAULT_PATH_SEPARATOR,
                  encoding=DEFAULT_ENCODING,
                  escape_ansi=DEFAULT_ESCAPE_ANSI,
-                 encoding_errors=DEFAULT_ENCODING_ERRORS):
+                 encoding_errors=DEFAULT_ENCODING_ERRORS,
+                 socket_timeout=DEFAULT_SOCKET_TIMEOUT):
         """SSHLibrary allows some import time `configuration`.
 
         If the library is imported without any arguments, the library
@@ -504,7 +512,8 @@ class SSHLibrary(object):
             path_separator or self.DEFAULT_PATH_SEPARATOR,
             encoding or self.DEFAULT_ENCODING,
             escape_ansi or self.DEFAULT_ESCAPE_ANSI,
-            encoding_errors or self.DEFAULT_ENCODING_ERRORS
+            encoding_errors or self.DEFAULT_ENCODING_ERRORS,
+            socket_timeout or self.DEFAULT_SOCKET_TIMEOUT
         )
         self._last_commands = dict()
 
@@ -516,7 +525,8 @@ class SSHLibrary(object):
     def set_default_configuration(self, timeout=None, newline=None, prompt=None,
                                   loglevel=None, term_type=None, width=None,
                                   height=None, path_separator=None,
-                                  encoding=None, escape_ansi=None, encoding_errors=None):
+                                  encoding=None, escape_ansi=None, encoding_errors=None,
+                                  socket_timeout=None):
         """Update the default `configuration`.
 
         Please note that using this keyword does not affect the already
@@ -550,11 +560,13 @@ class SSHLibrary(object):
         self._config.update(timeout=timeout, newline=newline, prompt=prompt,
                             loglevel=loglevel, term_type=term_type, width=width,
                             height=height, path_separator=path_separator,
-                            encoding=encoding, escape_ansi=escape_ansi, encoding_errors=encoding_errors)
+                            encoding=encoding, escape_ansi=escape_ansi, encoding_errors=encoding_errors,
+                            socket_timeout=socket_timeout)
 
     def set_client_configuration(self, timeout=None, newline=None, prompt=None,
                                  term_type=None, width=None, height=None,
-                                 path_separator=None, encoding=None, escape_ansi=None, encoding_errors=None):
+                                 path_separator=None, encoding=None, escape_ansi=None, encoding_errors=None,
+                                 socket_timeout=None):
         """Update the `configuration` of the current connection.
 
         Only parameters whose value is other than ``None`` are updated.
@@ -590,7 +602,8 @@ class SSHLibrary(object):
                                    width=width, height=height,
                                    path_separator=path_separator,
                                    encoding=encoding, escape_ansi=escape_ansi,
-                                   encoding_errors=encoding_errors)
+                                   encoding_errors=encoding_errors,
+                                   socket_timeout=socket_timeout)
 
     def enable_ssh_logging(self, logfile):
         """Enables logging of SSH protocol output to given ``logfile``.
@@ -617,7 +630,8 @@ class SSHLibrary(object):
 
     def open_connection(self, host, alias=None, port=22, timeout=None,
                         newline=None, prompt=None, term_type=None, width=None,
-                        height=None, path_separator=None, encoding=None, escape_ansi=None, encoding_errors=None):
+                        height=None, path_separator=None, encoding=None, escape_ansi=None, encoding_errors=None,
+                        socket_timeout=None):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
         The new connection is made active. Possible existing connections
@@ -691,8 +705,10 @@ class SSHLibrary(object):
         encoding = encoding or self._config.encoding
         escape_ansi = escape_ansi or self._config.escape_ansi
         encoding_errors = encoding_errors or self._config.encoding_errors
+        socket_timeout = socket_timeout or self._config.socket_timeout
         client = SSHClient(host, alias, port, timeout, newline, prompt,
-                           term_type, width, height, path_separator, encoding, escape_ansi, encoding_errors)
+                           term_type, width, height, path_separator, encoding, escape_ansi, encoding_errors,
+                           socket_timeout)
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
         return connection_index
@@ -1954,7 +1970,8 @@ class SSHLibrary(object):
 class _DefaultConfiguration(Configuration):
 
     def __init__(self, timeout, newline, prompt, loglevel, term_type, width,
-                 height, path_separator, encoding, escape_ansi, encoding_errors):
+                 height, path_separator, encoding, escape_ansi, encoding_errors,
+                 socket_timeout):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
             newline=NewlineEntry(newline),
@@ -1966,5 +1983,6 @@ class _DefaultConfiguration(Configuration):
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
             escape_ansi=StringEntry(escape_ansi),
-            encoding_errors=StringEntry(encoding_errors)
+            encoding_errors=StringEntry(encoding_errors),
+            socket_timeout=IntegerEntry(socket_timeout)
         )
