@@ -328,7 +328,10 @@ class Shell(AbstractShell):
         return self._shell.recv_ready()
 
     def write(self, text):
-        self._shell.sendall(text)
+        try:
+            self._shell.sendall(text)
+        except SSHClientException, e:
+            raise RuntimeError(e)
 
 
 class SFTPClient(AbstractSFTPClient):
