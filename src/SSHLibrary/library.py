@@ -937,7 +937,8 @@ class SSHLibrary(object):
         return configs
 
     def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay='0.5 seconds',
-              proxy_cmd=None, read_config=False, jumphost_index_or_alias=None, keep_alive_interval='0 seconds'):
+              proxy_cmd=None, read_config=False, jumphost_index_or_alias=None, keep_alive_interval='0 seconds',
+              disabled_algorithms=None):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
         Connection must be opened before using this keyword.
@@ -1006,13 +1007,13 @@ class SSHLibrary(object):
 
         return self._login(self.current.login, username, password, is_truthy(allow_agent),
                            is_truthy(look_for_keys), delay, proxy_cmd, is_truthy(read_config),
-                           jumphost_connection, keep_alive_interval)
+                           jumphost_connection, keep_alive_interval, disabled_algorithms)
 
     def login_with_public_key(self, username=None, keyfile=None, password='',
                               allow_agent=False, look_for_keys=False,
                               delay='0.5 seconds', proxy_cmd=None,
                               jumphost_index_or_alias=None,
-                              read_config=False, keep_alive_interval='0 seconds'):
+                              read_config=False, keep_alive_interval='0 seconds', disabled_algorithms=None):
         """Logs into the SSH server using key-based authentication.
 
         Connection must be opened before using this keyword.
@@ -1077,7 +1078,7 @@ class SSHLibrary(object):
         return self._login(self.current.login_with_public_key, username,
                            keyfile, password, is_truthy(allow_agent),
                            is_truthy(look_for_keys), delay, proxy_cmd,
-                           jumphost_connection, is_truthy(read_config), keep_alive_interval)
+                           jumphost_connection, is_truthy(read_config), keep_alive_interval, disabled_algorithms)
 
     def _login(self, login_method, username, *args):
         self._log("Logging into '%s:%s' as '%s'."

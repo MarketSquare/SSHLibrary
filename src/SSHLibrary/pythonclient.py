@@ -151,7 +151,7 @@ class PythonSSHClient(AbstractSSHClient):
         return jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
 
     def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
-               read_config=False, jumphost_connection=None, keep_alive_interval=None):
+               read_config=False, jumphost_connection=None, keep_alive_interval=None, disabled_algorithms=None):
         if read_config:
             hostname = self.config.host
             self.config.host, username, self.config.port, proxy_cmd = \
@@ -172,6 +172,7 @@ class PythonSSHClient(AbstractSSHClient):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
+                                        disabled_algorithms=disabled_algorithms,
                                         timeout=float(self.config.timeout), sock=sock_tunnel)
                 except paramiko.SSHException:
                     pass
@@ -183,6 +184,7 @@ class PythonSSHClient(AbstractSSHClient):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
+                                        disabled_algorithms=disabled_algorithms,
                                         timeout=float(self.config.timeout), sock=sock_tunnel)
                     transport = self.client.get_transport()
                     transport.set_keepalive(keep_alive_interval)
@@ -201,7 +203,8 @@ class PythonSSHClient(AbstractSSHClient):
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
-                               jumphost_connection=None, read_config=False, keep_alive_interval=None):
+                               jumphost_connection=None, read_config=False, keep_alive_interval=None,
+                               disabled_algorithms=None):
         if read_config:
             hostname = self.config.host
             self.config.host, username, self.config.port, key_file, proxy_cmd = \
@@ -230,6 +233,7 @@ class PythonSSHClient(AbstractSSHClient):
                                 password, key_filename=key_file,
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,
+                                disabled_algorithms=disabled_algorithms,
                                 timeout=float(self.config.timeout),
                                 sock=sock_tunnel)
             transport = self.client.get_transport()
