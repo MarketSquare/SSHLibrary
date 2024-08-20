@@ -143,12 +143,12 @@ available:
 
 .. _Robot Framework: http://robotframework.org
 .. _Robot Framework User Guide: http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
-.. _GitHub: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
+.. _GitHub: https://github.com/MarketSquare/SSHLibrary
 .. _Python: http://python.org
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _Keyword Documentation: http://robotframework.org/SSHLibrary/SSHLibrary.html
+.. _Keyword Documentation: https://marketsquare.github.io/SSHLibrary/SSHLibrary.html
 .. _Jython 2.7: http://jython.org
 .. _paramiko: http://www.paramiko.org
 .. _scp: https://github.com/jbardin/scp.py
