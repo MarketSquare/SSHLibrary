@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .utils import is_bytes, secs_to_timestr, timestr_to_secs
+from robot.utils import is_bytes, secs_to_timestr, timestr_to_secs
 
 
 class ConfigurationException(Exception):
@@ -42,7 +42,7 @@ class Configuration(object):
         self._config = entries
 
     def __str__(self):
-        return '\n'.join('%s=%s' % (k, v) for k, v in self._config.items())
+        return '\n'.join(f'{k}={v}' for k, v in self._config.items())
 
     def update(self, **entries):
         """Update configuration entries.
@@ -64,7 +64,7 @@ class Configuration(object):
     def __getattr__(self, name):
         if name in self._config:
             return self._config[name].value
-        msg = "Configuration parameter '%s' is not defined." % name
+        msg = f"Configuration parameter '{name}' is not defined."
         raise ConfigurationException(msg)
 
 
@@ -139,7 +139,7 @@ class LogLevelEntry(Entry):
     def _parse_value(self, value):
         value = str(value).upper()
         if value not in self.LEVELS:
-            raise ConfigurationException("Invalid log level '%s'." % value)
+            raise ConfigurationException(f"Invalid log level '{value}'.")
         return value
 
 

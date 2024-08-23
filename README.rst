@@ -10,9 +10,7 @@ SSHLibrary_ is a `Robot Framework`_ test
 library for SSH and SFTP.  The project is hosted on GitHub_
 and downloads can be found from PyPI_.
 
-SSHLibrary is operating system independent and supports Python 2.7 as well
-as Python 3.4 or newer. In addition to the normal Python_ interpreter,
-it also works with `Jython 2.7`_.
+SSHLibrary is operating system independent and supports Python 3.6 or newer.
 
 The library has the following main usages:
 
@@ -57,21 +55,13 @@ this command::
     pip install git+https://github.com/robotframework/SSHLibrary.git
 
 Alternatively you can download the source distribution from PyPI_, extract
-it, and install it using one of the following depending are you using
-Python or Jython::
+it, and install it using one the command::
 
     python setup.py install
-    jython setup.py install
 
 A benefit of using pip is that it automatically installs scp, paramiko
 and Cryptography_ modules (or PyCrypto_ if paramiko version < 2.0)
-that SSHLibrary requires on Python.
-
-On Jython, SSHLibrary requires Trilead SSH JAR distribution. You need to download
-`Trilead SSH JAR distribution`_ and add it to CLASSPATH.
-
-On Windows operating system, when using Python version < 3.0, SSHLibrary will
-require win_inet_pton_. The minimum supported win_inet_pton version is ``1.1.0``.
+that SSHLibrary requires.
 
 For creating SSH tunnels robotbackgroundlogger_ > 1.2 is also a requirement.
 
@@ -149,13 +139,10 @@ available:
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
 .. _Keyword Documentation: http://robotframework.org/SSHLibrary/SSHLibrary.html
-.. _Jython 2.7: http://jython.org
 .. _paramiko: http://www.paramiko.org
 .. _scp: https://github.com/jbardin/scp.py
 .. _Cryptography: https://cryptography.io
 .. _PyCrypto: http://www.pycrypto.org
-.. _Trilead SSH JAR distribution: http://search.maven.org/remotecontent?filepath=com/trilead/trilead-ssh2/1.0.0-build221/trilead-ssh2-1.0.0-build221.jar
-.. _win_inet_pton: https://github.com/hickeroar/win_inet_pton
 .. _robotbackgroundlogger: https://github.com/robotframework/robotbackgroundlogger
 .. _gcc: https://pkgs.alpinelinux.org/packages?name=gcc&branch=edge
 .. _make: https://pkgs.alpinelinux.org/packages?name=make&branch=edge

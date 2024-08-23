@@ -1,10 +1,8 @@
 import select
 import socket
 import threading
-from robot.utils import platform
 from .logger import logger
-if platform.PY2 and platform.WINDOWS:
-    import win_inet_pton
+
 try:
     import SocketServer
 except ImportError:
@@ -37,7 +35,7 @@ class LocalPortForwarding:
         t = threading.Thread(target=self.server.serve_forever)
         t.setDaemon(True)
         t.start()
-        logger.info("Now forwarding port %d to %s:%d ..." % (local_port, self.host, self.port))
+        logger.info(f"Now forwarding port {local_port} to {self.host}:{self.port} ...")
 
     def close(self):
         if self.server:
@@ -66,14 +64,13 @@ class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
             chan = self.ssh_transport.open_channel('direct-tcpip', (self.host, self.port),
                                                    self.request.getpeername())
         except Exception as e:
-            logger.info("Incoming request to %s:%d failed: %s" % (self.host, self.port, repr(e)))
+            logger.info(f"Incoming request to {self.host}:{self.port} failed: {repr(e)}")
             return
         if chan is None:
-            logger.info("Incoming request to %s:%d was rejected by the SSH server." % (self.host, self.port))
+            logger.info(f"Incoming request to {self.host}:{self.port} was rejected by the SSH server.")
             return
-        logger.info("Connected! Tunnel open %r -> %r -> %r" % (self.request.getpeername(),
-                                                               chan.getpeername(),
-                                                               (self.host, self.port)))
+        logger.info(
+            f"Connected! Tunnel open {self.request.getpeername()!r} -> {chan.getpeername()!r} -> {(self.host, self.port)!r}")
         while True:
             r, w, x = select.select([self.request, chan], [], [])
             if self.request in r:
@@ -89,4 +86,4 @@ class LocalPortForwardingHandler(SocketServer.BaseRequestHandler):
         peername = self.request.getpeername()
         chan.close()
         self.request.close()
-        logger.info("Tunnel closed from %r" % (peername,))
+        logger.info(f"Tunnel closed from {peername!r}")

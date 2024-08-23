@@ -1,5 +1,4 @@
 ﻿*** Settings ***
-Default Tags    pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login As Valid User
 Suite Teardown  Close All Connections
@@ -100,7 +99,6 @@ Put File With Pattern In Source File Name
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With SCP And Pattern Matching
-    [Tags]  pybot
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
     Put File  ${LOCAL TEXTFILES}${/}tes*.txt  ${REMOTE TEST ROOT}/  scp=ALL
@@ -136,7 +134,6 @@ Put File And Check For Proper Permissions
 	[Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With Scp (all) And Preserve Time
-    [Tags]  pybot
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
@@ -149,7 +146,6 @@ Put File With Scp (all) And Preserve Time
     [Teardown]  Execute Command  rm -rf ${REMOTE TEST ROOT}
 
 Put File With SCP (transfer) And Preserve Time
-    [Tags]  pybot
     SSH.File Should Not Exist  ${REMOTE TEST ROOT}/${TEST FILE NAME}
     Execute Command  mkdir ${REMOTE TEST ROOT NAME}
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=True
