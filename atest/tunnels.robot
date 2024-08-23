@@ -3,7 +3,7 @@ Resource       resources/common.robot
 Test Setup     Open Connection  ${HOST}
 Test Teardown  Close All Connections
 Library        OperatingSystem
-Library        Tunnels
+Library        Tunnels.py
 
 *** Variables ***
 ${LOCAL PORT}  9000
