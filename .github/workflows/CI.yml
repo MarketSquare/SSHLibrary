@@ -51,7 +51,7 @@ jobs:
           ssh-add atest/testdata/keyfiles/id_rsa
       - name: Run tests
         run: |
-          python atest/run.py -e no-gh-actions -b console.log atest
+          robot -d results -e no-gh-actions -b console.log atest
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
