@@ -3,6 +3,7 @@ Library     SSHLibrary  WITH NAME  SSH
 
 *** Variables ***
 ${USERNAME}               test
+${USERNAME_NOPASSWD}      test-nopasswd
 ${PASSWORD}               test
 ${HOST}                   localhost
 ${PROMPT}                 $
@@ -10,12 +11,13 @@ ${REMOTE TEST ROOT NAME}  robot-testdir
 ${REMOTE HOME TEST}       /home/test
 ${REMOTE TEST ROOT}       ${REMOTE HOME TEST}/${REMOTE TEST ROOT NAME}
 ${LOCAL TESTDATA}         ${CURDIR}${/}..${/}testdata
-${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
-${KEY USERNAME}      testkey
-${KEY}               ${KEY DIR}${/}id_rsa
-${TEST_HOSTNAME}     test_hostname
-${TESTKEY_HOSTNAME}  testkey_hostname
-${TEST_PROXY_HOSTNAME}  test_proxy_hostname
+${KEY DIR}                ${LOCAL TESTDATA}${/}keyfiles
+${KEY USERNAME}           testkey
+${KEY}                    ${KEY DIR}${/}id_rsa
+${TEST_HOSTNAME}          test_hostname
+${TESTKEY_HOSTNAME}       testkey_hostname
+${TEST_PROXY_HOSTNAME}    test_proxy_hostname
+${EMPTY_STRING}           \
 
 *** Keywords ***
 Login As Valid User

@@ -58,8 +58,21 @@ Login With Public Key Using Config File
     [Setup]  Open Connection   ${TESTKEY_HOSTNAME}  prompt=${PROMPT}
     Login With Public Key  read_config=True
 
+Login With No Password
+	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
+	Login  ${USERNAME_NOPASSWD}
+
+Login With Explicit No Password
+	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
+	Login  ${USERNAME_NOPASSWD}  ${EMPTY_STRING}
+
+Login With Empty Quotes No Password
+	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
+	Login  ${USERNAME_NOPASSWD}  ""
+
 Login Using Config File Proxy Command
     [Tags]  no-gh-actions
     [Setup]  Open Connection   ${TEST_PROXY_HOSTNAME}  prompt=${PROMPT}
     ${output}=  Login  password=test  read_config=True
     Should Contain  ${output}  test@
+
