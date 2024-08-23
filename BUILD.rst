@@ -176,7 +176,7 @@ Tagging
       git push --tags
 
 2. Add short release notes to GitHub's `releases page
-   <https://github.com/robotframework/SSHLibrary/releases>`_
+   <https://github.com/MarketSquare/SSHLibrary/releases>`_
    with a link to the full release notes.
 
 Creating distributions
@@ -229,7 +229,7 @@ Post actions
    to ``2.0.1a2.dev1``.
 
 3. Close the `issue tracker milestone
-   <https://github.com/robotframework/SSHLibrary/milestones>`_.
+   <https://github.com/MarketSquare/SSHLibrary/milestones>`_.
    Create also new milestone for the next release unless one exists already.
 
 Announcements

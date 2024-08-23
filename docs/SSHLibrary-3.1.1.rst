@@ -28,10 +28,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.1.1 was released on Tuesday August 14, 2018.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.1.1
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.1.1
 
 
 List of fixed issues
@@ -57,8 +57,8 @@ List of fixed issues
       - low
       - Permissions are not properly set when copying a directory 
 
-Altogether 3 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.1.1>`__.
+Altogether 3 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.1.1>`__.
 
-.. _#131: https://github.com/robotframework/SSHLibrary/issues/131
-.. _#255: https://github.com/robotframework/SSHLibrary/issues/255
-.. _#210: https://github.com/robotframework/SSHLibrary/issues/210
+.. _#131: https://github.com/MarketSquare/SSHLibrary/issues/131
+.. _#255: https://github.com/MarketSquare/SSHLibrary/issues/255
+.. _#210: https://github.com/MarketSquare/SSHLibrary/issues/210

@@ -29,10 +29,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.2.1 was released on Thursday November 8, 2018.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.2.1
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.2.1
 
 
 .. contents::
@@ -79,8 +79,8 @@ Full list of fixes and enhancements
       - low
       - SSHLibrary: not possible to change (width/height) of existing session
 
-Altogether 3 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.2.1>`__.
+Altogether 3 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.2.1>`__.
 
-.. _#279: https://github.com/robotframework/SSHLibrary/issues/279
-.. _#270: https://github.com/robotframework/SSHLibrary/issues/270
-.. _#248: https://github.com/robotframework/SSHLibrary/issues/248
+.. _#279: https://github.com/MarketSquare/SSHLibrary/issues/279
+.. _#270: https://github.com/MarketSquare/SSHLibrary/issues/270
+.. _#248: https://github.com/MarketSquare/SSHLibrary/issues/248

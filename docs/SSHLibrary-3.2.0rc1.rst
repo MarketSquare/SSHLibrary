@@ -29,10 +29,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.2.0rc1 was released on Tuesday October 30, 2018.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.2.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.2.0
 
 
 .. contents::
@@ -108,12 +108,12 @@ Full list of fixes and enhancements
       - Create Local SSH Tunnel could use a default port number for the remote_port
       - rc 1
 
-Altogether 7 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.2.0>`__.
+Altogether 7 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.2.0>`__.
 
-.. _#266: https://github.com/robotframework/SSHLibrary/issues/266
-.. _#260: https://github.com/robotframework/SSHLibrary/issues/260
-.. _#127: https://github.com/robotframework/SSHLibrary/issues/127
-.. _#247: https://github.com/robotframework/SSHLibrary/issues/247
-.. _#233: https://github.com/robotframework/SSHLibrary/issues/233
-.. _#237: https://github.com/robotframework/SSHLibrary/issues/237
-.. _#246: https://github.com/robotframework/SSHLibrary/issues/246
+.. _#266: https://github.com/MarketSquare/SSHLibrary/issues/266
+.. _#260: https://github.com/MarketSquare/SSHLibrary/issues/260
+.. _#127: https://github.com/MarketSquare/SSHLibrary/issues/127
+.. _#247: https://github.com/MarketSquare/SSHLibrary/issues/247
+.. _#233: https://github.com/MarketSquare/SSHLibrary/issues/233
+.. _#237: https://github.com/MarketSquare/SSHLibrary/issues/237
+.. _#246: https://github.com/MarketSquare/SSHLibrary/issues/246

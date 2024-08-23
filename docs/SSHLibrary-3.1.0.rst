@@ -28,10 +28,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.1.0 was released on Friday June 29, 2018.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.1.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.1.0
 
 
 .. contents::
@@ -89,12 +89,12 @@ Full list of fixes and enhancements
       - low
       - Separate section for explaining the time syntax
 
-Altogether 7 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.1.0>`__.
+Altogether 7 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.1.0>`__.
 
-.. _#230: https://github.com/robotframework/SSHLibrary/issues/230
-.. _#224: https://github.com/robotframework/SSHLibrary/issues/224
-.. _#228: https://github.com/robotframework/SSHLibrary/issues/228
-.. _#244: https://github.com/robotframework/SSHLibrary/issues/244
-.. _#206: https://github.com/robotframework/SSHLibrary/issues/206
-.. _#225: https://github.com/robotframework/SSHLibrary/issues/225
-.. _#229: https://github.com/robotframework/SSHLibrary/issues/229
+.. _#230: https://github.com/MarketSquare/SSHLibrary/issues/230
+.. _#224: https://github.com/MarketSquare/SSHLibrary/issues/224
+.. _#228: https://github.com/MarketSquare/SSHLibrary/issues/228
+.. _#244: https://github.com/MarketSquare/SSHLibrary/issues/244
+.. _#206: https://github.com/MarketSquare/SSHLibrary/issues/206
+.. _#225: https://github.com/MarketSquare/SSHLibrary/issues/225
+.. _#229: https://github.com/MarketSquare/SSHLibrary/issues/229

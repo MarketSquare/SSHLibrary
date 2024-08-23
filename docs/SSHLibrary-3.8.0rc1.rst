@@ -29,10 +29,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.8.0rc1 was released on Friday November 5, 2021.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.8.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.8.0
 
 
 .. contents::
@@ -66,8 +66,8 @@ Full list of fixes and enhancements
       - execute command with sudo has a potential password exposure
       - rc 1
 
-Altogether 3 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.8.0>`__.
+Altogether 3 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.8.0>`__.
 
-.. _#388: https://github.com/robotframework/SSHLibrary/issues/388
-.. _#104: https://github.com/robotframework/SSHLibrary/issues/104
-.. _#350: https://github.com/robotframework/SSHLibrary/issues/350
+.. _#388: https://github.com/MarketSquare/SSHLibrary/issues/388
+.. _#104: https://github.com/MarketSquare/SSHLibrary/issues/104
+.. _#350: https://github.com/MarketSquare/SSHLibrary/issues/350

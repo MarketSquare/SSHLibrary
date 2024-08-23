@@ -30,10 +30,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.4.0rc3 was released on Monday August 26, 2019.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.4.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.4.0
 
 
 .. contents::
@@ -124,17 +124,17 @@ Full list of fixes and enhancements
       - Add socket support with ProxyCommand
       - rc 3
 
-Altogether 12 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.4.0>`__.
+Altogether 12 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.4.0>`__.
 
-.. _#304: https://github.com/robotframework/SSHLibrary/issues/304
-.. _#318: https://github.com/robotframework/SSHLibrary/issues/318
-.. _#243: https://github.com/robotframework/SSHLibrary/issues/243
-.. _#285: https://github.com/robotframework/SSHLibrary/issues/285
-.. _#278: https://github.com/robotframework/SSHLibrary/issues/278
-.. _#292: https://github.com/robotframework/SSHLibrary/issues/292
-.. _#312: https://github.com/robotframework/SSHLibrary/issues/312
-.. _#329: https://github.com/robotframework/SSHLibrary/issues/329
-.. _#310: https://github.com/robotframework/SSHLibrary/issues/310
-.. _#331: https://github.com/robotframework/SSHLibrary/issues/331
-.. _#334: https://github.com/robotframework/SSHLibrary/issues/334
-.. _#335: https://github.com/robotframework/SSHLibrary/issues/335
+.. _#304: https://github.com/MarketSquare/SSHLibrary/issues/304
+.. _#318: https://github.com/MarketSquare/SSHLibrary/issues/318
+.. _#243: https://github.com/MarketSquare/SSHLibrary/issues/243
+.. _#285: https://github.com/MarketSquare/SSHLibrary/issues/285
+.. _#278: https://github.com/MarketSquare/SSHLibrary/issues/278
+.. _#292: https://github.com/MarketSquare/SSHLibrary/issues/292
+.. _#312: https://github.com/MarketSquare/SSHLibrary/issues/312
+.. _#329: https://github.com/MarketSquare/SSHLibrary/issues/329
+.. _#310: https://github.com/MarketSquare/SSHLibrary/issues/310
+.. _#331: https://github.com/MarketSquare/SSHLibrary/issues/331
+.. _#334: https://github.com/MarketSquare/SSHLibrary/issues/334
+.. _#335: https://github.com/MarketSquare/SSHLibrary/issues/335
