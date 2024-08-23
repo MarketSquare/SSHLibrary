@@ -17,6 +17,7 @@ jobs:
       - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
+          distribution: "temurin"
           java-version: ${{ matrix.java }}
           architecture: "x64"
       - name: Install dependencies
