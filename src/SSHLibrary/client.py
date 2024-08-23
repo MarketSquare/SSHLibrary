@@ -34,7 +34,7 @@ try:
 except ImportError as e:
     raise ImportError(
         'Importing Paramiko library failed. ' +
-        'Make sure you have Paramiko installed.'+ e
+        'Make sure you have Paramiko installed.'+ str(e)
     )
 
 try:
