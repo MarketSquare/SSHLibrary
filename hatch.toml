@@ -1,0 +1,15 @@
+[envs.default]
+python = "3.12"
+
+[version]
+path = "src/SSHLibrary/version.py"
+
+[build.targets.wheel]
+packages = [
+    "src/SSHLibrary",
+]
+
+[build.targets.sdist]
+include = [
+    "/src",
+]

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "robotframework-sshlibrary"
+dynamic = ["version"]
+description = "Robot Framework test library for SSH and SFTP"
+readme = "README.rst"
+license = { file = "LICENSE.txt" }
+authors = [
+    { name = "Markus Stahl", email = "markus.i.sverige@gmail.com" },
+]
+keywords = [
+    "robotframework",
+    "sftp",
+    "ssh",
+    "testautomation",
+    "testing",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Robot Framework",
+    "Framework :: Robot Framework :: Library",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "paramiko >= 1.15.3",
+    "robotframework >= 3.0",
+    "scp >= 0.13.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/MarketSquare/SSHLibrary"
+
+
