@@ -31,10 +31,10 @@ from .pythonforward import LocalPortForwarding
 
 try:
     import paramiko
-except ImportError e:
+except ImportError as e:
     raise ImportError(
-        'Importing Paramiko library failed. '
-        'Make sure you have Paramiko installed.' + e
+        'Importing Paramiko library failed. ' +
+        'Make sure you have Paramiko installed.'+ e
     )
 
 try:
