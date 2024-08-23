@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -51,11 +51,8 @@ jobs:
           ssh-add atest/testdata/keyfiles/id_rsa
       - name: Run tests
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install paramiko==2.7.2 scp==0.14.1
           python atest/run.py -e no-gh-actions -b console.log atest
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: Test Results - ${{ runner.os }}
