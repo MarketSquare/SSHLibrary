@@ -1,6 +1,6 @@
 name: SSHLibrary Python CI
 
-on: [ push, pull_request ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -8,11 +8,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-latest' ]
-        python-version: [ 3.8 ]
+        os: ["ubuntu-latest"]
+        python-version: [3.8]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -55,7 +55,7 @@ jobs:
       - name: Run tests
         run: |
           python atest/run.py -e no-gh-actions atest
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: Test Results - ${{ runner.os }}
