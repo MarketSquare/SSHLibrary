@@ -20,8 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install paramiko==2.7.2 scp==0.14.1 six .
+          pip install .
       - name: Configure test environment for Linux
         run: |
           sudo useradd test -m -s /bin/bash
