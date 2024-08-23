@@ -9,7 +9,7 @@ from setuptools import setup
 CURDIR = dirname(abspath(__file__))
 REQUIREMENTS = ["robotframework >= 3.0"]
 if not sys.platform.startswith("java"):
-    REQUIREMENTS.append("paramiko >= 1.15.3,<3")
+    REQUIREMENTS.append("paramiko >= 1.15.3")
     REQUIREMENTS.append("scp >= 0.13.0")
     if sys.version_info[0] < 3 and os.name == "nt":
         REQUIREMENTS.append("win_inet_pton >= 1.1.0")
