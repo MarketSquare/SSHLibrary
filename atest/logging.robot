@@ -1,12 +1,10 @@
 *** Settings ***
-Default Tags   pybot   jybot
 Resource       resources/common.robot
 Test Teardown  Close All Connections
 Library        OperatingSystem
 
 *** Test Cases ***
 Enable Logging
-    [Tags]   pybot
     [Setup]  Remove File  ${OUTPUTDIR}${/}sshlog.txt
     Enable SSH Logging  ${OUTPUTDIR}${/}sshlog.txt
     Login As Valid User

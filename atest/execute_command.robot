@@ -1,5 +1,4 @@
 *** Settings ***
-Default Tags      pybot   jybot
 Resource        resources/shell.robot
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files And Close Connections
@@ -8,7 +7,6 @@ Library         DateTime
 
 *** Test Cases ***
 Execute Timeout
-    [Tags]  pybot
     [Documentation]  FAIL  SSHClientException: Timed out in 3 seconds
     ...              LOG  1:2  INFO  GLOB:  *Command no. 1*Command no. 2*Command no. 3*
     Execute Command  for i in {1..10}; do echo "Command no. $i"; sleep 1; done  timeout=3s  output_if_timeout=True
@@ -74,7 +72,6 @@ Execute Command With Robot Timeout
    Execute Command     cat
 
 Execute Command With Huge Output
-   [Tags]      pybot        # this fails with jybot
    [Timeout]   5 seconds
    Execute Command     echo 'foo\\nbar\\n' > file.txt
    Execute Command     for i in {1..20}; do cat file.txt file.txt > file2.txt && mv file2.txt file.txt; done
@@ -101,9 +98,8 @@ Execute Command With Timeout
     Run Keyword and Expect Error  *Timed out in 5 seconds  Execute Command  sleep 10  timeout=5s
 
 Execute Command In Certain Amount Of Time
-    [Tags]  pybot
-    ${start_time}=  Get Current Date  result_format=%s  exclude_millis=False
+    ${start_time}=  Get Current Date  result_format=epoch  exclude_millis=True
     Execute Command  for i in {1..3}; do echo "Command no. $i"; sleep 1; done  timeout=5s
-    ${end_time}=  Get Current Date  result_format=%s  exclude_millis=False
+    ${end_time}=  Get Current Date  result_format=epoch  exclude_millis=True
     ${execution_time}=  Subtract Time From Time  ${end_time}  ${start_time}
     Should Be True  ${execution_time} < 5
