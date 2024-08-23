@@ -1,5 +1,4 @@
 *** Settings ***
-Force Tags      pybot   jybot
 Resource        resources/shell.robot
 Suite Setup     Login And Upload Test Scripts
 Suite Teardown  Remove Test Files And Close Connections
