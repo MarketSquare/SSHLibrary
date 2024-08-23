@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ["1.8"]
+        java: ["8.0.422+5"]
         os: ["ubuntu-latest"]
         jython-version: ["2.7.2"]
 
