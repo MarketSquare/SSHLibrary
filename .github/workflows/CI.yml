@@ -55,7 +55,7 @@ jobs:
           pip install -r requirements-dev.txt
           pip install paramiko==2.7.2 scp==0.14.1
           python atest/run.py -e no-gh-actions atest
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: Test Results - ${{ runner.os }}
