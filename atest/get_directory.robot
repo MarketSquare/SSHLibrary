@@ -1,5 +1,4 @@
 *** Settings ***
-Default Tags      pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login and Upload Test Files
 Suite Teardown  Remove Test Files And Close Connections
@@ -20,7 +19,6 @@ Get Directory To Existing Local Path With SCP (transfer)
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory To Existing Local Path With SCP (all)
-    [Tags]  pybot
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Get Directory  ${REMOTE TEST ROOT}  ${LOCAL TMPDIR}  scp=ALL
     Directory Should Exist Including Subdirectories  ${LOCAL TMPDIR}  ${/}robot-testdir
@@ -93,7 +91,6 @@ Get Directory containing a symlink
    [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory With SCP (transfer) And Preserve Time
-    [Tags]  pybot
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False
@@ -106,7 +103,6 @@ Get Directory With SCP (transfer) And Preserve Time
     [Teardown]  Remove Directory  ${LOCAL TMPDIR}  recursive=True
 
 Get Directory With SCP (all) And Preserve Time
-    [Tags]  pybot
     [Setup]  Create Directory  ${LOCAL TMPDIR}
     Sleep  15s
     ${current_time} =  Get Current Date  result_format=epoch  exclude_millis=False

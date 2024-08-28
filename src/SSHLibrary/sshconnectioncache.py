@@ -31,5 +31,5 @@ class SSHConnectionCache(ConnectionCache):
     def get_connection(self, alias_or_index=None):
         connection = super(SSHConnectionCache, self).get_connection(alias_or_index)
         if not connection:
-            raise RuntimeError("Non-existing index or alias '%s'." % alias_or_index)
+            raise RuntimeError(f"Non-existing index or alias '{alias_or_index}'.")
         return connection

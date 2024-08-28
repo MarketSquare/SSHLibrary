@@ -1,5 +1,4 @@
 *** Settings ***
-Default Tags   pybot   jybot
 Resource       resources/common.robot
 Test Teardown  Close All Connections
 
@@ -37,16 +36,7 @@ Switch Connection To None
     Switch Connection  ${NONE}
     Connection Should Be Closed
 
-Switch to closed connection pybot
-    [Tags]   pybot
-    Open Connection  ${HOST}  alias=SUT
-    Login  ${USERNAME}  ${PASSWORD}
-    Execute command   ls
-    close connection
-    Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
-
-Switch to closed connection jybot
-    [Tags]   jybot
+Switch to closed connection
     Open Connection  ${HOST}  alias=SUT
     Login  ${USERNAME}  ${PASSWORD}
     Execute command   ls
@@ -54,12 +44,11 @@ Switch to closed connection jybot
     Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
 
 Get pre-login banner without open connection
-    [Tags]   pybot  no-gh-actions
+    [Tags]  no-gh-actions
     ${banner} =  Get Pre Login Banner  ${HOST}
     Should Be Equal  ${banner}  Testing pre-login banner\n
 
 Get pre-login banner from current connection
-    [Tags]   pybot
     Open Connection  ${HOST}  prompt=${PROMPT}
     Login  ${USERNAME}  ${PASSWORD}
     ${banner} =  Get Pre Login Banner
@@ -115,12 +104,10 @@ Reuse Closed Connection Alias
     Should Be Equal  ${conn.alias}  alias1
 
 Connection To Host Read From SSH Config File
-   [Tags]  pybot
    Open Connection  ${TEST_HOSTNAME}
    Login  ${USERNAME}  ${PASSWORD}  read_config=True
 
 Connection To Host Ignoring SSH Config File
-   [Tags]  pybot
    Open Connection  ${TEST_HOSTNAME}
    Run Keyword And Expect Error  *Err*  Login  ${USERNAME}  ${PASSWORD}  read_config=False
    Run Keyword And Expect Error  *Err*  Login With Public Key  ${KEY USERNAME}  ${KEY}  read_config=False
@@ -136,7 +123,7 @@ Write Bare In Teardown Should Not Hang If Auth Failed
   [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write Bare  ls
 
 Login With Agent
-   [Tags]  pybot  no-gh-actions
+   [Tags]  no-gh-actions
    Open Connection  ${HOST}
    Login  ${KEY USERNAME}  allow_agent=True
 

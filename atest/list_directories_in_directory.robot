@@ -1,5 +1,4 @@
 *** Settings ***
-Force Tags      pybot   jybot
 Resource        resources/sftp.robot
 Suite Setup     Login And Upload Test Files
 Suite Teardown  Remove Test Files and Close Connections
