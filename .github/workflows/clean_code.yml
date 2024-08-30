@@ -1,4 +1,4 @@
-name: SSHLibrary Python CI
+name: Clean Code Verification
 
 on: [pull_request]
 concurrency:

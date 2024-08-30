@@ -1,4 +1,4 @@
-name: Test SSHLibrary
+name: Acceptance Tests
 
 on: [push, workflow_dispatch]
 concurrency:
