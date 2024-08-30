@@ -2,12 +2,12 @@ name: SSHLibrary Python CI
 
 on: [push, workflow_dispatch]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.sha}}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Aceptance tests Python ${{ matrix.python-version }}
+    name: Acceptance tests Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
