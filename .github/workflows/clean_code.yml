@@ -42,4 +42,4 @@ jobs:
         with:
           name: Syntax Validation
           path: "results"
-          retention-days: 180
+          retention-days: 7
