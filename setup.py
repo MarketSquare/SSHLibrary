@@ -12,9 +12,9 @@ REQUIREMENTS = [
 ]
 with open(join(CURDIR, 'src', 'SSHLibrary', 'version.py')) as f:
     VERSION = re.search("\nVERSION = '(.*)'", f.read()).group(1)
-with open(join(CURDIR, 'README.rst')) as f:
+with open(join(CURDIR, "README.rst")) as f:
     DESCRIPTION = f.read()
-CLASSIFIERS = '''
+CLASSIFIERS = """
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
@@ -25,21 +25,21 @@ Programming Language :: Python :: 3.8
 Topic :: Software Development :: Testing
 Framework :: Robot Framework
 Framework :: Robot Framework :: Library
-'''.strip().splitlines()
+""".strip().splitlines()
 
 setup(
-    name='robotframework-sshlibrary',
+    name="robotframework-sshlibrary",
     version=VERSION,
-    description='Robot Framework test library for SSH and SFTP',
+    description="Robot Framework test library for SSH and SFTP",
     long_description=DESCRIPTION,
-    author='Robot Framework Developers',
-    author_email='robotframework@gmail.com',
-    url='https://github.com/robotframework/SSHLibrary',
-    license='Apache License 2.0',
-    keywords='robotframework testing testautomation ssh sftp',
-    platforms='any',
+    author="Robot Framework Developers",
+    author_email="robotframework@gmail.com",
+    url="https://github.com/MarketSquare/SSHLibrary",
+    license="Apache License 2.0",
+    keywords="robotframework testing testautomation ssh sftp",
+    platforms="any",
     classifiers=CLASSIFIERS,
     install_requires=REQUIREMENTS,
-    package_dir={'': 'src'},
-    packages=['SSHLibrary']
+    package_dir={"": "src"},
+    packages=["SSHLibrary"],
 )

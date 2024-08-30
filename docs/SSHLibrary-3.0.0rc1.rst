@@ -30,10 +30,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.0.0rc1 was released on Tuesday April 24, 2018.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.0.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.0.0
 
 
 .. contents::
@@ -64,7 +64,7 @@ Big thanks also to `Mihai Pârvu <https://github.com/mihaiparvu>`_,
 `Andreea Kovacs <https://github.com/andreeakovacs>`_ for their work and
 especially for promising to work as SSHLibrary maintainers!
 
-.. _#207: https://github.com/robotframework/SSHLibrary/pull/207
+.. _#207: https://github.com/MarketSquare/SSHLibrary/pull/207
 
 
 Full list of fixes and enhancements
@@ -114,12 +114,12 @@ Full list of fixes and enhancements
       - Capture the pre login banner
       - rc 1
 
-Altogether 7 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.0.0>`__.
+Altogether 7 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.0.0>`__.
 
-.. _#219: https://github.com/robotframework/SSHLibrary/issues/219
-.. _#189: https://github.com/robotframework/SSHLibrary/issues/189
-.. _#182: https://github.com/robotframework/SSHLibrary/issues/182
-.. _#146: https://github.com/robotframework/SSHLibrary/issues/146
-.. _#199: https://github.com/robotframework/SSHLibrary/issues/199
-.. _#201: https://github.com/robotframework/SSHLibrary/issues/201
-.. _#132: https://github.com/robotframework/SSHLibrary/issues/132
+.. _#219: https://github.com/MarketSquare/SSHLibrary/issues/219
+.. _#189: https://github.com/MarketSquare/SSHLibrary/issues/189
+.. _#182: https://github.com/MarketSquare/SSHLibrary/issues/182
+.. _#146: https://github.com/MarketSquare/SSHLibrary/issues/146
+.. _#199: https://github.com/MarketSquare/SSHLibrary/issues/199
+.. _#201: https://github.com/MarketSquare/SSHLibrary/issues/201
+.. _#132: https://github.com/MarketSquare/SSHLibrary/issues/132

@@ -37,10 +37,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.8.1rc1 was released on Thursday May 12, 2022.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.8.1
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.8.1
 
 
 .. contents::
@@ -81,8 +81,8 @@ Full list of fixes and enhancements
       - SSH.Execute Command Giving Warning while Inputting Password ${stderr} [sudo] password for supervisor: Sorry, try again
       - rc 1
 
-Altogether 3 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.8.1>`__.
+Altogether 3 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.8.1>`__.
 
-.. _#401: https://github.com/robotframework/SSHLibrary/issues/401
-.. _#374: https://github.com/robotframework/SSHLibrary/issues/374
-.. _#412: https://github.com/robotframework/SSHLibrary/issues/412
+.. _#401: https://github.com/MarketSquare/SSHLibrary/issues/401
+.. _#374: https://github.com/MarketSquare/SSHLibrary/issues/374
+.. _#412: https://github.com/MarketSquare/SSHLibrary/issues/412

@@ -29,10 +29,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.6.0 was released on Friday December 18, 2020.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.5.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.5.0
 
 
 .. contents::
@@ -78,10 +78,10 @@ Full list of fixes and enhancements
       - medium
       - Support logins without authentication
 
-Altogether 5 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.6.0>`__.
+Altogether 5 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.6.0>`__.
 
-.. _#354: https://github.com/robotframework/SSHLibrary/issues/354
-.. _#357: https://github.com/robotframework/SSHLibrary/issues/357
-.. _#358: https://github.com/robotframework/SSHLibrary/issues/358
-.. _#369: https://github.com/robotframework/SSHLibrary/issues/369
-.. _#370: https://github.com/robotframework/SSHLibrary/issues/370
+.. _#354: https://github.com/MarketSquare/SSHLibrary/issues/354
+.. _#357: https://github.com/MarketSquare/SSHLibrary/issues/357
+.. _#358: https://github.com/MarketSquare/SSHLibrary/issues/358
+.. _#369: https://github.com/MarketSquare/SSHLibrary/issues/369
+.. _#370: https://github.com/MarketSquare/SSHLibrary/issues/370

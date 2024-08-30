@@ -30,10 +30,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.4.0rc1 was released on Tuesday July 30, 2019.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.4.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.4.0
 
 
 .. contents::
@@ -89,11 +89,11 @@ Full list of fixes and enhancements
       - Login using key agent
       - rc 1
 
-Altogether 6 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.4.0>`__.
+Altogether 6 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.4.0>`__.
 
-.. _#304: https://github.com/robotframework/SSHLibrary/issues/304
-.. _#318: https://github.com/robotframework/SSHLibrary/issues/318
-.. _#243: https://github.com/robotframework/SSHLibrary/issues/243
-.. _#285: https://github.com/robotframework/SSHLibrary/issues/285
-.. _#292: https://github.com/robotframework/SSHLibrary/issues/292
-.. _#310: https://github.com/robotframework/SSHLibrary/issues/310
+.. _#304: https://github.com/MarketSquare/SSHLibrary/issues/304
+.. _#318: https://github.com/MarketSquare/SSHLibrary/issues/318
+.. _#243: https://github.com/MarketSquare/SSHLibrary/issues/243
+.. _#285: https://github.com/MarketSquare/SSHLibrary/issues/285
+.. _#292: https://github.com/MarketSquare/SSHLibrary/issues/292
+.. _#310: https://github.com/MarketSquare/SSHLibrary/issues/310
