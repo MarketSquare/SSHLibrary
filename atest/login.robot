@@ -25,7 +25,9 @@ Login With Public Key When Valid Username And Key
     Login With Public Key  ${KEY USERNAME}  ${KEY}
 
 Login With Public Key When Invalid Username
-    Run Keyword And Expect Error  Login with public key failed for user '${INVALID USERNAME}'.
+    [Documentation]   A username that does not exist on the target machine leads to a rather misleading error message about key lengths.
+    ...   See: https://github.com/fabric/fabric/issues/2182#issuecomment-1362940149
+    Run Keyword And Expect Error  ValueError: q must be exactly 160, 224, or 256 bits long
     ...    Login With Public Key  ${INVALID USERNAME}  ${KEY}
 
 Login With Public Key When Invalid Key
