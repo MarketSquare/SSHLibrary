@@ -1,6 +1,9 @@
 name: SSHLibrary Python CI
 
-on: [push, pull_request]
+on: [push, workflow_dispatch]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.sha}}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -60,6 +63,7 @@ jobs:
         with:
           name: Test Results - Python ${{ matrix.python-version }}
           path: "results"
+          retention-days: 180
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: success() || failure()
