@@ -85,3 +85,15 @@ Login Using Config File Proxy Command
     ${output}=  Login  password=test  read_config=True
     Should Contain  ${output}  test@
 
+Login With Disabled Algorithms
+    [Setup]    Open Connection    ${HOST}    prompt=${PROMPT}
+    VAR    @{pubkeys}    rsa-sha2-512    rsa-sha2-256
+    VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
+    Login    ${USERNAME}    ${PASSWORD}    disabled_algorithms=${disabled_algorithms}
+
+Login With Disabled Algorithms And Public Key
+    [Setup]    Open Connection    ${HOST}    prompt=${PROMPT}
+    VAR    @{pubkeys}    rsa-sha2-512    rsa-sha2-256
+    VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
+    Login With Public Key    ${KEY USERNAME}    ${KEY}    disabled_algorithms=${disabled_algorithms}
+
