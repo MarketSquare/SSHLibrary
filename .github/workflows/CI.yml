@@ -30,7 +30,7 @@ jobs:
           sudo useradd -m testkey -s /bin/bash
           sudo -E su testkey -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/testkey/.bashrc"
           sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"
-          sudo -E su testkey -c "ssh-keygen -f /home/testkey/.ssh/id_rsa -t rsa -N ''"
+          sudo -E su testkey -c "ssh-keygen -f /home/testkey/.ssh/id_rsa -t rsa -b 2048 -N ''"
           sudo -E su testkey -c "cp /home/testkey/.ssh/id_rsa.pub /home/testkey/.ssh/authorized_keys"
           sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
           sudo -E su testkey -c "chmod 600 /home/testkey/.ssh/authorized_keys"
