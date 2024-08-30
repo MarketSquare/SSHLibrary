@@ -57,7 +57,7 @@ jobs:
           ssh-add atest/testdata/keyfiles/id_rsa
       - name: Run tests
         run: |
-          robot -d results-${{ matrix.python-version }} -i shell -e no-gh-actions -b console.log -x xunit.xml atest
+          robot -d results-${{ matrix.python-version }} -e no-gh-actions -b console.log -x xunit.xml atest
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
