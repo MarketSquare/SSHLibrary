@@ -1,4 +1,4 @@
-name: SSHLibrary Python CI
+name: Test SSHLibrary
 
 on: [push, workflow_dispatch]
 concurrency:

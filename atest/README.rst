@@ -6,6 +6,11 @@ This guide tells how to run the acceptance tests of SSHLibrary. Acceptance tests
 
 Because SSHLibrary is primary used on Linux, tests should be ran at least on it. If developing on OS X or Windows, setting up a virtual machine with Linux and SSHLibrary installed is the recommended approach.
 
+Setup IDE
+=========
+
+Use ``robotframework-tidy`` to format the test files. It can be installed with pip: ``pip install robotframework-tidy``. If you do not format test cases according to robotidy, the PR check will fail automatically.
+
 Setup on Linux
 ==============
 
@@ -208,4 +213,5 @@ Tests are ran using Bash script ``python atest/run.py``. The script prints help 
 In order to run the tests with IPv6, the ``::1`` must be used as host variable when running ``atest/run.py`` script::
 
     python atest/run.py --variable=HOST:::1 atest
+
 

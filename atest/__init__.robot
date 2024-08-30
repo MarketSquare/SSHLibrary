@@ -1,3 +1,2 @@
 *** Settings ***
-Force Tags  Regression
-
+Force Tags      regression

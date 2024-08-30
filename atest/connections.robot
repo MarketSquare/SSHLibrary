@@ -1,132 +1,139 @@
 *** Settings ***
-Resource       resources/common.robot
-Test Teardown  Close All Connections
+Resource            resources/common.robot
+
+Test Teardown       Close All Connections
+
 
 *** Test Cases ***
 Open Connection
-    Open Connection  ${HOST}
+    Open Connection    ${HOST}
 
 Close Connection
-    [Setup]  Login As Valid User
+    [Setup]    Login As Valid User
     Close Connection
     Connection Should Be Closed
 
 Close Connection Fails If No Connection
-    Run Keyword And Expect Error  No open connection.  Close Connection
+    Run Keyword And Expect Error    No open connection.    Close Connection
 
 Switch Connection
-    ${conn1_id} =  Open Connection  ${HOST}  alias=one  prompt=${PROMPT}
-    Login  ${USERNAME}  ${PASSWORD}
-    Write  cd /tmp
+    ${conn1_id} =    Open Connection    ${HOST}    alias=one    prompt=${PROMPT}
+    Login    ${USERNAME}    ${PASSWORD}
+    Write    cd /tmp
     Read Until Prompt
-    ${conn_id2} =  Open Connection  ${HOST}  alias=second  prompt=${PROMPT}
-    Login  ${USERNAME}  ${PASSWORD}
-    ${prev id} =  Switch Connection  ${conn1_id}
-    Should Be Equal  ${prev id}  ${conn_id2}
-    Write  pwd
-    ${output} =  Read Until Prompt
-    Should Contain  ${output}  /tmp
-    ${prev id} =  Switch Connection  second
-    Write  pwd
-    ${result} =  Read Until Prompt
-    Should Contain  ${result}  ~
+    ${conn_id2} =    Open Connection    ${HOST}    alias=second    prompt=${PROMPT}
+    Login    ${USERNAME}    ${PASSWORD}
+    ${prev id} =    Switch Connection    ${conn1_id}
+    Should Be Equal    ${prev id}    ${conn_id2}
+    Write    pwd
+    ${output} =    Read Until Prompt
+    Should Contain    ${output}    /tmp
+    ${prev id} =    Switch Connection    second
+    Write    pwd
+    ${result} =    Read Until Prompt
+    Should Contain    ${result}    ~
 
 Switch Connection To None
-    [Setup]   Login As Valid User
-    Switch Connection  ${NONE}
+    [Setup]    Login As Valid User
+    Switch Connection    ${NONE}
     Connection Should Be Closed
 
 Switch to closed connection
-    Open Connection  ${HOST}  alias=SUT
-    Login  ${USERNAME}  ${PASSWORD}
-    Execute command   ls
+    Open Connection    ${HOST}    alias=SUT
+    Login    ${USERNAME}    ${PASSWORD}
+    Execute command    ls
     close connection
-    Run keyword and expect error  Non-existing index or alias 'SUT'.  switch connection   SUT
+    Run keyword and expect error    Non-existing index or alias 'SUT'.    switch connection    SUT
 
 Get pre-login banner without open connection
-    [Tags]  no-gh-actions
-    ${banner} =  Get Pre Login Banner  ${HOST}
-    Should Be Equal  ${banner}  Testing pre-login banner\n
+    [Tags]    no-gh-actions
+    ${banner} =    Get Pre Login Banner    ${HOST}
+    Should Be Equal    ${banner}    Testing pre-login banner\n
 
 Get pre-login banner from current connection
-    Open Connection  ${HOST}  prompt=${PROMPT}
-    Login  ${USERNAME}  ${PASSWORD}
-    ${banner} =  Get Pre Login Banner
-    Should Be Equal  ${banner}  Testing pre-login banner\n
+    Open Connection    ${HOST}    prompt=${PROMPT}
+    Login    ${USERNAME}    ${PASSWORD}
+    ${banner} =    Get Pre Login Banner
+    Should Be Equal    ${banner}    Testing pre-login banner\n
 
 Switch Connection When Previous Connection Was Closed
-    Open Connection  ${HOST}  alias=alias1
-    Open Connection  ${HOST}  alias=alias2
-    Switch Connection  alias1
+    Open Connection    ${HOST}    alias=alias1
+    Open Connection    ${HOST}    alias=alias2
+    Switch Connection    alias1
     Close Connection
     Connection Should Be Closed
-    ${old_index}=  Switch Connection  alias2
-    Should Be Equal As Strings  ${old_index}  None
-    Run Keyword And Expect Error  Non-existing index or alias 'alias1'.  Switch Connection  alias1
-    ${conn}=  Get Connection
-    Should Be Equal As Strings  ${conn.index}  2
-    Should Be Equal As Strings  ${conn.alias}  alias2
+    ${old_index} =    Switch Connection    alias2
+    Should Be Equal As Strings    ${old_index}    None
+    Run Keyword And Expect Error    Non-existing index or alias 'alias1'.    Switch Connection    alias1
+    ${conn} =    Get Connection
+    Should Be Equal As Strings    ${conn.index}    2
+    Should Be Equal As Strings    ${conn.alias}    alias2
 
 Switch Connection Using Index When Previous Connection Was Closed
-    Open Connection  ${HOST}
-    Open Connection  ${HOST}
-    Switch Connection  1
+    Open Connection    ${HOST}
+    Open Connection    ${HOST}
+    Switch Connection    1
     Close Connection
     Connection Should Be Closed
-    Switch Connection  2
-    Run Keyword And Expect Error  Non-existing index or alias '1'.  Switch Connection  1
-    ${conn}=  Get Connection
-    Should Be Equal As Strings  ${conn.index}  2
+    Switch Connection    2
+    Run Keyword And Expect Error    Non-existing index or alias '1'.    Switch Connection    1
+    ${conn} =    Get Connection
+    Should Be Equal As Strings    ${conn.index}    2
 
 Open Connection When Previous Connection Was Closed
-    Open Connection  ${HOST}  alias=alias1
+    Open Connection    ${HOST}    alias=alias1
     Close Connection
     Connection Should Be Closed
-    ${idx}=  Open Connection  ${HOST}  alias=alias2
-    Should Be Equal  ${idx}  ${2}
-    ${conn}=  Get Connection  2
-    Should Be Equal  ${conn.index}  ${2}
-    Should Be Equal  ${conn.alias}  alias2
-    ${conn}=  Get Connection  alias2
-    Should Be Equal  ${conn.index}  ${2}
-    Should Be Equal  ${conn.alias}  alias2
+    ${idx} =    Open Connection    ${HOST}    alias=alias2
+    Should Be Equal    ${idx}    ${2}
+    ${conn} =    Get Connection    2
+    Should Be Equal    ${conn.index}    ${2}
+    Should Be Equal    ${conn.alias}    alias2
+    ${conn} =    Get Connection    alias2
+    Should Be Equal    ${conn.index}    ${2}
+    Should Be Equal    ${conn.alias}    alias2
 
 Reuse Closed Connection Alias
-    Open Connection  ${HOST}  alias=alias1
+    Open Connection    ${HOST}    alias=alias1
     Close Connection
     Connection Should Be Closed
-    Open Connection  ${HOST}  alias=alias1
-    ${conn}=  Get Connection  2
-    Should Be Equal  ${conn.index}  ${2}
-    Should Be Equal  ${conn.alias}  alias1
-    ${conn}=  Get Connection  alias1
-    Should Be Equal  ${conn.index}  ${2}
-    Should Be Equal  ${conn.alias}  alias1
+    Open Connection    ${HOST}    alias=alias1
+    ${conn} =    Get Connection    2
+    Should Be Equal    ${conn.index}    ${2}
+    Should Be Equal    ${conn.alias}    alias1
+    ${conn} =    Get Connection    alias1
+    Should Be Equal    ${conn.index}    ${2}
+    Should Be Equal    ${conn.alias}    alias1
 
 Connection To Host Read From SSH Config File
-   Open Connection  ${TEST_HOSTNAME}
-   Login  ${USERNAME}  ${PASSWORD}  read_config=True
+    Open Connection    ${TEST_HOSTNAME}
+    Login    ${USERNAME}    ${PASSWORD}    read_config=True
 
 Connection To Host Ignoring SSH Config File
-   Open Connection  ${TEST_HOSTNAME}
-   Run Keyword And Expect Error  *Err*  Login  ${USERNAME}  ${PASSWORD}  read_config=False
-   Run Keyword And Expect Error  *Err*  Login With Public Key  ${KEY USERNAME}  ${KEY}  read_config=False
+    Open Connection    ${TEST_HOSTNAME}
+    Run Keyword And Expect Error    *Err*    Login    ${USERNAME}    ${PASSWORD}    read_config=False
+    Run Keyword And Expect Error    *Err*    Login With Public Key    ${KEY USERNAME}    ${KEY}    read_config=False
 
 Write In Teardown Should Not Hang If Auth Failed
-  Open Connection  ${HOST}
-  Run Keyword And Expect Error  Authentication failed*  Login  ${USERNAME}  invalid
-  [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write  ls
+    Open Connection    ${HOST}
+    Run Keyword And Expect Error    Authentication failed*    Login    ${USERNAME}    invalid
+    [Teardown]    Run Keyword And Expect Error    *Cannot open session, you need to establish a connection first.    Write    ls
 
 Write Bare In Teardown Should Not Hang If Auth Failed
-  Open Connection  ${HOST}
-  Run Keyword And Expect Error  Login with public key failed*  Login With Public Key  ${USERNAME}  ${KEY}_invalid
-  [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write Bare  ls
+    Open Connection    ${HOST}
+    Run Keyword And Expect Error
+    ...    Login with public key failed*
+    ...    Login With Public Key
+    ...    ${USERNAME}
+    ...    ${KEY}_invalid
+    [Teardown]    Run Keyword And Expect Error    *Cannot open session, you need to establish a connection first.    Write Bare    ls
 
 Login With Agent
-   [Tags]  no-gh-actions
-   Open Connection  ${HOST}
-   Login  ${KEY USERNAME}  allow_agent=True
+    [Tags]    no-gh-actions
+    Open Connection    ${HOST}
+    Login    ${KEY USERNAME}    allow_agent=True
+
 
 *** Keywords ***
 Connection Should Be Closed
-    Run Keyword And Expect Error  No open connection.  Write  pwd
+    Run Keyword And Expect Error    No open connection.    Write    pwd
