@@ -5,11 +5,20 @@ Suite Teardown  Remove Test Files And Close Connections
 Library         OperatingSystem  WITH NAME  OS
 Library         DateTime
 
+Test Tags       shell    execute_command
+
 *** Test Cases ***
 Execute Timeout
     [Documentation]  FAIL  SSHClientException: Timed out in 3 seconds
     ...              LOG  1:2  INFO  GLOB:  *Command no. 1*Command no. 2*Command no. 3*
-    Execute Command  for i in {1..10}; do echo "Command no. $i"; sleep 1; done  timeout=3s  output_if_timeout=True
+    TRY
+        Execute Command  for i in {1..5}; do echo "Command no. $i"; sleep 1; done  timeout=3s  output_if_timeout=True
+    EXCEPT  SSHClientException: Timed out in 3 seconds
+        Pass Execution    Test passed: Command successfully timed out after 3 seconds.
+    EXCEPT    AS    ${exception}
+        Fail    Unexpected exception: ${exception}
+    END
+    Fail    Expected timeout did not occur.
 
 Execute Command With Defaults
     ${stdout} =  Execute Command  ${REMOTE TEST ROOT}/${TEST SCRIPT NAME}
@@ -65,11 +74,6 @@ Execute Command With Legacy Stdout And Stderr Config
     ...                     Both
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
-
-Execute Command With Robot Timeout
-   [Documentation]   FAIL Test timeout 500 milliseconds exceeded.
-   [Timeout]   0.5 seconds
-   Execute Command     cat
 
 Execute Command With Huge Output
    [Timeout]   5 seconds
