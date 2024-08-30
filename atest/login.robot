@@ -3,6 +3,8 @@ Resource       resources/common.robot
 Test Setup     Open Connection  ${HOST}
 Test Teardown  Close All Connections
 
+Test Tags      login
+
 *** Variables ***
 ${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
 ${KEY USERNAME}      testkey
@@ -66,7 +68,12 @@ Login With No Password
 
 Login With Explicit No Password
 	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
-	Login  ${USERNAME_NOPASSWD}  ${EMPTY_STRING}
+    TRY
+        Login  ${USERNAME_NOPASSWD}  ${EMPTY_STRING}
+    EXCEPT  Authentication failed for user '${USERNAME_NOPASSWD}'.    AS    ${ex}
+        Pass Execution    Authentication with empty password failed as expected: ${ex}
+    END
+    Fail    Authentication with empty password should have failed
 
 Login With Empty Quotes No Password
 	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
