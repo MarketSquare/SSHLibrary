@@ -29,10 +29,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.7.0rc1 was released on Monday April 19, 2021.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.7.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.7.0
 
 
 .. contents::
@@ -71,9 +71,9 @@ Full list of fixes and enhancements
       - Reconnect Keyword
       - rc 1
 
-Altogether 4 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.7.0>`__.
+Altogether 4 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.7.0>`__.
 
-.. _#129: https://github.com/robotframework/SSHLibrary/issues/129
-.. _#376: https://github.com/robotframework/SSHLibrary/issues/376
-.. _#368: https://github.com/robotframework/SSHLibrary/issues/368
-.. _#379: https://github.com/robotframework/SSHLibrary/issues/379
+.. _#129: https://github.com/MarketSquare/SSHLibrary/issues/129
+.. _#376: https://github.com/MarketSquare/SSHLibrary/issues/376
+.. _#368: https://github.com/MarketSquare/SSHLibrary/issues/368
+.. _#379: https://github.com/MarketSquare/SSHLibrary/issues/379

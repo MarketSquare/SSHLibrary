@@ -1,15 +1,19 @@
 name: SSHLibrary Python CI
 
-on: [push, pull_request]
+on: [push, workflow_dispatch]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
+    name: Acceptance tests Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: [3.8]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +34,7 @@ jobs:
           sudo useradd -m testkey -s /bin/bash
           sudo -E su testkey -c "echo $'export PS1=\'\u@$HOSTNAME \W \$ \'' >> /home/testkey/.bashrc"
           sudo -E su testkey -c "mkdir -p /home/testkey/.ssh"
-          sudo -E su testkey -c "ssh-keygen -f /home/testkey/.ssh/id_rsa -t rsa -N ''"
+          sudo -E su testkey -c "ssh-keygen -f /home/testkey/.ssh/id_rsa -t rsa -b 2048 -N ''"
           sudo -E su testkey -c "cp /home/testkey/.ssh/id_rsa.pub /home/testkey/.ssh/authorized_keys"
           sudo -E su testkey -c "chmod 644 /home/testkey/.ssh/id_rsa"
           sudo -E su testkey -c "chmod 600 /home/testkey/.ssh/authorized_keys"
@@ -53,9 +57,15 @@ jobs:
           ssh-add atest/testdata/keyfiles/id_rsa
       - name: Run tests
         run: |
-          robot -d results -e no-gh-actions -b console.log atest
+          robot -d results-${{ matrix.python-version }} -e no-gh-actions -b console.log -x xunit.xml atest
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: Test Results - ${{ runner.os }}
-          path: "atest/results/"
+          name: Test Results - Python ${{ matrix.python-version }}
+          path: "results-${{ matrix.python-version }}"
+          retention-days: 180
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: success() || failure()
+        with:
+          files: results-${{ matrix.python-version }}/xunit.xml

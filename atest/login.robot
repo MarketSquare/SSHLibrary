@@ -3,6 +3,8 @@ Resource       resources/common.robot
 Test Setup     Open Connection  ${HOST}
 Test Teardown  Close All Connections
 
+Test Tags      login
+
 *** Variables ***
 ${KEY DIR}           ${LOCAL TESTDATA}${/}keyfiles
 ${KEY USERNAME}      testkey
@@ -25,7 +27,9 @@ Login With Public Key When Valid Username And Key
     Login With Public Key  ${KEY USERNAME}  ${KEY}
 
 Login With Public Key When Invalid Username
-    Run Keyword And Expect Error  Login with public key failed for user '${INVALID USERNAME}'.
+    [Documentation]   A username that does not exist on the target machine leads to a rather misleading error message about key lengths.
+    ...   See: https://github.com/fabric/fabric/issues/2182#issuecomment-1362940149
+    Run Keyword And Expect Error  ValueError: q must be exactly 160, 224, or 256 bits long
     ...    Login With Public Key  ${INVALID USERNAME}  ${KEY}
 
 Login With Public Key When Invalid Key
@@ -64,7 +68,12 @@ Login With No Password
 
 Login With Explicit No Password
 	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}
-	Login  ${USERNAME_NOPASSWD}  ${EMPTY_STRING}
+    TRY
+        Login  ${USERNAME_NOPASSWD}  ${EMPTY_STRING}
+    EXCEPT  Authentication failed for user '${USERNAME_NOPASSWD}'.    AS    ${ex}
+        Pass Execution    Authentication with empty password failed as expected: ${ex}
+    END
+    Fail    Authentication with empty password should have failed
 
 Login With Empty Quotes No Password
 	[Setup]  Open Connection  ${HOST}  prompt=${PROMPT}

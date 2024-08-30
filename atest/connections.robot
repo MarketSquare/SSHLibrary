@@ -119,7 +119,7 @@ Write In Teardown Should Not Hang If Auth Failed
 
 Write Bare In Teardown Should Not Hang If Auth Failed
   Open Connection  ${HOST}
-  Run Keyword And Expect Error  Login with public key failed*  Login With Public Key  invalid  ${KEY}
+  Run Keyword And Expect Error  Login with public key failed*  Login With Public Key  ${USERNAME}  ${KEY}_invalid
   [Teardown]   Run Keyword And Expect Error  *Cannot open session, you need to establish a connection first.  Write Bare  ls
 
 Login With Agent

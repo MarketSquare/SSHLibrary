@@ -29,10 +29,10 @@ distribution from PyPI_ and install it manually.
 SSHLibrary 3.5.0 was released on Monday September 14, 2020.
 
 .. _Robot Framework: http://robotframework.org
-.. _SSHLibrary: https://github.com/robotframework/SSHLibrary
+.. _SSHLibrary: https://github.com/MarketSquare/SSHLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-sshlibrary
-.. _issue tracker: https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.5.0
+.. _issue tracker: https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.5.0
 
 
 .. contents::
@@ -89,13 +89,13 @@ Full list of fixes and enhancements
       - low
       - Deprecation warning due to invalid escape sequences in Python 3.7
 
-Altogether 8 issues. View on the `issue tracker <https://github.com/robotframework/SSHLibrary/issues?q=milestone%3Av3.5.0>`__.
+Altogether 8 issues. View on the `issue tracker <https://github.com/MarketSquare/SSHLibrary/issues?q=milestone%3Av3.5.0>`__.
 
-.. _#151: https://github.com/robotframework/SSHLibrary/issues/151
-.. _#349: https://github.com/robotframework/SSHLibrary/issues/349
-.. _#121: https://github.com/robotframework/SSHLibrary/issues/121
-.. _#323: https://github.com/robotframework/SSHLibrary/issues/323
-.. _#340: https://github.com/robotframework/SSHLibrary/issues/340
-.. _#348: https://github.com/robotframework/SSHLibrary/issues/348
-.. _#356: https://github.com/robotframework/SSHLibrary/issues/356
-.. _#341: https://github.com/robotframework/SSHLibrary/issues/341
+.. _#151: https://github.com/MarketSquare/SSHLibrary/issues/151
+.. _#349: https://github.com/MarketSquare/SSHLibrary/issues/349
+.. _#121: https://github.com/MarketSquare/SSHLibrary/issues/121
+.. _#323: https://github.com/MarketSquare/SSHLibrary/issues/323
+.. _#340: https://github.com/MarketSquare/SSHLibrary/issues/340
+.. _#348: https://github.com/MarketSquare/SSHLibrary/issues/348
+.. _#356: https://github.com/MarketSquare/SSHLibrary/issues/356
+.. _#341: https://github.com/MarketSquare/SSHLibrary/issues/341
