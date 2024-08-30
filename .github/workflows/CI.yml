@@ -57,7 +57,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: Test Results - ${{ runner.os }}
+          name: Test Results - Python ${{ matrix.python-version }}
           path: "results"
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
