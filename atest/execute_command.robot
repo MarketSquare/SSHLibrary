@@ -5,6 +5,8 @@ Suite Teardown  Remove Test Files And Close Connections
 Library         OperatingSystem  WITH NAME  OS
 Library         DateTime
 
+Test Tags       shell    execute_command
+
 *** Test Cases ***
 Execute Timeout
     [Documentation]  FAIL  SSHClientException: Timed out in 3 seconds
@@ -77,6 +79,7 @@ Execute Command With Robot Timeout
    [Documentation]   FAIL Test timeout 500 milliseconds exceeded.
    [Timeout]   0.5 seconds
    Execute Command     cat
+   [Teardown]    Run Keyword If   ${TEST_MESSAGE} == 'Test timeout 500 milliseconds exceeded.'  Pass Execution  Test passed: Command successfully timed out after 500 milliseconds.
 
 Execute Command With Huge Output
    [Timeout]   5 seconds
