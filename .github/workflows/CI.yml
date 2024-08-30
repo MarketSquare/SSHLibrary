@@ -17,7 +17,7 @@ jobs:
           python-version: "3.11"
       - name: Install robotidy
         run: |
-          pip install robotframework-robotidy
+          pip install robotframework-tidy
       - name: Check Test Formatting
         run: |
           robotidy --check atest
