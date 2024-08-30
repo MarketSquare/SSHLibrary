@@ -1,9 +1,13 @@
 name: SSHLibrary Python CI
 
-on: [push, pull_request]
+on: [push, workflow_dispatch]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
+    name: Acceptance tests Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -53,9 +57,15 @@ jobs:
           ssh-add atest/testdata/keyfiles/id_rsa
       - name: Run tests
         run: |
-          robot -d results -e no-gh-actions -b console.log atest
+          robot -d results -e no-gh-actions -b console.log -x xunit.xml atest
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: Test Results - ${{ runner.os }}
-          path: "atest/results/"
+          name: Test Results - Python ${{ matrix.python-version }}
+          path: "results"
+          retention-days: 180
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: success() || failure()
+        with:
+          files: results/xunit.xml
