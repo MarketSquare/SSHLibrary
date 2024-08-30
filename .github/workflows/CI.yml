@@ -6,6 +6,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tidy:
+    name: Check test format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install robotidy
+        run: |
+          pip install robotframework-robotidy
+      - name: Check Test Formatting
+        run: |
+          robotidy --check atest
   build:
     name: Acceptance tests Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
