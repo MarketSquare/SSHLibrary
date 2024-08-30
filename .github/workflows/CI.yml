@@ -61,5 +61,6 @@ jobs:
           path: "results"
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
+        if: success() || failure()
         with:
           files: results/xunit.xml
