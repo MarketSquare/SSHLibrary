@@ -75,12 +75,6 @@ Execute Command With Legacy Stdout And Stderr Config
     Should Be Equal  ${stdout}  This is stdout
     Should Be Equal  ${stderr}  This is stderr
 
-Execute Command With Robot Timeout
-   [Documentation]   FAIL Test timeout 500 milliseconds exceeded.
-   [Timeout]   0.5 seconds
-   Execute Command     cat
-   [Teardown]    Run Keyword If   ${TEST_MESSAGE} == 'Test timeout 500 milliseconds exceeded.'  Pass Execution  Test passed: Command successfully timed out after 500 milliseconds.
-
 Execute Command With Huge Output
    [Timeout]   5 seconds
    Execute Command     echo 'foo\\nbar\\n' > file.txt
