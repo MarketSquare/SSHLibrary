@@ -1,0 +1,45 @@
+name: SSHLibrary Python CI
+
+on: [pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tidy:
+    name: Robotidy - Check Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install robotidy
+        run: |
+          pip install robotframework-tidy
+      - name: Check Test Formatting
+        run: |
+          robotidy --check --diff atest
+  validate-syntax:
+    name: Validate Test Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install SSHLibrary
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+      - name: Run tests
+        run: |
+          robot --dryrun -d results -e no-gh-actions -b console.log atest
+      - uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: Syntax Validation
+          path: "results"
+          retention-days: 180
