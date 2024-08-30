@@ -1,9 +1,18 @@
 .. list-table::
    :header-rows: 0
 
-   * - |_github_created_at|
+   * - Statistic:
+     - |_github_created_at|
+     - |_pypi_python_version|
      - |_pypi_downloads|
+   * - Quality:
+     - |_github_main_status|
+     - Next Release:
      - |_github_milestone_4|
+   * - Pulse:
+     - |_github_latest_release|
+     - |_github_commits_since_release|
+     - |_github_last_commit|
 
 SSHLibrary
 ===============
@@ -167,3 +176,18 @@ available:
 
 .. |_github_milestone_4| image:: https://img.shields.io/github/milestones/progress-percent/MarketSquare/SSHLibrary/25
    :alt: GitHub milestone details
+
+.. |_pypi_python_version| image:: https://img.shields.io/pypi/pyversions/robotframework-sshlibrary
+   :alt: PyPI - Python Version
+
+.. |_github_main_status| image:: https://img.shields.io/github/checks-status/MarketSquare/SSHLibrary/master
+   :alt: GitHub branch status
+
+.. |_github_commits_since_release| image:: https://img.shields.io/github/commits-since/MarketSquare/SSHLibrary/latest
+   :alt: GitHub commits since latest release
+
+.. |_github_latest_release| image:: https://img.shields.io/github/release-date/MarketSquare/SSHLibrary
+   :alt: GitHub Release Date
+
+.. |_github_last_commit| image:: https://img.shields.io/github/last-commit/MarketSquare/SSHLibrary
+   :alt: GitHub last commit
