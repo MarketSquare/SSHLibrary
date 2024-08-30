@@ -180,8 +180,8 @@ available:
 .. |_pypi_python_version| image:: https://img.shields.io/pypi/pyversions/robotframework-sshlibrary
    :alt: PyPI - Python Version
 
-.. |_github_main_status| image:: https://img.shields.io/github/checks-status/MarketSquare/SSHLibrary/master
-   :alt: GitHub branch status
+.. |_github_main_status| image:: https://img.shields.io/github/check-runs/MarketSquare/SSHLibrary/master
+   :alt: GitHub branch check runs
 
 .. |_github_commits_since_release| image:: https://img.shields.io/github/commits-since/MarketSquare/SSHLibrary/latest
    :alt: GitHub commits since latest release
