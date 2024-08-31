@@ -43,6 +43,11 @@ Login With Public Key When Non-Existing Key
     Run Keyword And Expect Error    Given key file 'not_existing_key' does not exist.
     ...    Login With Public Key    ${KEY USERNAME}    not_existing_key
 
+Login With Public Key And Disabled Algorithms
+    VAR    @{pubkeys}    rsa-sha2-512    rsa-sha2-256
+    VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
+    Login With Public Key    ${KEY USERNAME}    ${KEY}    disabled_algorithms=${disabled_algorithms}
+
 Logging In Returns Server Output
     [Setup]    Open Connection    ${HOST}
     ${output}=    Login    ${USERNAME}    ${PASSWORD}
@@ -94,8 +99,3 @@ Login With Disabled Algorithms
     VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
     Login    ${USERNAME}    ${PASSWORD}    disabled_algorithms=${disabled_algorithms}
 
-Login With Disabled Algorithms And Public Key
-    [Setup]    Open Connection    ${TESTKEY_HOSTNAME}    prompt=${PROMPT}
-    VAR    @{pubkeys}    rsa-sha2-512    rsa-sha2-256
-    VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
-    Login With Public Key    ${KEY USERNAME}    ${KEY}    disabled_algorithms=${disabled_algorithms}
