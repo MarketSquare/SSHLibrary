@@ -95,7 +95,7 @@ Login With Disabled Algorithms
     Login    ${USERNAME}    ${PASSWORD}    disabled_algorithms=${disabled_algorithms}
 
 Login With Disabled Algorithms And Public Key
-    [Setup]    Open Connection    ${HOST}    prompt=${PROMPT}
+    [Setup]    Open Connection    ${TESTKEY_HOSTNAME}    prompt=${PROMPT}
     VAR    @{pubkeys}    rsa-sha2-512    rsa-sha2-256
     VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
     Login With Public Key    ${KEY USERNAME}    ${KEY}    disabled_algorithms=${disabled_algorithms}
