@@ -44,7 +44,7 @@ Login With Public Key When Non-Existing Key
     ...    Login With Public Key    ${KEY USERNAME}    not_existing_key
 
 Login With Public Key And Disabled Algorithms
-    VAR    @{pubkeys}    rsa-sha2-512    rsa-sha2-256
+    VAR    @{pubkeys}    diffie-hellman-group16-sha512
     VAR    &{disabled_algorithms}    pubkeys=${pubkeys}
     Login With Public Key    ${KEY USERNAME}    ${KEY}    disabled_algorithms=${disabled_algorithms}
 
