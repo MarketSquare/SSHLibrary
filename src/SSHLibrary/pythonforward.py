@@ -40,6 +40,7 @@ class LocalPortForwarding:
     def close(self):
         if self.server:
             self.server.shutdown()
+            self.server.server_close()
             try:
                 logger.log_background_messages()
             except AttributeError:
