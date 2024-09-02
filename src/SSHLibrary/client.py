@@ -26,7 +26,7 @@ import fnmatch
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from robot.api import logger
-from robot.utils import is_bytes, is_string, is_unicode, is_truthy, unicode, is_list_like
+from robot.utils import is_bytes, is_string, is_truthy, is_list_like
 from .pythonforward import LocalPortForwarding
 
 try:
@@ -234,7 +234,7 @@ class SSHClient(object):
         if is_bytes(text):
             return text
         if not is_string(text):
-            text = unicode(text)
+            text = str(text)
         return text.encode(self.config.encoding, self.config.encoding_errors)
 
     def _decode(self, bytes):
@@ -1459,7 +1459,7 @@ class SFTPClient(object):
         return destination.rsplit(path_separator, 1)
 
     def _create_missing_remote_path(self, path, mode):
-        if is_unicode(path):
+        if is_string(path):
             path = path.encode(self._encoding)
         if path.startswith(b'/'):
             current_dir = b'/'
