@@ -26,7 +26,7 @@ import fnmatch
 from .config import (Configuration, IntegerEntry, NewlineEntry, StringEntry,
                      TimeEntry)
 from robot.api import logger
-from robot.utils import is_bytes, is_string, is_truthy, is_list_like
+from robot.utils import is_bytes, is_string, is_truthy
 from .pythonforward import LocalPortForwarding
 
 try:
@@ -46,29 +46,7 @@ except ImportError:
     )
 
 
-# There doesn't seem to be a simpler way to increase banner timeout
-def _custom_start_client(self, *args, **kwargs):
-    self.banner_timeout = 45
-    self._orig_start_client(*args, **kwargs)
-
-
-paramiko.transport.Transport._orig_start_client = \
-    paramiko.transport.Transport.start_client
-paramiko.transport.Transport.start_client = _custom_start_client
-
-
-# See http://code.google.com/p/robotframework-sshlibrary/issues/detail?id=55
-def _custom_log(self, level, msg, *args):
-    escape = lambda s: s.replace('%', '%%')
-    if is_list_like(msg):
-        msg = [escape(m) for m in msg]
-    else:
-        msg = escape(msg)
-    return self._orig_log(level, msg, *args)
-
-
-paramiko.sftp_client.SFTPClient._orig_log = paramiko.sftp_client.SFTPClient._log
-paramiko.sftp_client.SFTPClient._log = _custom_log
+BANNER_TIMEOUT = 45
 
 
 class SSHClientException(RuntimeError):
@@ -900,7 +878,8 @@ class SSHClient(object):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=sock_tunnel)
+                                        timeout=float(self.config.timeout), sock=sock_tunnel,
+                                        banner_timeout=BANNER_TIMEOUT)
                 except paramiko.SSHException:
                     pass
                 transport = self.client.get_transport()
@@ -911,7 +890,8 @@ class SSHClient(object):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=sock_tunnel)
+                                        timeout=float(self.config.timeout), sock=sock_tunnel,
+                                        banner_timeout=BANNER_TIMEOUT)
                     transport = self.client.get_transport()
                     transport.set_keepalive(keep_alive_interval)
                 except paramiko.AuthenticationException:
@@ -958,7 +938,7 @@ class SSHClient(object):
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout),
-                                sock=sock_tunnel)
+                                sock=sock_tunnel, banner_timeout=BANNER_TIMEOUT)
             transport = self.client.get_transport()
             transport.set_keepalive(keep_alive_interval)
         except paramiko.AuthenticationException:
@@ -981,7 +961,7 @@ class SSHClient(object):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(str(host), int(port), username="bad-username")
+            client.connect(str(host), int(port), username="bad-username", banner_timeout=BANNER_TIMEOUT)
         except paramiko.AuthenticationException:
             return client.get_transport().get_banner()
         except Exception:
