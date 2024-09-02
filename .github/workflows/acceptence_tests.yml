@@ -1,6 +1,6 @@
 name: Acceptance Tests
 
-on: [push, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
