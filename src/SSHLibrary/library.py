@@ -1046,6 +1046,7 @@ class SSHLibrary:
         read_config=False,
         jumphost_index_or_alias=None,
         keep_alive_interval="0 seconds",
+        disabled_algorithms=None,
     ):
         """Logs into the SSH server with the given ``username`` and ``password``.
 
@@ -1082,6 +1083,11 @@ class SSHLibrary:
 
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
 
+        ``disabled_algorithms`` is a list of algorithms that should be disabled.
+        For example, if you need to disable diffie-hellman-group16-sha512 key exchange 
+        (perhaps because your code talks to a server which implements it differently from Paramiko), 
+        specify disabled_algorithms={"kex": ["diffie-hellman-group16-sha512"]}
+
         Example that logs in and returns the output:
 
         | `Open Connection` | linux.server.com |
@@ -1104,6 +1110,12 @@ class SSHLibrary:
         First, add the key to the authentication agent with: ``ssh-add /path/to/keyfile``.
         | `Open Connection` | linux.server.com |
         | `Login` | johndoe | allow_agent=True |
+
+        Example login with disabled algorithms:
+        | `Open Connection` | linux.server.com |
+        | `VAR`             | @{pubkeys}             | rsa-sha2-512    rsa-sha2-256 |
+        | `VAR`             | &{disabled_algorithms} | pubkeys=${pubkeys} |
+        | `Login`           | username=johndoe       | disabled_algorithms=${disabled_algorithms} |
         """
         jumphost_connection_conf = (
             self.get_connection(index_or_alias=jumphost_index_or_alias)
@@ -1127,6 +1139,7 @@ class SSHLibrary:
             is_truthy(read_config),
             jumphost_connection,
             keep_alive_interval,
+            disabled_algorithms,
         )
 
     @keyword(tags=("login",))
@@ -1142,6 +1155,7 @@ class SSHLibrary:
         jumphost_index_or_alias=None,
         read_config=False,
         keep_alive_interval="0 seconds",
+        disabled_algorithms=None,
     ):
         """Logs into the SSH server using key-based authentication.
 
@@ -1196,6 +1210,17 @@ class SSHLibrary:
         set to ``0``, which means sending the ``keepalive`` packet is disabled.
 
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
+
+        ``disabled_algorithms`` is a list of algorithms that should be disabled.
+        For example, if you need to disable diffie-hellman-group16-sha512 key exchange 
+        (perhaps because your code talks to a server which implements it differently from Paramiko), 
+        specify disabled_algorithms={"kex": ["diffie-hellman-group16-sha512"]}
+
+        Example login with disabled algorithms:
+        | `Open Connection`       | linux.server.com |
+        | `VAR`                   | @{pubkeys}             | rsa-sha2-512    rsa-sha2-256 |
+        | `VAR`                   | &{disabled_algorithms} | pubkeys=${pubkeys} |
+        | `Login With Public Key` | username=johndoe       | keyfile=key | disabled_algorithms=${disabled_algorithms} |
         """
         if proxy_cmd and jumphost_index_or_alias:
             raise ValueError(
@@ -1223,6 +1248,7 @@ class SSHLibrary:
             jumphost_connection,
             is_truthy(read_config),
             keep_alive_interval,
+            disabled_algorithms,
         )
 
     def _login(self, login_method, username, *args):

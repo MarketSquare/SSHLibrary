@@ -183,7 +183,7 @@ class SSHClient(object):
             pass
 
     def login(self, username=None, password=None, allow_agent=False, look_for_keys=False, delay=None, proxy_cmd=None,
-              read_config=False, jumphost_connection=None, keep_alive_interval='0 seconds'):
+              read_config=False, jumphost_connection=None, keep_alive_interval='0 seconds', disabled_algorithms=None):
         """Logs into the remote host using password authentication.
 
         This method reads the output from the remote host after logging in,
@@ -225,7 +225,7 @@ class SSHClient(object):
             password = self._encode(password)
         try:
             self._login(username, password, allow_agent, look_for_keys, proxy_cmd, read_config,
-                        jumphost_connection, keep_alive_interval)
+                        jumphost_connection, keep_alive_interval, disabled_algorithms)
         except SSHClientException:
             self.client.close()
             raise SSHClientException(f"Authentication failed for user '{self._decode(username)}'.")
@@ -250,7 +250,8 @@ class SSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config=False, keep_alive_interval='0 seconds'):
+                              jumphost_connection=None, read_config=False, keep_alive_interval='0 seconds', 
+                              disabled_algorithms=None):
         """Logs into the remote host using the public key authentication.
 
         This method reads the output from the remote host after logging in,
@@ -296,7 +297,8 @@ class SSHClient(object):
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
                                         proxy_cmd, jumphost_connection,
-                                        read_config, keep_alive_interval)
+                                        read_config, keep_alive_interval, 
+                                        disabled_algorithms)
         except SSHClientException:
             self.client.close()
             raise SSHClientException(f"Login with public key failed for user '{self._decode(username)}'.")
@@ -879,7 +881,7 @@ class SSHClient(object):
         return jumphost_transport.open_channel("direct-tcpip", dest_addr, jump_addr)
 
     def _login(self, username, password, allow_agent=False, look_for_keys=False, proxy_cmd=None,
-               read_config=False, jumphost_connection=None, keep_alive_interval=None):
+               read_config=False, jumphost_connection=None, keep_alive_interval=None, disabled_algorithms=None):
         if read_config:
             hostname = self.config.host
             self.config.host, username, self.config.port, proxy_cmd = \
@@ -900,7 +902,8 @@ class SSHClient(object):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=sock_tunnel)
+                                        timeout=float(self.config.timeout), sock=sock_tunnel,
+                                        disabled_algorithms=disabled_algorithms)
                 except paramiko.SSHException:
                     pass
                 transport = self.client.get_transport()
@@ -911,7 +914,8 @@ class SSHClient(object):
                     self.client.connect(self.config.host, self.config.port, username,
                                         password, look_for_keys=look_for_keys,
                                         allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=sock_tunnel)
+                                        timeout=float(self.config.timeout), sock=sock_tunnel,
+                                        disabled_algorithms=disabled_algorithms)
                     transport = self.client.get_transport()
                     transport.set_keepalive(keep_alive_interval)
                 except paramiko.AuthenticationException:
@@ -929,7 +933,7 @@ class SSHClient(object):
             raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
-                               jumphost_connection=None, read_config=False, keep_alive_interval=None):
+                               jumphost_connection=None, read_config=False, keep_alive_interval=None, disabled_algorithms=None):
         if read_config:
             hostname = self.config.host
             self.config.host, username, self.config.port, key_file, proxy_cmd = \
@@ -958,7 +962,8 @@ class SSHClient(object):
                                 allow_agent=allow_agent,
                                 look_for_keys=look_for_keys,
                                 timeout=float(self.config.timeout),
-                                sock=sock_tunnel)
+                                sock=sock_tunnel,
+                                disabled_algorithms=disabled_algorithms)
             transport = self.client.get_transport()
             transport.set_keepalive(keep_alive_interval)
         except paramiko.AuthenticationException:
