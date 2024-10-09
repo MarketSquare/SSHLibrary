@@ -893,40 +893,25 @@ class SSHClient(object):
             sock_tunnel = paramiko.ProxyCommand(proxy_cmd)
         elif jumphost_connection:
             sock_tunnel = self._get_jumphost_tunnel(jumphost_connection)
+
         try:
-            if not password and not allow_agent:
-                # If no password is given, try login without authentication
-                try:
-                    self.client.connect(self.config.host, self.config.port, username,
-                                        password, look_for_keys=look_for_keys,
-                                        allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=sock_tunnel)
-                except paramiko.SSHException:
-                    pass
+            self.client.connect(self.config.host, self.config.port, username,
+                                password, look_for_keys=look_for_keys,
+                                allow_agent=allow_agent,
+                                timeout=float(self.config.timeout), sock=sock_tunnel)
+            transport = self.client.get_transport()
+            transport.set_keepalive(keep_alive_interval)
+        except paramiko.AuthenticationException:
+            try:
                 transport = self.client.get_transport()
                 transport.set_keepalive(keep_alive_interval)
-                transport.auth_none(username)
-            else:
                 try:
-                    self.client.connect(self.config.host, self.config.port, username,
-                                        password, look_for_keys=look_for_keys,
-                                        allow_agent=allow_agent,
-                                        timeout=float(self.config.timeout), sock=sock_tunnel)
-                    transport = self.client.get_transport()
-                    transport.set_keepalive(keep_alive_interval)
-                except paramiko.AuthenticationException:
-                    try:
-                        transport = self.client.get_transport()
-                        transport.set_keepalive(keep_alive_interval)
-                        try:
-                            transport.auth_none(username)
-                        except:
-                            pass
-                        transport.auth_password(username, password)
-                    except:
-                        raise SSHClientException
-        except paramiko.AuthenticationException:
-            raise SSHClientException
+                    transport.auth_none(username)
+                except:
+                    pass
+                transport.auth_password(username, password)
+            except:
+                raise SSHClientException
 
     def _login_with_public_key(self, username, key_file, password, allow_agent, look_for_keys, proxy_cmd=None,
                                jumphost_connection=None, read_config=False, keep_alive_interval=None):
