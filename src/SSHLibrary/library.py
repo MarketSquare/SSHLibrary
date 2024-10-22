@@ -2193,7 +2193,6 @@ class SSHLibrary:
             files = self.current.list_files_in_dir(path, pattern, absolute)
         except SSHClientException as msg:
             raise RuntimeError(msg)
-        files = self.current.list_files_in_dir(path, pattern, absolute)
         self._log(
             "{0} file{1}:\n{2}".format(
                 len(files), plural_or_not(files), "\n".join(files)
