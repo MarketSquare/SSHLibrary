@@ -102,8 +102,12 @@ Configure Session Width And Height
     [Teardown]    Set Client Configuration    height=24    width=80
 
 Read Until With Encoding Errors On Strict
-    Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
-    Run Keyword And Expect Error    *codec can't decode byte*    Read Until    Hello
+    TRY
+        Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+        Read Until    We expect this to fail, if Write did not fail already
+    EXCEPT    *codec can't decode byte*    type=GLOB    AS    ${error_message}
+        Log    Write command failed with expected error: ${error_message}
+    END
 
 Read Until With Encoding Errors On Replace
     Set Client Configuration    encoding_errors=replace
