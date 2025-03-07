@@ -110,17 +110,22 @@ Read Until With Encoding Errors On Strict
     ...    Since this is kind of the expected behavior, we now also allow the WRITE command to fail with the same expected error message as the Read.
     ...
     ...    This is not the exact expected behavior of the test title, but for now good enough.
-    TRY
-        Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
-    EXCEPT
-        SKIP    Could not test READ UNTIL, as WRITE command is flaky in failing fast with corrupted data.
+    GROUP    Call "cat" of corrupted file
+        TRY
+            Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+        EXCEPT
+            SKIP    Could not test READ UNTIL, as WRITE command is flaky in failing fast with corrupted data.
+        END
     END
 
-    TRY
-        Read Until    We expect this to fail, if Write did not fail already
-        Fail    WRITE or READ UNTIL should have failed with expected error
-    EXCEPT    *codec can't decode byte*    type=GLOB    AS    ${error_message}
-        Log    Write command failed with expected error: ${error_message}
+    GROUP    Read output from "cat" command
+        TRY
+            # "Hello" is at the end of the corrupted file
+            Read Until    Hello
+            Fail    WRITE or READ UNTIL should have failed with expected error
+        EXCEPT    *codec can't decode byte*    type=GLOB    AS    ${error_message}
+            Log    Write command failed with expected error: ${error_message}
+        END
     END
 
 Read Until With Encoding Errors On Replace
