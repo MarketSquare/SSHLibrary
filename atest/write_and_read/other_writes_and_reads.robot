@@ -7,11 +7,11 @@ Suite Teardown      Remove Test Files and Close Connections
 
 *** Test Cases ***
 Write And Read Until
-    ${output} =    Write    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
+    ${output} =    Write And Read    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
     Should Contain    ${output}    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
     ${output} =    Read Until    Give your name?
     Should Contain    ${output}    Give your name?
-    ${output} =    Write    Mr. Ääkkönen
+    ${output} =    Write And Read    Mr. Ääkkönen
     Should Contain    ${output}    Mr. Ääkkönen
     ${output} =    Read Until Prompt
     Should Contain    ${output}    Hello Mr. Ääkkönen
@@ -38,7 +38,7 @@ Write Non-String
     Should Contain    ${output}    1
 
 Write Bare Non-String
-    Write Bare    ${False}\n
+    Write    ${False}\n
     ${output} =    Read Until Prompt
     Should Contain    ${output}    False
 
@@ -58,9 +58,9 @@ Write Returning Stderr
     Should Contain    ${output}    This is Error
 
 Write Bare And Read Until
-    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}\n
+    Write    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}\n
     ${output} =    Read Until    name?
-    Write Bare    Mr. Ääkkönen\n
+    Write    Mr. Ääkkönen\n
     ${output2} =    Read Until Prompt
     Should Contain    ${output}    Give your name?
     Should Contain    ${output2}    Hello Mr. Ääkkönen
@@ -102,27 +102,15 @@ Configure Session Width And Height
     [Teardown]    Set Client Configuration    height=24    width=80
 
 Read Until With Encoding Errors On Strict
-    [Documentation]    This test is expected to fail because the file contains invalid UTF-8 characters.
-    ...
-    ...    For later debugging:
-    ...
-    ...    Originally the READ UNTIL keyword would fail with a UnicodeDecodeError, but due to some reason, the WRITE command has a chance of failing directly.
-    ...    Since this is kind of the expected behavior, we now also allow the WRITE command to fail with the same expected error message as the Read.
-    ...
-    ...    This is not the exact expected behavior of the test title, but for now good enough.
     GROUP    Call "cat" of corrupted file
-        TRY
-            Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
-        EXCEPT
-            SKIP    Could not test READ UNTIL, as WRITE command is flaky in failing fast with corrupted data.
-        END
+        Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
     END
 
     GROUP    Read output from "cat" command
         TRY
             # "Hello" is at the end of the corrupted file
             Read Until    Hello
-            Fail    WRITE or READ UNTIL should have failed with expected error
+            Fail    READ UNTIL should have failed with expected error
         EXCEPT    *codec can't decode byte*    type=GLOB    AS    ${error_message}
             Log    Write command failed with expected error: ${error_message}
         END

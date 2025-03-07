@@ -642,7 +642,8 @@ class SSHLibrary:
         | # Check myserver.log for detailed debug information   |
         """
         if SSHClient.enable_logging(logfile):
-            self._log(f'SSH log is written to <a href="{logfile}">file</a>.', "HTML")
+            self._log(
+                f'SSH log is written to <a href="{logfile}">file</a>.', "HTML")
 
     @keyword(tags=("connection",))
     def open_connection(
@@ -1356,8 +1357,10 @@ class SSHLibrary:
         if not is_truthy(sudo):
             self._log(f"Executing command '{command}'.", self._config.loglevel)
         else:
-            self._log(f"Executing command 'sudo {command}'.", self._config.loglevel)
-        opts = self._legacy_output_options(return_stdout, return_stderr, return_rc)
+            self._log(
+                f"Executing command 'sudo {command}'.", self._config.loglevel)
+        opts = self._legacy_output_options(
+            return_stdout, return_stderr, return_rc)
         stdout, stderr, rc = self.current.execute_command(
             command,
             sudo,
@@ -1424,7 +1427,8 @@ class SSHLibrary:
         if not is_truthy(sudo):
             self._log(f"Starting command '{command}'.", self._config.loglevel)
         else:
-            self._log(f"Starting command 'sudo {command}'.", self._config.loglevel)
+            self._log(
+                f"Starting command 'sudo {command}'.", self._config.loglevel)
         if self.current.config.index not in self._last_commands.keys():
             self._last_commands[self.current.config.index] = command
         else:
@@ -1493,9 +1497,11 @@ class SSHLibrary:
             f"Reading output of command '{self._last_commands.get(self.current.config.index)}'.",
             self._config.loglevel,
         )
-        opts = self._legacy_output_options(return_stdout, return_stderr, return_rc)
+        opts = self._legacy_output_options(
+            return_stdout, return_stderr, return_rc)
         try:
-            stdout, stderr, rc = self.current.read_command_output(timeout=timeout)
+            stdout, stderr, rc = self.current.read_command_output(
+                timeout=timeout)
         except SSHClientException as msg:
             raise RuntimeError(msg)
         return self._return_command_output(stdout, stderr, rc, *opts)
@@ -1549,7 +1555,8 @@ class SSHLibrary:
     def _return_command_output(
         self, stdout, stderr, rc, return_stdout, return_stderr, return_rc
     ):
-        self._log(f"Command exited with return code {rc}.", self._config.loglevel)
+        self._log(
+            f"Command exited with return code {rc}.", self._config.loglevel)
         ret = []
         if is_truthy(return_stdout):
             ret.append(stdout.rstrip("\n"))
@@ -1562,7 +1569,7 @@ class SSHLibrary:
         return ret
 
     @keyword(tags=("command",))
-    def write(self, text, loglevel=None):
+    def write_and_read(self, text, loglevel=None):
         """Writes the given ``text`` on the remote machine and appends a newline.
 
         Appended `newline` can be configured.
@@ -1590,7 +1597,7 @@ class SSHLibrary:
         return self._read_and_log(loglevel, self.current.read_until_newline)
 
     @keyword(tags=("command",))
-    def write_bare(self, text):
+    def write(self, text):
         """Writes the given ``text`` on the remote machine without appending a newline.
 
         Unlike `Write`, this keyword returns and consumes nothing. See the
@@ -2206,7 +2213,8 @@ class SSHLibrary:
     def list_directories_in_directory(self, path, pattern=None, absolute=False):
         """A wrapper for `List Directory` that returns only directories."""
         try:
-            dirs = self.current.list_dirs_in_dir(path, pattern, is_truthy(absolute))
+            dirs = self.current.list_dirs_in_dir(
+                path, pattern, is_truthy(absolute))
         except SSHClientException as msg:
             raise RuntimeError(msg)
         self._log(
