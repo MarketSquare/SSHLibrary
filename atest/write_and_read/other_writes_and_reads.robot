@@ -112,6 +112,11 @@ Read Until With Encoding Errors On Strict
     ...    This is not the exact expected behavior of the test title, but for now good enough.
     TRY
         Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+    EXCEPT
+        SKIP    Could not test READ UNTIL, as WRITE command is flaky in failing fast with corrupted data.
+    END
+
+    TRY
         Read Until    We expect this to fail, if Write did not fail already
         Fail    WRITE or READ UNTIL should have failed with expected error
     EXCEPT    *codec can't decode byte*    type=GLOB    AS    ${error_message}
