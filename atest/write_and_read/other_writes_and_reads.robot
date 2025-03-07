@@ -102,9 +102,18 @@ Configure Session Width And Height
     [Teardown]    Set Client Configuration    height=24    width=80
 
 Read Until With Encoding Errors On Strict
+    [Documentation]    This test is expected to fail because the file contains invalid UTF-8 characters.
+    ...
+    ...    For later debugging:
+    ...
+    ...    Originally the READ UNTIL keyword would fail with a UnicodeDecodeError, but due to some reason, the WRITE command has a chance of failing directly.
+    ...    Since this is kind of the expected behavior, we now also allow the WRITE command to fail with the same expected error message as the Read.
+    ...
+    ...    This is not the exact expected behavior of the test title, but for now good enough.
     TRY
         Write    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
         Read Until    We expect this to fail, if Write did not fail already
+        Fail    WRITE or READ UNTIL should have failed with expected error
     EXCEPT    *codec can't decode byte*    type=GLOB    AS    ${error_message}
         Log    Write command failed with expected error: ${error_message}
     END
