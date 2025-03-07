@@ -23,7 +23,7 @@ Write And Read Until Prompt
     Should Contain    ${output}    Hello Mr. Ääkkönen
 
 Write And Read Until Regexp
-    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
+    Write    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
     ${output} =    Read Until Regexp    Give.*\\?
     Should Contain    ${output}    Give your name?
     Write Bare    Mr. Ääkkönen    add_newline=True
@@ -83,14 +83,14 @@ Write Until Expected Output In Case Of Timeout
     [Teardown]    Execute Command    rm -f ${COUNTER NAME}
 
 Read Until Prompt With Strip Prompt
-    Write Bare    echo This is a test
+    Write Bare    echo This is a test    add_newline=True
     ${output} =    Read Until Prompt    strip_prompt=True
     Should Contain    ${output}    This is a test
     Should Not Contain    ${output}    ${PROMPT}
 
 Read Until REGEXP Prompt With Strip Prompt
     Set Client Configuration    prompt=REGEXP:[#$]
-    Write Bare    echo This is a test
+    Write Bare    echo This is a test    add_newline=True
     ${output} =    Read Until Prompt    strip_prompt=True
     Should Contain    ${output}    This is a test
     Should Not Match Regexp    ${output}    [#$]
@@ -101,7 +101,7 @@ Configure Session Width And Height
     ${conn} =    Get Connection    1
     Should Be Equal As Integers    ${conn.height}    48
     Should Be Equal As Integers    ${conn.width}    160
-    Write    stty size
+    Write Bare    stty size    add_newline=True
     ${output} =    Read Until Prompt
     Should Contain    ${output}    48 160
     [Teardown]    Set Client Configuration    height=24    width=80
@@ -133,6 +133,6 @@ Read Until With Encoding Errors On Ignore
 Read Until With Encoding Errors Set In Open Connection
     [Setup]    Run Keywords    Open Connection    ${HOST}    prompt=${PROMPT}    encoding_errors=replace    AND
     ...    Login    ${USERNAME}    ${PASSWORD}
-    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}    add_newline=True
     ${output} =    Read Until    Hello
     Should Contain    ${output}    Hello
