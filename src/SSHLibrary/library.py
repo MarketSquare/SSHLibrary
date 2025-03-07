@@ -1602,7 +1602,7 @@ class SSHLibrary:
             return None
 
     @keyword(tags=("command",))
-    def write_bare(self, text):
+    def write_bare(self, text, add_newline=False):
         """Writes the given ``text`` on the remote machine without appending a newline.
 
         Unlike `Write`, this keyword returns and consumes nothing. See the
@@ -1619,7 +1619,7 @@ class SSHLibrary:
 
         See also `Write`.
         """
-        self._write(text)
+        self._write(text, add_newline)
 
     def _write(self, text, add_newline=False):
         try:

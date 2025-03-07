@@ -17,8 +17,8 @@ Write And Read Until
     Should Contain    ${output}    Hello Mr. Ääkkönen
 
 Write And Read Until Prompt
-    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
-    Write Bare    Mr. Ääkkönen
+    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}    add_newline=True
+    Write Bare    Mr. Ääkkönen    add_newline=True
     ${output} =    Read Until Prompt
     Should Contain    ${output}    Hello Mr. Ääkkönen
 
@@ -26,14 +26,14 @@ Write And Read Until Regexp
     Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
     ${output} =    Read Until Regexp    Give.*\\?
     Should Contain    ${output}    Give your name?
-    Write Bare    Mr. Ääkkönen
+    Write Bare    Mr. Ääkkönen    add_newline=True
     Comment    Prompt needs to be escaped because it might be $
     ${output} =    Read Until Regexp    (?s).*\\${PROMPT}
     Should Contain    ${output}    Hello Mr. Ääkkönen
     Should End With    ${output}    ${PROMPT}
 
 Write Non-String
-    Write Bare    ${1}
+    Write    ${1}
     ${output} =    Read Until Prompt
     Should Contain    ${output}    1
 
@@ -42,25 +42,30 @@ Write Bare Non-String
     ${output} =    Read Until Prompt
     Should Contain    ${output}    False
 
+Write Bare Add New Line Non-String
+    Write Bare    ${False}    add_newline=True
+    ${output} =    Read Until Prompt
+    Should Contain    ${output}    False
+
 Write In Case Of Timeout
-    Write Bare    Foo Bar And Some Other
+    Write Bare    Foo Bar And Some Other    add_newline=True
     Set Client Configuration    timeout=1
     ${status}    ${error} =    Run Keyword And Ignore Error
     ...    Read Until    This is not found
     Should Start With    ${error}    No match found for 'This is not found' in 1 second
 
 Write Returning Stderr
-    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
+    Write    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}
     Read Until    Give your name?
-    Write Bare    Error
+    Write Bare    Error    add_newline=True
     ${output} =    Read Until    ${PROMPT}
     Should Contain    ${output}    Hello Error
     Should Contain    ${output}    This is Error
 
 Write Bare And Read Until
-    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}\n
+    Write Bare    ${REMOTE TEST ROOT}/${INTERACTIVE TEST SCRIPT NAME}    add_newline=True
     ${output} =    Read Until    name?
-    Write Bare    Mr. Ääkkönen\n
+    Write Bare    Mr. Ääkkönen    add_newline=True
     ${output2} =    Read Until Prompt
     Should Contain    ${output}    Give your name?
     Should Contain    ${output2}    Hello Mr. Ääkkönen
@@ -96,13 +101,13 @@ Configure Session Width And Height
     ${conn} =    Get Connection    1
     Should Be Equal As Integers    ${conn.height}    48
     Should Be Equal As Integers    ${conn.width}    160
-    Write Bare    stty size
+    Write    stty size
     ${output} =    Read Until Prompt
     Should Contain    ${output}    48 160
     [Teardown]    Set Client Configuration    height=24    width=80
 
 Read Until With Encoding Errors On Strict
-    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}    add_newline=True
     GROUP    Read output from "cat" command
         TRY
             # "Hello" is at the end of the corrupted file
@@ -115,13 +120,13 @@ Read Until With Encoding Errors On Strict
 
 Read Until With Encoding Errors On Replace
     Set Client Configuration    encoding_errors=replace
-    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}    add_newline=True
     ${output} =    Read Until    Hello
     Should Contain    ${output}    Hello
 
 Read Until With Encoding Errors On Ignore
     Set Client Configuration    encoding_errors=ignore
-    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}
+    Write Bare    cat ${REMOTE TEST ROOT}/${CORRUPTED FILE NAME}    add_newline=True
     ${output} =    Read Until    Hello
     Should Contain    ${output}    Hello
 
