@@ -1572,8 +1572,6 @@ class SSHLibrary:
     def write(self, text, loglevel=None):
         """Writes the given ``text`` on the remote machine and appends a newline.
 
-        Appended `newline` can be configured.
-
         This keyword returns and consumes the written ``text``
         (including the appended newline) from the server output. See the
         `Interactive shells` section for more information.
@@ -1608,12 +1606,14 @@ class SSHLibrary:
         Unlike `Write`, this keyword returns and consumes nothing. See the
         `Interactive shells` section for more information.
 
+        Appended `newline` can be configured with `add_newline`.
+
         Example:
-        | `Write Bare`     | su\\n            |
+        | `Write Bare`     | su\\n            | # or instead of \\n: add_newline=True
         | ${output}=       | `Read`           |
         | `Should Contain` | ${output}        | su                         | # Was not consumed from output |
         | `Should Contain` | ${output}        | Password:                  |
-        | `Write Bare`     | invalidpasswd\\n |
+        | `Write Bare`     | invalidpasswd\\n | # or instead of \\n: add_newline=True
         | ${output}=       | `Read`           |
         | `Should Contain` | ${output}        | su: Authentication failure |
 
