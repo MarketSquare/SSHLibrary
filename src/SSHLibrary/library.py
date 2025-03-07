@@ -1579,6 +1579,8 @@ class SSHLibrary:
         The written ``text`` is logged. ``loglevel`` can be used to override
         the default `log level`.
 
+        If the written text cannot be read from shell, `None` is returned.
+
         Example:
         | ${written}=          | `Write`         | su                         |
         | `Should Contain`     | ${written}      | su                         | # Returns the consumed output  |
@@ -1596,7 +1598,7 @@ class SSHLibrary:
         try:
             return self._read_and_log(loglevel, self.current.read_until_newline)
         except Exception as e:
-            logger.error(e)
+            logger.warn(e)
             return None
 
     @keyword(tags=("command",))
