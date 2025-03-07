@@ -101,7 +101,7 @@ Configure Session Width And Height
     ${conn} =    Get Connection    1
     Should Be Equal As Integers    ${conn.height}    48
     Should Be Equal As Integers    ${conn.width}    160
-    Write Bare    stty size    add_newline=True
+    Write    stty size
     ${output} =    Read Until Prompt
     Should Contain    ${output}    48 160
     [Teardown]    Set Client Configuration    height=24    width=80
