@@ -31,6 +31,7 @@ from .config import (
     NewlineEntry,
     StringEntry,
     TimeEntry,
+    
 )
 from .version import VERSION
 
@@ -449,7 +450,7 @@ class SSHLibrary:
     DEFAULT_ENCODING = "UTF-8"
     DEFAULT_ESCAPE_ANSI = False
     DEFAULT_ENCODING_ERRORS = "strict"
-
+    DEFAULT_SOCKET_TIMEOUT = 10
     def __init__(
         self,
         timeout=DEFAULT_TIMEOUT,
@@ -463,6 +464,7 @@ class SSHLibrary:
         encoding=DEFAULT_ENCODING,
         escape_ansi=DEFAULT_ESCAPE_ANSI,
         encoding_errors=DEFAULT_ENCODING_ERRORS,
+        socket_timeout=DEFAULT_SOCKET_TIMEOUT
     ):
         """SSHLibrary allows some import time `configuration`.
 
@@ -502,6 +504,7 @@ class SSHLibrary:
             encoding or self.DEFAULT_ENCODING,
             escape_ansi or self.DEFAULT_ESCAPE_ANSI,
             encoding_errors or self.DEFAULT_ENCODING_ERRORS,
+            socket_timeout or self.DEFAULT_SOCKET_TIMEOUT
         )
         self._last_commands = dict()
 
@@ -523,6 +526,7 @@ class SSHLibrary:
         encoding=None,
         escape_ansi=None,
         encoding_errors=None,
+        socket_timeout=None
     ):
         """Update the default `configuration`.
 
@@ -566,6 +570,7 @@ class SSHLibrary:
             encoding=encoding,
             escape_ansi=escape_ansi,
             encoding_errors=encoding_errors,
+            socket_timeout=socket_timeout
         )
 
     @keyword(tags=("configuration",))
@@ -581,6 +586,7 @@ class SSHLibrary:
         encoding=None,
         escape_ansi=None,
         encoding_errors=None,
+        socket_timeout=None
     ):
         """Update the `configuration` of the current connection.
 
@@ -621,6 +627,7 @@ class SSHLibrary:
             encoding=encoding,
             escape_ansi=escape_ansi,
             encoding_errors=encoding_errors,
+            socket_timeout=socket_timeout
         )
 
     @keyword(tags=("configuration",))
@@ -661,6 +668,7 @@ class SSHLibrary:
         encoding=None,
         escape_ansi=None,
         encoding_errors=None,
+        socket_timeout=None
     ):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
@@ -729,6 +737,7 @@ class SSHLibrary:
         encoding = encoding or self._config.encoding
         escape_ansi = escape_ansi or self._config.escape_ansi
         encoding_errors = encoding_errors or self._config.encoding_errors
+        socket_timeout = socket_timeout or self._config.socket_timeout
         client = SSHClient(
             host,
             alias,
@@ -743,6 +752,7 @@ class SSHLibrary:
             encoding,
             escape_ansi,
             encoding_errors,
+            socket_timeout
         )
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
@@ -2273,6 +2283,7 @@ class _DefaultConfiguration(Configuration):
         encoding,
         escape_ansi,
         encoding_errors,
+        socket_timeout
     ):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
@@ -2286,4 +2297,5 @@ class _DefaultConfiguration(Configuration):
             encoding=StringEntry(encoding),
             escape_ansi=StringEntry(escape_ansi),
             encoding_errors=StringEntry(encoding_errors),
+            socket_timeout = IntegerEntry(socket_timeout)
         )
