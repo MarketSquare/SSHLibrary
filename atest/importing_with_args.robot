@@ -8,9 +8,11 @@ Importing Library With Arguments
     [Setup]    Open Connections
     ${conn}=    Get Connections
     Should Be Equal As Integers    ${conn[0].timeout}    210
+    Should Be Equal As Integers    ${conn[0].scp_socket_timeout}    10
     Should Be Equal    ${conn[0].prompt}    >>
     Should Be Equal    ${conn[1].path_separator}    \\
     Should Be Equal As Integers    ${conn[1].timeout}    60
+    Should Be Equal As Integers    ${conn[1].scp_socket_timeout}    90
     Should Be Equal    ${conn[1].prompt}    >>
     Should Be Equal    ${conn[1].path_separator}    \\
     [Teardown]    Close All Connections
@@ -19,5 +21,5 @@ Importing Library With Arguments
 *** Keywords ***
 Open Connections
     Open Connection    localhost
-    Set Default Configuration    timeout=1 minute
+    Set Default Configuration    timeout=1 minute    scp_socket_timeout=90 seconds
     Open Connection    localhost

@@ -78,7 +78,8 @@ class SSHClientException(RuntimeError):
 class _ClientConfiguration(Configuration):
 
     def __init__(self, host, alias, port, timeout, newline, prompt, term_type,
-                 width, height, path_separator, encoding, escape_ansi, encoding_errors):
+                 width, height, path_separator, encoding, escape_ansi, encoding_errors,
+                 scp_socket_timeout):
         super(_ClientConfiguration, self).__init__(
             index=IntegerEntry(None),
             host=StringEntry(host),
@@ -93,7 +94,8 @@ class _ClientConfiguration(Configuration):
             path_separator=StringEntry(path_separator),
             encoding=StringEntry(encoding),
             escape_ansi=StringEntry(escape_ansi),
-            encoding_errors=StringEntry(encoding_errors)
+            encoding_errors=StringEntry(encoding_errors),
+            scp_socket_timeout=TimeEntry(scp_socket_timeout)
         )
 
 
@@ -107,10 +109,12 @@ class SSHClient(object):
 
     def __init__(self, host, alias=None, port=22, timeout=3, newline='LF',
                  prompt=None, term_type='vt100', width=80, height=24,
-                 path_separator='/', encoding='utf8', escape_ansi=False, encoding_errors='strict'):
+                 path_separator='/', encoding='utf8', escape_ansi=False, encoding_errors='strict',
+                 scp_socket_timeout=10):
         self.config = _ClientConfiguration(host, alias, port, timeout, newline,
                                            prompt, term_type, width, height,
-                                           path_separator, encoding, escape_ansi, encoding_errors)
+                                           path_separator, encoding, escape_ansi, encoding_errors,
+                                           scp_socket_timeout)
         self._sftp_client = None
         self._scp_transfer_client = None
         self._scp_all_client = None
@@ -250,7 +254,7 @@ class SSHClient(object):
 
     def login_with_public_key(self, username, keyfile, password, allow_agent=False,
                               look_for_keys=False, delay=None, proxy_cmd=None,
-                              jumphost_connection=None, read_config=False, keep_alive_interval='0 seconds', 
+                              jumphost_connection=None, read_config=False, keep_alive_interval='0 seconds',
                               disabled_algorithms=None):
         """Logs into the remote host using the public key authentication.
 
@@ -297,7 +301,7 @@ class SSHClient(object):
             self._login_with_public_key(username, keyfile, password,
                                         allow_agent, look_for_keys,
                                         proxy_cmd, jumphost_connection,
-                                        read_config, keep_alive_interval, 
+                                        read_config, keep_alive_interval,
                                         disabled_algorithms)
         except SSHClientException:
             self.client.close()
@@ -1009,10 +1013,10 @@ class SSHClient(object):
         return SFTPClient(self.client, self.config.encoding)
 
     def _create_scp_transfer_client(self):
-        return SCPTransferClient(self.client, self.config.encoding)
+        return SCPTransferClient(self.client, self.config.encoding, self.config.scp_socket_timeout)
 
     def _create_scp_all_client(self):
-        return SCPClient(self.client)
+        return SCPClient(self.client, self.config.scp_socket_timeout)
 
     def _create_shell(self):
         return Shell(self.client, self.config.term_type,
@@ -1584,8 +1588,8 @@ class SFTPClient(object):
 
 
 class SCPClient(object):
-    def __init__(self, ssh_client):
-        self._scp_client = scp.SCPClient(ssh_client.get_transport())
+    def __init__(self, ssh_client, scp_socket_timeout):
+        self._scp_client = scp.SCPClient(ssh_client.get_transport(), socket_timeout=scp_socket_timeout)
 
     def put_file(self, source, destination, scp_preserve_times, *args):
         sources = self._get_put_file_sources(source)
@@ -1614,8 +1618,8 @@ class SCPClient(object):
 
 class SCPTransferClient(SFTPClient):
 
-    def __init__(self, ssh_client, encoding):
-        self._scp_client = scp.SCPClient(ssh_client.get_transport())
+    def __init__(self, ssh_client, encoding, scp_socket_timeout):
+        self._scp_client = scp.SCPClient(ssh_client.get_transport(), socket_timeout=scp_socket_timeout)
         super(SCPTransferClient, self).__init__(ssh_client, encoding)
 
     def _put_file(self, source, destination, mode, newline, path_separator, scp_preserve_times=False):
