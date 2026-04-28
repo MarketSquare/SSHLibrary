@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robotframework-sshlibrary"
+dynamic = ["version"]
+description = "Robot Framework test library for SSH and SFTP"
+readme = "README.rst"
+license = "Apache-2.0"
+requires-python = ">=3.8"
+authors = [
+    {name = "Markus Stahl", email = "markus.i.sverige@gmail.com"},
+]
+keywords = ["robotframework", "testing", "testautomation", "ssh", "sftp"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Framework :: Robot Framework",
+    "Framework :: Robot Framework :: Library",
+]
+dependencies = [
+    "robotframework>=5.0",
+    "paramiko>=1.15.3",
+    "scp>=0.13.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/MarketSquare/SSHLibrary"
+Documentation = "https://marketsquare.github.io/SSHLibrary/SSHLibrary.html"
+Repository = "https://github.com/MarketSquare/SSHLibrary"
+Issues = "https://github.com/MarketSquare/SSHLibrary/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "SSHLibrary.version.VERSION"}
