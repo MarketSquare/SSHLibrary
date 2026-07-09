@@ -1,0 +1,21 @@
+{
+  "name": "SSHLibrary development",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/SSHLibrary",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/SSHLibrary,type=bind,consistency=cached",
+  "postCreateCommand": "python -m pip install --upgrade pip && python -m pip install -e . -r requirements-dev.txt && cp /home/testkey/.ssh/id_rsa atest/testdata/keyfiles/id_rsa",
+  "postStartCommand": "service ssh start",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "robocorp.robotframework-lsp"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python"
+      }
+    }
+  }
+}
