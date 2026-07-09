@@ -1537,6 +1537,29 @@ class SFTPClient(object):
                 position += len(data)
             self._close_remote_file(remote_file)
 
+    def remove_file(self, source, path_separator='/'):
+        r"""Removes file(s) from the remote host.
+
+        :param str source: Must be the path to an existing file on the remote
+            machine or a glob pattern.
+            Glob patterns, like '*' and '?', can be used in the source, in
+            which case all the matching files are removed.
+
+        :param str path_separator: The path separator used for joining the
+            paths on the remote host. On Windows, this must be set as `\`.
+            The default is `/`, which is also the default on Linux-like systems.
+        """
+        remote_files = self._get_get_file_sources(source, path_separator)
+        if not remote_files:
+            msg = "There were no remote files matching '%s'." % source
+            raise SSHClientException(msg)
+        for src in remote_files:
+            self._remove_file(src)
+
+    def _remove_file(self, remote_path):
+        remote_path = remote_path.encode(self._encoding)
+        self._client.remove(remote_path)
+
     def _list(self, path):
         path = path.encode(self._encoding)
         for item in self._client.listdir_attr(path):

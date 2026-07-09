@@ -2038,6 +2038,19 @@ class SSHLibrary:
         )
 
     @keyword(tags=("file",))
+    def remove_file(self, source):
+        """Removes file(s) from the remote machine.
+
+        ``source`` is a path on the remote machine. Both absolute paths and
+        paths relative to the current working directory are supported.
+        If the source contains wildcards explained in `glob patterns`,
+        all files matching it are removed.
+
+        SCP is not supported.
+        """
+        self._run_command(self.current.remove_file, source)
+
+    @keyword(tags=("file",))
     def put_directory(
         self,
         source,
