@@ -155,6 +155,23 @@ Additional OpenSSH configuration
     echo $'Host test_proxy_hostname\n    Hostname localhost\n    User test\n    Port 22\n    ProxyCommand ssh -W %h:%p testkey_hostname\n' >> ~/.ssh/config
 
 
+Setup for VS Code Dev Containers
+================================
+
+The repository includes a Dev Container configuration for contributors who want
+an out-of-box Linux development environment in VS Code. Open the repository in
+VS Code and run ``Dev Containers: Reopen in Container``. The container installs
+SSHLibrary in editable mode, starts an OpenSSH server when the container starts,
+and prepares the ``test``, ``test-nopasswd``, and ``testkey`` accounts used by
+the acceptance tests.
+
+After the container has started, acceptance tests can be run from the repository
+root with:
+
+::
+
+    python3 atest/run.py .
+
 Setup for Docker
 ================
 First go into the ``docker`` folder and build a SSHLibrary image that will be based on your repository:
