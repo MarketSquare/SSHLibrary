@@ -18,6 +18,7 @@ ${KEY}                      ${KEY DIR}${/}id_rsa
 ${TEST_HOSTNAME}            test_hostname
 ${TESTKEY_HOSTNAME}         testkey_hostname
 ${TEST_PROXY_HOSTNAME}      test_proxy_hostname
+${TEST_USER_HOSTNAME}       test_user_hostname
 ${EMPTY_STRING}             \
 
 

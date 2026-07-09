@@ -70,6 +70,10 @@ Login With Public Key Using Config File
     [Setup]    Open Connection    ${TESTKEY_HOSTNAME}    prompt=${PROMPT}
     Login With Public Key    read_config=True
 
+Login With Specified User Differing From Config File
+    [Setup]    Open Connection    ${TEST_USER_HOSTNAME}    prompt=${PROMPT}
+    Login    ${USERNAME}    ${PASSWORD}    read_config=True
+
 Login With No Password
     [Setup]    Open Connection    ${HOST}    prompt=${PROMPT}
     Login    ${USERNAME_NOPASSWD}

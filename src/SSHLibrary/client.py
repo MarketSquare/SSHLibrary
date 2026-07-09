@@ -884,8 +884,10 @@ class SSHClient(object):
                read_config=False, jumphost_connection=None, keep_alive_interval=None, disabled_algorithms=None):
         if read_config:
             hostname = self.config.host
-            self.config.host, username, self.config.port, proxy_cmd = \
+            self.config.host, username_from_config, self.config.port, proxy_cmd = \
                 self._read_login_ssh_config(hostname, username, self.config.port, proxy_cmd)
+            if not username or username == b'None':
+                username = username_from_config
 
         sock_tunnel = None
 
