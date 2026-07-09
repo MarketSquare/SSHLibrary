@@ -31,6 +31,7 @@ from .config import (
     NewlineEntry,
     StringEntry,
     TimeEntry,
+
 )
 from .version import VERSION
 
@@ -162,6 +163,16 @@ class SSHLibrary:
 
     Argument ``timeout`` is used by `Read Until` variants. The default value
     is ``3 seconds``. See `time format` below for supported timeout syntax.
+
+    === SCP Socket timeout ===
+    Argument ``scp_socket_timeout`` defines the timeout of the socket used for scp operations.
+    It exposes the 'socket_timeout' parameter of SCPClient.
+    (See SCPClient __init__() in https://github.com/jbardin/scp.py/blob/master/scp.py)
+    This allows to specify the timeout that the scp client should use in keywords
+    `Get File`, `Get Directory`, `Put File`, `Put Directory`, when the parameter ``scp``
+    is set to ``TRANSFER`` or ``ALL`.
+    The default is ``10 seconds``.
+    See `time format` below for supported scp_socket_timeout syntax.
 
     === Newline ===
 
@@ -449,7 +460,7 @@ class SSHLibrary:
     DEFAULT_ENCODING = "UTF-8"
     DEFAULT_ESCAPE_ANSI = False
     DEFAULT_ENCODING_ERRORS = "strict"
-
+    DEFAULT_SCP_SOCKET_TIMEOUT = "10 seconds"
     def __init__(
         self,
         timeout=DEFAULT_TIMEOUT,
@@ -463,6 +474,7 @@ class SSHLibrary:
         encoding=DEFAULT_ENCODING,
         escape_ansi=DEFAULT_ESCAPE_ANSI,
         encoding_errors=DEFAULT_ENCODING_ERRORS,
+        scp_socket_timeout=DEFAULT_SCP_SOCKET_TIMEOUT
     ):
         """SSHLibrary allows some import time `configuration`.
 
@@ -502,6 +514,7 @@ class SSHLibrary:
             encoding or self.DEFAULT_ENCODING,
             escape_ansi or self.DEFAULT_ESCAPE_ANSI,
             encoding_errors or self.DEFAULT_ENCODING_ERRORS,
+            scp_socket_timeout or self.DEFAULT_SCP_SOCKET_TIMEOUT
         )
         self._last_commands = dict()
 
@@ -523,6 +536,7 @@ class SSHLibrary:
         encoding=None,
         escape_ansi=None,
         encoding_errors=None,
+        scp_socket_timeout=None
     ):
         """Update the default `configuration`.
 
@@ -566,6 +580,7 @@ class SSHLibrary:
             encoding=encoding,
             escape_ansi=escape_ansi,
             encoding_errors=encoding_errors,
+            scp_socket_timeout=scp_socket_timeout
         )
 
     @keyword(tags=("configuration",))
@@ -581,6 +596,7 @@ class SSHLibrary:
         encoding=None,
         escape_ansi=None,
         encoding_errors=None,
+        scp_socket_timeout=None
     ):
         """Update the `configuration` of the current connection.
 
@@ -621,6 +637,7 @@ class SSHLibrary:
             encoding=encoding,
             escape_ansi=escape_ansi,
             encoding_errors=encoding_errors,
+            scp_socket_timeout=scp_socket_timeout
         )
 
     @keyword(tags=("configuration",))
@@ -661,6 +678,7 @@ class SSHLibrary:
         encoding=None,
         escape_ansi=None,
         encoding_errors=None,
+        scp_socket_timeout=None
     ):
         """Opens a new SSH connection to the given ``host`` and ``port``.
 
@@ -729,6 +747,7 @@ class SSHLibrary:
         encoding = encoding or self._config.encoding
         escape_ansi = escape_ansi or self._config.escape_ansi
         encoding_errors = encoding_errors or self._config.encoding_errors
+        scp_socket_timeout = scp_socket_timeout or self._config.scp_socket_timeout
         client = SSHClient(
             host,
             alias,
@@ -743,6 +762,7 @@ class SSHLibrary:
             encoding,
             escape_ansi,
             encoding_errors,
+            scp_socket_timeout
         )
         connection_index = self._connections.register(client, alias)
         client.config.update(index=connection_index)
@@ -833,6 +853,7 @@ class SSHLibrary:
         height=False,
         encoding=False,
         escape_ansi=False,
+        scp_socket_timeout=False
     ):
         """Returns information about the connection.
 
@@ -845,19 +866,20 @@ class SSHLibrary:
 
         This keyword returns an object that has the following attributes:
 
-        | = Name =       | = Type = | = Explanation = |
-        | index          | integer  | Number of the connection. Numbering starts from ``1``. |
-        | host           | string   | Destination hostname. |
-        | alias          | string   | An optional alias given when creating the connection.  |
-        | port           | integer  | Destination port. |
-        | timeout        | string   | `Timeout` length in textual representation. |
-        | newline        | string   | The line break sequence used by `Write` keyword. See `newline`. |
-        | prompt         | string   | `Prompt` character sequence for `Read Until Prompt`. |
-        | term_type      | string   | Type of the virtual terminal. See `terminal settings`. |
-        | width          | integer  | Width of the virtual terminal. See `terminal settings`. |
-        | height         | integer  | Height of the virtual terminal. See `terminal settings`. |
-        | path_separator | string   | The `path separator` used on the remote host. |
-        | encoding       | string   | The `encoding` used for inputs and outputs. |
+        | = Name =           | = Type = | = Explanation = |
+        | index              | integer  | Number of the connection. Numbering starts from ``1``. |
+        | host               | string   | Destination hostname. |
+        | alias              | string   | An optional alias given when creating the connection.  |
+        | port               | integer  | Destination port. |
+        | timeout            | string   | `Timeout` length in textual representation. |
+        | newline            | string   | The line break sequence used by `Write` keyword. See `newline`. |
+        | prompt             | string   | `Prompt` character sequence for `Read Until Prompt`. |
+        | term_type          | string   | Type of the virtual terminal. See `terminal settings`. |
+        | width              | integer  | Width of the virtual terminal. See `terminal settings`. |
+        | height             | integer  | Height of the virtual terminal. See `terminal settings`. |
+        | path_separator     | string   | The `path separator` used on the remote host. |
+        | encoding           | string   | The `encoding` used for inputs and outputs. |
+        | scp_socket_timeout | string   | `SCP Socket timeout` length in textual representation. |
 
         If there is no connection, an object having ``index`` and ``host``
         as ``None`` is returned, rest of its attributes having their values
@@ -937,6 +959,7 @@ class SSHLibrary:
                 height,
                 encoding,
                 escape_ansi,
+                scp_socket_timeout
             )
         )
         if not return_values:
@@ -985,6 +1008,7 @@ class SSHLibrary:
         height,
         encoding,
         escape_ansi,
+        scp_socket_timeout
     ):
         if is_truthy(index):
             yield config.index
@@ -1010,6 +1034,8 @@ class SSHLibrary:
             yield config.encoding
         if is_truthy(escape_ansi):
             yield config.escape_ansi
+        if is_truthy(scp_socket_timeout):
+            yield config.scp_socket_timeout
 
     @keyword(tags=("connection",))
     def get_connections(self):
@@ -1085,8 +1111,8 @@ class SSHLibrary:
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
 
         ``disabled_algorithms`` is a list of algorithms that should be disabled.
-        For example, if you need to disable diffie-hellman-group16-sha512 key exchange 
-        (perhaps because your code talks to a server which implements it differently from Paramiko), 
+        For example, if you need to disable diffie-hellman-group16-sha512 key exchange
+        (perhaps because your code talks to a server which implements it differently from Paramiko),
         specify disabled_algorithms={"kex": ["diffie-hellman-group16-sha512"]}
 
         Example that logs in and returns the output:
@@ -1213,8 +1239,8 @@ class SSHLibrary:
         ``keep_alive_interval`` is new in SSHLibrary 3.7.0.
 
         ``disabled_algorithms`` is a list of algorithms that should be disabled.
-        For example, if you need to disable diffie-hellman-group16-sha512 key exchange 
-        (perhaps because your code talks to a server which implements it differently from Paramiko), 
+        For example, if you need to disable diffie-hellman-group16-sha512 key exchange
+        (perhaps because your code talks to a server which implements it differently from Paramiko),
         specify disabled_algorithms={"kex": ["diffie-hellman-group16-sha512"]}
 
         Example login with disabled algorithms:
@@ -2273,6 +2299,7 @@ class _DefaultConfiguration(Configuration):
         encoding,
         escape_ansi,
         encoding_errors,
+        scp_socket_timeout
     ):
         super(_DefaultConfiguration, self).__init__(
             timeout=TimeEntry(timeout),
@@ -2286,4 +2313,5 @@ class _DefaultConfiguration(Configuration):
             encoding=StringEntry(encoding),
             escape_ansi=StringEntry(escape_ansi),
             encoding_errors=StringEntry(encoding_errors),
+            scp_socket_timeout = TimeEntry(scp_socket_timeout)
         )

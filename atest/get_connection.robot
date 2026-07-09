@@ -55,6 +55,12 @@ Get Connection Host And Timeout Only
     Should Be Equal    ${rhost}    ${HOST}
     Should Be Equal As Integers    ${timeout}    3
 
+Get Connection Host And Scp Timeout Only
+    Open Connection    ${HOST}    scp_socket_timeout=10 seconds
+    ${rhost}    ${scp_socket_timeout} =    Get Connection    host=Yes    scp_socket_timeout=True    port=false
+    Should Be Equal    ${rhost}    ${HOST}
+    Should Be Equal As Integers    ${scp_socket_timeout}    10
+
 Get Connections
     Open Connection    ${HOST}    prompt=>>    escape_ansi=True
     Open Connection    ${HOST}    alias=another
