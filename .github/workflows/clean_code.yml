@@ -9,6 +9,7 @@ jobs:
   tidy:
     name: Robotidy - Check Formatting
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -24,6 +25,7 @@ jobs:
   validate-syntax:
     name: Validate Test Syntax
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
