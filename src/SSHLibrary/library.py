@@ -21,6 +21,11 @@ from .logger import logger
 
 from robot.utils import is_string, is_truthy, plural_or_not
 from robot.api.deco import keyword, library
+
+try:
+    from robot.api.types import Secret
+except ImportError:  # Robot Framework < 7.4
+    Secret = None
 from .sshconnectioncache import SSHConnectionCache
 from .client import SSHClientException
 from .client import SSHClient
@@ -33,6 +38,16 @@ from .config import (
     TimeEntry,
 )
 from .version import VERSION
+
+
+def _reveal(value):
+    """Returns the plain value of a Robot Framework ``Secret``.
+
+    Other values are returned as is.
+    """
+    if Secret is not None and isinstance(value, Secret):
+        return value.value
+    return value
 
 
 @library(version=VERSION, scope="GLOBAL")
@@ -718,6 +733,9 @@ class SSHLibrary:
         The connection to the server can also be made like this:
 
         | `Open connection` | my_custom_hostname |
+
+        ``host`` can also be a Robot Framework ``Secret`` (Robot Framework 7.4
+        or newer). The secret is unwrapped when the connection is made.
         """
         timeout = timeout or self._config.timeout
         newline = newline or self._config.newline
@@ -730,7 +748,7 @@ class SSHLibrary:
         escape_ansi = escape_ansi or self._config.escape_ansi
         encoding_errors = encoding_errors or self._config.encoding_errors
         client = SSHClient(
-            host,
+            _reveal(host),
             alias,
             port,
             timeout,
@@ -1117,6 +1135,12 @@ class SSHLibrary:
         | `VAR`             | @{pubkeys}             | rsa-sha2-512    rsa-sha2-256 |
         | `VAR`             | &{disabled_algorithms} | pubkeys=${pubkeys} |
         | `Login`           | username=johndoe       | disabled_algorithms=${disabled_algorithms} |
+
+        ``username`` and ``password`` can also be Robot Framework ``Secret``
+        values (Robot Framework 7.4 or newer), so the password does not have
+        to be unwrapped with ``${PASSWORD.value}`` and exposed in the logs:
+        | `VAR`   | ${PASSWORD: Secret} | secretpasswd |
+        | `Login` | johndoe             | ${PASSWORD}  |
         """
         jumphost_connection_conf = (
             self.get_connection(index_or_alias=jumphost_index_or_alias)
@@ -1131,8 +1155,8 @@ class SSHLibrary:
 
         return self._login(
             self.current.login,
-            username,
-            password,
+            _reveal(username),
+            _reveal(password),
             is_truthy(allow_agent),
             is_truthy(look_for_keys),
             delay,
@@ -1222,6 +1246,9 @@ class SSHLibrary:
         | `VAR`                   | @{pubkeys}             | rsa-sha2-512    rsa-sha2-256 |
         | `VAR`                   | &{disabled_algorithms} | pubkeys=${pubkeys} |
         | `Login With Public Key` | username=johndoe       | keyfile=key | disabled_algorithms=${disabled_algorithms} |
+
+        ``username``, ``keyfile`` and ``password`` can also be Robot Framework
+        ``Secret`` values (Robot Framework 7.4 or newer).
         """
         if proxy_cmd and jumphost_index_or_alias:
             raise ValueError(
@@ -1239,9 +1266,9 @@ class SSHLibrary:
         )
         return self._login(
             self.current.login_with_public_key,
-            username,
-            keyfile,
-            password,
+            _reveal(username),
+            _reveal(keyfile),
+            _reveal(password),
             is_truthy(allow_agent),
             is_truthy(look_for_keys),
             delay,
